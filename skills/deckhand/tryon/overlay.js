@@ -78,6 +78,7 @@
   root.appendChild(siteBtn);
 
   var picking = false, outline = null, tag = null, panel = null, bar = null, session = null, idx = 1, state = null, busy = false;
+  var batch = 4;                                   // how many variants a pick (and each More) brings
 
   /* ------------------------------------------------------------ stamps + slots */
   function fiberOf(n) {
@@ -292,7 +293,8 @@
     var r1 = el('div', 'row');
     r1.appendChild(slotSel);
     var cnt = el('select');
-    [3, 4, 6].forEach(function (n) { var o = el('option', null, n + ' variants'); o.value = n; if (n === 4) o.selected = true; cnt.appendChild(o); });
+    [4, 6, 8, 12].forEach(function (n) { var o = el('option', null, n + ' variants'); o.value = n; if (n === batch) o.selected = true; cnt.appendChild(o); });
+    cnt.title = 'How many to show at once. More brings the next ones from the pool.';
     r1.appendChild(cnt);
     panel.appendChild(r1);
     var r2 = el('div', 'row');
@@ -328,7 +330,7 @@
       if (!m || busy) return;
       var where = { file: m[1], line: +m[2], col: +m[3], slot: slotSel.value, hint: hintOf(cr[sel]) };
       if (!slots[slotSel.value]) { draftForm(panel, where, 'No licensed ' + slotSel.value + ' designs exist for this site yet.'); return; }
-      busy = true; go.disabled = true;
+      busy = true; go.disabled = true; batch = +cnt.value;
       msg.className = 'small';
       msg.innerHTML = '<span class="spin"></span>Fetching, theming and filling variants with your content…';
       api('open', { file: where.file, line: where.line, col: where.col, slot: where.slot, count: +cnt.value, probe: probe(),
@@ -701,7 +703,12 @@
     if (!note && session.dropped && session.dropped.length) sub += ' · ' + session.dropped.length + ' variant(s) removed: they broke your page build';
     var subEl = el('div', 'sub'); if (note) subEl.innerHTML = note; else subEl.textContent = sub;
     meta.appendChild(subEl);
-    var keep = el('button', 'keep', 'Keep'), orig = el('button', null, 'Original'), more = el('button', null, 'More'), disc = el('button', null, 'Discard');
+    var keep = el('button', 'keep', 'Keep'), orig = el('button', null, 'Original'), disc = el('button', null, 'Discard');
+    // the pool: how many designs this element has not been shown yet (More brings the next batch after these)
+    var pool = session.pool, full = vs.length - 1 >= (session.max || 30);
+    var more = el('button', null, pool ? (pool.left ? 'More · ' + pool.left + ' left' : 'No more') : 'More');
+    more.title = full ? 'This try holds the most variants it can: keep one, or discard and pick again'
+      : pool ? pool.left + ' of ' + pool.total + ' ' + session.slot + ' designs not shown yet — the next ' + Math.min(batch, pool.left) + ' come after these' : 'The next designs from the pool';
     var aiBtn = el('button', 'ai', 'AI draft');
     aiBtn.title = 'Ask your AI agent to write one more version for this element (labelled AI-generated)';
     [prev, count, next, meta, orig, keep, more, aiBtn, disc].forEach(function (x) { bar.appendChild(x); });
@@ -719,6 +726,7 @@
     disc.onclick = doDiscard;
     more.onclick = doMore;
     if (busy || note) [prev, next, orig, keep, more, aiBtn].forEach(function (b) { b.disabled = true; });
+    if ((pool && !pool.left) || full) more.disabled = true;
   }
   function endSession() {
     session = null;
@@ -751,16 +759,26 @@
     });
   }
   function doMore() {
-    if (busy) return;
+    if (busy || !session) return;
     busy = true;
-    var sid = session.id;
-    renderBar('<span class="spin"></span>Fetching more variants…');
-    api('more', { id: sid, probe: probe(), page: location.pathname + location.search }).then(function (r) {
+    var sid = session.id, was = session;
+    renderBar('<span class="spin"></span>Fetching the next ' + batch + ' from the pool — the ones you saw stay…');
+    api('more', { id: sid, batch: batch, probe: probe(), page: location.pathname + location.search }).then(function (r) {
       busy = false;
+      // the pool is spent or the try is full: nothing was touched, keep comparing
+      if (!r.ok && (r.code === 'POOL_EMPTY' || r.code === 'TOO_MANY_VARIANTS')) { session = was; if (r.pool) session.pool = r.pool; renderBar(); moreNote(r.message); return; }
       if (!r.ok) { session = null; endSession(); stale = true; toast(r.code + ': ' + r.message + keptText(r)); return; }
       session = null;
-      startSession(r, 1);
-    });
+      startSession(r, r.startAt || 1);
+      if (!r.added) moreNote('No new design could hold your content this time; the ones you saw are back.');
+    }).catch(function (e) { busy = false; session = was; renderBar(); moreNote(String(e)); });
+  }
+  function moreNote(text) {
+    var t = el('div', 'panel');
+    t.appendChild(el('div', 'small', text));
+    var ok = el('button', null, 'OK'); ok.style.marginTop = '8px'; ok.onclick = function () { t.remove(); if (panel === t) panel = null; };
+    t.appendChild(ok);
+    closePanel(); root.appendChild(t); panel = t;
   }
   function toast(text, keptId) {
     var t = el('div', 'panel');

@@ -209,7 +209,7 @@ Run for real in this release:
   in code, each with a test: a gate passed on the agent's paraphrase of a change request, a base that could not land
   in the planning folder, a database kept alive by hand for hours, ports Windows reserves, 22 work packages for 4
   builders, and a Windows `HOSTNAME` trap.
-- CI on every push, Ubuntu and Windows: 101 try-on + 139 control-plane + 40 server-client + 17 repo tests.
+- CI on every push, Ubuntu and Windows: 108 try-on + 139 control-plane + 40 server-client + 17 repo tests.
 
 Not yet proven live: a full `dh deploy ship` against a real server (it uses the same Coolify client that
 was proven live in v1), the first real run of the $0 Oracle track, and the Claude Code session hook inside a

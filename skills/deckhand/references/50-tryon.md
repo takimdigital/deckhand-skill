@@ -12,17 +12,20 @@ $T setup  --project .          # dev-only stamp loader (next.config / vite.confi
 $T serve  --project .          # prints http://127.0.0.1:3999 — give THIS URL to the owner (background it)
 ```
 The owner: click **Try-on** (bottom right) → click any section/button → confirm what it is (hero, pricing,
-cta…) → **Show variants** → ←/→ to compare (instant) → **Keep** (Enter) or **Discard** (Esc) → optional
-**Save to my library** (ranks first next time). The agent does nothing per click; do not poll.
+cta…) → **Show variants** (4, 6, 8 or 12 at once) → ←/→ to compare (instant) → **More · N left** brings the next
+batch from the pool after the ones on screen (never a design already shown or refused; up to 30 per try) →
+**Keep** (Enter) or **Discard** (Esc) → optional **Save to my library** (ranks first next time). The agent does
+nothing per click; do not poll.
 
 Headless (no browser in the harness, or scripted):
 ```bash
 $T query --slot hero --project .                                   # ranked candidates, no writes
 $T try --file components/hero.tsx --line 6 --col 5 --slot hero --count 4
+$T more --id <S> --batch 4    # the next 4 designs from the pool, after the ones shown (POOL_EMPTY when spent)
 $T show --id <S> --idx 2      # the dev page now shows variant 2
 $T keep --id <S> --idx 2      # or: discard --id <S>   (byte-exact restore)
 ```
-`--no-install` refuses candidates needing new npm packages instead of installing them. With the dev server's URL
+`--only id,id` stages exactly those designs (a flag report's reproduce command). `--no-install` refuses candidates needing new npm packages instead of installing them. With the dev server's URL
 (`--url`, else the one `dh dev start` recorded) `try` also proves the page still builds (below); `--page /pricing`
 loads that route instead of `/`, `--no-verify` skips it.
 

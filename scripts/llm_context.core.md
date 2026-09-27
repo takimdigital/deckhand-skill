@@ -285,6 +285,12 @@ F5 OPEN (swap) [[tryon/lib/engine.mjs#open]]
 7. Write ONE wrapper (`data-dh-session`, variant 0 = the original, hidden). Imports are marked `// dh-tryon:<id>`.
    The result is re-parsed; the backup is saved.
 8. Cycling ← → is client-side display toggling: zero writes. [[tryon/lib/engine.mjs#show]] persists the choice.
+   The pool: a session holds `pool:{total,left}` ([[tryon/lib/engine.mjs#poolOf]]) and `tried` (every design offered
+   or refused for good; a failed download is not remembered). More ([[tryon/lib/engine.mjs#more]], helper `more`,
+   `tryon more --id S --batch N`): the variants on screen come back in their places (`first`; an AI draft from its
+   own files via `aiItem`), then the next batch from the pool after them, up to [[tryon/lib/engine.mjs#MAX_VARIANTS]].
+   A spent pool ([[!POOL_EMPTY]]) or a full try ([[!TOO_MANY_VARIANTS]]) touches nothing. Per-candidate staging is
+   ONE function, [[tryon/lib/engine.mjs#stageCandidate]], shared with the registry fit check (F-FIT).
 9. Nothing fits → [[!NO_CANDIDATES]] or [[!NO_VARIANTS]] with `draft:{file,line,col,slot}`; the overlay offers an
    AI draft (F7). The message says why in the owner's words ([[tryon/lib/engine.mjs#noVariantsWhy]]: no room for
    your content, the closest fit, or no place for your form).

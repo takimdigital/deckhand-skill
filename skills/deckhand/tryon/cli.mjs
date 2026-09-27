@@ -8,7 +8,8 @@
  *   node tryon/cli.mjs slots    [--project .]                      what can be tried here
  *   node tryon/cli.mjs query    --slot hero [--project .]          ranked candidates (no writes)
  *   node tryon/cli.mjs inspect  --file f --line n --col c [--slot s]
- *   node tryon/cli.mjs try      --file f --line n --col c --slot s [--count 4] [--no-install] [--registry r]
+ *   node tryon/cli.mjs try      --file f --line n --col c --slot s [--count 4] [--no-install] [--registry r] [--only id,id]
+ *   node tryon/cli.mjs more     --id S [--batch 4]                 the next designs from the pool, after the ones shown
  *   node tryon/cli.mjs show     --id S --idx N                     make variant N the visible one
  *   node tryon/cli.mjs keep     --id S [--idx N]                   collapse to N, bake the text, graduate
  *   node tryon/cli.mjs discard  --id S                             byte-exact restore
@@ -115,9 +116,17 @@ async function main() {
       // with a running dev server (--url, else the one `dh dev start` recorded) the page must still build after the swap
       let devUrl = typeof flags.url === 'string' ? flags.url : null;
       if (!devUrl && flags.verify !== false) { try { devUrl = JSON.parse(fs.readFileSync(path.join(project, '.deckhand', 'dev.json'), 'utf8')).url || null; } catch { devUrl = null; } }
-      const r = await engine.openVerified(project, { ...flags, install: flags.install !== false, onProgress: flags.verbose ? (p) => console.error(JSON.stringify(p)) : undefined },
+      const r = await engine.openVerified(project, { ...flags, only: typeof flags.only === 'string' ? flags.only : undefined, install: flags.install !== false, onProgress: flags.verbose ? (p) => console.error(JSON.stringify(p)) : undefined },
         { url: devUrl, page: typeof flags.page === 'string' ? flags.page : '/' });
       return out({ ok: true, ...r, next: `compare in the browser (←/→) or \`show --id ${r.id} --idx N\`; then \`keep --id ${r.id} --idx N\` or \`discard --id ${r.id}\`` });
+    }
+    case 'more': {
+      need('id');
+      let devUrl = typeof flags.url === 'string' ? flags.url : null;
+      if (!devUrl && flags.verify !== false) { try { devUrl = JSON.parse(fs.readFileSync(path.join(project, '.deckhand', 'dev.json'), 'utf8')).url || null; } catch { devUrl = null; } }
+      const r = await engine.more(project, flags.id, { batch: flags.batch, url: devUrl, page: typeof flags.page === 'string' ? flags.page : '/',
+        onProgress: flags.verbose ? (p) => console.error(JSON.stringify(p)) : undefined });
+      return out({ ok: true, ...r, next: r.added ? `variants ${r.startAt}–${r.variants.length - 1} are new; compare, then keep or discard` : 'no new design could be staged; keep or discard' });
     }
     case 'draft': {
       if (!flags.session) need('file', 'line', 'col', 'slot');
@@ -200,12 +209,12 @@ async function main() {
       return out({ ok: true, discarded, ...r, restartDevServer: true });
     }
     default:
-      return out({ ok: false, code: 'USAGE', commands: ['setup', 'serve', 'doctor', 'slots', 'query', 'inspect', 'try', 'show', 'keep', 'discard', 'save', 'library', 'status', 'clean', 'draft', 'drafts', 'draft-check', 'draft-done', 'tune', 'theme', 'seo', 'registry'] }, 2);
+      return out({ ok: false, code: 'USAGE', commands: ['setup', 'serve', 'doctor', 'slots', 'query', 'inspect', 'try', 'more', 'show', 'keep', 'discard', 'save', 'library', 'status', 'clean', 'draft', 'drafts', 'draft-check', 'draft-done', 'tune', 'theme', 'seo', 'registry'] }, 2);
   }
 }
 
 main().catch((e) => out({ ok: false, code: e.code || 'ERROR', message: String(e.message || e).slice(0, 3000), skipped: e.skipped, problems: e.problems, ...(e.report ? { report: e.report } : {}),
   ...(e.reload ? { reload: true, next: 'the page is older than the file: reload it (or re-run inspect) and pick again' } : {}),
-  ...(e.restored ? { restored: true } : {}), ...(e.dropped && e.dropped.length ? { dropped: e.dropped } : {}),
+  ...(e.restored ? { restored: true } : {}), ...(e.pool ? { pool: e.pool } : {}), ...(e.dropped && e.dropped.length ? { dropped: e.dropped } : {}),
   ...(e.installedKept && e.installedKept.length ? { installedKept: e.installedKept } : {}),
   ...(e.draft ? { next: `no licensed design fits — an AI draft is possible (labelled AI-generated for the owner): draft --file ${e.draft.file} --line ${e.draft.line} --col ${e.draft.col} --slot ${e.draft.slot}` } : {}) }, 1));

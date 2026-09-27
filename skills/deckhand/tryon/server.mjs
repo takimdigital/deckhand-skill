@@ -94,12 +94,9 @@ export function startServer({ root: rootIn, port = 3999, target, host = '127.0.0
       case 'show': return serial(() => engine.show(root, body.id, body.idx));
       case 'keep': return serial(() => engine.keep(root, body.id, body.idx));
       case 'discard': return serial(() => engine.discard(root, body.id));
-      case 'more': return serial(async () => {
-        const s = engine.loadSession(root, body.id);
-        engine.discard(root, body.id, { reason: 'more' });
-        return engine.openVerified(root, { file: s.file, line: s.line, col: s.col, slot: body.slot || s.slot, count: body.count || s.variants.length, exclude: s.tried, probe: body.probe, onProgress: (p) => emit({ type: 'progress', ...p }) },
-          { url: upstream.origin, page: body.page });
-      });
+      // the next batch from the pool: the variants on screen stay, new ones are added after them
+      case 'more': return serial(() => engine.more(root, body.id, { batch: body.batch || body.count, probe: body.probe, onProgress: (p) => emit({ type: 'progress', ...p }),
+        url: upstream.origin, page: body.page }));
       case 'save': return serial(() => saveToLibrary(root, body.id, { name: body.name }));
       case 'draft': {
         // the owner asks for an AI variant: one request for the agent (it is not in the click loop)
@@ -190,7 +187,7 @@ export function startServer({ root: rootIn, port = 3999, target, host = '127.0.0
         const bad = e instanceof SyntaxError || /BODY_TOO_LARGE/.test(String(e.message));   // the request itself is malformed
         res.writeHead(e.status || (bad ? 400 : e.code ? 200 : 500), { 'content-type': 'application/json' });
         res.end(JSON.stringify({ ok: false, code: e.code || 'ERROR', message: String(e.message).slice(0, 2000), skipped: e.skipped, problems: e.problems, draft: e.draft,
-          reload: e.reload, restored: e.restored, dropped: e.dropped, installedKept: e.installedKept }));
+          reload: e.reload, restored: e.restored, dropped: e.dropped, installedKept: e.installedKept, pool: e.pool, max: e.max }));
       }
       return;
     }

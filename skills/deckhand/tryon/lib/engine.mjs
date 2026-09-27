@@ -266,9 +266,23 @@ function removeCss(prof, tag) {
   fs.writeFileSync(p, css.slice(0, start) + css.slice(b + endTag.length).replace(/^\n/, ''));
 }
 
+/** The most variants one session holds: the owner browses the pool with More, a batch at a time, up to this. */
+export const MAX_VARIANTS = 30;
+/** Skips that say something about the design itself (never offered again in this session); a download that failed
+ *  or a design held back for its npm packages may be offered by the next batch. */
+const FINAL_SKIPS = new Set(['POOR_FIT', 'UNRESOLVED_IMPORT', 'NO_EXPORT', 'PARAMETERIZE_FAILED', 'BROKEN_IMPORT']);
+
+/** The pool for one element: every licensed candidate for its slot here, and how many are still untried. */
+export function poolOf(catalog, { slot, prof, registry = null }, tried = []) {
+  const all = rank(catalog, { slot, prof, registry }).items;
+  const t = new Set(tried);
+  return { total: all.length, left: all.filter((x) => !t.has(x.id)).length };
+}
+
 /**
- * Open a session. opts: { file, line, col, slot, count=4, exclude=[], registry, stripChrome, install=true,
- *   probe, onProgress }
+ * Open a session. opts: { file, line, col, slot, count=4 (≤ MAX_VARIANTS), exclude=[], only=[ids], first=[ids],
+ *   registry, stripChrome, install=true, probe, onProgress, candidates, tried }
+ * `first`: these designs, when staged, keep their order at the front (More re-shows the batch the owner saw).
  */
 export async function open(rootIn, opts) {
   const prof = detectProject(rootIn);
@@ -289,14 +303,18 @@ export async function open(rootIn, opts) {
   const slot = String(opts.slot || '').trim();
   if (!slot) throw new TryonError('NO_SLOT', 'say what this element is (hero, pricing, button…)');
   const kind = kindOf(slot);
-  const count = Math.max(1, Math.min(8, Number(opts.count || 4)));
+  const count = Math.max(1, Math.min(MAX_VARIANTS, Number(opts.count || 4)));
 
   const orig = extractUnits(code, el, ast);
   const origShape = shapeOf(orig);
   const origCount = contentCount(orig);
   const catalog = loadCatalog();
   // opts.candidates: an explicit list (an AI draft, alone or beside the registry variants it joins)
-  const ranked = opts.candidates ? { items: opts.candidates, hidden: 0 } : rank(catalog, { slot, prof, exclude: opts.exclude || [], registry: opts.registry || null });
+  const exclude = opts.exclude || [];
+  const ranked = opts.candidates ? { items: opts.candidates.filter((c) => !exclude.includes(c.id)), hidden: 0 } : rank(catalog, { slot, prof, exclude, registry: opts.registry || null });
+  // `only`: exactly these designs (a flag report's reproduce command), in rank order
+  const only = [].concat(opts.only || []).flatMap((x) => String(x).split(',')).map((x) => x.trim()).filter(Boolean);
+  if (only.length) ranked.items = ranked.items.filter((c) => only.includes(c.id) || only.includes(String(c.id).replace(/@[\w-]+$/, '')));
   if (!ranked.items.length) {
     throw new TryonError('NO_CANDIDATES', `no licensed ${slot} candidates for a ${prof.base} project` + (ranked.hidden ? ` (${ranked.hidden} hidden: other primitive base)` : ''),
       { draft: { file: rel, line: Number(opts.line), col: Number(opts.col), slot } });
@@ -319,95 +337,16 @@ export async function open(rootIn, opts) {
   // a variant that needs a package installed comes last: a running dev server may not see a new package until it
   // restarts (the owner's page broke on exactly that). Offered only when too few install-free ones exist.
   const held = [];
+  const ctx = { root, code, el, orig, origCount, kind, slot, stripChrome, links, hasPublic, taken, sessionId: id, log,
+    noFitGate: opts.noFitGate, checkImports: opts.checkImports };
   for (const cand of ranked.items) {
     if (variants.length >= count || variants.length + held.length >= count * 3) break;
     if (skipped.length > count * 3) break;
     if (busy.has(slugOf(cand))) continue;
-    log({ phase: 'fetch', id: cand.id });
-    let stage;
-    try {
-      const bundle = await fetchBundle(detectProject(root), cand);
-      stage = writeBundle(detectProject(root), cand, bundle);
-    } catch (e) { skipped.push({ id: cand.id, why: e.code || 'FETCH', detail: String(e.message).slice(0, 200) }); continue; }
-    if (stage.problems.length || !stage.export) {
-      skipped.push({ id: cand.id, why: stage.export ? 'UNRESOLVED_IMPORT' : 'NO_EXPORT', detail: stage.problems.join('; ') });
-      fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true });
-      continue;
-    }
-    let fit = { carried: [], dropped: [], demo: [], hidden: [] };
-    let usage;
-    const local = uniqueName('Dh' + pascal(cand.n).slice(0, 40), taken);
-    const entryAbs = path.join(root, stage.entry);
-    const entryCode = fs.readFileSync(entryAbs, 'utf8');
-    if (cand.ai) {
-      // an AI draft already holds the owner's words (its gate proved it): measured, never transplanted
-      const lf = literalFit(root, stage.relDir, orig, cand.dynamic || []);
-      fit = { carried: lf.carried, dropped: lf.dropped, demo: lf.invented.map((t) => ({ text: 'AI-written: ' + t })), hidden: [], demoVisual: lf.invented.length };
-      const props = (cand.dynamic || []).map((d) => [d.key, `<>${d.src}</>`]);
-      usage = kind === 'block' ? `<${local}${contentProp('content', props)} />` : primitiveUsage(code, el, local, entryCode);
-      stage.prop = props.length ? 'content' : null;
-      stage.ownerTexts = orig.units.map((x) => x.text).concat(orig.lists.flatMap((l) => l.items.flatMap((it) => it.units.map((u) => u.text).concat(it.bullets || []))));
-    } else if (kind === 'block' || (origCount > 0 && !wrapsContent(rendersChildren(stage.entry, entryCode, stage.export), el))) {
-      // a section — or a "card"/"button" that never shows what is put inside it (a demo tweet, a flip card with its
-      // own title): the owner's words go into its props like a section's, or it is not offered
-      const logoLocals = logoLocalsFor(stage, entryCode);
-      let p;
-      try { p = parameterize(stage.entry, entryCode, stage.export, { stripChrome, logoLocals, logoSwap: ownerLogos(orig).length >= 2, forms: (orig.forms || []).some((f) => f.src) ? 'swap' : FORM_SLOTS.has(slot) || orig.inputs.length ? 'keep' : 'hide' }); } catch (e) {
-        skipped.push({ id: cand.id, why: 'PARAMETERIZE_FAILED', detail: e.message.slice(0, 200) });
-        fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true });
-        continue;
-      }
-      // a footer/navbar shows the owner's routes (plan sitemap), never the design's demo menu
-      const fl = fillLinks(stage.entry, p.code, links, slot);
-      fs.writeFileSync(entryAbs, fl.code);
-      const b = bind(orig, p, { placeholder: hasPublic ? PLACEHOLDER : null, brand: brandName(root) });
-      if (fl.filled.length) b.hidden.push(...fl.filled.map((f) => (f.demoHidden ? `${f.array}: the design's demo ${f.kind} hidden (${f.demoHidden}) — no menu in your plan` : `${f.array}: ${f.kind} from your plan (${f.count})`)));
-      // fit gate: a variant that would throw away most of the owner's words is not offered
-      const gate = opts.noFitGate ? null : fitGate(kind, origCount, b);
-      if (gate) {
-        skipped.push({ id: cand.id, why: 'POOR_FIT', detail: gate });
-        fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true });
-        continue;
-      }
-      fit = b;
-      fit.demoVisual = demoTexts(root, stage.relDir, []).length;
-      for (const f of fs.readdirSync(path.join(root, stage.relDir))) {
-        if (!/\.(tsx|jsx)$/.test(f)) continue;
-        const fp = path.join(root, stage.relDir, f);
-        const before = fs.readFileSync(fp, 'utf8');
-        const after = markDemo(f, before);
-        if (after !== before) fs.writeFileSync(fp, after);
-      }
-      stage.ownerTexts = orig.units.map((x) => x.text).concat(orig.lists.flatMap((l) => l.items.flatMap((it) => it.units.map((u) => u.text))), linkTexts(links));
-      usage = `<${local}${contentProp(p.prop, b.props)} />`;
-      stage.prop = p.prop;
-      stage.removedChrome = p.removed;
-    } else {
-      // a wrapper (a card that renders its children): the owner's content goes inside, every word of it — and the
-      // design's own words kept in props beside it ("Acme", "Case Study", "Get Started") are emptied, not shown
-      const own = new Set(el.openingElement.attributes.filter((a) => a.type === 'JSXAttribute').map((a) => a.name.name));
-      const demoProps = defaultPropsOf(stage.entry, entryCode, stage.export).filter((d) => !own.has(d.propName));
-      usage = primitiveUsage(code, el, local, entryCode, demoProps.map((d) => `${d.propName}={${d.role === 'bullets' ? '[]' : '""'}}`));
-      fit = { carried: orig.units.concat(orig.images), dropped: [], demo: [], hidden: demoProps.map((d) => `demo ${d.propName}: ${d.demo} (emptied)`), demoVisual: 0 };
-    }
-    const v = {
-      idx: variants.length + 1, id: cand.id, r: cand.r, n: cand.n, t: cand.t, lic: cand.lic || 'MIT', slot: cand.slot, generated: !!cand.ai, draft: cand.draft || null,
-      slug: stage.slug, dir: stage.relDir, entry: stage.entry, spec: stage.spec, export: stage.export, local, usage,
-      deps: stage.deps, missingDeps: stage.missingDeps, sourceUrl: stage.sourceUrl, prop: stage.prop || null,
-      css: itemCss({ css: stage.css, cssVars: stage.cssVars }, id + '-' + stage.slug) || null,
-      fit: { carried: fit.carried.length, of: origCount, dropped: fit.dropped, demo: fit.demo.map((d) => d.text).slice(0, 6), hidden: fit.hidden || [], demoVisual: fit.demoVisual || 0 },
-      ownerTexts: stage.ownerTexts || [],
-      removedChrome: stage.removedChrome || [],
-    };
-    if (stage.missingDeps.length) { held.push(v); continue; }
-    // checked as it is staged: a design that would break the page makes room for the next candidate
-    const why = opts.checkImports === false ? null : checkImports(root, [v]).bad.get(v);
-    if (why) {
-      skipped.push({ id: cand.id, why: 'BROKEN_IMPORT', detail: why });
-      fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true });
-      continue;
-    }
-    variants.push(v);
+    const r = await stageCandidate(ctx, cand);
+    if (r.skip) skipped.push(r.skip);
+    else if (r.held) held.push(r.held);
+    else variants.push(r.v);
   }
   for (const v of held) {
     if (variants.length < count) { variants.push(v); continue; }
@@ -443,8 +382,11 @@ export async function open(rootIn, opts) {
     variants.splice(variants.indexOf(v), 1);
   }
   if (!variants.length) throw new TryonError('NO_VARIANTS', 'every candidate imports something this project cannot load', { skipped, draft: { file: rel, line: Number(opts.line), col: Number(opts.col), slot } });
-  // best fit first: most of the owner's content, then the least leftover demo copy (rank breaks ties)
-  variants.sort((a, b) => (b.fit.of ? b.fit.carried / b.fit.of : 0) - (a.fit.of ? a.fit.carried / a.fit.of : 0) || a.fit.demoVisual - b.fit.demoVisual);
+  // best fit first: most of the owner's content, then the least leftover demo copy (rank breaks ties); the designs
+  // the owner already saw (`first`, a More) keep their places in front, so browsing never reshuffles them
+  const first = opts.first || [];
+  const placeOf = (v) => { const i = first.indexOf(v.id); return i === -1 ? first.length : i; };
+  variants.sort((a, b) => placeOf(a) - placeOf(b) || (b.fit.of ? b.fit.carried / b.fit.of : 0) - (a.fit.of ? a.fit.carried / a.fit.of : 0) || a.fit.demoVisual - b.fit.demoVisual);
   variants.forEach((v, i) => { v.idx = i + 1; });
   for (const v of variants) if (v.css) appendCss(prof, v.css);
 
@@ -477,11 +419,97 @@ export async function open(rootIn, opts) {
   const session = {
     id, createdAt: now(), state: 'open', file: rel, line: Number(opts.line), col: Number(opts.col), slot, kind,
     shaBefore: sha(before), shaAfter: sha(Buffer.from(next)), backup: path.relative(root, path.join(bdir, path.basename(rel) + '.orig')).split(path.sep).join('/'),
-    shown: 1, origShape, variants, skipped, installed, hidden: ranked.hidden,
-    tried: (opts.exclude || []).concat(variants.map((v) => v.id)),
+    shown: 1, origShape, variants, skipped, installed, hidden: ranked.hidden, registry: opts.registry || null,
+    // every design this element has been offered or refused (a More continues after them, never repeats them)
+    tried: [...new Set((opts.tried || []).concat(exclude, variants.map((v) => v.id), skipped.filter((k) => FINAL_SKIPS.has(k.why)).map((k) => k.id)))],
   };
+  session.pool = poolOf(catalog, { slot, prof, registry: session.registry }, session.tried);
   saveSession(root, session);
   return publicSession(session);
+}
+
+/**
+ * Stage ONE candidate for the owner's element: fetched, themed, the owner's content transplanted, fit-gated and
+ * import-checked. {v} a variant (idx set by the caller) · {held: v} it needs a package installed · {skip}. open() and
+ * the registry fit check both use it, so a design the check passes is exactly one the owner is offered.
+ */
+export async function stageCandidate(ctx, cand) {
+  const { root, code, el, orig, origCount, kind, slot, stripChrome, links, hasPublic, taken, log = () => {} } = ctx;
+  const id = ctx.sessionId;
+  const opts = { noFitGate: ctx.noFitGate, checkImports: ctx.checkImports };
+  const skip = (why, detail, dir) => { if (dir) fs.rmSync(path.join(root, dir), { recursive: true, force: true }); return { skip: { id: cand.id, why, detail: String(detail || '').slice(0, 200) } }; };
+  log({ phase: 'fetch', id: cand.id });
+  let stage;
+  try {
+    const bundle = await fetchBundle(detectProject(root), cand);
+    stage = writeBundle(detectProject(root), cand, bundle);
+  } catch (e) { return skip(e.code || 'FETCH', e.message); }
+  if (stage.problems.length || !stage.export) return skip(stage.export ? 'UNRESOLVED_IMPORT' : 'NO_EXPORT', stage.problems.join('; '), stage.relDir);
+  let fit = { carried: [], dropped: [], demo: [], hidden: [] };
+  let usage;
+  const local = uniqueName('Dh' + pascal(cand.n).slice(0, 40), taken);
+  const entryAbs = path.join(root, stage.entry);
+  const entryCode = fs.readFileSync(entryAbs, 'utf8');
+  if (cand.ai) {
+    // an AI draft already holds the owner's words (its gate proved it): measured, never transplanted
+    const lf = literalFit(root, stage.relDir, orig, cand.dynamic || []);
+    fit = { carried: lf.carried, dropped: lf.dropped, demo: lf.invented.map((t) => ({ text: 'AI-written: ' + t })), hidden: [], demoVisual: lf.invented.length };
+    const props = (cand.dynamic || []).map((d) => [d.key, `<>${d.src}</>`]);
+    usage = kind === 'block' ? `<${local}${contentProp('content', props)} />` : primitiveUsage(code, el, local, entryCode);
+    stage.prop = props.length ? 'content' : null;
+    stage.ownerTexts = orig.units.map((x) => x.text).concat(orig.lists.flatMap((l) => l.items.flatMap((it) => it.units.map((u) => u.text).concat(it.bullets || []))));
+  } else if (kind === 'block' || (origCount > 0 && !wrapsContent(rendersChildren(stage.entry, entryCode, stage.export), el))) {
+    // a section — or a "card"/"button" that never shows what is put inside it (a demo tweet, a flip card with its
+    // own title): the owner's words go into its props like a section's, or it is not offered
+    const logoLocals = logoLocalsFor(stage, entryCode);
+    let p;
+    try { p = parameterize(stage.entry, entryCode, stage.export, { stripChrome, logoLocals, logoSwap: ownerLogos(orig).length >= 2, forms: (orig.forms || []).some((f) => f.src) ? 'swap' : FORM_SLOTS.has(slot) || orig.inputs.length ? 'keep' : 'hide' }); } catch (e) {
+      return skip('PARAMETERIZE_FAILED', e.message, stage.relDir);
+    }
+    // a footer/navbar shows the owner's routes (plan sitemap), never the design's demo menu
+    const fl = fillLinks(stage.entry, p.code, links, slot);
+    fs.writeFileSync(entryAbs, fl.code);
+    const b = bind(orig, p, { placeholder: hasPublic ? PLACEHOLDER : null, brand: brandName(root) });
+    if (fl.filled.length) b.hidden.push(...fl.filled.map((f) => (f.demoHidden ? `${f.array}: the design's demo ${f.kind} hidden (${f.demoHidden}) — no menu in your plan` : `${f.array}: ${f.kind} from your plan (${f.count})`)));
+    // fit gate: a variant that would throw away most of the owner's words is not offered
+    const gate = opts.noFitGate ? null : fitGate(kind, origCount, b);
+    if (gate) return skip('POOR_FIT', gate, stage.relDir);
+    fit = b;
+    fit.demoVisual = demoTexts(root, stage.relDir, []).length;
+    for (const f of fs.readdirSync(path.join(root, stage.relDir))) {
+      if (!/\.(tsx|jsx)$/.test(f)) continue;
+      const fp = path.join(root, stage.relDir, f);
+      const before = fs.readFileSync(fp, 'utf8');
+      const after = markDemo(f, before);
+      if (after !== before) fs.writeFileSync(fp, after);
+    }
+    stage.ownerTexts = orig.units.map((x) => x.text).concat(orig.lists.flatMap((l) => l.items.flatMap((it) => it.units.map((u) => u.text))), linkTexts(links));
+    usage = `<${local}${contentProp(p.prop, b.props)} />`;
+    stage.prop = p.prop;
+    stage.removedChrome = p.removed;
+  } else {
+    // a wrapper (a card that renders its children): the owner's content goes inside, every word of it — and the
+    // design's own words kept in props beside it ("Acme", "Case Study", "Get Started") are emptied, not shown
+    const own = new Set(el.openingElement.attributes.filter((a) => a.type === 'JSXAttribute').map((a) => a.name.name));
+    const demoProps = defaultPropsOf(stage.entry, entryCode, stage.export).filter((d) => !own.has(d.propName));
+    usage = primitiveUsage(code, el, local, entryCode, demoProps.map((d) => `${d.propName}={${d.role === 'bullets' ? '[]' : '""'}}`));
+    fit = { carried: orig.units.concat(orig.images), dropped: [], demo: [], hidden: demoProps.map((d) => `demo ${d.propName}: ${d.demo} (emptied)`), demoVisual: 0 };
+  }
+  const v = {
+    idx: 0, id: cand.id, r: cand.r, n: cand.n, t: cand.t, lic: cand.lic || 'MIT', slot: cand.slot, generated: !!cand.ai, draft: cand.draft || null,
+    slug: stage.slug, dir: stage.relDir, entry: stage.entry, spec: stage.spec, export: stage.export, local, usage,
+    deps: stage.deps, missingDeps: stage.missingDeps, sourceUrl: stage.sourceUrl, prop: stage.prop || null,
+    css: itemCss({ css: stage.css, cssVars: stage.cssVars }, id + '-' + stage.slug) || null,
+    fit: { carried: fit.carried.length, of: origCount, dropped: fit.dropped, demo: fit.demo.map((d) => d.text).slice(0, 6), hidden: fit.hidden || [], demoVisual: fit.demoVisual || 0 },
+    ownerTexts: stage.ownerTexts || [],
+    removedChrome: stage.removedChrome || [],
+  };
+  if (cand.ai) v.aiItem = cand;                                   // More re-stages it from the draft's own files
+  if (stage.missingDeps.length) return { held: v };
+  // checked as it is staged: a design that would break the page makes room for the next candidate
+  const why = opts.checkImports === false ? null : checkImports(root, [v]).bad.get(v);
+  if (why) return skip('BROKEN_IMPORT', why, stage.relDir);
+  return { v };
 }
 
 /** The bare packages a staged variant imports: [{spec, names}] (named imports plus `NS.x` reads of a namespace import). */
@@ -730,6 +758,34 @@ export async function openVerified(rootIn, opts, { url, page, deadlineMs = 25000
   throw new TryonError('BUILD_BROKE', 'every variant tried broke the page build — your file is restored', { restored: true, dropped, installedKept: kept });
 }
 
+/**
+ * More: the next batch from the pool for an open session. The variants the owner has seen come back in their places
+ * (an AI draft too, from its own files), then `batch` new designs after them — never one already offered or refused.
+ * Nothing is discarded when the pool is spent or the session is full: the owner keeps comparing what they have.
+ * { url, page } (a running dev server) proves the page still builds, like every open.
+ */
+export async function more(rootIn, id, { batch = 4, probe, onProgress, url, page, deadlineMs } = {}) {
+  const prof = detectProject(rootIn);
+  const root = prof.root;
+  const s = loadSession(root, id);
+  if (s.state !== 'open') throw new TryonError('SESSION_CLOSED', `session ${id} is ${s.state}`);
+  const n = Math.max(1, Math.min(12, Number(batch) || 4));
+  const catalog = loadCatalog();
+  const byId = new Map(catalog.map((c) => [c.id, c]));
+  const shown = s.variants.slice().sort((a, b) => a.idx - b.idx).map((v) => (v.generated ? v.aiItem : byId.get(v.id))).filter(Boolean);
+  const room = MAX_VARIANTS - s.variants.length;
+  if (room <= 0) throw new TryonError('TOO_MANY_VARIANTS', `this element already shows ${s.variants.length} variants, the most one try holds: keep one, or discard and pick again`, { max: MAX_VARIANTS });
+  const tried = [...new Set((s.tried || []).concat(s.variants.map((v) => v.id)))];
+  const fresh = rank(catalog, { slot: s.slot, prof, exclude: tried, registry: s.registry || null }).items;
+  if (!fresh.length) throw new TryonError('POOL_EMPTY', `every ${s.slot} design in the pool has already been shown for this element (${tried.length} tried): keep one, or ask AI to draft one`, { pool: s.pool || null });
+  discard(root, id, { reason: 'more' });
+  const r = await openVerified(root, { file: s.file, line: s.line, col: s.col, slot: s.slot, count: shown.length + Math.min(n, room),
+    candidates: shown.concat(fresh), first: shown.map((c) => c.id), tried, registry: s.registry || null, probe, onProgress }, { url, page, deadlineMs });
+  const back = r.variants.filter((v) => v.idx > 0 && shown.some((c) => c.id === v.id)).length;
+  const added = r.variants.length - 1 - back;
+  return { ...r, added, startAt: added ? back + 1 : 1 };
+}
+
 // text compared the way a browser shows it may differ from the source: case (CSS uppercase), spacing, split words
 const squash = (t) => String(t || '').replace(/\s+/g, '').toLowerCase();
 /** The static text an element renders FIRST (its innerText starts with it); '' when an expression comes first. */
@@ -837,6 +893,7 @@ export function publicSession(s) {
       idx: v.idx, id: v.id, t: v.t, r: v.r, lic: v.lic, fit: v.fit, deps: v.deps, source: v.sourceUrl, removedChrome: v.removedChrome, generated: !!v.generated,
     }))),
     skipped: s.skipped, installed: s.installed,
+    pool: s.pool || null, max: MAX_VARIANTS,
   };
 }
 
