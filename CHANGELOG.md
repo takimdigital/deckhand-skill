@@ -1,5 +1,77 @@
 # Changelog
 
+## [2.3.0] — 2026-09-27 — try-on: more designs, compared, checked before you see them
+
+### Browse more, compare, report what breaks
+- **More.** A pick shows 4, 6, 8 or 12 designs; "More · N left" brings the next batch from the pool, up to 30 per
+  try. The variants on screen keep their places, nothing is shown twice, and a design refused for good is never
+  offered again. `tryon more --id S --batch N`, `tryon try --only id,id`.
+- **Before/after slider.** The original and the variant share the section's place, cut at a line the owner drags.
+  On by default, C toggles it, the choice is remembered. Display only: zero writes.
+- **Flags and the error report.** A variant that does not work is flagged with reasons and a note (the overlay
+  prefills what it measured). "Create the error report" writes one Markdown file named by its hash, with a
+  `try --only` command per flag to reproduce it. It stays in `.deckhand/tryon/`, never committed.
+- Fixed live in Chromium: shortcuts fired while typing in the overlay's fields; a slider restore undid the next
+  variant switch; the overlay vanished when the framework re-rendered the page; the flags list sat under Next's
+  dev badge; on a phone the bar hid the corner buttons.
+
+### The fit check: every design is staged before an owner sees it
+- `tryon registry check --id X|all [--sample N] [--md]` stages each design with the same function a real try
+  uses, against a reference section of its kind, and records a verdict: fits, partial, refused, broken or
+  unchecked. A broken design is never offered (unless `try --only` names it); a refused one comes last.
+- `registry add` runs it on a sample of the new registry. The verdicts for every shipped registry ship in
+  `data/checks/`; a local run (`~/.deckhand/catalog/checks/`) wins.
+- A registry whose licence the GitHub API cannot give is read from its LICENSE file; a Commons Clause or copyleft
+  text is never accepted.
+- Gaps it found, fixed and pinned by tests:
+  - Base UI designs dropped every button (the label sits in a `render` prop). They now carry the owner's actions
+    like their Radix twins. Tailark fits went from 87 to 132 of 336.
+  - A footer or navbar showing the plan's menu carries the owner's links that menu already holds; Tailark footers
+    whose columns are `{ group, items }` take the plan's columns.
+  - `© {2026}` and `© {new Date().getFullYear()}` are copyright slots, not demo copy.
+  - shadcn login and signup blocks no longer fail to stage (10 were broken): a fetched primitive's own
+    primitives are fetched too, the block's form is the entry rather than the page that centres it, `from "cn"`
+    is the project's utils (read as a package, it would have installed an unrelated npm `cn`), and a card's
+    header is no longer stripped as if it were the site's navbar.
+  - A block importing another block's file, or its registry's own primitive, gets it from that registry. A form
+    kept in a file beside the design (`<LoginForm />`) takes the owner's form.
+
+### Catalog: 773 → 1,247 MIT designs
+- **Shadcn UI Blocks** (418: heroes, features, pricing, FAQ, testimonials, team, stats, logo clouds, CTAs,
+  footers, navbars, login, signup) and **blocks.so** (55: login, stats, dialogs, tables, sidebars), read from the
+  registry builds committed to their MIT GitHub repos.
+- basecn gains a GitHub mirror, so it works when its site does not answer.
+- Refused: shadcn/studio. Its LICENSE adds a Commons Clause, which is not MIT.
+- `catalog-build.mjs --only id,id` rebuilds those registries and keeps every other item; a registry's
+  `index_mirror` is read when its site is not. Radio groups map to their slot.
+
+### The AI slop check: copy that reads like a machine wrote it
+- `dh slop check` scores a text, a file or a page (`--url`) as clean, review or slop, with the line of each hit and
+  what to write instead. All script, no model call. It looks for cliché words and phrases, repeated connectors,
+  superlatives with no number beside them, too many em dashes, emoji and exclamation marks, lists of three, and
+  sentences that all run the same length.
+- One JSON pack per language: en, fr, es, de, it, pt, nl, pl, ja, ko, zh (first drafts, marked "seed"). A language
+  without a pack still gets the checks that do not depend on words.
+- `dh slop brief` gives the writer what not to write, before it writes. `dh rebrand check` fails the brand step on
+  slop copy and warns on review; `dh compose` checks the copy it is given; `dh verify` warns on rendered pages.
+- The owner's brand words are never flagged, and a line marked `dh:slop-ok` is skipped, so a real customer quote
+  stays as written. `dh slop add "phrase" --lang fr` applies a find at once; `dh slop export` packages finds to
+  send upstream; `dh slop lint` refuses a pack whose examples disagree with its own rules or whose patterns could
+  hang the check.
+
+### Each project keeps its own settings and keys
+- Before: in a personal project every `dh profile set` and `dh vault set` went to `~/.deckhand`, so one project's
+  domain, provider or keys leaked into every other project.
+- After: the first write keeps them in the project's gitignored `.deckhand/` and asks the owner once where they
+  should live. `dh profile where --set here|machine|<folder>` records the choice in `.deckhand/layout.json`.
+- The owner's own facts (`owner.*`, `defaults.*`) stay on the machine, so no project asks them again; reads still
+  merge the machine's values under the project's.
+- A broken choice (folder gone, copied project, corrupt file) refuses to write (`BINDING_BROKEN`) while reads,
+  `dh next` and `dh resume` keep working. A client project can't be bound to the machine; a folder inside the
+  project is refused, so the gitignore guarantee holds.
+- Re-binding moves the settings and stops on a differing value. clone, adopt and scaffold carry the choice to the
+  app folder; the ops scripts, `dh vault list`, the handoff, RESUME and the runbooks follow it.
+
 ## [2.2.3] — 2026-09-26 — try-on, section by section: the component zoo
 
 A test site with one section of every common kind: a notice bar, service cards, a lone card, a shadcn `<Card>`,

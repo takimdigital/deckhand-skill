@@ -1,7 +1,7 @@
 {
  "version": 1,
  "registry": "blocks-so",
- "deckhand": "2.2.3",
+ "deckhand": "2.3.0",
  "verdicts": {
   "blocks-so/command-menu-01@any": {
    "v": "unchecked",

@@ -1,7 +1,7 @@
 {
  "version": 1,
  "registry": "tailark-oss",
- "deckhand": "2.2.3",
+ "deckhand": "2.3.0",
  "verdicts": {
   "tailark-oss/dusk-call-to-action-1@base-ui": {
    "v": "partial",

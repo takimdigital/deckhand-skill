@@ -1,7 +1,7 @@
 {
  "version": 1,
  "registry": "basecn",
- "deckhand": "2.2.3",
+ "deckhand": "2.3.0",
  "verdicts": {
   "basecn/accordion@base-ui": {
    "v": "unchecked",

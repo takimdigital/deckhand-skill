@@ -1,7 +1,7 @@
 {
  "version": 1,
  "registry": "kokonutui",
- "deckhand": "2.2.3",
+ "deckhand": "2.3.0",
  "verdicts": {
   "kokonutui/ai-input-search@any": {
    "v": "fits",
