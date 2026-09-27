@@ -276,6 +276,14 @@ function resolvedText(src) {
  * Walk a JSX root. mode 'original': expressions allowed, literal-array maps unrolled.
  * mode 'candidate': static units only; maps over demo arrays become list slots.
  */
+/** The element a childless Base UI component renders in its place (`render={<Link …>…</Link>}`), else null. */
+function renderedBy(el) {
+  if ((el.children || []).length) return null;
+  const a = attr(el, 'render');
+  const e = a && a.value && a.value.type === 'JSXExpressionContainer' ? a.value.expression : null;
+  return e && e.type === 'JSXElement' ? e : null;
+}
+
 function collect(code, root, ast, mode) {
   const arrays = topArrays(ast);
   const units = [], images = [], inputs = [], lists = [], bullets = [];
@@ -397,6 +405,9 @@ function collect(code, root, ast, mode) {
       const ph = attr(el, 'placeholder');
       if (ph && ph.value) inputs.push({ el, ph });
     }
+    // Base UI: `<Button render={<Link href="/x">Label</Link>} />` shows the element in its `render` prop
+    const rendered = renderedBy(el);
+    if (rendered) { visit(rendered, { ...ctx, parent: el, grand: ctx.parent || null }); return; }
     const kids = el.children || [];
     const nestedBlock = kids.some((c) => c.type === 'JSXElement' && containsBlock(c));
     const blockish = isBlockEl(name) && !nestedBlock && inlineContent(el, mode === 'original' || !!ctx.env);
@@ -969,12 +980,18 @@ export function parameterize(file, code, exp, opts = {}) {
   const formSwaps = [];
   const conds = new Map();
   const cut = [];
+  // a primitive's part (`CardHeader` beside `Card`, `DialogHeader` from components/ui/…) is the design's own layout,
+  // not site chrome
+  const uiParts = new Set(ast.program.body.filter((st) => st.type === 'ImportDeclaration').flatMap((st) => {
+    const names = st.specifiers.map((x) => x.local.name);
+    return /(^|\/)ui\/[\w-]+$/.test(st.source.value) ? names : names.filter((n) => names.some((m) => m !== n && n.startsWith(m)));
+  }));
   for (const root of roots) {
     if (opts.stripChrome) {
       walk(root, (n) => {
         if (n.type !== 'JSXElement') return true;
         const nm = jsxName(n.openingElement.name);
-        if (/^[A-Z]/.test(nm) && CHROME.test(nm)) { cut.push({ start: n.start, end: n.end }); removed.push(nm); return false; }
+        if (/^[A-Z]/.test(nm) && CHROME.test(nm) && !uiParts.has(nm.split('.')[0])) { cut.push({ start: n.start, end: n.end }); removed.push(nm); return false; }
         if (nm === 'main') {
           edits.push({ start: n.openingElement.name.start, end: n.openingElement.name.end, text: 'div' });
           if (n.closingElement) edits.push({ start: n.closingElement.name.start, end: n.closingElement.name.end, text: 'div' });
@@ -1203,11 +1220,12 @@ export function parameterize(file, code, exp, opts = {}) {
   }
   for (const [node, cs] of conds) {
     if (cut.some((x) => !x.hidden && x.start <= node.start && node.end <= x.end)) continue;
-    edits.push({ start: node.start, end: node.start, text: `{${cs.join(' && ')} && (` }, { start: node.end, end: node.end, text: ')}' });
+    edits.push({ start: node.start, end: node.start, text: `{${cs.join(' && ')} && (` }, { start: node.end, end: node.end, text: ')}', close: true });
   }
   for (const x of cut) if (!x.hidden) edits.push({ ...x, text: '' });
   const kept = edits.filter((e) => e.keep || (e.text === '' && !e.hidden) || !cut.some((x) => x.start <= e.start && e.end <= x.end));
-  kept.sort((a, b) => b.start - a.start || b.end - a.end);
+  // `<A/><B/>` both guarded: A's `)}` and B's `{… && (` land on one offset — the close is applied last, so it reads first
+  kept.sort((a, b) => b.start - a.start || b.end - a.end || (a.close ? 1 : 0) - (b.close ? 1 : 0));
   let out = code;
   for (const e of kept) out = out.slice(0, e.start) + e.text + out.slice(e.end);
   if (!opts.noVerify) parse(file, out);                        // must still parse — throws otherwise (noVerify: debugging only)

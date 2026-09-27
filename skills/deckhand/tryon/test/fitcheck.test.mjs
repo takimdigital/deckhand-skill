@@ -204,3 +204,44 @@ test('a footer/navbar showing the plan\'s menu carries the owner\'s links that m
   assert.equal(fitGate('block', 5, b), null);
   assert.equal(carryPlanLinks({ carried: [], dropped: [{ role: 'action', text: 'Menu' }] }, null, orig).carried.length, 0, 'no plan, nothing assumed');
 });
+
+test('a Base UI button (`render={<Link>…</Link>}`, no children) carries the owner\'s action like its Radix twin', () => {
+  const code = `export default function H() { return (<section><h1>Ship faster</h1><div><Button nativeButton={false} render={<Link href="#"><span className="text-nowrap">Start free</span></Link>} /><Button variant="ghost" nativeButton={false} render={<Link href="#">Watch demo</Link>} /></div></section>); }`;
+  const p = parameterize('h.tsx', code, { kind: 'default' }, {});
+  assert.deepEqual(p.slots.filter((s) => s.role === 'action').length, 2);
+  assert.match(p.code, /render=\{\s*<Link href=\{content\.action\d+Href \?\? "#"\}><span className="text-nowrap">\{content\.action\d+ \?\?/);
+  assert.match(p.code, /\{content\.action\d+Show !== false && \(<Button/, 'the whole button hides when the owner has no such action');
+});
+
+test('a shadcn block read raw: its page\'s one component is the entry, `from "cn"` is the project\'s utils, and a fetched primitive\'s own primitives are fetched too', async () => {
+  const { fetchBundle, rawSource } = await import('../lib/materialize.mjs');
+  const { keyOf } = await import('../lib/registry.mjs');
+  const fx = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fx-'));
+  const put = (url, text) => fs.writeFileSync(path.join(fx, keyOf(url) + (text === 404 ? '.404' : '.txt')), text === 404 ? url : text);
+  const GH = 'shadcn-ui/ui/main/apps/v4/registry/new-york-v4/blocks/login-01';
+  put(`https://raw.githubusercontent.com/${GH}/page.tsx`, 'import { LoginForm } from "@/registry/new-york-v4/blocks/login-01/components/login-form"\nexport default function Page() { return <div className="min-h-svh"><LoginForm /></div> }\n');
+  put(`https://raw.githubusercontent.com/${GH}/components/login-form.tsx`, 'import { cn } from "cn"\nimport { Field } from "@/registry/new-york-v4/ui/field"\nexport function LoginForm() { return <div className={cn("p-4")}><Field><h1>Login</h1></Field></div> }\n');
+  for (const n of ['field', 'label', 'separator']) put(`https://ui.shadcn.com/r/styles/new-york-v4/${n}.json`, 404);
+  put('https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/registry/new-york-v4/ui/field.tsx', 'import { cn } from "cn"\nimport { Label } from "@/registry/new-york-v4/ui/label"\nimport { Separator } from "@/registry/new-york-v4/ui/separator"\nexport function Field(p) { return <div className={cn("f")}><Label /><Separator />{p.children}</div> }\n');
+  put('https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/registry/new-york-v4/ui/label.tsx', 'import * as LabelPrimitive from "@radix-ui/react-label"\nexport function Label(p) { return <LabelPrimitive.Root {...p} /> }\n');
+  put('https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/registry/new-york-v4/ui/separator.tsx', 'export function Separator() { return <hr /> }\n');
+  const was = process.env.DH_FIXTURES;
+  process.env.DH_FIXTURES = fx;
+  try {
+    const prof = { ui: {}, base: 'radix', utilsExists: false, root: fx };
+    const b = await fetchBundle(prof, { id: 'shadcn/login-01@radix', ghFiles: [`${GH}/page.tsx`, `${GH}/components/login-form.tsx`] });
+    assert.equal(b.entry, 'apps/v4/registry/new-york-v4/blocks/login-01/components/login-form.tsx', 'the form, not the page that centres it');
+    assert.deepEqual(b.files.map((f) => path.posix.basename(f.path)).sort(), ['field.tsx', 'label.tsx', 'login-form.tsx', 'page.tsx', 'separator.tsx']);
+    assert.ok(!b.deps.includes('cn'), 'never an npm package named "cn"');
+    assert.ok(b.deps.includes('@radix-ui/react-label'), 'a nested primitive\'s package is a dep');
+    assert.ok(b.files.every((f) => !/from "cn"/.test(f.content)));
+  } finally { process.env.DH_FIXTURES = was; }
+  assert.equal(rawSource("import { cn } from 'cn'\nimport x from 'cnx'"), "import { cn } from '@/lib/utils'\nimport x from 'cnx'");
+});
+
+test('a primitive\'s part (CardHeader beside Card) stays in the design; a site header the block embeds is still stripped', () => {
+  const code = `import { Card, CardHeader, CardTitle } from "./card"\nimport { HeroHeader } from "./header"\nexport default function L() { return (<section><HeroHeader /><Card><CardHeader><CardTitle>Login to your account</CardTitle></CardHeader></Card></section>); }`;
+  const p = parameterize('l.tsx', code, { kind: 'default' }, { stripChrome: true });
+  assert.deepEqual(p.removed, ['HeroHeader']);
+  assert.match(p.code, /<CardHeader><CardTitle>\{content\.heading1 \?\?/);
+});

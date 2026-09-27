@@ -286,13 +286,22 @@ export async function fetchBundle(prof, item) {
     try {
       const repo = item.ghFiles[0].split('/').slice(0, 3).join('/');
       const files = [];
-      for (const f of item.ghFiles) files.push({ path: f.split('/').slice(3).join('/'), content: await getText(`https://raw.githubusercontent.com/${f}`) });
+      for (const f of item.ghFiles) files.push({ path: f.split('/').slice(3).join('/'), content: rawSource(await getText(`https://raw.githubusercontent.com/${f}`)) });
       return await jsonBundle(prof, item, { files, dependencies: item.deps, registryDependencies: item.rdeps }, `https://github.com/${repo}`);
     } catch (e) { errors.push('ghFiles: ' + e.message); }
   }
   const err = new Error('FETCH_FAILED ' + item.id + ' — ' + errors.join(' | '));
   err.code = 'FETCH_FAILED';
   throw err;
+}
+
+/**
+ * A registry's source read raw from its repo, as its published JSON would give it: shadcn's own sources import
+ * `cn` from a workspace alias `"cn"` that its registry build rewrites to `@/lib/utils` — read as a package, it
+ * would install an unrelated npm package named `cn`.
+ */
+export function rawSource(content) {
+  return content.replace(/(\bfrom\s+)(["'])cn\2/g, '$1$2@/lib/utils$2');
 }
 
 /** shadcn-schema JSON -> bundle; unresolved `@/registry|components/ui/x` become shadcn/registry deps. */
@@ -302,7 +311,8 @@ async function jsonBundle(prof, item, doc, url) {
   const external = {};
   const have = new Set(files.map((f) => f.path));
   const extra = [];
-  for (const f of files) {
+  const queued = new Set();
+  const scan = (f) => {
     for (const imp of importsOf(f.path, f.content)) {
       const s = imp.spec;
       const prov = projectProvides(prof, s);
@@ -310,36 +320,49 @@ async function jsonBundle(prof, item, doc, url) {
       if (s.startsWith('@/') || s.startsWith('~/')) {
         const local = files.find((x) => x.path.replace(/\.(tsx|ts|jsx|js)$/, '').endsWith(s.replace(/^[@~]\/(registry\/[^/]+\/)?/, '')));
         if (local) continue;
+        if (/lib\/utils$/.test(s) || queued.has(s)) continue;           // local utils copy is added at write time
+        queued.add(s);
         const ui = /(?:^|\/)ui\/([a-z0-9-]+)$/.exec(s);
-        if (ui) { extra.push({ spec: s, name: ui[1] }); continue; }
-        if (/lib\/utils$/.test(s)) continue;           // local utils copy is added at write time
-        extra.push({ spec: s, name: s.split('/').pop() });
+        extra.push({ spec: s, name: ui ? ui[1] : s.split('/').pop() });
       } else if (!s.startsWith('.') && !imp.typeOnly) {
         const n = pkgName(s);
         if (!BUILTIN.has(n)) deps.add(n);
       }
     }
-  }
-  // registry-internal deps the item did not embed: shadcn primitives by the project's style
-  for (const x of extra) {
+  };
+  for (const f of files) scan(f);
+  // registry-internal deps the item did not embed: shadcn primitives by the project's style — and theirs in turn
+  // (a login block's `field` imports `separator` and `label`)
+  for (let i = 0; i < extra.length; i++) {
+    const x = extra[i];
     const style = prof.base === 'base-ui' ? 'base-nova' : 'new-york-v4';
     const tries = [`https://ui.shadcn.com/r/styles/${style}/${x.name}.json`];
     let got = null;
     for (const u of tries) { try { got = await fetchJsonItem(u); break; } catch { /* next */ } }
     if (!got) {
       try {
-        const content = await getText(`https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/registry/${style}/ui/${x.name}.tsx`);
+        const content = rawSource(await getText(`https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/registry/${style}/ui/${x.name}.tsx`));
         got = { files: [{ path: `registry/${style}/ui/${x.name}.tsx`, content }], dependencies: [] };
       } catch { /* unresolved */ }
     }
     if (!got) throw new Error('UNRESOLVED_REGISTRY_DEP ' + x.spec);
-    for (const f of got.files) if (!have.has(f.path)) { files.push({ path: f.path, content: f.content, aliasOf: x.spec }); have.add(f.path); }
     for (const d of got.dependencies || []) deps.add(d);
-    for (const f of got.files) for (const imp of importsOf(f.path, f.content)) {
-      if (!imp.spec.startsWith('.') && !imp.spec.startsWith('@/') && !imp.typeOnly) { const n = pkgName(imp.spec); if (!BUILTIN.has(n)) deps.add(n); }
+    for (const f of got.files) if (!have.has(f.path)) {
+      const nf = { path: f.path, content: f.content, aliasOf: x.spec };
+      files.push(nf);
+      have.add(f.path);
+      scan(nf);
     }
   }
-  const mainIdx = Math.max(0, files.findIndex((f) => /\.(tsx|jsx)$/.test(f.path) && !/\/ui\//.test(f.path)));
+  let mainIdx = Math.max(0, files.findIndex((f) => /\.(tsx|jsx)$/.test(f.path) && !/\/ui\//.test(f.path)));
+  // a block's `app/login/page.tsx` only centres its `<LoginForm/>`: the section is the one component it shows
+  const page = files[mainIdx];
+  if (/(^|\/)page\.(tsx|jsx)$/.test(page.path)) {
+    const shown = importsOf(page.path, page.content).filter((i) => !i.typeOnly).map((i) => i.spec.replace(/^[@~]\//, '').replace(/^(\.\.?\/)+/, '').replace(/^registry\/[^/]+\//, ''))
+      .map((body) => files.findIndex((f) => f !== page && /\.(tsx|jsx)$/.test(f.path) && !/\/ui\//.test(f.path) && f.path.replace(/\.(tsx|jsx)$/, '').endsWith(body)))
+      .filter((i) => i >= 0);
+    if (shown.length === 1) mainIdx = shown[0];
+  }
   const entry = files[mainIdx].path;
   return { origin: 'json', sourceUrl: url, entry, files, deps: [...deps], external, css: doc.css || null, cssVars: doc.cssVars || null };
 }

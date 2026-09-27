@@ -464,7 +464,11 @@ F13 VET
     refused one last (−30) and a fitting one first among equals (+3);
   - gaps it found, fixed in the engine: a footer/navbar showing the plan's menu carries the owner's links that menu
     already holds ([[tryon/lib/engine.mjs#carryPlanLinks]]); `© {2026}` / `© {new Date().getFullYear()}` are
-    copyright slots ([[tryon/lib/transplant.mjs#selfContained]]).
+    copyright slots ([[tryon/lib/transplant.mjs#selfContained]]); a Base UI `<Button render={<Link>…</Link>} />`
+    carries its action like the Radix `asChild` twin ([[tryon/lib/transplant.mjs#renderedBy]]); a primitive's part
+    (`CardHeader` beside `Card`) is never stripped as site chrome; a shadcn block read raw gets its page's one
+    component as the entry, `from "cn"` as the project's utils ([[tryon/lib/materialize.mjs#rawSource]]; read as a
+    package it would install an unrelated npm `cn`), and a fetched primitive's own primitives in turn.
 
 F14 REUSE
 - `dh harvest --name N [--push]` ([[dhlib/harvest.py#harvest]]):
