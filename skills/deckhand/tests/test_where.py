@@ -28,7 +28,7 @@ from dhlib.util import DhError  # noqa: E402
 
 class Base(unittest.TestCase):
     def setUp(self):
-        self.tmp = Path(tempfile.mkdtemp())
+        self.tmp = Path(tempfile.mkdtemp()).resolve()          # Windows: RUNNER~1 → runneradmin, as the code resolves it
         self.env = {k: os.environ.get(k) for k in ("DECKHAND_HOME", "VPS_OPS_HOME", "COOLIFY_TOKEN", "COOLIFY_URL", "HOSTINGER_API_TOKEN", "CLOUDFLARE_API_TOKEN", "RESEND_API_KEY")}
         os.environ["DECKHAND_HOME"] = str(self.tmp / "home")
         os.environ["VPS_OPS_HOME"] = str(self.tmp / "vps-ops")
