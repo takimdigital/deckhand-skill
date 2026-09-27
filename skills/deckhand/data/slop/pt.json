@@ -1,0 +1,282 @@
+{
+  "schema": "deckhand.slop/1",
+  "lang": "pt",
+  "name": "Português",
+  "maturity": "seed",
+  "maintainers": [
+    "deckhand"
+  ],
+  "script": "latin",
+  "suffixes": [
+    "s",
+    "es"
+  ],
+  "stopwords": [
+    "o",
+    "a",
+    "os",
+    "as",
+    "de",
+    "do",
+    "da",
+    "dos",
+    "das",
+    "e",
+    "em",
+    "um",
+    "uma",
+    "é",
+    "para",
+    "que",
+    "com",
+    "não",
+    "no",
+    "na",
+    "por",
+    "se",
+    "seu",
+    "sua",
+    "você",
+    "nosso",
+    "nossa",
+    "mais",
+    "como",
+    "ao"
+  ],
+  "words": {
+    "strong": [
+      "revolucionar|revoluciona|revolucionário|revolucionária",
+      "sinergia|sinergias",
+      "paradigma",
+      "inigualável|inigualáveis",
+      "holístico|holística",
+      "meticuloso|meticulosa|meticulosamente",
+      "transformador|transformadora",
+      "alavancar|alavanca|alavanque|potencializar|potencialize",
+      "elevar|eleve|eleva",
+      "desbloquear|desbloqueie",
+      "mergulhe|mergulhar",
+      "tapeçaria",
+      "aninhado|aninhada",
+      "disruptivo|disruptiva",
+      "inesquecível"
+    ],
+    "buzz": [
+      "inovador|inovadora|inovadores|inovadoras",
+      "soluções",
+      "fluido|fluida",
+      "ecossistema",
+      "robusto|robusta",
+      "otimizar|otimize|otimiza",
+      "joia",
+      "pilar",
+      "sob medida",
+      "chave na mão",
+      "dinâmico|dinâmica",
+      "apaixonado|apaixonada|apaixonados",
+      "excepcional|excepcionais",
+      "único|única",
+      "autêntico|autêntica",
+      "excelência",
+      "jornada",
+      "experiência"
+    ]
+  },
+  "fixes": {
+    "alavancar": "usar",
+    "soluções": "nomear o serviço",
+    "inovador": "dizer o que é novo",
+    "inigualável": "uma prova: um número, uma avaliação",
+    "jornada": "visita, processo",
+    "experiência": "dizer o que acontece de concreto"
+  },
+  "phrases": [
+    {
+      "id": "mundo-atual",
+      "kind": "opener",
+      "w": 4,
+      "rx": "no mundo (de hoje|atual|acelerado)|(em|num) (um )?mundo (em constante (evolução|mudança)|onde|cada vez mais|que muda)",
+      "example": "Num mundo em constante evolução, o tempo conta.",
+      "fix": "começar pelo problema do cliente"
+    },
+    {
+      "id": "era-digital",
+      "kind": "opener",
+      "w": 3,
+      "rx": "na era (digital|da ia|da inteligência artificial)",
+      "example": "Na era digital, o site conta.",
+      "fix": "cortar"
+    },
+    {
+      "id": "importante-notar",
+      "kind": "hedge",
+      "w": 3,
+      "rx": "é (importante|fundamental|essencial) (notar|destacar|ressaltar|lembrar)|vale (a pena )?(ressaltar|destacar|lembrar)",
+      "example": "É importante notar que abrimos aos domingos.",
+      "fix": "dizer o fato"
+    },
+    {
+      "id": "nao-e-apenas",
+      "kind": "structure",
+      "w": 3,
+      "rx": "não (é|se trata) (apenas|só|somente|simplesmente) (de )?[^.;!?]{1,50}[.,;—–-]+ ?é",
+      "example": "Não é apenas um corte, é um ritual.",
+      "fix": "dizer o que é, uma vez"
+    },
+    {
+      "id": "nao-so-mas",
+      "kind": "structure",
+      "w": 2,
+      "rx": "não (só|apenas) [^.;!?]{1,60} mas também",
+      "example": "não só rápido mas também confiável",
+      "fix": "dois fatos, duas frases"
+    },
+    {
+      "id": "seja-voce",
+      "kind": "structure",
+      "w": 2,
+      "rx": "seja (você )?[^,.;]{1,40},? ou ",
+      "example": "Seja você iniciante ou experiente, venha.",
+      "fix": "dizer para quem"
+    },
+    {
+      "id": "nao-procure-mais",
+      "kind": "cta",
+      "w": 3,
+      "rx": "não (procure|espere) mais",
+      "example": "Procura um canalizador? Não procure mais.",
+      "fix": "um botão claro: Pedir orçamento"
+    },
+    {
+      "id": "pronto-para",
+      "kind": "cta",
+      "w": 2,
+      "rx": "pront[oa]s? para (transformar|levar|descobrir|começar|viver|elevar|dar o salto)[^?]{0,40}\\?",
+      "example": "Pronto para transformar o seu jardim?",
+      "fix": "um botão claro: Marcar visita"
+    },
+    {
+      "id": "proximo-nivel",
+      "kind": "cta",
+      "w": 3,
+      "rx": "(para o|ao) próximo nível|a um novo patamar",
+      "example": "Leve o seu negócio ao próximo nível.",
+      "fix": "o resultado: 20 reservas a mais por semana"
+    },
+    {
+      "id": "liberte-potencial",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(liberte|libere|desbloqueie|desperte) (todo )?o (seu )?(verdadeiro |pleno )?potencial",
+      "example": "Liberte todo o seu potencial.",
+      "fix": "dizer o resultado"
+    },
+    {
+      "id": "em-conclusao",
+      "kind": "closer",
+      "w": 2,
+      "rx": "(em conclusão|em resumo|em suma|resumindo)[,.]",
+      "example": "Em resumo, estamos aqui.",
+      "fix": "cortar"
+    },
+    {
+      "id": "de-ponta",
+      "kind": "claim",
+      "w": 3,
+      "rx": "(tecnologia|soluções|equipamentos?) de ponta|sem precedentes|em constante evolução|de última geração",
+      "example": "tecnologia de ponta",
+      "fix": "nomear a técnica ou a máquina"
+    },
+    {
+      "id": "na-marca-acreditamos",
+      "kind": "opener",
+      "w": 3,
+      "rx": "^n[ao] [a-z0-9áâãàçéêíóôõú&' -]{2,30}, (acreditamos|entendemos|estamos comprometidos|somos apaixonados)",
+      "example": "Na Bloom, acreditamos que a beleza é pessoal.",
+      "fix": "dizer o que fazem e para quem"
+    },
+    {
+      "id": "mais-do-que",
+      "kind": "structure",
+      "w": 2,
+      "rx": "(muito )?mais do que (um|uma) (simples )?[a-záâãàçéêíóôõú]+",
+      "example": "mais do que uma simples padaria",
+      "fix": "dizer o que é"
+    },
+    {
+      "id": "experiencia-unica",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(viva|desfrute de|descubra) uma experiência|experiência (fluida|inesquecível|imersiva|única|incomparável)",
+      "example": "Viva uma experiência inesquecível.",
+      "fix": "dizer o que acontece de concreto"
+    },
+    {
+      "id": "mergulhe",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(mergulhe|embarque|deixe-se levar) (no|na|em|nos|nas)",
+      "example": "Mergulhe nos nossos sabores.",
+      "fix": "ver o menu"
+    },
+    {
+      "id": "coracao-de",
+      "kind": "filler",
+      "w": 1,
+      "rx": "no coração d[eoa]",
+      "example": "no coração de Lisboa",
+      "fix": "a rua ou o bairro"
+    },
+    {
+      "id": "chat-leak",
+      "kind": "leak",
+      "w": 5,
+      "rx": "como (uma )?(ia|inteligência artificial|modelo de linguagem)|espero que (isso|isto) (ajude|seja útil)|ótima pergunta|claro! aqui|aqui está (uma|a) versão (revisada|melhorada)|sinta-se à vontade para (adaptar|personalizar)|\\[inserir [a-záâãàçéêíóôõú ]+\\]",
+      "example": "Claro! Aqui está uma seção para a sua padaria.",
+      "fix": "resposta de chatbot colada na página: apagar"
+    }
+  ],
+  "transitions": [
+    "além disso",
+    "ademais",
+    "portanto",
+    "por conseguinte",
+    "consequentemente",
+    "no entanto",
+    "contudo",
+    "todavia",
+    "de fato",
+    "em suma",
+    "finalmente",
+    "outrossim"
+  ],
+  "superlatives": [
+    "melhor",
+    "melhores",
+    "líder",
+    "líderes",
+    "número um",
+    "nº 1",
+    "#1",
+    "perfeito",
+    "perfeita",
+    "imbatível",
+    "incomparável"
+  ],
+  "and": [
+    "e",
+    "ou"
+  ],
+  "examples": {
+    "slop": [
+      "Num mundo em constante evolução, as nossas soluções inovadoras alavancam o seu negócio para libertar todo o seu potencial. Além disso, a nossa equipa apaixonada otimiza cada etapa da sua jornada.",
+      "No coração de Lisboa, a nossa padaria é muito mais do que uma simples padaria — uma experiência inesquecível. Não procure mais.",
+      "Claro! Aqui está uma seção inicial para o seu salão."
+    ],
+    "clean": [
+      "Pão de fermentação natural, baguetes e croissants cozidos todas as manhãs a partir das 5h no Porto. Encomende até às 20h e levante no dia seguinte.",
+      "Reparamos fugas, caldeiras e esquentadores em Braga. A deslocação custa 40 €, e a maioria dos trabalhos demora menos de uma hora.",
+      "A Ana corta cabelo na Rua Augusta desde 2009. Um corte com secagem demora 45 minutos e custa 30 €."
+    ]
+  }
+}

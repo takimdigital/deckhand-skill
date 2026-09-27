@@ -128,6 +128,7 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 | plan | `dh plan init\|lint\|render\|split --agents N` (N AGENT-n.md + CONVENTIONS.md) · `dh bb post\|read` · `dh bb flag NAME` · `dh bb wait NAME --max 170` |
 | build | `dh clone T --to DIR` · `dh adopt PATH\|URL` · `dh scaffold --to DIR` (the planning folder is fine) · `dh base record --kind scratch\|existing` · `dh compose --sections … --copy .deckhand/copy.json` · `dh swap scan\|check` · `dh dev start\|stop\|status` · `dh dev add NAME --cmd "…" --port N [--env-file .env]` · `dh dev remove NAME` · `dh dev port --from N` |
 | brand | `dh rebrand scan\|apply\|check` |
+| copy that does not read as AI | `dh slop brief [--lang L]` (before writing) · `dh slop check [PATH… \| --text T \| --url U]` · `dh slop allow "word"` · `dh slop add "tic" --lang L` · `dh slop export\|langs\|lint` |
 | try-on | `node <skill>/tryon/cli.mjs setup\|serve\|try\|show\|keep\|discard\|save\|query\|doctor\|clean` (or `dh tryon …`) · inspect: `inspect\|slots\|status\|library` · adjust: `tune --file F --line N --col C --preset P` · `theme --accent X --corners Y` · `theme --undo` · AI draft: `drafts [--wait]\|draft-check\|draft-done --id D` |
 | found on Google | `dh seo audit [--url U]` · `dh seo apply` (add/improve, never overwrite) · `dh seo undo` · `dh seo ping` · `dh seo facts` (engine: `tryon seo inspect\|apply\|undo`) |
 | review | `dh verify [--url U]` |

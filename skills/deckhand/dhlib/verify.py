@@ -1,8 +1,8 @@
 """REVIEW: one command, evidence rows, a red row blocks the deploy gate.
 
 Rows: typecheck · lint (advisory) · build · prod-clean (no try-on stamp in the build) · tryon-closed ·
-secrets · leaks/honesty · routes (every planned static route + every internal link on the home page
-answers < 400 — on the production build, served on a free port for the check) · a11y basics (advisory) · dependency audit (advisory).
+secrets · leaks/honesty (incl. AI-slop copy) · routes (every planned static route + every internal link on the home page
+answers < 400 — on the production build, served on a free port for the check) · copy-slop on rendered pages (advisory) · a11y basics (advisory) · dependency audit (advisory).
 Writes .deckhand/verify.json + .deckhand/VERIFY.md.
 """
 from __future__ import annotations
@@ -170,6 +170,12 @@ def run_verify(root: Path, url: str | None = None, skip: tuple = (), allow: tupl
                 row("seo", not s_["blockers"], f"SEO {s_['score']}/100 on {where} — {len(s_['blockers'])} launch-breakers, "
                     f"{len([x for x in s_['findings'] if x['severity'] == 'high'])} high · {len(s_['owner'])} owner items in PENDING.md (.deckhand/SEO.md)",
                     evidence="\n".join(f"{x['rule']} {x['where']}: {x['title']} {x['detail']}".strip() for x in (s_["blockers"] or s_["findings"])[:10]) or None)
+            if "slop" not in skip:
+                from . import slop as SLOP
+                sr = SLOP.summarize(SLOP.url_units(base, paths=sorted(routes)[:30], root=root))
+                row("copy-slop", sr["verdict"] != "slop", f"rendered copy on {where}: {sr['by_verdict']['slop']} pages read as AI slop, "
+                    f"{sr['by_verdict']['review']} to review, {sr['by_verdict']['clean']} clean (dh slop check --url)", blocking=False,
+                    evidence="\n".join(f"{u['where']} {u['verdict']} {u['score']}/100: " + ", ".join(h["match"] for h in u["hits"][:5]) for u in sr["worst"][:8]) or None)
         else:
             row("routes", False, "not checked: no build to serve and no running URL (dh dev start, or --url)", blocking=False)
     finally:

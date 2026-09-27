@@ -5,7 +5,8 @@ source/docs, the primary colour token, a monogram icon when there is no logo. LI
 THIRD_PARTY_NOTICES are never touched (they are the legal condition of reuse).
 check: the honesty + leak gate — template names, demo companies, lorem ipsum, example contacts,
 placeholder images, demo-copy markers, third-party brand logos presented as social proof; words an AI
-try-on draft wrote (labelled for the owner) are a warning until confirmed or rewritten.
+try-on draft wrote (labelled for the owner) are a warning until confirmed or rewritten; copy that reads as AI slop
+(dhlib/slop.py: a text scored slop blocks, one to review warns — `--allow ai-slop` skips it).
 """
 from __future__ import annotations
 
@@ -182,5 +183,14 @@ def check(root: Path, allow: tuple = ()) -> dict:
                 add(e["file"], 1, "ai-copy", f"AI-written text on the page: \"{e['text'][:80]}\" — owner confirms or rewrites", "warn")
             else:
                 add(e["file"], 1, "demo-copy", f"design demo text still on the page: \"{e['text'][:80]}\" — rewrite for the owner or delete")
+    # copy that reads as written by a model (dhlib/slop.py): a text scored slop blocks, one to review warns
+    if "ai-slop" not in allow:
+        from . import slop as SLOP
+        for u in SLOP.project_units(root):
+            if u["verdict"] == "clean":
+                continue
+            for h in u["hits"][:8]:
+                add(u["file"], h.get("line") or 1, "ai-slop", f"{u['verdict']} {u['score']}/100 · {h['rule']} \"{h['match']}\""
+                    + (f" [{h['key']}]" if h.get("key") else "") + (f" → {h['fix']}" if h.get("fix") else ""), "block" if u["verdict"] == "slop" else "warn")
     blocking = [f for f in findings if f["severity"] == "block"]
     return {"ok": not blocking, "blocking": len(blocking), "warnings": len(findings) - len(blocking), "findings": findings[:300]}

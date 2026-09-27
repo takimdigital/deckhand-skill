@@ -1,0 +1,294 @@
+{
+  "schema": "deckhand.slop/1",
+  "lang": "es",
+  "name": "Español",
+  "maturity": "seed",
+  "maintainers": [
+    "deckhand"
+  ],
+  "script": "latin",
+  "suffixes": [
+    "s",
+    "es"
+  ],
+  "stopwords": [
+    "el",
+    "la",
+    "los",
+    "las",
+    "de",
+    "del",
+    "y",
+    "en",
+    "un",
+    "una",
+    "es",
+    "para",
+    "que",
+    "con",
+    "por",
+    "su",
+    "sus",
+    "tu",
+    "tus",
+    "nuestro",
+    "nuestra",
+    "se",
+    "lo",
+    "al",
+    "más",
+    "como",
+    "no",
+    "este",
+    "esta",
+    "o"
+  ],
+  "words": {
+    "strong": [
+      "potenciar|potencia|potencian|potenciamos|potencie",
+      "revolucionar|revoluciona|revolucionario|revolucionaria",
+      "sinergia",
+      "paradigma",
+      "plétora",
+      "inigualable",
+      "holístico|holística",
+      "meticuloso|meticulosa|meticulosamente",
+      "transformador|transformadora",
+      "elevar|eleva|eleve|elevamos",
+      "desbloquear|desbloquea|desbloquee",
+      "sumérgete|sumergirse|adéntrate|adentrémonos",
+      "tapiz",
+      "crisol",
+      "enclavado|enclavada",
+      "vanguardista",
+      "disruptivo|disruptiva",
+      "inolvidable"
+    ],
+    "buzz": [
+      "innovador|innovadora|innovadores|innovadoras",
+      "soluciones",
+      "fluido|fluida",
+      "ecosistema",
+      "robusto|robusta",
+      "optimizar|optimiza|optimice",
+      "impulsar|impulsa|impulsamos",
+      "joya",
+      "a medida",
+      "llave en mano",
+      "dinámico|dinámica",
+      "apasionado|apasionada|apasionados",
+      "excepcional|excepcionales",
+      "único|única",
+      "auténtico|auténtica",
+      "experiencia"
+    ]
+  },
+  "fixes": {
+    "potenciar": "decir qué mejora y cuánto",
+    "soluciones": "nombrar el servicio",
+    "innovador": "decir qué es nuevo",
+    "inigualable": "una prueba: una cifra, una reseña",
+    "experiencia": "decir qué pasa en concreto"
+  },
+  "phrases": [
+    {
+      "id": "mundo-actual",
+      "kind": "opener",
+      "w": 4,
+      "rx": "en (el mundo (actual|de hoy|acelerado)|un mundo (en constante (evolución|cambio)|donde|cada vez más|que cambia))",
+      "example": "En un mundo en constante evolución, el tiempo importa.",
+      "fix": "empezar por el problema del cliente"
+    },
+    {
+      "id": "era-digital",
+      "kind": "opener",
+      "w": 3,
+      "rx": "en (la|esta) era (digital|de la ia|de la inteligencia artificial)",
+      "example": "En la era digital, tu web importa.",
+      "fix": "eliminar"
+    },
+    {
+      "id": "es-importante",
+      "kind": "hedge",
+      "w": 3,
+      "rx": "es (importante|fundamental|crucial) (destacar|señalar|tener en cuenta|recordar|mencionar)|cabe (destacar|señalar|mencionar)",
+      "example": "Es importante destacar que abrimos los domingos.",
+      "fix": "decir el hecho"
+    },
+    {
+      "id": "no-es-solo",
+      "kind": "structure",
+      "w": 3,
+      "rx": "no (es|se trata de) (solo|sólo|simplemente|solamente) [^.;!?]{1,50}[.,;—–-]+ ?es",
+      "example": "No es solo un corte, es un ritual.",
+      "fix": "decir qué es, una vez"
+    },
+    {
+      "id": "no-solo-sino",
+      "kind": "structure",
+      "w": 2,
+      "rx": "no solo [^.;!?]{1,60} sino (también|que)",
+      "example": "no solo rápido sino también fiable",
+      "fix": "dos hechos, dos frases"
+    },
+    {
+      "id": "ya-seas",
+      "kind": "structure",
+      "w": 2,
+      "rx": "(ya sea que|tanto si) (seas|eres|busques|buscas) [^,.;]{1,40},? (o|como) ",
+      "example": "Ya sea que seas principiante o experto, ven.",
+      "fix": "decir para quién"
+    },
+    {
+      "id": "no-busques-mas",
+      "kind": "cta",
+      "w": 3,
+      "rx": "no (busques|esperes) más",
+      "example": "¿Buscas fontanero? No busques más.",
+      "fix": "un botón claro: Pedir presupuesto"
+    },
+    {
+      "id": "listo-para",
+      "kind": "cta",
+      "w": 2,
+      "rx": "(list[oa]s?|preparad[oa]s?) para (transformar|llevar|dar el salto|descubrir|empezar|vivir|elevar)[^?]{0,40}\\?",
+      "example": "¿Listo para transformar tu jardín?",
+      "fix": "un botón claro: Reservar visita"
+    },
+    {
+      "id": "siguiente-nivel",
+      "kind": "cta",
+      "w": 3,
+      "rx": "al (siguiente|próximo) nivel",
+      "example": "Lleva tu negocio al siguiente nivel.",
+      "fix": "el resultado: 20 reservas más por semana"
+    },
+    {
+      "id": "libera-potencial",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(libera|desbloquea|liberar|desbloquear|despliega|alcanza) (todo )?(tu|su) (verdadero |máximo |pleno )?potencial",
+      "example": "Libera todo tu potencial.",
+      "fix": "decir el resultado"
+    },
+    {
+      "id": "en-conclusion",
+      "kind": "closer",
+      "w": 2,
+      "rx": "(en conclusión|en resumen|en definitiva|en pocas palabras)[,.]",
+      "example": "En resumen, estamos aquí.",
+      "fix": "eliminar"
+    },
+    {
+      "id": "de-vanguardia",
+      "kind": "claim",
+      "w": 3,
+      "rx": "de vanguardia|sin precedentes|en constante evolución|pilar fundamental|de primer nivel",
+      "example": "tecnología de vanguardia",
+      "fix": "nombrar la técnica o la máquina"
+    },
+    {
+      "id": "en-marca-creemos",
+      "kind": "opener",
+      "w": 3,
+      "rx": "^en [a-z0-9áéíóúñü&' -]{2,30}, (creemos|entendemos|nos comprometemos|estamos comprometidos|nos apasiona)",
+      "example": "En Bloom, creemos que la belleza es personal.",
+      "fix": "decir qué hacen y para quién"
+    },
+    {
+      "id": "compromiso-excelencia",
+      "kind": "claim",
+      "w": 2,
+      "rx": "(compromiso|comprometidos) con (la excelencia|la calidad)",
+      "example": "nuestro compromiso con la excelencia",
+      "fix": "un hecho que lo pruebe"
+    },
+    {
+      "id": "mas-que-un",
+      "kind": "structure",
+      "w": 2,
+      "rx": "(mucho )?más que (un|una) (simple )?[a-záéíóúñü]+",
+      "example": "más que una simple panadería",
+      "fix": "decir qué es"
+    },
+    {
+      "id": "experiencia-unica",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(vive|disfruta de|descubre) una experiencia|experiencia (fluida|inolvidable|inmersiva|sin igual|única|incomparable)",
+      "example": "Vive una experiencia inolvidable.",
+      "fix": "decir qué pasa en concreto"
+    },
+    {
+      "id": "sumergete",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(sumérgete|adéntrate|déjate llevar) (en|por)",
+      "example": "Sumérgete en nuestros sabores.",
+      "fix": "ver la carta"
+    },
+    {
+      "id": "corazon-de",
+      "kind": "filler",
+      "w": 1,
+      "rx": "en (el )?(pleno )?corazón de",
+      "example": "en el corazón de Madrid",
+      "fix": "la calle o el barrio"
+    },
+    {
+      "id": "chat-leak",
+      "kind": "leak",
+      "w": 5,
+      "rx": "como (una )?(ia|inteligencia artificial|modelo de lenguaje)|espero que (esto|te) (te )?(ayude|sirva)|excelente pregunta|¡claro! aquí|aquí tienes (una|la) versión|no dudes en (adaptar|personalizar)|\\[insertar [a-záéíóúñü ]+\\]",
+      "example": "¡Claro! Aquí tienes una sección para tu panadería.",
+      "fix": "respuesta de chatbot pegada en la página: borrar"
+    }
+  ],
+  "transitions": [
+    "además",
+    "asimismo",
+    "por lo tanto",
+    "por consiguiente",
+    "en consecuencia",
+    "sin embargo",
+    "no obstante",
+    "de hecho",
+    "en definitiva",
+    "finalmente",
+    "igualmente",
+    "del mismo modo"
+  ],
+  "superlatives": [
+    "mejor",
+    "mejores",
+    "líder",
+    "líderes",
+    "número uno",
+    "n.º 1",
+    "#1",
+    "insuperable",
+    "definitivo",
+    "perfecto",
+    "perfecta",
+    "incomparable",
+    "inmejorable"
+  ],
+  "and": [
+    "y",
+    "e",
+    "o",
+    "u"
+  ],
+  "examples": {
+    "slop": [
+      "En un mundo en constante evolución, nuestra solución innovadora potencia tu negocio para liberar todo tu potencial. Además, nuestro equipo apasionado optimiza cada paso de tu experiencia.",
+      "Enclavada en el corazón de Madrid, nuestra panadería es mucho más que una simple panadería — es una experiencia inolvidable. No busques más.",
+      "¡Claro! Aquí tienes una sección de inicio para tu peluquería."
+    ],
+    "clean": [
+      "Pan de masa madre, baguettes y cruasanes horneados cada mañana desde las 5 en Valencia. Pide antes de las 20 h y recógelo al día siguiente.",
+      "Reparamos fugas, calderas y calentadores en Sevilla. El desplazamiento cuesta 50 €, y la mayoría de los trabajos duran menos de una hora.",
+      "Ana corta el pelo en la calle Mayor desde 2009. Un corte con secado dura 45 minutos y cuesta 30 €."
+    ]
+  }
+}

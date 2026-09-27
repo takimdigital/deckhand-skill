@@ -1,0 +1,260 @@
+{
+  "schema": "deckhand.slop/1",
+  "lang": "nl",
+  "name": "Nederlands",
+  "maturity": "seed",
+  "maintainers": [
+    "deckhand"
+  ],
+  "script": "latin",
+  "suffixes": [
+    "e",
+    "en",
+    "s"
+  ],
+  "stopwords": [
+    "de",
+    "het",
+    "een",
+    "en",
+    "van",
+    "in",
+    "is",
+    "op",
+    "te",
+    "dat",
+    "die",
+    "voor",
+    "met",
+    "niet",
+    "zijn",
+    "je",
+    "u",
+    "uw",
+    "we",
+    "wij",
+    "ons",
+    "onze",
+    "aan",
+    "er",
+    "als",
+    "ook",
+    "bij",
+    "door",
+    "naar",
+    "om",
+    "of"
+  ],
+  "words": {
+    "strong": [
+      "revolutioneren|revolutionair|revolutionaire",
+      "baanbrekend",
+      "naadloos|naadloze",
+      "holistisch",
+      "synergie",
+      "paradigma",
+      "ongeëvenaard",
+      "ongekend",
+      "toekomstbestendig",
+      "ontgrendel|ontgrendelen",
+      "dompel|onderdompelen",
+      "disruptief|disruptieve",
+      "onvergetelijk",
+      "state-of-the-art"
+    ],
+    "buzz": [
+      "innovatief|innovatieve",
+      "oplossingen",
+      "robuust|robuuste",
+      "optimaliseren|optimaliseer",
+      "ecosysteem",
+      "maatwerk",
+      "ontzorgen|ontzorgt|ontzorging",
+      "hoogwaardig",
+      "dynamisch",
+      "gepassioneerd|gepassioneerde",
+      "uniek|unieke",
+      "authentiek|authentieke",
+      "beleving",
+      "ervaring"
+    ]
+  },
+  "fixes": {
+    "ontzorgen": "zeggen wat u overneemt",
+    "oplossingen": "de dienst noemen",
+    "innovatief": "zeggen wat nieuw is",
+    "hoogwaardig": "een bewijs: materiaal, keurmerk"
+  },
+  "phrases": [
+    {
+      "id": "huidige-wereld",
+      "kind": "opener",
+      "w": 4,
+      "rx": "in de (huidige |snelle |digitale |moderne ){1,2}(wereld|tijd|maatschappij)|in een (steeds|snel|voortdurend) veranderende wereld",
+      "example": "In de huidige snelle wereld telt elke minuut.",
+      "fix": "begin bij het probleem van de klant"
+    },
+    {
+      "id": "digitale-tijdperk",
+      "kind": "opener",
+      "w": 3,
+      "rx": "in het (digitale |ai-)tijdperk",
+      "example": "In het digitale tijdperk telt uw website.",
+      "fix": "schrappen"
+    },
+    {
+      "id": "belangrijk-om",
+      "kind": "hedge",
+      "w": 3,
+      "rx": "het is (belangrijk|goed|vermeldenswaard) om (op te merken|te benadrukken|te vermelden|te weten)",
+      "example": "Het is belangrijk om op te merken dat we zondag open zijn.",
+      "fix": "zeg het feit"
+    },
+    {
+      "id": "niet-alleen-maar-ook",
+      "kind": "structure",
+      "w": 2,
+      "rx": "niet alleen [^.;!?]{1,60},? maar ook",
+      "example": "niet alleen snel, maar ook betrouwbaar",
+      "fix": "twee feiten, twee zinnen"
+    },
+    {
+      "id": "gaat-niet-om",
+      "kind": "structure",
+      "w": 3,
+      "rx": "het gaat niet (alleen )?om [^.;!?]{1,50}[.,;—–-]+ ?het gaat om",
+      "example": "Het gaat niet om een kapsel, het gaat om gevoel.",
+      "fix": "zeg wat het is"
+    },
+    {
+      "id": "of-je-nu",
+      "kind": "structure",
+      "w": 2,
+      "rx": "of (je|u) nu [^,.;]{1,40} (bent )?of ",
+      "example": "Of je nu beginner of expert bent, kom langs.",
+      "fix": "zeg voor wie"
+    },
+    {
+      "id": "zoek-niet-verder",
+      "kind": "cta",
+      "w": 3,
+      "rx": "zoek niet verder|wacht niet langer|waar wacht (je|u) nog op",
+      "example": "Loodgieter nodig? Zoek niet verder.",
+      "fix": "een duidelijke knop: Offerte aanvragen"
+    },
+    {
+      "id": "klaar-om",
+      "kind": "cta",
+      "w": 2,
+      "rx": "klaar om [^?]{1,40}\\?",
+      "example": "Klaar om uw tuin te transformeren?",
+      "fix": "een duidelijke knop: Afspraak maken"
+    },
+    {
+      "id": "hoger-niveau",
+      "kind": "cta",
+      "w": 3,
+      "rx": "naar (een hoger|het volgende) (niveau|level)",
+      "example": "Til uw bedrijf naar een hoger niveau.",
+      "fix": "het resultaat: 20 boekingen meer per week"
+    },
+    {
+      "id": "potentieel",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(ontgrendel|benut|ontdek|ontplooi) (je|uw) (volledige |ware )?potentieel",
+      "example": "Ontgrendel uw volledige potentieel.",
+      "fix": "zeg het resultaat"
+    },
+    {
+      "id": "kortom",
+      "kind": "closer",
+      "w": 2,
+      "rx": "^(kortom|samenvattend|concluderend|al met al)[,.]",
+      "example": "Kortom, wij zijn er voor u.",
+      "fix": "schrappen"
+    },
+    {
+      "id": "bij-merk-geloven",
+      "kind": "opener",
+      "w": 3,
+      "rx": "^bij [a-z0-9ëéï&' -]{2,30} (geloven|begrijpen|staan) we",
+      "example": "Bij Bloom geloven we dat schoonheid persoonlijk is.",
+      "fix": "zeg wat u doet en voor wie"
+    },
+    {
+      "id": "meer-dan-alleen",
+      "kind": "structure",
+      "w": 2,
+      "rx": "meer dan (alleen |zomaar )?(een|een simpele) ",
+      "example": "meer dan alleen een bakkerij",
+      "fix": "zeg wat het is"
+    },
+    {
+      "id": "beleving",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(naadloze|onvergetelijke|unieke|ongeëvenaarde) (ervaring|beleving)",
+      "example": "een onvergetelijke beleving",
+      "fix": "zeg wat er concreet gebeurt"
+    },
+    {
+      "id": "hart-van",
+      "kind": "filler",
+      "w": 1,
+      "rx": "in het (hart|kloppend hart) van",
+      "example": "in het hart van Utrecht",
+      "fix": "de straat of wijk"
+    },
+    {
+      "id": "chat-leak",
+      "kind": "leak",
+      "w": 5,
+      "rx": "als (ai|taalmodel)|ik hoop dat dit helpt|goede vraag|zeker! hier|hier is (een|de) (herziene|verbeterde) versie|voel je vrij om (aan te passen|te personaliseren)|\\[(invoegen|voeg [a-z ]+ in)\\]",
+      "example": "Zeker! Hier is een sectie voor uw bakkerij.",
+      "fix": "een chatbot-antwoord op de pagina: verwijderen"
+    }
+  ],
+  "transitions": [
+    "bovendien",
+    "daarnaast",
+    "verder",
+    "tevens",
+    "derhalve",
+    "dus",
+    "daarom",
+    "echter",
+    "niettemin",
+    "uiteindelijk",
+    "kortom",
+    "sterker nog"
+  ],
+  "superlatives": [
+    "beste",
+    "toonaangevend",
+    "toonaangevende",
+    "marktleider",
+    "nummer één",
+    "nummer 1",
+    "#1",
+    "perfect",
+    "perfecte",
+    "ongeëvenaard"
+  ],
+  "and": [
+    "en",
+    "of"
+  ],
+  "examples": {
+    "slop": [
+      "In de huidige snelle wereld revolutioneren onze innovatieve oplossingen uw bedrijf. Bovendien ontgrendelt u uw volledige potentieel met naadloze, robuuste processen.",
+      "In het hart van Utrecht is onze bakkerij meer dan alleen een bakkerij — een onvergetelijke beleving. Zoek niet verder.",
+      "Zeker! Hier is een sectie voor uw kapsalon."
+    ],
+    "clean": [
+      "Zuurdesembrood, baguettes en croissants, elke ochtend vanaf 5 uur gebakken in Gent. Bestel voor 20 uur en haal het de volgende dag op.",
+      "We repareren lekkende kranen, verstopte afvoeren en cv-ketels in Utrecht. Voorrijden kost € 55, de meeste klussen duren korter dan een uur.",
+      "Ana knipt sinds 2009 haar in de Oudegracht. Knippen en föhnen duurt 45 minuten en kost € 38."
+    ]
+  }
+}
