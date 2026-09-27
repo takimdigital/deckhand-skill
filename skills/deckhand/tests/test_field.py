@@ -19,6 +19,16 @@ from dhlib.cli import main  # noqa: E402
 from dhlib.util import DhError, read_json, write_json  # noqa: E402
 
 
+def reach(root, upto):
+    """Walk a test run to just after `upto` (every phase up to it done, its gates passed): gates and clone refuse earlier."""
+    s = state.load(root)
+    for p in state.PHASES[:state.PHASE_IDS.index(upto) + 1]:
+        s["phases"][p["id"]] = {"status": "done"}
+        if p.get("gate"):
+            s["gates"][p["gate"]] = {"status": "passed", "by": "test"}
+    state.save(root, s)
+
+
 class Base(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
@@ -47,6 +57,8 @@ class GateQuote(Base):
     def setUp(self):
         super().setUp()
         state.init(self.root, "CleanKit", "phased", "scratch")
+        reach(self.root, "research")
+        state.phase_done(self.root, "plan", force_reason="test")          # G1 is due once the plan is done
 
     def test_phased_gate_needs_the_owners_words(self):
         code, out = self.dh("gate", "pass", "G1", "--note", "Owner approved with change: realistic demo business")
@@ -87,6 +99,55 @@ class GateQuote(Base):
         self.assertEqual((code, out["code"]), (1, "CHANGE_REQUEST"))
 
 
+class OrderIsEnforced(Base):
+    """Review 2026-09-27 (findings 4, 5, N3): gates, skips and phase commands obeyed the order only in `phase done`."""
+
+    def setUp(self):
+        super().setUp()
+        state.init(self.root, "CleanKit", "phased", "scratch")
+        reach(self.root, "plan")                                           # at build, G1 passed
+
+    def test_a_gate_is_not_passed_before_its_phase_is_done(self):
+        code, out = self.dh("gate", "pass", "G2", "--quote", "looks good")
+        self.assertEqual((code, out["code"], out["phase"]), (1, "GATE_NOT_DUE", "build"))
+        self.assertEqual(state.load(self.root)["gates"]["G2"]["status"], "pending")
+
+    def test_only_the_current_phase_can_be_skipped_and_review_never(self):
+        code, out = self.dh("phase", "skip", "brand", "--reason", "x")
+        self.assertEqual((code, out["code"]), (1, "OUT_OF_ORDER"))
+        reach(self.root, "tryon")
+        code, out = self.dh("phase", "skip", "review", "--reason", "x")
+        self.assertEqual((code, out["code"]), (1, "NOT_SKIPPABLE"))
+
+    def test_skipping_tryon_in_phased_mode_still_asks_the_owner_for_the_design(self):
+        reach(self.root, "brand")
+        code, _ = self.dh("phase", "skip", "tryon", "--reason", "owner happy with the brand")
+        self.assertEqual(code, 0)
+        self.assertEqual(state.blocking_gate(state.load(self.root)), "G3")
+        code, out = self.dh("phase", "done", "review")
+        self.assertEqual((code, out["code"]), (1, "GATE_BLOCKED"))
+        self.assertEqual(self.dh("gate", "pass", "G3", "--quote", "approved")[0], 0)
+
+    def test_skipping_tryon_in_auto_mode_passes_g3(self):
+        s = state.load(self.root); s["mode"] = "auto"; state.save(self.root, s)
+        reach(self.root, "brand")
+        self.dh("phase", "skip", "tryon", "--reason", "x")
+        self.assertIsNone(state.blocking_gate(state.load(self.root)))
+
+    def test_phase_commands_wait_for_their_phase(self):
+        s = state.load(self.root); s["phases"]["plan"] = {"status": "pending"}; s["gates"]["G1"] = {"status": "pending"}
+        state.save(self.root, s)
+        code, out = self.dh("scaffold", "--to", str(self.tmp / "app"))
+        self.assertEqual((code, out["code"]), (1, "OUT_OF_ORDER"))                 # no clone/scaffold before the plan
+        self.assertFalse((self.tmp / "app").exists())
+        code, out = self.dh("rebrand", "apply", "brand.name=X")
+        self.assertEqual((code, out["code"]), (1, "OUT_OF_ORDER"))
+        self.assertNotEqual(self.dh("rebrand", "apply", "brand.name=X", "--dry")[1].get("code"), "OUT_OF_ORDER")
+        reach(self.root, "tryon")
+        code, out = self.dh("deploy", "ship")
+        self.assertEqual((code, out["code"]), (1, "OUT_OF_ORDER"))                 # no deploy before review + G4
+
+
 class BaseIntoInitFolder(Base):
     """D3: `dh init` fills the folder, then clone/scaffold refused it (DEST_NOT_EMPTY); D4: the agent imported a
     private function to record the base."""
@@ -102,6 +163,7 @@ class BaseIntoInitFolder(Base):
 
     def test_clone_lands_in_the_planning_folder_and_keeps_its_state(self):
         state.init(self.root, "CleanKit", "phased", "mine")
+        reach(self.root, "plan")
         (self.root / ".deckhand" / "brief.json").write_text('{"business": "x"}', encoding="utf-8")
         name = self._local_base()
         out = build.clone(name, self.root, do_install=False)
@@ -118,6 +180,7 @@ class BaseIntoInitFolder(Base):
     def test_a_base_built_in_another_folder_continues_the_same_run_there(self):
         # the simulation: `--to OTHERDIR` started the app folder over at define; the planning folder never finished
         state.init(self.root, "CleanKit", "phased", "mine")
+        reach(self.root, "plan")
         (self.root / ".deckhand" / "brief.json").write_text('{"business": "x"}', encoding="utf-8")
         (self.root / ".deckhand" / "sitemap.json").write_text('{"pages": []}', encoding="utf-8")
         s = state.load(self.root)
@@ -139,6 +202,7 @@ class BaseIntoInitFolder(Base):
     def test_a_clone_run_from_inside_another_business_takes_nothing_of_it(self):
         # the simulation: cloning from client A's folder copied A's Stripe and Resend keys into the new project
         state.init(self.root, "ClientA", "phased", "mine")
+        reach(self.root, "plan")
         s = state.load(self.root)
         s["base"] = {"kind": "scratch"}
         state.save(self.root, s)
@@ -153,6 +217,7 @@ class BaseIntoInitFolder(Base):
 
     def test_a_folder_with_other_files_is_still_refused(self):
         state.init(self.root, "CleanKit", "phased", "mine")
+        reach(self.root, "plan")
         (self.root / "notes.txt").write_text("mine", encoding="utf-8")
         with self.assertRaises(DhError) as e:
             build.clone(self._local_base(), self.root, do_install=False)

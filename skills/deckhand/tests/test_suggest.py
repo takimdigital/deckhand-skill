@@ -275,11 +275,15 @@ class AuditEdges(Base):
 
     def test_gates_in_auto_mode_need_no_quote_and_empty_quotes_are_refused(self):
         state.init(self.root, "X", "auto", "scratch")
+        for p in ("define", "research", "plan"):
+            state.phase_done(self.root, p, force_reason="test")
         code, out = self.dh("gate", "pass", "G1")
         self.assertEqual(code, 0)
         other = self.tmp / "p2"
         other.mkdir()
         state.init(other, "Y", "phased", "scratch")
+        for p in ("define", "research", "plan"):
+            state.phase_done(other, p, force_reason="test")
         buf = io.StringIO()
         with redirect_stdout(buf):
             main(["--project", str(other), "gate", "pass", "G1", "--quote", ""])

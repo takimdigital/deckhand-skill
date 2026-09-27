@@ -97,8 +97,6 @@ def blocking_gate(s: dict):
     for p in PHASES:
         g = p.get("gate")
         if g and s["phases"][p["id"]]["status"] in ("done", "skipped") and s["gates"][g]["status"] != "passed":
-            if p.get("optional") and s["phases"][p["id"]]["status"] == "skipped":
-                continue
             return g
     return None
 
@@ -110,6 +108,29 @@ def summary(root: Path, s: dict) -> dict:
             "gate": blocking_gate(s)}
 
 
+def gate_phase(gate: str) -> str:
+    return next(p["id"] for p in PHASES if p.get("gate") == gate)
+
+
+def reached(s: dict, phase: str) -> None:
+    """Refuse the work of `phase` before the run gets there: every earlier phase done or skipped, no owner's go owed
+    before it. `phase done|skip`, clone/scaffold, `rebrand apply` and `deploy ship` all go through here."""
+    idx = PHASE_IDS.index(phase)
+    for prev in PHASE_IDS[:idx]:
+        if s["phases"][prev]["status"] not in ("done", "skipped") and prev != "operate":
+            raise DhError("OUT_OF_ORDER", f"phase '{prev}' is not done yet (`dh next` says what is)", phase=phase, first=prev)
+    g = blocking_gate(s)
+    if g and PHASE_IDS.index(gate_phase(g)) < idx:
+        raise DhError("GATE_BLOCKED", f"gate {g} ({GATES[g]}) needs the owner's go: `dh gate pass {g}`", gate=g)
+
+
+def require(root: Path, phase: str) -> None:
+    """`reached` for a command that belongs to a phase; no run (a bare folder) = nothing to enforce."""
+    s = load(root, required=False)
+    if s and not s.get("moved_to"):
+        reached(s, phase)
+
+
 def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reason: str | None = None) -> dict:
     """Mark a phase done — only after its check passes (checks live in dhlib.checks)."""
     from . import checks
@@ -119,12 +140,7 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
     if phase not in PHASE_IDS:
         raise DhError("BAD_PHASE", f"phase must be one of {PHASE_IDS}")
     idx = PHASE_IDS.index(phase)
-    for prev in PHASE_IDS[:idx]:
-        if s["phases"][prev]["status"] not in ("done", "skipped") and prev != "operate":
-            raise DhError("OUT_OF_ORDER", f"phase '{prev}' is not done yet (`dh next` says what is)")
-    g = blocking_gate(s)
-    if g and PHASE_IDS.index([p for p in PHASES if p.get("gate") == g][0]["id"]) < idx:
-        raise DhError("GATE_BLOCKED", f"gate {g} ({GATES[g]}) needs the owner's go: `dh gate pass {g}`")
+    reached(s, phase)
     result = checks.run(phase, Path(root), s)
     if not result["ok"] and not force_reason:
         return {"ok": False, "phase": phase, "check": result}
@@ -138,13 +154,21 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
     return {"ok": True, "phase": phase, "check": result, **summary(root, s)}
 
 
+NOT_SKIPPABLE = {"review": "nothing reaches production without `dh verify` green (fix the red rows instead)"}
+
+
 def phase_skip(root: Path, phase: str, reason: str) -> dict:
     s = load(root)
     if not reason:
         raise DhError("NEED_REASON", "a skipped phase needs --reason (it is shown to the owner)")
+    if phase not in PHASE_IDS:
+        raise DhError("BAD_PHASE", f"phase must be one of {PHASE_IDS}")
+    if phase in NOT_SKIPPABLE:
+        raise DhError("NOT_SKIPPABLE", f"phase {phase} cannot be skipped: {NOT_SKIPPABLE[phase]}")
+    reached(s, phase)                                   # only the phase the run is at: no skipping ahead
     s["phases"][phase] = {"status": "skipped", "at": now(), "reason": reason}
     p = PHASES[PHASE_IDS.index(phase)]
-    if p.get("gate") and (s["mode"] == "auto" or p.get("optional")):
+    if p.get("gate") and s["mode"] == "auto":           # phased: the owner still gives the go (G3 = the brand, try-on or not)
         s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "skip"}
     save(root, s)
     log(root, {"event": "phase_skip", "phase": phase, "reason": reason})
@@ -185,9 +209,13 @@ def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -
     s = load(root)
     if gate not in GATES:
         raise DhError("BAD_GATE", f"gate must be one of {list(GATES)}")
+    due = gate_phase(gate)
+    if s["phases"][due]["status"] not in ("done", "skipped"):
+        raise DhError("GATE_NOT_DUE", f"gate {gate} follows phase {due}, which is not done yet: finish it and show the owner first",
+                      gate=gate, phase=due, do=[f"dh phase done {due}"])
     verdict = classify_quote(quote) if quote is not None else None
     if verdict == "change_request":
-        phase = next(p["id"] for p in PHASES if p.get("gate") == gate)
+        phase = due
         raise DhError("CHANGE_REQUEST", f"the owner's words read as a change request, not a go: {quote!r}",
                       gate=gate, do=[f"dh reopen {phase} --reason \"{(quote or '')[:80]}\"", "make the change, show it again, ask for the go",
                                      "the owner did say go? quote the words that say it (\"ok go\", \"approved\", \"G1 ok\")"])
