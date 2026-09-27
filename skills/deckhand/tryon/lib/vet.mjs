@@ -44,11 +44,18 @@ export async function vetRegistry({ index, repo, id, item: itemTemplate, sample 
   if (!repo) {
     check(false, 'licence', '', 'no source repository given (--repo owner/name): a licence must be evidenced by the repository, not assumed');
   } else {
+    let apiErr = null;
     try {
       const meta = JSON.parse(await getText(`https://api.github.com/repos/${repo}`));
       lic = (meta.license && meta.license.spdx_id) || 'NONE';
       if (meta.archived) warns.push({ id: 'archived', detail: `${repo} is archived` });
-    } catch (e) { lic = null; check(false, 'licence', '', `could not read ${repo} on GitHub (${e.message.split(' ').slice(0, 3).join(' ')})`); }
+    } catch (e) { apiErr = e; }
+    // the API out of reach (a rate limit, a proxy): the repository's own LICENSE file is the same evidence
+    if (!lic) {
+      const f = await licenceFromFile(repo);
+      if (f) { lic = f.spdx; warns.push({ id: 'licence-from-file', detail: `GitHub's API was out of reach; read ${repo}/${f.file}` }); }
+      else check(false, 'licence', '', `could not read ${repo} on GitHub (${apiErr.message.split(' ').slice(0, 3).join(' ')}) nor its LICENSE file`);
+    }
     if (lic) check(lic in POLICY.accepted, 'licence', `${lic} — ${POLICY.accepted[lic] || ''}`, `${lic}: ${POLICY.refused[lic] || POLICY.refused.OTHER}`);
   }
 
@@ -84,6 +91,39 @@ export async function vetRegistry({ index, repo, id, item: itemTemplate, sample 
   const ok = !fails.length;
   return { registry: rid, index, repo: repo || null, verdict: ok ? 'accepted' : 'refused', fails, warnings: warns, passes,
     items: items.length, base: items[0] ? items[0].base : null, ...(ok ? {} : { acceptable: acceptable() }), _reg: reg, _items: items };
+}
+
+/** The licence a repository's own LICENSE file states (main or master), or null when there is none to read. */
+export async function licenceFromFile(repo) {
+  for (const branch of ['main', 'master']) {
+    for (const f of ['LICENSE', 'LICENSE.md', 'LICENSE.txt', 'license', 'license.md']) {
+      let text;
+      try { text = await getText(`https://raw.githubusercontent.com/${repo}/${branch}/${f}`); } catch { continue; }
+      return { spdx: spdxOf(text), file: `${branch}/${f}` };
+    }
+  }
+  return null;
+}
+
+/** A licence text -> its SPDX id. A permissive text with a Commons Clause (or any restriction on selling) is not
+ *  permissive: checked first. Unknown -> OTHER (refused, never guessed). */
+export function spdxOf(text) {
+  const t = String(text || '').replace(/\s+/g, ' ');
+  if (/Commons Clause|the Software does not include the right to Sell/i.test(t)) return 'OTHER';
+  if (/GNU AFFERO GENERAL PUBLIC LICENSE/i.test(t)) return 'AGPL-3.0';
+  if (/GNU LESSER GENERAL PUBLIC LICENSE/i.test(t)) return /Version 2\.1/i.test(t) ? 'LGPL-2.1' : 'LGPL-3.0';
+  if (/GNU GENERAL PUBLIC LICENSE/i.test(t)) return /Version 2,/i.test(t) ? 'GPL-2.0' : 'GPL-3.0';
+  if (/Mozilla Public License,? (version )?2\.0/i.test(t)) return 'MPL-2.0';
+  if (/Business Source License/i.test(t)) return 'BUSL-1.1';
+  if (/Server Side Public License/i.test(t)) return 'SSPL-1.0';
+  if (/Apache License,? Version 2\.0/i.test(t)) return 'Apache-2.0';
+  if (/Permission is hereby granted, free of charge, to any person obtaining a copy/i.test(t)) return 'MIT';
+  if (/Redistribution and use in source and binary forms/i.test(t)) return /Neither the name/i.test(t) ? 'BSD-3-Clause' : 'BSD-2-Clause';
+  if (/Permission to use, copy, modify, and\/or distribute this software for any purpose with or without fee is hereby granted/i.test(t)) {
+    return /provided that the above copyright notice and this permission notice appear/i.test(t) ? 'ISC' : '0BSD';
+  }
+  if (/This is free and unencumbered software released into the public domain/i.test(t)) return 'Unlicense';
+  return 'OTHER';
 }
 
 export async function addRegistry(opts) {

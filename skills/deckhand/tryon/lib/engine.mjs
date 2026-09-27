@@ -311,9 +311,9 @@ export async function open(rootIn, opts) {
   const catalog = loadCatalog();
   // opts.candidates: an explicit list (an AI draft, alone or beside the registry variants it joins)
   const exclude = opts.exclude || [];
-  const ranked = opts.candidates ? { items: opts.candidates.filter((c) => !exclude.includes(c.id)), hidden: 0 } : rank(catalog, { slot, prof, exclude, registry: opts.registry || null });
   // `only`: exactly these designs (a flag report's reproduce command), in rank order
   const only = [].concat(opts.only || []).flatMap((x) => String(x).split(',')).map((x) => x.trim()).filter(Boolean);
+  const ranked = opts.candidates ? { items: opts.candidates.filter((c) => !exclude.includes(c.id)), hidden: 0 } : rank(catalog, { slot, prof, exclude, registry: opts.registry || null, includeBroken: only.length > 0 });
   if (only.length) ranked.items = ranked.items.filter((c) => only.includes(c.id) || only.includes(String(c.id).replace(/@[\w-]+$/, '')));
   if (!ranked.items.length) {
     throw new TryonError('NO_CANDIDATES', `no licensed ${slot} candidates for a ${prof.base} project` + (ranked.hidden ? ` (${ranked.hidden} hidden: other primitive base)` : ''),
@@ -485,6 +485,7 @@ export async function stageCandidate(ctx, cand) {
     fs.writeFileSync(entryAbs, fl.code);
     const b = bind(orig, p, { placeholder: hasPublic ? PLACEHOLDER : null, brand: brandName(root) });
     if (fl.filled.length) b.hidden.push(...fl.filled.map((f) => (f.demoHidden ? `${f.array}: the design's demo ${f.kind} hidden (${f.demoHidden}) — no menu in your plan` : `${f.array}: ${f.kind} from your plan (${f.count})`)));
+    if (fl.filled.some((f) => f.count)) carryPlanLinks(b, links, orig);
     // fit gate: a variant that would throw away most of the owner's words is not offered
     const gate = opts.noFitGate ? null : fitGate(kind, origCount, b);
     if (gate) return skip('POOR_FIT', gate, stage.relDir);
@@ -919,6 +920,31 @@ export function publicSession(s) {
  * music player — is a different thing, not a variant of theirs); and any design must have a place for the owner's
  * form (a newsletter whose email field vanished leaves a dead "Subscribe" link).
  */
+/**
+ * A footer/navbar shows the plan's menu in place of the design's: the owner's own links that menu holds (same
+ * route or same label) are on the page, so they count as carried, not dropped — before the fit gate weighs them.
+ */
+export function carryPlanLinks(b, links, orig) {
+  if (!links) return b;
+  const norm = (x) => String(x || '').trim().toLowerCase().replace(/(.)\/+$/, '$1');
+  const shown = [...(links.header || []), ...(links.footerCols || []).flatMap((c) => c.links || [])];
+  const hrefs = new Set(shown.map((l) => norm(l.href)));
+  const labels = new Set(shown.map((l) => norm(l.label)));
+  // the owner's link as written: "/menu", '/menu' or `/menu` (a template with ${…} is not a fixed route)
+  const hrefOf = (text) => {
+    const u = orig.units.find((x) => x.role === 'action' && x.text === text);
+    const m = u && typeof u.href === 'string' && u.href.trim().match(/^(["'`])([^"'`$]*)\1$/);
+    return m ? m[2] : null;
+  };
+  const keep = [];
+  for (const d of b.dropped) {
+    if (d.role === 'action' && (labels.has(norm(d.text)) || hrefs.has(norm(hrefOf(d.text))))) b.carried.push({ ...d, via: 'plan menu' });
+    else keep.push(d);
+  }
+  b.dropped = keep;
+  return b;
+}
+
 export function fitGate(kind, origCount, b) {
   if (b.lost) return `has no place for your ${b.lost}`;
   const need = kind === 'block' ? Math.ceil(origCount / 2) : origCount;

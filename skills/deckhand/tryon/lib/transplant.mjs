@@ -51,13 +51,27 @@ const withPrice = (u) => {
 };
 
 const isStaticExpr = (e) => e.type === 'StringLiteral' || (e.type === 'TemplateLiteral' && !e.expressions.length);
+const SAFE_GLOBALS = new Set(['Date', 'Math', 'Intl', 'String', 'Number', 'JSON', 'undefined']);
+/** `{2026}`, `{new Date().getFullYear()}`: an expression that refers to nothing in its file renders like text — a
+ *  design's `© {2026} Acme` line is a slot like any other (it was left on the owner's page as demo copy). */
+function selfContained(e) {
+  if (!e || e.type === 'JSXEmptyExpression') return false;
+  let ok = true;
+  walk(e, (n, parent, key) => {
+    if (!ok) return false;
+    if (n.type === 'JSXElement' || n.type === 'JSXFragment' || /Function/.test(n.type)) return (ok = false);
+    if (n.type === 'Identifier' && !(parent && parent.type === 'MemberExpression' && key === 'property' && !parent.computed) && !SAFE_GLOBALS.has(n.name)) return (ok = false);
+    return true;
+  });
+  return ok;
+}
 
 function hasStaticText(kids) {
   return kids.some((c) => (c.type === 'JSXText' && c.value.trim()) || (c.type === 'JSXExpressionContainer' && isStaticExpr(c.expression)));
 }
 /** An expression that renders content (`{t('x')}`, `{p.name}`) — not structure (`{list.map(…)}`, `{ok && <X/>}`). */
 function isDynamicChild(c) {
-  if (c.type !== 'JSXExpressionContainer' || c.expression.type === 'JSXEmptyExpression' || isStaticExpr(c.expression)) return false;
+  if (c.type !== 'JSXExpressionContainer' || c.expression.type === 'JSXEmptyExpression' || isStaticExpr(c.expression) || selfContained(c.expression)) return false;
   let structural = false;
   walk(c.expression, (n) => {
     if (structural) return false;
@@ -127,6 +141,7 @@ function textOf(code, node) {
     else if (n.type === 'JSXExpressionContainer' && parent && parent.type !== 'JSXAttribute') {
       const e = n.expression;
       if (e.type === 'StringLiteral') s += e.value;
+      else if (e.type === 'NumericLiteral') s += String(e.value);
       else if (e.type !== 'JSXEmptyExpression') s += '{' + code.slice(e.start, e.end) + '}';
       return false;
     }

@@ -36,9 +36,11 @@
  * Flags (a variant that does not work, flagged from the try-on bar) and the report an AI can fix the engine from:
  *   node tryon/cli.mjs flags list | flags report [--ids F1a2b3c4d,…] | flags remove --id F… | flags clear
  *
- * A registry someone found — vetted (licence, paywall, schema, usable items) before it is indexed:
+ * A registry someone found — vetted (licence, paywall, schema, usable items) before it is indexed, then fit-checked:
  *   node tryon/cli.mjs registry vet|add --index https://…/registry.json --repo owner/name [--id x]
  *   node tryon/cli.mjs registry list | registry remove --id x
+ *   node tryon/cli.mjs registry check --id x [--sample N] [--md] [--ship]   stage each design against an owner section
+ *     of its kind: fits | partial | refused | broken (hidden) | unreachable | unchecked (--id all: every registry)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -50,6 +52,7 @@ import { saveToLibrary, listLibrary } from './lib/library.mjs';
 import { startServer, detectTarget } from './server.mjs';
 import * as draft from './lib/draft.mjs';
 import { vetRegistry, addRegistry, listRegistries, removeRegistry } from './lib/vet.mjs';
+import { fitCheck, fitMarkdown, recordVerdicts, shippedChecksDir, localChecksDir } from './lib/fitcheck.mjs';
 import { tuneOpen, tuneSet, tuneKeep, tuneReset, DIALS, PRESETS } from './lib/tune.mjs';
 import { themeState, themeApply, themeUndo } from './lib/sitetheme.mjs';
 import { seoInspect, seoApply, seoUndo } from './lib/seo.mjs';
@@ -69,6 +72,24 @@ for (let i = 1; i < argv.length; i++) {
 const project = path.resolve(String(flags.project || '.'));
 const out = (o, code = 0) => { process.stdout.write(JSON.stringify(o) + '\n'); process.exit(code); };
 const need = (...ks) => { const miss = ks.filter((k) => flags[k] === undefined || flags[k] === true); if (miss.length) out({ ok: false, code: 'USAGE', missing: miss.map((m) => '--' + m) }, 2); };
+
+/** `registry check`: stage each design (or a sample) against an owner section of its kind; record the verdicts. */
+async function checkRegistries(id, { sample = 0, md = false, ship = false } = {}) {
+  const items = loadCatalog();
+  const ids = id === 'all' ? [...new Set(items.map((x) => x.r))].filter((r) => r !== 'mine').sort() : [id];
+  const registries = [];
+  for (const r of ids) {
+    const mine = items.filter((x) => x.r === r);
+    if (!mine.length) throw Object.assign(new Error(`no designs from a registry "${r}" (registry list / query --slot …)`), { code: 'NO_SUCH_REGISTRY' });
+    const res = await fitCheck({ id: r, items: mine, sample, onProgress: (p) => { if (process.stderr.isTTY) process.stderr.write(`\r${r} ${p.done}/${p.of}`); } });
+    const rec = recordVerdicts(res, { dir: ship ? shippedChecksDir() : localChecksDir() });
+    const row = { registry: r, checked: res.checked, of: res.of, counts: res.counts, verdicts: rec.file };
+    if (md) { const f = rec.file.replace(/\.json$/, '.md'); fs.writeFileSync(f, fitMarkdown(res)); row.report = f; }
+    registries.push(row);
+  }
+  if (process.stderr.isTTY) process.stderr.write('\n');
+  return { registries, next: 'broken designs are no longer offered; refused ones come last. `--md` writes the per-design reasons' };
+}
 
 async function main() {
   switch (cmd) {
@@ -172,11 +193,15 @@ async function main() {
       const act = argv[1];
       if (act === 'list') return out({ ok: true, registries: listRegistries() });
       if (act === 'remove') { need('id'); return out({ ok: true, ...removeRegistry(flags.id) }); }
-      if (!['vet', 'add'].includes(act)) return out({ ok: false, code: 'USAGE', usage: 'registry vet|add --index https://…/registry.json --repo owner/name [--id x] | registry list | registry remove --id x' }, 2);
+      if (act === 'check') { need('id'); return out({ ok: true, ...(await checkRegistries(String(flags.id), { sample: Number(flags.sample) || 0, md: !!flags.md, ship: !!flags.ship })) }); }
+      if (!['vet', 'add'].includes(act)) return out({ ok: false, code: 'USAGE', usage: 'registry vet|add --index https://…/registry.json --repo owner/name [--id x] | registry list | registry remove --id x | registry check --id x|all [--sample N] [--md]' }, 2);
       need('index');
       const o = { index: flags.index, repo: typeof flags.repo === 'string' ? flags.repo : null, id: typeof flags.id === 'string' ? flags.id : null, item: typeof flags.item === 'string' ? flags.item : null };
       if (act === 'vet') { const { _reg, _items, ...v } = await vetRegistry(o); return out({ ok: v.verdict === 'accepted', ...v }, v.verdict === 'accepted' ? 0 : 1); }
-      return out({ ok: true, ...(await addRegistry(o)) });
+      const added = await addRegistry(o);
+      // a registry that is added is fit-checked at once (a sample): the owner is never offered what cannot be staged
+      const fit = await checkRegistries(added.registry, { sample: Number(flags.sample) || 8 });
+      return out({ ok: true, ...added, fit: fit.registries[0] });
     }
     case 'tune': {
       const dials = Object.fromEntries(Object.keys(DIALS).filter((k) => flags[k] !== undefined && flags[k] !== true).map((k) => [k, flags[k]]));

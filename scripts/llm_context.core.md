@@ -95,6 +95,7 @@ registries (https, cached in ~/.deckhand/cache/tryon) ─▶ materialize ─▶ 
 | .deckhand/tryon/sessions/<id>.json · backups/<id>/ | [[tryon/lib/engine.mjs#open]] | show/keep/discard, checks.tryon, verify | open→kept/discarded, variants[], shaBefore/After · original file bytes |
 | .deckhand/tryon/drafts/<D>.json · <D>/draft.tsx | [[tryon/lib/draft.mjs#requestDraft]] · the agent | [[tryon/lib/draft.mjs#checkDraft]], completeDraft | AI draft brief + state pending/rejected/done · the agent's component |
 | .deckhand/tryon/tune/<id>.json(+.orig) | [[tryon/lib/tune.mjs#tuneOpen]] | tuneSet/Keep/Reset | dials, original file bytes and sha (FILE_CHANGED guard) |
+| data/checks/<reg>.json (shipped) · ~/.deckhand/catalog/checks/<reg>.json (local) | [[tryon/lib/fitcheck.mjs#recordVerdicts]] (`tryon registry check`, `registry add`) | [[tryon/lib/catalog.mjs#loadVerdicts]] → rank | per-design fit verdicts; local wins; unreachable never recorded |
 | .deckhand/tryon/flags.json · reports/tryon-flags-<sha10>.md | [[tryon/lib/flags.mjs#addFlag]] (overlay ⚑ Flag) · [[tryon/lib/flags.mjs#buildReport]] | `tryon flags`, the owner, the AI they send it to | flagged variants with everything to reproduce them · the report (the owner's text: never committed, never published) |
 | .deckhand/tryon/theme/last.json | [[tryon/lib/sitetheme.mjs#themeApply]] | [[tryon/lib/sitetheme.mjs#themeUndo]] | the files before the last Site apply |
 | <project>/PENDING.md · HANDOFF.md | [[dhlib/state.py#init]] (from [[templates/PENDING.md]]) · [[dhlib/handoff.py#write]] | owner | facts only the owner holds · access LOCATIONS, commands, pending |
@@ -447,7 +448,23 @@ F13 VET
   - add refuses with [[!REFUSED]].
 - Registries: `tryon registry vet|add` → [[tryon/lib/vet.mjs#vetRegistry]]:
   - checks: refused-list hosts, the repo licence, shadcn schema, usable items, sampled downloads with no paywall;
-  - accepted → [[tryon/lib/vet.mjs#addRegistry]], items mapped by [[tryon/lib/regmap.mjs#mapShadcnItems]].
+  - accepted → [[tryon/lib/vet.mjs#addRegistry]], items mapped by [[tryon/lib/regmap.mjs#mapShadcnItems]];
+  - licence: the GitHub API, else the repo's own LICENSE file read raw ([[tryon/lib/vet.mjs#spdxOf]]; a Commons
+    Clause or copyleft text is never permissive).
+- F-FIT, the fit check (`tryon registry check --id X|all [--sample N] [--md] [--ship]`; `registry add` runs it on a
+  sample) → [[tryon/lib/fitcheck.mjs#fitCheck]]:
+  - each item is staged by [[tryon/lib/engine.mjs#stageCandidate]] (the same function a real try uses) against a
+    REFERENCE owner section of its kind in a throwaway scaffold site ([[tryon/lib/fitcheck.mjs#makeSite]]; deps
+    stubbed, one site per primitive base), so a verdict means what an owner would see: fits · partial (shown,
+    some owner content dropped) · refused (the fit gate would skip it) · broken (it cannot be staged) · unreachable
+    (download failed: not recorded) · unchecked (no reference for its slot);
+  - [[tryon/lib/fitcheck.mjs#recordVerdicts]] → `data/checks/<reg>.json` (shipped, `--ship`) or
+    `~/.deckhand/catalog/checks/<reg>.json` (local, wins) → [[tryon/lib/catalog.mjs#loadVerdicts]];
+  - [[tryon/lib/catalog.mjs#rank]] hides a broken design (never offered unless `try --only` names it), puts a
+    refused one last (−30) and a fitting one first among equals (+3);
+  - gaps it found, fixed in the engine: a footer/navbar showing the plan's menu carries the owner's links that menu
+    already holds ([[tryon/lib/engine.mjs#carryPlanLinks]]); `© {2026}` / `© {new Date().getFullYear()}` are
+    copyright slots ([[tryon/lib/transplant.mjs#selfContained]]).
 
 F14 REUSE
 - `dh harvest --name N [--push]` ([[dhlib/harvest.py#harvest]]):
@@ -592,6 +609,7 @@ F19 RESEARCH EVIDENCE
 | autopsy detection / owner / rung | [[dhlib/autopsy.py#is_failure]] · [[dhlib/autopsy.py#_owner]] · [[dhlib/autopsy.py#_rung]] · MARKERS | [[skills/deckhand/tests/test_autopsy.py]] |
 | harvest / GitHub library | [[dhlib/harvest.py]] · [[dhlib/github.py]] | [[skills/deckhand/tests/test_library.py]] (mock API) |
 | candidate ranking / slots | [[tryon/lib/catalog.mjs#rank]] · [[tryon/lib/slots.mjs]] | [[skills/deckhand/tryon/test/engine.test.mjs]] |
+| registry fit check, verdicts, what a verdict hides | [[tryon/lib/fitcheck.mjs]] · [[tryon/lib/catalog.mjs#rank]] | [[skills/deckhand/tryon/test/fitcheck.test.mjs]] |
 | fetching registry items | [[tryon/lib/registry.mjs]] (fixtures: DH_FIXTURES, record: DH_RECORD) | engine.test.mjs |
 | staging files / import rewriting | [[tryon/lib/materialize.mjs]] | engine.test.mjs |
 | owner content carried into designs | [[tryon/lib/transplant.mjs]] | [[skills/deckhand/tryon/test/transplant.test.mjs]], sections.test.mjs |

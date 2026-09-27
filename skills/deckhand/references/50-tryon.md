@@ -89,8 +89,14 @@ header says so on keep; no third-party licence notice is written for it.
 `$T registry vet --index https://x.dev/r/registry.json --repo owner/name` → accepted or refused with reasons
 (not on the refused list · permissive licence evidenced by the source repo · shadcn schema · items that map
 to slots · sampled items download with their source: a 401/402/403 or a content-less "pro" item is a
-paywall). `registry add` indexes it into `~/.deckhand/catalog/` — it ranks beside the shipped catalog.
-`registry list` / `registry remove --id x`.
+paywall). `registry add` indexes it into `~/.deckhand/catalog/` — it ranks beside the shipped catalog — and runs
+the fit check on a sample. `registry list` / `registry remove --id x`.
+
+Fit check: `$T registry check --id x|all [--sample N] [--md]` stages each design exactly as a try would, against
+a reference section of its kind, and records a verdict: fits · partial · refused (the fit gate would skip it) ·
+broken (cannot be staged) · unchecked (no reference for its kind). A broken design is never offered (unless
+`try --only` names it); a refused one ranks last. Run it before offering a registry the owner just added; `--md`
+writes the report beside the verdicts.
 
 ## What the engine guarantees
 - Location: every JSX element carries `data-dh="file:line:col"` in dev (AST, vendored parser — works with

@@ -30,7 +30,26 @@ export function loadCatalog() {
   if (fs.existsSync(mine)) {
     try { items = JSON.parse(fs.readFileSync(mine, 'utf8')).items.concat(items); } catch { /* a broken personal index never blocks the catalog */ }
   }
-  return items;
+  // the fit check's verdicts (tryon/lib/fitcheck.mjs): rank() hides a design the engine cannot stage
+  const verdicts = loadVerdicts();
+  return verdicts.size ? items.map((it) => (verdicts.has(it.id) ? { ...it, check: verdicts.get(it.id).v } : it)) : items;
+}
+
+/** Where fit-check verdicts live: shipped with the skill, and the owner's own runs (they win). */
+export const shippedChecksDir = () => path.join(SKILL_DIR, 'data', 'checks');
+export const localChecksDir = () => path.join(path.dirname(libraryDir()), 'catalog', 'checks');
+
+/** id -> {v, why?, needs?}: shipped first, the owner's own runs over them. A broken file never blocks the catalog. */
+export function loadVerdicts() {
+  const out = new Map();
+  for (const dir of [shippedChecksDir(), localChecksDir()]) {
+    let files = [];
+    try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort(); } catch { continue; }
+    for (const f of files) {
+      try { for (const [id, v] of Object.entries(JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')).verdicts || {})) out.set(id, v); } catch { /* skip */ }
+    }
+  }
+  return out;
 }
 
 function baseScore(projectBase, itemBase) {
@@ -40,15 +59,18 @@ function baseScore(projectBase, itemBase) {
   return null;                                   // hidden: a Radix project never gets Base UI code
 }
 
-export function rank(items, { slot, prof, exclude = [], registry = null }) {
+export function rank(items, { slot, prof, exclude = [], registry = null, includeBroken = false }) {
   const cousins = COMPATIBLE[slot] || [slot];
   const out = [];
   let hidden = 0;
+  let broken = 0;
   for (const it of items) {
     if (exclude.includes(it.id)) continue;
     if (registry && it.r !== registry) continue;
     const exact = it.slot === slot;
     if (!exact && !cousins.includes(it.slot)) continue;
+    // the fit check staged it and the engine could not: never offered (a flag report's `--only` still reaches it)
+    if (it.check === 'broken' && !includeBroken) { broken++; continue; }
     // the project's own primitive is not an alternative to itself
     if (it.kind === 'ui' && (it.r === 'shadcn' || it.r === 'basecn') && prof.ui && prof.ui[it.n]) continue;
     const b = baseScore(prof.base, it.base);
@@ -58,6 +80,8 @@ export function rank(items, { slot, prof, exclude = [], registry = null }) {
     if (kindOf(slot) === 'block' && it.r === 'tailark-oss') s += 5;
     const missing = (it.deps || []).filter((d) => !depInstalled(prof, d));
     s -= missing.length * 6;
+    if (it.check === 'refused') s -= 30;                             // the fit gate refused it for this kind: last
+    else if (it.check === 'fits') s += 3;
     out.push({ ...it, score: s, missing });
   }
   out.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
@@ -68,7 +92,7 @@ export function rank(items, { slot, prof, exclude = [], registry = null }) {
   const order = [...buckets.keys()].sort((a, b) => buckets.get(b)[0].score - buckets.get(a)[0].score || a.localeCompare(b));
   const mixed = [];
   for (let i = 0; mixed.length < out.length; i++) for (const g of order) if (buckets.get(g)[i]) mixed.push(buckets.get(g)[i]);
-  return { items: mixed, hidden };
+  return { items: mixed, hidden, broken };
 }
 
 /** A design family: one Tailark kit (dusk / mist / veil) or one registry. */
