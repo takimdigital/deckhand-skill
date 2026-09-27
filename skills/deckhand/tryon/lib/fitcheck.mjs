@@ -394,7 +394,7 @@ export function makeSite(dir, { base = 'radix' } = {}) {
   w('package.json', JSON.stringify({ name: 'maison-levain', private: true, dependencies: deps, devDependencies: dev }, null, 2));
   w('tsconfig.json', JSON.stringify({ compilerOptions: { jsx: 'preserve', paths: { '@/*': ['./*'] } } }, null, 2));
   for (const rel of ['app/globals.css', 'lib/utils.ts', 'components/ui/button.tsx']) w(rel, fs.readFileSync(path.join(scaffold, rel), 'utf8'));
-  if (base === 'base-ui') w('components/ui/button.tsx', fs.readFileSync(path.join(scaffold, 'components/ui/button.tsx'), 'utf8').replace('import { Slot } from "radix-ui"\n', ''));
+  if (base === 'base-ui') w('components/ui/button.tsx', fs.readFileSync(path.join(scaffold, 'components/ui/button.tsx'), 'utf8').replace(/import \{ Slot \} from "radix-ui"\r?\n/, ''));
   w('app/page.tsx', 'export default function Page() { return null; }\n');
   for (const d of Object.keys({ ...deps, ...dev })) w(`node_modules/${d}/package.json`, JSON.stringify({ name: d, version: '0.0.0' }));
   if (base !== 'base-ui') for (const p of RADIX_PARTS) w(`node_modules/radix-ui/dist/${p}.mjs`, 'export {};\n');
