@@ -429,6 +429,20 @@ export async function open(rootIn, opts) {
 }
 
 /**
+ * Everything stageCandidate needs to know about the owner's element, built the way open() builds it (the registry
+ * fit check stages designs against a reference section through this too).
+ */
+export function stagingContext(prof, { code, ast, el, slot, sessionId, stripChrome, log, noFitGate, checkImports }) {
+  const root = prof.root;
+  const orig = extractUnits(code, el, ast);
+  return {
+    root, code, el, orig, origCount: contentCount(orig), kind: kindOf(slot), slot, sessionId, log,
+    stripChrome: stripChrome ?? (slot !== 'navbar'), links: ['footer', 'navbar'].includes(slot) ? siteLinks(root) : null,
+    hasPublic: ensurePlaceholder(prof), taken: identifiers(code), noFitGate, checkImports,
+  };
+}
+
+/**
  * Stage ONE candidate for the owner's element: fetched, themed, the owner's content transplanted, fit-gated and
  * import-checked. {v} a variant (idx set by the caller) · {held: v} it needs a package installed · {skip}. open() and
  * the registry fit check both use it, so a design the check passes is exactly one the owner is offered.
