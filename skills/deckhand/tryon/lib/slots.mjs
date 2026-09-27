@@ -24,7 +24,7 @@ export const TAILARK_CATEGORY = {
 const NAME_RULES = [
   // not slots: groups of controls, demos, hooks (a null rule stops the scan)
   // (and a vendor's own branded button — "Open in v0" — is not a button for anyone else's site)
-  [/(button|toggle|radio|input)-group|input-otp|native-select|-demo$|^use-|^v0-/, null],
+  [/(button|toggle|input)-group|input-otp|native-select|-demo$|^use-|^v0-/, null],
   [/^(login|sign-?in)/, 'login'], [/^(signup|sign-?up|register)/, 'signup'], [/^sidebar/, 'sidebar'],
   [/^dashboard/, 'dashboard'], [/^calendar/, 'calendar'], [/(^|-)hero/, 'hero'], [/pricing/, 'pricing'],
   [/(^|-)(faq|faqs)(-|$)/, 'faq'], [/footer/, 'footer'], [/(navbar|header|navigation-bar|nav-bar)/, 'navbar'],

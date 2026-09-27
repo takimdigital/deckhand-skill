@@ -1,0 +1,183 @@
+{
+ "version": 1,
+ "registry": "smoothui",
+ "deckhand": "2.2.3",
+ "verdicts": {
+  "smoothui/agent-avatar@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"avatar\""
+  },
+  "smoothui/animated-avatar-group@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"avatar\""
+  },
+  "smoothui/animated-progress-bar@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "smoothui/animated-tabs@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tabs\""
+  },
+  "smoothui/animated-toggle@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "smoothui/animated-tooltip@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "smoothui/aurora-curtain@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "smoothui/basic-accordion@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"accordion\""
+  },
+  "smoothui/basic-dropdown@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dropdown-menu\""
+  },
+  "smoothui/basic-modal@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "smoothui/basic-toast@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"toast\""
+  },
+  "smoothui/border-beam@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "smoothui/breadcrumb@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"breadcrumb\""
+  },
+  "smoothui/checkbox@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"checkbox\""
+  },
+  "smoothui/country-dialog@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "smoothui/coverflow-carousel@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"carousel\""
+  },
+  "smoothui/cursor-follow@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"cursor\""
+  },
+  "smoothui/cursor-image-trail@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"cursor\""
+  },
+  "smoothui/dialog@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "smoothui/dither-chart@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "smoothui/drawer@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sheet\""
+  },
+  "smoothui/drawing-cursor@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"cursor\""
+  },
+  "smoothui/dropdown-menu@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dropdown-menu\""
+  },
+  "smoothui/exposure-slider@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"slider\""
+  },
+  "smoothui/glow-hover-card@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "smoothui/gooey-popover@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "smoothui/grid-loader@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "smoothui/infinite-slider@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"slider\""
+  },
+  "smoothui/music-toggle@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "smoothui/pagination@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"pagination\""
+  },
+  "smoothui/progressive-blur@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "smoothui/reviews-carousel@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"carousel\""
+  },
+  "smoothui/rich-popover@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "smoothui/scroll-progress@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "smoothui/searchable-dropdown@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dropdown-menu\""
+  },
+  "smoothui/select@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"select\""
+  },
+  "smoothui/shader-reveal-noise-transition@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "smoothui/skeleton-loader@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"skeleton\""
+  },
+  "smoothui/social-hover-card@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "smoothui/theme-toggle@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "smoothui/tweet-card@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"embed\""
+  },
+  "smoothui/user-account-avatar@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"avatar\""
+  },
+  "smoothui/video-modal@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "smoothui/warped-circle-transition@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  }
+ }
+}

@@ -143,9 +143,9 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 
 ## 5. Try-on (live component swap) — zero model calls per click
 
-The owner clicks any element of their running site; N licensed variants (773 indexed: Tailark OSS
-blocks, shadcn, Magic UI, Kokonut, Smooth, basecn) are written into the source once, **wearing the site's
-colour tokens and carrying the owner's own copy, links, images and list data** (footer/nav menus from the
+The owner clicks any element of their running site; N licensed variants (1,247 indexed: Tailark OSS,
+Shadcn UI Blocks, blocks.so, shadcn, Magic UI, Kokonut, Smooth, basecn) are written into the source once,
+**wearing the site's colour tokens and carrying the owner's own copy, links, images and list data** (footer/nav menus from the
 plan; demo logos, stock photos and unwired forms hidden); ←/→ compares instantly;
 Keep bakes the copy in, prunes unused files, records the licence. Launch: `tryon setup` → restart dev →
 `tryon serve` → give the owner the printed URL. No browser in this harness? Use `tryon try/show/keep`

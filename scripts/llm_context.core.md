@@ -469,7 +469,10 @@ F13 VET
     (`CardHeader` beside `Card`) is never stripped as site chrome; a shadcn block read raw gets its page's one
     component as the entry, `from "cn"` as the project's utils ([[tryon/lib/materialize.mjs#rawSource]]; read as a
     package it would install an unrelated npm `cn`), and a fetched primitive's own primitives in turn; footer columns
-    titled by `group` (`{ group, items }`) take the plan's columns ([[tryon/lib/sitelinks.mjs#columnShape]]);
+    titled by `group` (`{ group, items }`) take the plan's columns ([[tryon/lib/sitelinks.mjs#columnShape]]); a block
+    importing another block's file (`@/registry/blocks/radix/navbar-04/components/logo`) or its registry's own
+    primitive (`ui/marquee`) gets it from that registry's JSON beside its own; a form kept in a file beside the
+    design (`<LoginForm />` from `./login-form`) is the design's form, so the owner's form takes its place;
   - refusals left on purpose: a one-quote testimonial or a logo-only integrations row cannot hold the reference's
     content (an owner with less still gets it: the gate runs again on the real section); a text effect whose words
     are a required array prop (`words`, `texts`) has no place for one heading.
@@ -634,7 +637,7 @@ F19 RESEARCH EVIDENCE
 | helper routes / proxy | [[tryon/server.mjs]] | [[skills/deckhand/tryon/test/setup-theme-server.test.mjs]] |
 | dev-only wiring (Next/Vite) | [[tryon/lib/setup.mjs]] · [[tryon/lib/stamp.cjs]] · [[tryon/loader.cjs]] · [[tryon/vite.mjs]] | setup-theme-server.test.mjs, stamp.test.mjs |
 | registry vetting | [[tryon/lib/vet.mjs]] · [[data/registries.json]] | [[skills/deckhand/tryon/test/vet.test.mjs]] |
-| the shipped catalog | [[tryon/catalog-build.mjs]] (maintainer, network) → [[data/components.index.json]] | engine.test.mjs |
+| the shipped catalog | [[tryon/catalog-build.mjs]] (maintainer, network; `--only id,id` rebuilds those registries and keeps every other item, a registry's `index_mirror` is read when its site is not) → [[data/components.index.json]], then `tryon registry check --id all --ship` → data/checks/ | engine.test.mjs, fitcheck.test.mjs |
 | installer | [[install.sh]] · [[install.ps1]] | manual |
 | owner-facing docs | [[README.md]] · [[docs/USE-CASES.md]] · [[skills/deckhand/SKILL.md]] | [[scripts/version_check.py]] (versions) |
 | secret patterns / redaction / project gitignore | [[data/secrets.json]] · [[dhlib/util.py#redact]] · [[dhlib/util.py#ensure_gitignore]] | [[skills/deckhand/tests/test_security.py]], [[skills/deckhand/tryon/test/hardening.test.mjs]] |

@@ -254,3 +254,51 @@ test('footer columns titled by `group` (Tailark: `{ group, items: [{ title, href
   assert.match(r.code, /\{ group: "Maison Levain", items: \[\{ href: "\/legal", title: "Legal notice" \}\] \}/);
   assert.doesNotMatch(r.code, /Features|Solution/);
 });
+
+test('the catalog build: --only rebuilds one registry from a snapshot and keeps every other item; radio groups are a slot', async () => {
+  const { slotFromName } = await import('../lib/slots.mjs');
+  assert.equal(slotFromName('radio-group-01'), 'radio-group');
+  assert.equal(slotFromName('button-group'), null);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-cb-'));
+  const out = path.join(dir, 'index.json');
+  const keep = { id: 'tailark-oss/x@radix', r: 'tailark-oss', n: 'x', base: 'radix', slot: 'hero', kind: 'block' };
+  fs.writeFileSync(out, JSON.stringify({ version: 2, count: 2, items: [keep, { id: 'blocks-so/gone@any', r: 'blocks-so', n: 'gone', slot: 'login' }] }));
+  fs.writeFileSync(path.join(dir, 'blocks-so@base-nova.json'), JSON.stringify({ items: [
+    { name: 'login-01', type: 'registry:block', files: [{ path: 'content/components/login/login-01.tsx' }] },
+    { name: 'stats-02', type: 'registry:block', files: [] }, { name: 'notes', type: 'registry:lib' }] }));
+  const r = spawnSync(process.execPath, [path.join(path.dirname(CLI), 'catalog-build.mjs'), '--only', 'blocks-so', '--snapshots', dir, '--out', out], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  const doc = JSON.parse(fs.readFileSync(out, 'utf8'));
+  assert.deepEqual(doc.items.map((i) => i.id).sort(), ['blocks-so/login-01@any', 'blocks-so/stats-02@any', 'tailark-oss/x@radix']);
+  assert.deepEqual(doc.items.find((i) => i.r === 'tailark-oss'), keep, 'another registry\'s item is kept as it was');
+  assert.match(doc.items.find((i) => i.n === 'login-01').json, /^https:\/\/raw\.githubusercontent\.com\/ephraimduncan\/blocks\//);
+});
+
+test('a block importing another block\'s file, or its registry\'s own primitive, gets them from that registry', async () => {
+  const { fetchBundle } = await import('../lib/materialize.mjs');
+  const { keyOf } = await import('../lib/registry.mjs');
+  const fx = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fx-'));
+  const put = (url, v) => fs.writeFileSync(path.join(fx, keyOf(url) + (v === 404 ? '.404' : '.txt')), v === 404 ? url : JSON.stringify(v));
+  const R = 'https://raw.githubusercontent.com/o/blocks/main/public/r/';
+  put(R + 'hero-03.json', { files: [{ path: 'src/registry/blocks/radix/hero-03/components/hero.tsx', content: 'import { Logo } from "@/registry/blocks/radix/navbar-04/components/logo"\nimport { Marquee } from "@/registry/bases/radix/ui/marquee"\nexport default function Hero() { return <section><Logo /><Marquee><h1>Hi</h1></Marquee></section> }\n' }] });
+  put(R + 'navbar-04.json', { files: [{ path: 'src/registry/blocks/radix/navbar-04/components/navbar.tsx', content: 'export const N = 1\n' }, { path: 'src/registry/blocks/radix/navbar-04/components/logo.tsx', content: 'export function Logo() { return <svg /> }\n' }] });
+  put('https://ui.shadcn.com/r/styles/new-york-v4/marquee.json', 404);
+  fs.writeFileSync(path.join(fx, keyOf('https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/registry/new-york-v4/ui/marquee.tsx') + '.404'), 'x');
+  put(R + 'marquee.json', { dependencies: ['motion'], files: [{ path: 'src/registry/bases/radix/ui/marquee.tsx', content: 'export function Marquee(p) { return <div>{p.children}</div> }\n' }] });
+  const was = process.env.DH_FIXTURES;
+  process.env.DH_FIXTURES = fx;
+  try {
+    const b = await fetchBundle({ ui: {}, base: 'radix', utilsExists: false, root: fx }, { id: 'o/hero-03@radix', json: R + 'hero-03.json' });
+    assert.deepEqual(b.files.map((f) => path.posix.basename(f.path)).sort(), ['hero.tsx', 'logo.tsx', 'marquee.tsx'], 'only the file imported, not the whole other block');
+    assert.ok(b.deps.includes('motion'));
+  } finally { process.env.DH_FIXTURES = was; }
+});
+
+test('a login design whose form lives beside it (`<LoginForm />` from "./login-form") takes the owner\'s form there', () => {
+  const code = `import { LoginForm } from "./login-form"\nimport { ContactForm } from "@/components/contact-form"\nexport default function L() { return (<section><h1>Welcome back</h1><LoginForm /></section>); }`;
+  const p = parameterize('l.tsx', code, { kind: 'default' }, { forms: 'swap' });
+  assert.deepEqual(p.formSwaps, ['form1']);
+  assert.match(p.code, /\{content\.form1 \?\? \(<LoginForm \/>\)\}/);
+  const q = parameterize('l.tsx', code.replace('<LoginForm />', '<ContactForm />'), { kind: 'default' }, { forms: 'swap' });
+  assert.deepEqual(q.formSwaps, [], 'only a form component kept beside the design, never an import from elsewhere');
+});

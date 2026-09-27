@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updated": "2026-09-24",
+  "updated": "2026-09-27",
   "policy": "MIT / Apache-2.0 only. A registry is indexed only after its LICENSE was read at the URL in license_evidence. Try-on writes an attribution header (source URL + licence) into every staged file; a kept file keeps it.",
   "refused": [
   {"id": "coss (originui)", "reason": "AGPL-3.0", "hosts": ["coss.com", "originui.com"]},
@@ -8,7 +8,8 @@
   {"id": "aceternity", "reason": "custom licence, paid tiers", "hosts": ["aceternity.com"]},
   {"id": "21st.dev", "reason": "marketplace ToS, no redistribution grant", "hosts": ["21st.dev"]},
   {"id": "tailark.com (pro)", "reason": "paywalled blocks (401) — the MIT OSS registry below is the free source", "hosts": ["tailark.com"]},
-  {"id": "cult-ui", "reason": "endpoint bot-challenged (429) for every client — not installable", "hosts": ["cult-ui.com"]}
+  {"id": "cult-ui", "reason": "endpoint bot-challenged (429) for every client — not installable", "hosts": ["cult-ui.com"]},
+  {"id": "shadcn-studio", "reason": "MIT + Commons Clause (LICENSE.md, read 2026-09-27) — not OSI MIT", "hosts": ["shadcnstudio.com"]}
  ],
   "registries": [
     {
@@ -80,7 +81,31 @@
       "adapter": "shadcn-schema",
       "base": "base-ui",
       "index": "https://basecn.dev/r/registry.json",
-      "item": "https://basecn.dev/r/{name}.json"
+      "index_mirror": "https://raw.githubusercontent.com/akash3444/basecn/main/public/r/registry.json",
+      "item": "https://basecn.dev/r/{name}.json",
+      "mirror": "https://raw.githubusercontent.com/akash3444/basecn/main/public/r/{name}.json"
+    },
+    {
+      "id": "shadcnui-blocks",
+      "name": "Shadcn UI Blocks",
+      "license": "MIT",
+      "license_evidence": "https://github.com/akash3444/shadcn-ui-blocks/blob/main/LICENSE",
+      "adapter": "shadcn-schema",
+      "base": "radix",
+      "index": "https://raw.githubusercontent.com/akash3444/shadcn-ui-blocks/main/public/r/registry.json",
+      "item": "https://raw.githubusercontent.com/akash3444/shadcn-ui-blocks/main/public/r/{name}.json",
+      "notes": "Marketing blocks (hero, features, pricing, faq, testimonials, team, stats, logo cloud, cta, footer, navbar, login, signup) and many component variants. Read from the registry build committed to its MIT GitHub repo."
+    },
+    {
+      "id": "blocks-so",
+      "name": "blocks.so",
+      "license": "MIT",
+      "license_evidence": "https://github.com/ephraimduncan/blocks/blob/main/LICENSE.md",
+      "adapter": "shadcn-schema",
+      "base": "any",
+      "index": "https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/registry.json",
+      "item": "https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/{name}.json",
+      "notes": "App blocks: login, stats, dialogs, tables, sidebars, command menus. Read from the registry build committed to its MIT GitHub repo."
     }
   ]
 }

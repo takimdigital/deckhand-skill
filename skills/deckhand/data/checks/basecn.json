@@ -1,0 +1,157 @@
+{
+ "version": 1,
+ "registry": "basecn",
+ "deckhand": "2.2.3",
+ "verdicts": {
+  "basecn/accordion@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"accordion\""
+  },
+  "basecn/alert-dialog@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "basecn/avatar@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"avatar\""
+  },
+  "basecn/badge@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "basecn/breadcrumb@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"breadcrumb\""
+  },
+  "basecn/button@base-ui": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "basecn/calendar@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"calendar\""
+  },
+  "basecn/card@base-ui": {
+   "v": "fits",
+   "carried": 2,
+   "of": 2
+  },
+  "basecn/carousel@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"carousel\""
+  },
+  "basecn/checkbox@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"checkbox\""
+  },
+  "basecn/command@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"command\""
+  },
+  "basecn/context-menu@base-ui": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "basecn/dialog@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "basecn/drawer-base@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sheet\""
+  },
+  "basecn/drawer@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sheet\""
+  },
+  "basecn/dropdown-menu@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dropdown-menu\""
+  },
+  "basecn/hover-card@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "basecn/input@base-ui": {
+   "v": "fits"
+  },
+  "basecn/label@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "basecn/navigation-menu@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"navigation-menu\""
+  },
+  "basecn/pagination@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"pagination\""
+  },
+  "basecn/popover@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "basecn/progress@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "basecn/radio-group@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"radio-group\""
+  },
+  "basecn/select@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"select\""
+  },
+  "basecn/separator-extended@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"separator\""
+  },
+  "basecn/separator@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"separator\""
+  },
+  "basecn/sheet@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sheet\""
+  },
+  "basecn/skeleton@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"skeleton\""
+  },
+  "basecn/slider@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"slider\""
+  },
+  "basecn/sonner@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"toast\""
+  },
+  "basecn/switch@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "basecn/table@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"table\""
+  },
+  "basecn/tabs@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tabs\""
+  },
+  "basecn/textarea@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"textarea\""
+  },
+  "basecn/toggle@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "basecn/tooltip@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  }
+ }
+}

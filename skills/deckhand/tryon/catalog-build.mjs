@@ -3,7 +3,11 @@
  * catalog-build.mjs — (re)build data/components.index.json from the licensed registries.
  * Maintainer tool; owners never need it (the index ships with the skill).
  *
- *   node tryon/catalog-build.mjs [--snapshots <dir>] [--out data/components.index.json]
+ *   node tryon/catalog-build.mjs [--snapshots <dir>] [--out data/components.index.json] [--only id,id]
+ *
+ * --only rebuilds just those registries and keeps every other item of the current index (a registry whose site
+ * is unreachable from here is not dropped). A registry's `index_mirror` (its registry.json committed on GitHub)
+ * is read when its site is not.
  *
  * Sources (data/registries.json): tailark-oss is read from its MIT GitHub source (the registry
  * definitions are TypeScript, parsed with the vendored AST parser — no regex over code); every
@@ -28,6 +32,7 @@ const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const SNAP = opt('snapshots', null);
 const OUT = path.resolve(opt('out', path.join(SKILL, 'data', 'components.index.json')));
+const ONLY = opt('only', null) ? new Set(opt('only').split(',')) : null;
 
 async function get(url) {
   const r = await fetch(url, { headers: { 'user-agent': 'deckhand-catalog/2' } });
@@ -119,9 +124,11 @@ async function shadcnSchema(reg) {
   const styles = reg.styles ? Object.entries(reg.styles) : [[null, reg.base || 'any']];
   for (const [style, base] of styles) {
     let idx = readSnapshot(reg.id, style);
-    if (!idx) {
-      try { idx = JSON.parse(await get(reg.index.replace('{style}', style))); } catch (e) { console.error('skip', reg.id, style, e.message); continue; }
+    for (const u of [reg.index, reg.index_mirror].filter(Boolean)) {
+      if (idx) break;
+      try { idx = JSON.parse(await get(u.replace('{style}', style))); } catch (e) { console.error('skip', reg.id, style, e.message); }
     }
+    if (!idx) continue;
     out.push(...mapShadcnItems(reg, idx, style, base));
   }
   return out;
@@ -131,12 +138,14 @@ async function main() {
   const regs = JSON.parse(fs.readFileSync(path.join(SKILL, 'data', 'registries.json'), 'utf8'));
   let items = [];
   for (const reg of regs.registries) {
+    if (ONLY && !ONLY.has(reg.id)) continue;
     if (!OK_LICENSES.has(reg.license) || reg.status === 'excluded') { console.error('refused', reg.id, reg.license); continue; }
     const got = reg.adapter === 'tailark-oss' ? await tailark(reg) : await shadcnSchema(reg);
     console.error(reg.id, got.length);
     items = items.concat(got);
   }
   items = items.concat(navbarsFromHeroes(items));
+  if (ONLY) items = items.concat(JSON.parse(fs.readFileSync(OUT, 'utf8')).items.filter((i) => !ONLY.has(i.r)));
   const seen = new Set();
   items = items.filter((i) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
   items.sort((a, b) => (a.slot + a.r + a.n + a.base).localeCompare(b.slot + b.r + b.n + b.base));

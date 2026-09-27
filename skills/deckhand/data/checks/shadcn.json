@@ -1,0 +1,790 @@
+{
+ "version": 1,
+ "registry": "shadcn",
+ "deckhand": "2.2.3",
+ "verdicts": {
+  "shadcn/accordion@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"accordion\""
+  },
+  "shadcn/accordion@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"accordion\""
+  },
+  "shadcn/alert-dialog@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "shadcn/alert-dialog@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "shadcn/avatar@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"avatar\""
+  },
+  "shadcn/avatar@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"avatar\""
+  },
+  "shadcn/badge@radix": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "shadcn/breadcrumb@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"breadcrumb\""
+  },
+  "shadcn/breadcrumb@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"breadcrumb\""
+  },
+  "shadcn/button@radix": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "shadcn/calendar@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"calendar\""
+  },
+  "shadcn/calendar@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"calendar\""
+  },
+  "shadcn/card@radix": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
+  },
+  "shadcn/carousel@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"carousel\""
+  },
+  "shadcn/carousel@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"carousel\""
+  },
+  "shadcn/chart-area-axes@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-default@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-gradient@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-icons@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-interactive@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-legend@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-linear@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-stacked-expand@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-stacked@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-area-step@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-bar-active@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-bar-default@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-bar-horizontal@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-bar-interactive@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-bar-label-custom@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-bar-label@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-bar-mixed@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-bar-multiple@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-bar-negative@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-bar-stacked@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-line-default@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-line-dots-colors@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-line-dots-custom@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-line-dots@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-line-interactive@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-line-label-custom@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-line-label@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-line-linear@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-line-multiple@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-line-step@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-pie-donut-active@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-pie-donut-text@radix": {
+   "v": "fits",
+   "needs": [
+    "recharts"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "shadcn/chart-pie-donut@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-pie-interactive@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-pie-label-custom@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-pie-label-list@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-pie-label@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-pie-legend@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-pie-separator-none@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"separator\""
+  },
+  "shadcn/chart-pie-simple@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-pie-stacked@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radar-default@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radar-dots@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-radar-grid-circle-fill@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-radar-grid-circle-no-lines@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-radar-grid-circle@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-radar-grid-custom@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-radar-grid-fill@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-radar-grid-none@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-radar-icons@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radar-label-custom@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-radar-legend@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radar-lines-only@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radar-multiple@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radar-radius@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radial-grid@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "shadcn/chart-radial-label@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/chart-radial-shape@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radial-simple@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radial-stacked@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart-radial-text@radix": {
+   "v": "fits",
+   "needs": [
+    "recharts"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "shadcn/chart-tooltip-advanced@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart-tooltip-default@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart-tooltip-formatter@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart-tooltip-icons@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart-tooltip-indicator-line@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart-tooltip-indicator-none@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart-tooltip-label-custom@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart-tooltip-label-formatter@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart-tooltip-label-none@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/chart@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/chart@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"chart\""
+  },
+  "shadcn/checkbox@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"checkbox\""
+  },
+  "shadcn/checkbox@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"checkbox\""
+  },
+  "shadcn/command@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"command\""
+  },
+  "shadcn/command@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"command\""
+  },
+  "shadcn/context-menu@radix": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "shadcn/dashboard-01@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dashboard\""
+  },
+  "shadcn/dashboard-01@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dashboard\""
+  },
+  "shadcn/dialog@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "shadcn/dialog@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "shadcn/drawer@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sheet\""
+  },
+  "shadcn/drawer@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sheet\""
+  },
+  "shadcn/dropdown-menu@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dropdown-menu\""
+  },
+  "shadcn/dropdown-menu@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dropdown-menu\""
+  },
+  "shadcn/hover-card@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "shadcn/hover-card@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "shadcn/input@radix": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
+  },
+  "shadcn/label@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/label@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"label\""
+  },
+  "shadcn/login-01@radix": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 5,
+   "of": 7
+  },
+  "shadcn/login-02@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: has no place for your form"
+  },
+  "shadcn/login-03@radix": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
+  },
+  "shadcn/login-04@radix": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 4,
+   "of": 7
+  },
+  "shadcn/login-05@radix": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 4,
+   "of": 7
+  },
+  "shadcn/navigation-menu@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"navigation-menu\""
+  },
+  "shadcn/navigation-menu@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"navigation-menu\""
+  },
+  "shadcn/pagination@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"pagination\""
+  },
+  "shadcn/pagination@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"pagination\""
+  },
+  "shadcn/popover@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "shadcn/popover@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"popover\""
+  },
+  "shadcn/progress@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "shadcn/progress@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "shadcn/select@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"select\""
+  },
+  "shadcn/select@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"select\""
+  },
+  "shadcn/separator@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"separator\""
+  },
+  "shadcn/separator@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"separator\""
+  },
+  "shadcn/sheet@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sheet\""
+  },
+  "shadcn/sheet@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sheet\""
+  },
+  "shadcn/sidebar-01@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-01@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-02@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-02@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-03@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-03@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-04@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-04@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-05@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-05@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-06@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-06@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-07@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-07@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-08@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-08@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-09@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-09@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-10@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-10@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-11@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-11@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-12@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-12@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-13@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-13@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-14@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-14@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-15@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-15@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-16@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar-16@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/sidebar@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "shadcn/signup-01@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 7
+  },
+  "shadcn/signup-02@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: has no place for your form"
+  },
+  "shadcn/signup-03@radix": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
+  },
+  "shadcn/signup-04@radix": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 4,
+   "of": 7
+  },
+  "shadcn/signup-05@radix": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 4,
+   "of": 7
+  },
+  "shadcn/skeleton@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"skeleton\""
+  },
+  "shadcn/skeleton@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"skeleton\""
+  },
+  "shadcn/slider@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"slider\""
+  },
+  "shadcn/slider@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"slider\""
+  },
+  "shadcn/sonner@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"toast\""
+  },
+  "shadcn/sonner@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"toast\""
+  },
+  "shadcn/switch@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "shadcn/switch@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "shadcn/table@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"table\""
+  },
+  "shadcn/table@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"table\""
+  },
+  "shadcn/tabs@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tabs\""
+  },
+  "shadcn/tabs@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tabs\""
+  },
+  "shadcn/textarea@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"textarea\""
+  },
+  "shadcn/textarea@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"textarea\""
+  },
+  "shadcn/toast@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"toast\""
+  },
+  "shadcn/toggle@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "shadcn/toggle@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "shadcn/tooltip@base-ui": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  },
+  "shadcn/tooltip@radix": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"tooltip\""
+  }
+ }
+}

@@ -980,6 +980,10 @@ export function parameterize(file, code, exp, opts = {}) {
   const formSwaps = [];
   const conds = new Map();
   const cut = [];
+  // a design's form, or the form component it keeps in a file beside it (`<LoginForm />` from "./login-form")
+  const localForms = new Set(ast.program.body.filter((st) => st.type === 'ImportDeclaration' && st.source.value.startsWith('.'))
+    .flatMap((st) => st.specifiers.map((x) => x.local.name)).filter((n) => /^[A-Z]\w*Form$/.test(n)));
+  const isForm = (n) => { const nm = jsxName(n.openingElement.name); return nm === 'form' || localForms.has(nm); };
   // a primitive's part (`CardHeader` beside `Card`, `DialogHeader` from components/ui/…) is the design's own layout,
   // not site chrome
   const uiParts = new Set(ast.program.body.filter((st) => st.type === 'ImportDeclaration').flatMap((st) => {
@@ -1097,7 +1101,7 @@ export function parameterize(file, code, exp, opts = {}) {
     if (opts.forms === 'swap') {
       walk(root, (n) => {
         if (n.type !== 'JSXElement') return true;
-        if (jsxName(n.openingElement.name) !== 'form') return true;
+        if (!isForm(n)) return true;
         if (n !== root && inChildren(n) && !inCut(n)) {
           const k = 'form' + (formSwaps.length + forms.length + 1);
           if (!formSwaps.length) { edits.push({ start: n.start, end: n.end, text: `{${acc(k)} ?? (${code.slice(n.start, n.end)})}`, keep: true }); formSwaps.push(k); }
@@ -1110,7 +1114,7 @@ export function parameterize(file, code, exp, opts = {}) {
     if (opts.forms === 'hide') {
       walk(root, (n) => {
         if (n.type !== 'JSXElement') return true;
-        if (jsxName(n.openingElement.name) !== 'form') return true;
+        if (!isForm(n)) return true;
         if (n !== root && inChildren(n) && !inCut(n)) {
           const k = 'form' + (forms.length + 1);
           addCond(n, `${acc(k + 'Show')} === true`);

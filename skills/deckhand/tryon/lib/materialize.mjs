@@ -336,14 +336,31 @@ async function jsonBundle(prof, item, doc, url) {
   for (let i = 0; i < extra.length; i++) {
     const x = extra[i];
     const style = prof.base === 'base-ui' ? 'base-nova' : 'new-york-v4';
-    const tries = [`https://ui.shadcn.com/r/styles/${style}/${x.name}.json`];
     let got = null;
-    for (const u of tries) { try { got = await fetchJsonItem(u); break; } catch { /* next */ } }
-    if (!got) {
+    // a file of another block of the same registry (`@/registry/blocks/radix/navbar-04/components/logo`): that
+    // block's own JSON, beside this one, holds it
+    const sib = /registry\/blocks\/(?:[^/]+\/)?([a-z0-9-]+)\/(.+)$/.exec(x.spec);
+    if (sib) {
       try {
-        const content = rawSource(await getText(`https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/registry/${style}/ui/${x.name}.tsx`));
-        got = { files: [{ path: `registry/${style}/ui/${x.name}.tsx`, content }], dependencies: [] };
+        const doc2 = await fetchJsonItem(url.replace(/[^/]+\.json$/, sib[1] + '.json'));
+        const f = (doc2.files || []).find((y) => y.content && y.path.replace(/\.(tsx|ts|jsx|js)$/, '').endsWith(sib[1] + '/' + sib[2]));
+        if (f) got = { files: [{ path: f.path, content: f.content }], dependencies: doc2.dependencies || [] };
       } catch { /* unresolved */ }
+    } else {
+      try { got = await fetchJsonItem(`https://ui.shadcn.com/r/styles/${style}/${x.name}.json`); } catch { /* next */ }
+      if (!got) {
+        try {
+          const content = rawSource(await getText(`https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/v4/registry/${style}/ui/${x.name}.tsx`));
+          got = { files: [{ path: `registry/${style}/ui/${x.name}.tsx`, content }], dependencies: [] };
+        } catch { /* next */ }
+      }
+      // not a shadcn primitive (a registry's own `ui/marquee`): the registry's item of that name, beside this one
+      if (!got && /\/[^/]+\.json$/.test(url)) {
+        try {
+          const own = await fetchJsonItem(url.replace(/[^/]+\.json$/, x.name + '.json'));
+          got = { files: own.files.filter((f) => f.content), dependencies: own.dependencies || [] };
+        } catch { /* unresolved */ }
+      }
     }
     if (!got) throw new Error('UNRESOLVED_REGISTRY_DEP ' + x.spec);
     for (const d of got.dependencies || []) deps.add(d);

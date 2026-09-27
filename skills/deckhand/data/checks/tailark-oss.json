@@ -1,0 +1,1713 @@
+{
+ "version": 1,
+ "registry": "tailark-oss",
+ "deckhand": "2.2.3",
+ "verdicts": {
+  "tailark-oss/dusk-call-to-action-1@base-ui": {
+   "v": "partial",
+   "carried": 2,
+   "of": 3
+  },
+  "tailark-oss/dusk-call-to-action-1@radix": {
+   "v": "partial",
+   "carried": 2,
+   "of": 3
+  },
+  "tailark-oss/dusk-call-to-action-2@base-ui": {
+   "v": "partial",
+   "carried": 2,
+   "of": 3
+  },
+  "tailark-oss/dusk-call-to-action-2@radix": {
+   "v": "partial",
+   "carried": 2,
+   "of": 3
+  },
+  "tailark-oss/dusk-content-1@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-content-1@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-content-2@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/dusk-content-2@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/dusk-content-3@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/dusk-content-3@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/dusk-content-4@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/dusk-content-4@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/dusk-faqs-1@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/dusk-faqs-1@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/dusk-features-1@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-1@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-2@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-2@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-3@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-3@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-4@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-4@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-5@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/dusk-features-5@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/dusk-features-6@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-6@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-7@base-ui": {
+   "v": "partial",
+   "needs": [
+    "dotted-map",
+    "recharts"
+   ],
+   "carried": 7,
+   "of": 8
+  },
+  "tailark-oss/dusk-features-7@radix": {
+   "v": "partial",
+   "needs": [
+    "dotted-map",
+    "recharts"
+   ],
+   "carried": 7,
+   "of": 8
+  },
+  "tailark-oss/dusk-footer-1@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 6
+  },
+  "tailark-oss/dusk-footer-1@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 6
+  },
+  "tailark-oss/dusk-footer-2@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 6
+  },
+  "tailark-oss/dusk-footer-2@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/dusk-hero-section-1-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-1-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-10-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-10-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-10@base-ui": {
+   "v": "partial",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-10@radix": {
+   "v": "partial",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-1@base-ui": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-1@radix": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-2-header@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-2-header@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-2@base-ui": {
+   "v": "partial",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 2,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-2@radix": {
+   "v": "partial",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 2,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-3-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-3-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-3@base-ui": {
+   "v": "partial",
+   "carried": 2,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-3@radix": {
+   "v": "partial",
+   "carried": 2,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-4-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-4-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-4@base-ui": {
+   "v": "fits",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-4@radix": {
+   "v": "fits",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-5-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-5-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-5@base-ui": {
+   "v": "partial",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 2,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-5@radix": {
+   "v": "partial",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 2,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-6-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-6-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-6@base-ui": {
+   "v": "fits",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-6@radix": {
+   "v": "fits",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-7@base-ui": {
+   "v": "fits",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-7@radix": {
+   "v": "fits",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-8@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/4"
+  },
+  "tailark-oss/dusk-hero-section-8@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/4"
+  },
+  "tailark-oss/dusk-hero-section-9-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-9-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-hero-section-9@base-ui": {
+   "v": "partial",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/dusk-hero-section-9@radix": {
+   "v": "partial",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/dusk-integrations-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/dusk-integrations-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/dusk-logo-cloud-1@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/dusk-logo-cloud-1@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/dusk-logo-cloud-2@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "tailark-oss/dusk-logo-cloud-2@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "tailark-oss/dusk-logo-cloud-3@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/dusk-logo-cloud-3@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/dusk-logo-cloud-4@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/5"
+  },
+  "tailark-oss/dusk-logo-cloud-4@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/5"
+  },
+  "tailark-oss/dusk-pricing-1@base-ui": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/dusk-pricing-1@radix": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/dusk-pricing-2@base-ui": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/dusk-pricing-2@radix": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/dusk-stats-1@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/dusk-stats-1@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/dusk-stats-2@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/dusk-stats-2@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/dusk-team-1@base-ui": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/dusk-team-1@radix": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/dusk-team-2@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/10"
+  },
+  "tailark-oss/dusk-team-2@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/10"
+  },
+  "tailark-oss/dusk-testimonials-1@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-testimonials-1@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/dusk-testimonials-2@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "tailark-oss/dusk-testimonials-2@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "tailark-oss/mist-call-to-action-1@base-ui": {
+   "v": "partial",
+   "carried": 2,
+   "of": 3
+  },
+  "tailark-oss/mist-call-to-action-1@radix": {
+   "v": "partial",
+   "carried": 2,
+   "of": 3
+  },
+  "tailark-oss/mist-call-to-action-2@base-ui": {
+   "v": "partial",
+   "carried": 2,
+   "of": 3
+  },
+  "tailark-oss/mist-call-to-action-2@radix": {
+   "v": "partial",
+   "carried": 2,
+   "of": 3
+  },
+  "tailark-oss/mist-call-to-action-3@base-ui": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/mist-call-to-action-3@radix": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/mist-comparator-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/12"
+  },
+  "tailark-oss/mist-comparator-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/12"
+  },
+  "tailark-oss/mist-contact-1@base-ui": {
+   "v": "fits",
+   "carried": 6,
+   "of": 6
+  },
+  "tailark-oss/mist-contact-1@radix": {
+   "v": "fits",
+   "carried": 6,
+   "of": 6
+  },
+  "tailark-oss/mist-content-1@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/mist-content-1@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/mist-content-2@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/mist-content-2@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/mist-content-3@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/mist-content-3@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/mist-content-4@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/mist-content-4@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/mist-faqs-1@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/mist-faqs-1@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/mist-faqs-2@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/mist-faqs-2@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/mist-faqs-3@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/mist-faqs-3@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/mist-features-10@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/mist-features-10@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/mist-features-11@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/mist-features-11@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/mist-features-1@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-1@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-2@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/mist-features-2@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/mist-features-3@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-3@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-4@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-4@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-5@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/mist-features-5@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/mist-features-6@base-ui": {
+   "v": "partial",
+   "carried": 7,
+   "of": 8
+  },
+  "tailark-oss/mist-features-6@radix": {
+   "v": "partial",
+   "carried": 7,
+   "of": 8
+  },
+  "tailark-oss/mist-features-7@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-7@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-8@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-8@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 8
+  },
+  "tailark-oss/mist-features-9@base-ui": {
+   "v": "partial",
+   "carried": 7,
+   "of": 8
+  },
+  "tailark-oss/mist-features-9@radix": {
+   "v": "partial",
+   "carried": 7,
+   "of": 8
+  },
+  "tailark-oss/mist-footer-1@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/mist-footer-1@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/mist-footer-2@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/mist-footer-2@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/mist-footer-3@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 6
+  },
+  "tailark-oss/mist-footer-3@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 6
+  },
+  "tailark-oss/mist-footer-4@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/mist-footer-4@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/mist-forgot-password-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/7"
+  },
+  "tailark-oss/mist-forgot-password-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/7"
+  },
+  "tailark-oss/mist-hero-section-1-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-hero-section-1-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-hero-section-1@base-ui": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-1@radix": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-2-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-hero-section-2-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-hero-section-2@base-ui": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-2@radix": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-3-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-hero-section-3-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-hero-section-3@base-ui": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-3@radix": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-4-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-hero-section-4-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-hero-section-4@base-ui": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-4@radix": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-5@base-ui": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-5@radix": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-6@base-ui": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-hero-section-6@radix": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/mist-integrations-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
+  },
+  "tailark-oss/mist-integrations-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
+  },
+  "tailark-oss/mist-integrations-2@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/8"
+  },
+  "tailark-oss/mist-integrations-2@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/8"
+  },
+  "tailark-oss/mist-integrations-3@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/mist-integrations-3@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/mist-login-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/7"
+  },
+  "tailark-oss/mist-login-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/7"
+  },
+  "tailark-oss/mist-logo-cloud-1@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-logo-cloud-1@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-logo-cloud-2@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-logo-cloud-2@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-pricing-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 4/12"
+  },
+  "tailark-oss/mist-pricing-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 4/12"
+  },
+  "tailark-oss/mist-pricing-2@base-ui": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/mist-pricing-2@radix": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/mist-sign-up-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/7"
+  },
+  "tailark-oss/mist-sign-up-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/7"
+  },
+  "tailark-oss/mist-stats-1@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/mist-stats-1@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/mist-stats-2@base-ui": {
+   "v": "partial",
+   "carried": 7,
+   "of": 8
+  },
+  "tailark-oss/mist-stats-2@radix": {
+   "v": "partial",
+   "carried": 7,
+   "of": 8
+  },
+  "tailark-oss/mist-stats-3@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
+  },
+  "tailark-oss/mist-stats-3@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
+  },
+  "tailark-oss/mist-stats-4@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 8
+  },
+  "tailark-oss/mist-stats-4@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 8
+  },
+  "tailark-oss/mist-team-1@base-ui": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/mist-team-1@radix": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/mist-team-2@base-ui": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/mist-team-2@radix": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/mist-testimonials-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/mist-testimonials-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/mist-testimonials-2@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-testimonials-2@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/mist-testimonials-3@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/mist-testimonials-3@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/mist-testimonials-4@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/mist-testimonials-4@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/mist-testimonials-5@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/mist-testimonials-5@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/veil-call-to-action-1@base-ui": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/veil-call-to-action-1@radix": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/veil-call-to-action-2@base-ui": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/veil-call-to-action-2@radix": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/veil-call-to-action-3@base-ui": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/veil-call-to-action-3@radix": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/veil-call-to-action-4@base-ui": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/veil-call-to-action-4@radix": {
+   "v": "fits",
+   "carried": 3,
+   "of": 3
+  },
+  "tailark-oss/veil-comparator-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/12"
+  },
+  "tailark-oss/veil-comparator-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/12"
+  },
+  "tailark-oss/veil-comparator-2@base-ui": {
+   "v": "fits",
+   "carried": 12,
+   "of": 12
+  },
+  "tailark-oss/veil-comparator-2@radix": {
+   "v": "fits",
+   "carried": 12,
+   "of": 12
+  },
+  "tailark-oss/veil-comparator-3@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/12"
+  },
+  "tailark-oss/veil-comparator-3@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/12"
+  },
+  "tailark-oss/veil-contact-1@base-ui": {
+   "v": "fits",
+   "carried": 6,
+   "of": 6
+  },
+  "tailark-oss/veil-contact-1@radix": {
+   "v": "fits",
+   "carried": 6,
+   "of": 6
+  },
+  "tailark-oss/veil-contact-2@base-ui": {
+   "v": "fits",
+   "carried": 6,
+   "of": 6
+  },
+  "tailark-oss/veil-contact-2@radix": {
+   "v": "fits",
+   "carried": 6,
+   "of": 6
+  },
+  "tailark-oss/veil-content-1@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/veil-content-1@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/veil-content-2@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/veil-content-2@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/veil-content-3@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/veil-content-3@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 5
+  },
+  "tailark-oss/veil-faqs-1@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-1@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-2@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-2@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-3@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-3@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-4@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-4@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-5@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 7
+  },
+  "tailark-oss/veil-faqs-5@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 7
+  },
+  "tailark-oss/veil-features-1@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/veil-features-1@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/veil-features-2@base-ui": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/veil-features-2@radix": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "tailark-oss/veil-features-3@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/veil-features-3@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/veil-footer-1@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-1@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-2@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-2@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-3@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-3@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-4@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-4@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-5@base-ui": {
+   "v": "partial",
+   "needs": [
+    "next-themes"
+   ],
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-5@radix": {
+   "v": "partial",
+   "needs": [
+    "next-themes"
+   ],
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-6@base-ui": {
+   "v": "partial",
+   "needs": [
+    "next-themes"
+   ],
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/veil-footer-6@radix": {
+   "v": "partial",
+   "needs": [
+    "next-themes"
+   ],
+   "carried": 4,
+   "of": 6
+  },
+  "tailark-oss/veil-forgot-password-1@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "tailark-oss/veil-forgot-password-1@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "tailark-oss/veil-forgot-password-2@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "tailark-oss/veil-forgot-password-2@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "tailark-oss/veil-forgot-password-3@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 7
+  },
+  "tailark-oss/veil-forgot-password-3@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 7
+  },
+  "tailark-oss/veil-hero-section-1-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-hero-section-1-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-hero-section-1@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-1@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-2-header@base-ui": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-hero-section-2-header@radix": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-hero-section-2@base-ui": {
+   "v": "partial",
+   "needs": [
+    "motion"
+   ],
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-2@radix": {
+   "v": "partial",
+   "needs": [
+    "motion"
+   ],
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-3-header@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-hero-section-3-header@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-hero-section-3@base-ui": {
+   "v": "partial",
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-3@radix": {
+   "v": "partial",
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-4-header@base-ui": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-hero-section-4-header@radix": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-hero-section-4@base-ui": {
+   "v": "partial",
+   "needs": [
+    "motion"
+   ],
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-4@radix": {
+   "v": "partial",
+   "needs": [
+    "motion"
+   ],
+   "carried": 3,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-5@base-ui": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/veil-hero-section-5@radix": {
+   "v": "fits",
+   "carried": 4,
+   "of": 4
+  },
+  "tailark-oss/veil-integrations-1@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/veil-integrations-1@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/veil-integrations-2@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/veil-integrations-2@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "tailark-oss/veil-login-1@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-login-1@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-login-2@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "tailark-oss/veil-login-2@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "tailark-oss/veil-login-3@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 7
+  },
+  "tailark-oss/veil-login-3@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 7
+  },
+  "tailark-oss/veil-logo-cloud-1@base-ui": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/veil-logo-cloud-1@radix": {
+   "v": "partial",
+   "carried": 4,
+   "of": 5
+  },
+  "tailark-oss/veil-logo-cloud-2@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "tailark-oss/veil-logo-cloud-2@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "tailark-oss/veil-pricing-1@base-ui": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/veil-pricing-1@radix": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/veil-pricing-2@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 12
+  },
+  "tailark-oss/veil-pricing-2@radix": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/veil-pricing-3@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 12
+  },
+  "tailark-oss/veil-pricing-3@radix": {
+   "v": "partial",
+   "carried": 8,
+   "of": 12
+  },
+  "tailark-oss/veil-sign-up-1@base-ui": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-sign-up-1@radix": {
+   "v": "fits",
+   "carried": 7,
+   "of": 7
+  },
+  "tailark-oss/veil-sign-up-2@base-ui": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "tailark-oss/veil-sign-up-2@radix": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "tailark-oss/veil-sign-up-3@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 7
+  },
+  "tailark-oss/veil-sign-up-3@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 7
+  },
+  "tailark-oss/veil-stats-1@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/veil-stats-1@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/veil-stats-2@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/veil-stats-2@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/veil-stats-3@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/veil-stats-3@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/veil-stats-4@base-ui": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/veil-stats-4@radix": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "tailark-oss/veil-team-1@base-ui": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/veil-team-1@radix": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/veil-team-2@base-ui": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/veil-team-2@radix": {
+   "v": "fits",
+   "carried": 10,
+   "of": 10
+  },
+  "tailark-oss/veil-testimonials-1@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-testimonials-1@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-testimonials-2@base-ui": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-testimonials-2@radix": {
+   "v": "fits",
+   "carried": 5,
+   "of": 5
+  },
+  "tailark-oss/veil-testimonials-3@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/veil-testimonials-3@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/veil-testimonials-4@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  },
+  "tailark-oss/veil-testimonials-4@radix": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  }
+ }
+}

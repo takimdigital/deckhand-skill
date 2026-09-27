@@ -1,0 +1,258 @@
+{
+ "version": 1,
+ "registry": "blocks-so",
+ "deckhand": "2.2.3",
+ "verdicts": {
+  "blocks-so/command-menu-01@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"command\""
+  },
+  "blocks-so/command-menu-02@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"command\""
+  },
+  "blocks-so/command-menu-03@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"command\""
+  },
+  "blocks-so/command-menu-04@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"command\""
+  },
+  "blocks-so/dashboard-01@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dashboard\""
+  },
+  "blocks-so/dialog-01@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-02@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-03@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-04@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-05@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-06@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-07@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-08@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-09@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-10@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-11@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/dialog-12@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"dialog\""
+  },
+  "blocks-so/grid-list-01@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "blocks-so/grid-list-02@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "blocks-so/grid-list-03@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "blocks-so/login-01@any": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "blocks-so/login-02@any": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "blocks-so/login-03@any": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "blocks-so/login-04@any": {
+   "v": "partial",
+   "carried": 6,
+   "of": 7
+  },
+  "blocks-so/login-05@any": {
+   "v": "partial",
+   "carried": 5,
+   "of": 7
+  },
+  "blocks-so/login-06@any": {
+   "v": "refused",
+   "why": "POOR_FIT: has no place for your form"
+  },
+  "blocks-so/login-07@any": {
+   "v": "refused",
+   "why": "POOR_FIT: has no place for your form"
+  },
+  "blocks-so/login-08@any": {
+   "v": "refused",
+   "why": "POOR_FIT: has no place for your form"
+  },
+  "blocks-so/login-09@any": {
+   "v": "refused",
+   "why": "POOR_FIT: has no place for your form"
+  },
+  "blocks-so/sidebar-01@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "blocks-so/sidebar-02@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "blocks-so/sidebar-03@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "blocks-so/sidebar-04@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "blocks-so/sidebar-05@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "blocks-so/sidebar-06@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"sidebar\""
+  },
+  "blocks-so/stats-01@any": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "blocks-so/stats-02@any": {
+   "v": "partial",
+   "carried": 4,
+   "of": 8
+  },
+  "blocks-so/stats-03@any": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "blocks-so/stats-04@any": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "blocks-so/stats-05@any": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "blocks-so/stats-06@any": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "blocks-so/stats-07@any": {
+   "v": "partial",
+   "needs": [
+    "recharts"
+   ],
+   "carried": 7,
+   "of": 8
+  },
+  "blocks-so/stats-08@any": {
+   "v": "partial",
+   "needs": [
+    "recharts"
+   ],
+   "carried": 7,
+   "of": 8
+  },
+  "blocks-so/stats-09@any": {
+   "v": "partial",
+   "carried": 5,
+   "of": 8
+  },
+  "blocks-so/stats-10@any": {
+   "v": "partial",
+   "needs": [
+    "recharts"
+   ],
+   "carried": 5,
+   "of": 8
+  },
+  "blocks-so/stats-11@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
+  },
+  "blocks-so/stats-12@any": {
+   "v": "partial",
+   "needs": [
+    "recharts"
+   ],
+   "carried": 7,
+   "of": 8
+  },
+  "blocks-so/stats-13@any": {
+   "v": "partial",
+   "carried": 4,
+   "of": 8
+  },
+  "blocks-so/stats-14@any": {
+   "v": "partial",
+   "carried": 4,
+   "of": 8
+  },
+  "blocks-so/stats-15@any": {
+   "v": "fits",
+   "carried": 8,
+   "of": 8
+  },
+  "blocks-so/table-01@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"table\""
+  },
+  "blocks-so/table-02@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"table\""
+  },
+  "blocks-so/table-03@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"table\""
+  },
+  "blocks-so/table-04@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"table\""
+  },
+  "blocks-so/table-05@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"table\""
+  }
+ }
+}

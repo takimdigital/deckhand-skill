@@ -1,0 +1,295 @@
+{
+ "version": 1,
+ "registry": "magicui",
+ "deckhand": "2.2.3",
+ "verdicts": {
+  "magicui/animated-beam@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/animated-circular-progress-bar@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "magicui/animated-gradient-text@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/animated-grid-pattern@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/animated-shiny-text@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/animated-theme-toggler@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"switch\""
+  },
+  "magicui/aurora-text@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/avatar-circles@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"avatar\""
+  },
+  "magicui/bento-grid@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
+  },
+  "magicui/border-beam@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/client-tweet-card@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"embed\""
+  },
+  "magicui/comic-text@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/dia-text-reveal@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "magicui/dot-pattern@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/flickering-grid@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/floating-3d-particles@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/globe@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/grid-pattern@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/hero-video-dialog@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
+  },
+  "magicui/hexagon-pattern@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/highlighter@any": {
+   "v": "fits",
+   "needs": [
+    "motion",
+    "rough-notation"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/hyper-text@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/interactive-grid-pattern@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/interactive-hover-button@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/kinetic-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "magicui/line-shadow-text@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/magic-card@any": {
+   "v": "fits",
+   "needs": [
+    "motion",
+    "next-themes"
+   ],
+   "carried": 2,
+   "of": 2
+  },
+  "magicui/marquee@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "magicui/meteors@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/morphing-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "magicui/neon-gradient-card@any": {
+   "v": "fits",
+   "carried": 2,
+   "of": 2
+  },
+  "magicui/noise-texture@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "magicui/number-ticker@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"number-ticker\""
+  },
+  "magicui/particles@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/pointer@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"cursor\""
+  },
+  "magicui/progressive-blur@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "magicui/pulsating-button@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/rainbow-button@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/retro-grid@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/ripple-button@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/ripple@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/scroll-progress@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"progress\""
+  },
+  "magicui/shimmer-button@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/shine-border@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"border-effect\""
+  },
+  "magicui/shiny-button@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/smooth-cursor@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"cursor\""
+  },
+  "magicui/sparkles-text@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/spinning-text@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/striped-pattern@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/text-3d-flip@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/text-animate@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/text-reveal@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/tweet-card@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"embed\""
+  },
+  "magicui/typing-animation@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/video-text@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "magicui/warp-background@any": {
+   "v": "unchecked",
+   "why": "no owner section of kind \"background\""
+  },
+  "magicui/word-rotate@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  }
+ }
+}

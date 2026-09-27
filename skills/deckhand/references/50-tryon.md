@@ -101,7 +101,7 @@ writes the report beside the verdicts.
 ## What the engine guarantees
 - Location: every JSX element carries `data-dh="file:line:col"` in dev (AST, vendored parser — works with
   TypeScript 7 projects); the overlay resolves the clicked node and its owners.
-- Candidates: `data/components.index.json` (773 MIT items; the navbars include every Tailark hero's own header),
+- Candidates: `data/components.index.json` (1,247 MIT items; the navbars include every Tailark hero's own header),
   ranked by slot, primitive base (a Radix project never gets Base UI code), missing deps, personal library first
   (for the same slot only), then design diversity. Outside Next (Vite), `next/link` and `next/image` in a design
   become local stand-ins written beside it.
