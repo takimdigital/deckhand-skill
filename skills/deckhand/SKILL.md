@@ -66,20 +66,25 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 1. **Owner facts are never invented.** Prices, reviews, addresses, licences, testimonials, client logos:
    unknown → `PENDING.md` (format in the file). A demo value the owner did not confirm is a defect.
 2. **Access before asks.** Run `dh profile doctor` before asking for anything (its `notes_md` = the owner's own
-   `~/.deckhand/profile.md`: answered, never re-asked). What existing access can do, DO — never ask for the outcome. A
+   `profile.md` notes, machine and project: answered, never re-asked). What existing access can do, DO — never ask for the outcome. A
    capability wall is proven by a cheap probe and its verbatim error, never assumed. Ask ONLY for what nothing covers:
    ONE batched message, exact click path, labeled `ACTION NEEDED`/`DECISION NEEDED`, and anything a later phase will
    need asked in the same message. "Later" is a decision: `dh pending add … --when "trigger"`, never re-asked before it.
-3. **Secrets** live in the vault `~/.deckhand/vault.env` (0600; `dh vault set NAME`; values single-quoted, so
-   `set -a; . ~/.deckhand/vault.env; set +a` is safe for curl lines) or the platform's env store. A secret the owner
+3. **Secrets** live in the vault (0600; `dh vault set NAME`; values single-quoted, so the `shell` line `dh vault list`
+   prints is safe for curl lines) or the platform's env store. A secret the owner
    pastes in chat: `dh vault set NAME` at once, then tell them once that it now sits in the chat history (and in the
    harness's compaction summary) — rotate it if that history leaves the machine; next time `dh vault set` in their terminal. Server ops keep
    SSH keys in `~/.vps-ops/ssh/` and the backup keyring in `~/.vps-ops/secrets/backup*.env.sh`; v1's
    `~/.vps-ops/secrets/env.sh` is still read as a fallback. Secrets MUST NOT appear in chat, the profile,
    commits, logs or HANDOFF.md (write locations, not values). Run logs and autopsy reports are redacted with one
-   policy (`data/secrets.json`), and `dh init` gitignores deckhand's run logs in every project. A client project
-   (`dh init --for client`) keeps its settings and secrets in its own gitignored `.deckhand/profile.json` and
-   `.deckhand/vault.env`; the owner's machine vault stays a fallback. Never use one client's keys for another.
+   policy (`data/secrets.json`), and `dh init` gitignores deckhand's run logs in every project. **Each project keeps
+   its own settings and secrets** where the owner chose, once (`dh profile where --set here|machine|<folder>`,
+   remembered in `.deckhand/layout.json`): `here` = the project's gitignored `.deckhand/` (the first `dh profile set`/
+   `dh vault set` records it and returns `ask_once` — relay that line to the owner in your next message, once),
+   `machine` = `~/.deckhand/` shared by every project, or a folder outside the project. The owner's own facts
+   (`owner.*`, `defaults.*`) stay on the machine; `--machine` stores a key every project should use; reads always merge
+   (machine, then the project's, which wins). `BINDING_BROKEN` = ask the owner, never write around it. A client
+   project (`dh init --for client`) can never be bound to the machine. Never use one client's keys for another.
 4. **Licences.** Bases and components come from permissive licences only (`data/licenses.json`: MIT,
    Apache-2.0, BSD-2/3, ISC, 0BSD, Unlicense); `NOTICE` and `THIRD_PARTY_NOTICES.md` are never deleted or
    rewritten. Nothing enters the pool or the catalog unvetted: `dh pool vet|add owner/repo` and `tryon registry
@@ -122,7 +127,7 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 | gates | `dh gate pass Gx --quote "the owner's words"` · `dh reopen PHASE --reason "…"` |
 | owner's tasks | `dh pending list [--all]` · `dh pending add "what" --why --how --where [--machine] [--when T]` · `dh pending decide "question" --rec X` · `dh pending done\|wait\|drop P-0NN [--reason]` |
 | resume a session | `dh resume [--check [--online]]` · `dh note decision\|doing\|next "…"` · `dh resume --install-hook claude` (adds `dh resume --hook` as a SessionStart hook) |
-| owner profile / secrets | `dh profile show\|doctor\|set k=v [--here\|--machine]` · `dh vault set NAME [--here\|--machine]` (value via stdin) · `dh vault list` |
+| owner profile / secrets | `dh profile show\|doctor\|set k=v [--here\|--machine]` · `dh profile where [--set here\|machine\|FOLDER]` · `dh vault set NAME [--here\|--machine]` (value via stdin) · `dh vault list` (names + `shell` line) |
 | bases | `dh pool query [--shape --features]` · `dh pool show N` · `dh pool vet owner/repo` · `dh pool add owner/repo [--mine]` (vetted) · `dh pool add D:/your/project --mine` · `dh pool list [--mine]` |
 | research | `dh research brief --focus F --agent ID` · `dh research seen\|add URL` (shared sources) · `dh research merge` · `dh research verify` (every quote re-checked on its page) · `dh research score [LOG] [--baseline LOG]` |
 | plan | `dh plan init\|lint\|render\|split --agents N` (N AGENT-n.md + CONVENTIONS.md) · `dh bb post\|read` · `dh bb flag NAME` · `dh bb wait NAME --max 170` |

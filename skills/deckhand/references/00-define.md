@@ -1,7 +1,7 @@
 # 00 — DEFINE (the only interview)
 
 **Objective:** a complete `.deckhand/brief.json` + the run's mode and path, in ONE owner round-trip.
-**Inputs:** `~/.deckhand/profile.json` + the owner's notes `~/.deckhand/profile.md` (`dh profile show`), `dh profile doctor`,
+**Inputs:** the profile (machine + this project's, `dh profile show`) + the owner's notes `profile.md`, `dh profile doctor`,
 `dh workflow query` (a proven path for this kind of project), whatever the owner already said.
 **Output:** `dh phase done define` green.
 

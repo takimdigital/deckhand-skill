@@ -276,12 +276,15 @@ class LocalOnly(Base):
         self.assertNotIn("coolify-client-token-123", h)                               # locations, never values
         self.assertIn("dh resume", h)
 
-    def test_personal_projects_write_to_the_machine_unless_told_here(self):
+    def test_personal_projects_keep_their_own_settings_the_owners_facts_stay_on_the_machine(self):
         self.dh("init", "--name", "Mine")
-        code, out = self.dh("profile", "set", "defaults.hosting=vps")
+        code, out = self.dh("profile", "set", "defaults.hosting=vps")         # the owner's own default: every project
         self.assertEqual(out["scope"], "machine")
-        code, out = self.dh("profile", "set", "domain.default=mine.dev", "--here")
+        code, out = self.dh("profile", "set", "domain.default=mine.dev")      # this project's: its own layer (2.3)
         self.assertEqual(out["scope"], "project")
+        self.assertIn("ask_once", out)
+        code, out = self.dh("profile", "set", "dns.provider=cloudflare", "--machine")
+        self.assertEqual(out["scope"], "machine")
         code, out = self.dh("profile", "show")
         self.assertEqual((out["scope"], out["profile"]["domain"]["default"], out["profile"]["defaults"]["hosting"]), ("me", "mine.dev", "vps"))
         profile.use_project(None)

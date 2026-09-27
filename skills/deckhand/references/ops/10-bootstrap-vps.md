@@ -8,9 +8,10 @@ Load when: the user's VPS + access method (+ provider API token) are known — i
 > Security List + ref 11 — that pair IS Track F's dashboard lock: never open 8000 there + the tunnel, ref 11 Steps 1/4) and **Step 7** (Hostinger-only). **Never run UFW on Oracle images.**
 Runs from the agent machine (git-bash on Windows; `py` = Python launcher). `ops/scripts/hostinger_api.py`
 and `ops/scripts/coolify_api.py` are stdlib-only — the contract; raw curl equivalents shown for every
-step. Secrets live only in the deckhand vault `~/.deckhand/vault.env` — stored with `dh vault set NAME` (chmod 600 —
+step. Secrets live only in the deckhand vault — stored with `dh vault set NAME` (`--machine` for a server every project uses; chmod 600 —
 cosmetic on Windows git-bash; enforce for real with `icacls <file> /inheritance:r /grant:r "%USERNAME%:F"`). The scripts
-read the vault themselves; for the raw curl lines load it into the shell with `set -a; . ~/.deckhand/vault.env; set +a` (values are
+read the vault themselves (this project's, then the machine's); for the raw curl lines load it into the shell with
+the `shell` line `dh vault list` prints (`set -a; . <machine vault>; . <this project's>; set +a`; values are
 single-quoted, so this never executes or splits one). SSH keys stay in `~/.vps-ops/ssh/` and v1's
 `~/.vps-ops/secrets/env.sh` is still read as a fallback, so servers set up with v1 keep working.
 
@@ -33,7 +34,7 @@ note: on perms errors (`UNPROTECTED PRIVATE KEY`), `chmod 600`, use git-bash's `
 
 ## Step 1a — Hostinger: register + attach the key via API
 
-Store the provider token once: the owner runs `dh vault set HOSTINGER_API_TOKEN` (hidden prompt) — or, if they pasted it in chat, `printf '%s\n' '<token>' | dh vault set HOSTINGER_API_TOKEN` — then `set -a; . ~/.deckhand/vault.env; set +a`.
+Store the provider token once: the owner runs `dh vault set HOSTINGER_API_TOKEN` (hidden prompt) — or, if they pasted it in chat, `printf '%s\n' '<token>' | dh vault set HOSTINGER_API_TOKEN` — then load the vault with the `shell` line `dh vault list` prints.
 
 ```bash
 PUB="$(cat ~/.vps-ops/ssh/id_ed25519.pub)"
@@ -206,7 +207,7 @@ printf '%s\n' '<token>' | dh vault set COOLIFY_TOKEN        # or the owner runs 
 printf '%s\n' 'http://127.0.0.1:8000' | dh vault set COOLIFY_URL
 printf '%s\n' "root@$VPS_IP" | dh vault set VPS_SSH_HOST
 printf '%s\n' "$HOME/.vps-ops/ssh/id_ed25519" | dh vault set VPS_SSH_KEY
-set -a; . ~/.deckhand/vault.env; set +a
+set -a; . ~/.deckhand/vault.env; [ -f .deckhand/vault.env ] && . .deckhand/vault.env; set +a   # = the `shell` line of dh vault list
 curl -sS -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_URL/api/v1/applications"
 ```
 
@@ -276,5 +277,5 @@ Hostinger's remote MCP (`https://mcp.hostinger.com`) is OAuth-based — fine in 
 | `Host key verification failed` after a VPS rebuild | stale entry for `$VPS_IP` in the vault known_hosts | `ssh-keygen -R $VPS_IP -f ~/.vps-ops/ssh/known_hosts`, retry Step 2 |
 | `:8000/api/health` not 200, or unreachable | install still running; AFTER Step 3b the port is loopback-only BY DESIGN (a timeout from the internet is the lock working) | wait 2–3 min; `docker ps`; from the agent machine run the tunnel (`py ops/scripts/coolify_api.py tunnel`) then `curl http://127.0.0.1:8000/api/health` — never re-open 8000 publicly |
 | Token curl → `401` | API access off / token scopes wrong | `00-user-checklist.md` §4A, recreate the token |
-| `config error: …` from a script | token/URL not stored | `dh vault set COOLIFY_TOKEN` + `dh profile set coolify.url=…` (curl lines: `set -a; . ~/.deckhand/vault.env; set +a`) |
+| `config error: …` from a script | token/URL not stored | `dh vault set COOLIFY_TOKEN` + `dh profile set coolify.url=…` (curl lines: the `shell` line `dh vault list` prints) |
 | SSH lost after firewall change | rule for 22 missing | add TCP/22 + `…/sync`; recover via provider console |

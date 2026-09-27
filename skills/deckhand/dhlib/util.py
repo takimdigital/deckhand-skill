@@ -145,10 +145,11 @@ def redact_obj(obj, values=()):
 
 
 GITIGNORE_MARK = "# deckhand: run logs and local state"
-# run logs hold command output; RESUME/notes/project profile/vault are this machine's own (never pushed)
+# run logs hold command output; RESUME/notes/project profile/vault/notes/layout are this machine's own (never pushed)
 GITIGNORE_LINES = (".deckhand/runs.jsonl", ".deckhand/failures.jsonl", ".deckhand/*.log", ".deckhand/dev.json",
                    ".deckhand/autopsy/", ".deckhand/tryon/", ".deckhand/RESUME.md", ".deckhand/notes.jsonl",
-                   ".deckhand/profile.json", ".deckhand/vault.env", ".deckhand/research/cache/", ".deckhand/suggest.json")
+                   ".deckhand/profile.json", ".deckhand/vault.env", ".deckhand/profile.md", ".deckhand/layout.json",
+                   ".deckhand/research/cache/", ".deckhand/suggest.json")
 GITIGNORE_BLOCK = GITIGNORE_MARK + " (they can hold command output — never commit them)\n" + "\n".join(GITIGNORE_LINES) + "\n"
 # probe path -> what to show (a directory is probed through a file inside it)
 RUNTIME_STATE = {".deckhand/runs.jsonl": ".deckhand/runs.jsonl", ".deckhand/failures.jsonl": ".deckhand/failures.jsonl",
@@ -156,6 +157,7 @@ RUNTIME_STATE = {".deckhand/runs.jsonl": ".deckhand/runs.jsonl", ".deckhand/fail
                  ".deckhand/autopsy/r.md": ".deckhand/autopsy/", ".deckhand/tryon/s.json": ".deckhand/tryon/",
                  ".deckhand/RESUME.md": ".deckhand/RESUME.md", ".deckhand/notes.jsonl": ".deckhand/notes.jsonl",
                  ".deckhand/profile.json": ".deckhand/profile.json", ".deckhand/vault.env": ".deckhand/vault.env",
+                 ".deckhand/profile.md": ".deckhand/profile.md", ".deckhand/layout.json": ".deckhand/layout.json",
                  ".deckhand/research/cache/p.txt": ".deckhand/research/cache/", ".deckhand/suggest.json": ".deckhand/suggest.json"}
 
 

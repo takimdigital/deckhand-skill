@@ -34,6 +34,7 @@ class Sec(unittest.TestCase):
             os.environ.pop(k, None)
         self.root = self.tmp / "proj"
         self.root.mkdir()
+        profile.use_project(None)                      # the machine layer, whatever project an earlier test left active
 
     def tearDown(self):
         for k, v in self.env.items():
@@ -41,6 +42,7 @@ class Sec(unittest.TestCase):
                 os.environ.pop(k, None)
             else:
                 os.environ[k] = v
+        profile.use_project(None)
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def dh(self, *args):

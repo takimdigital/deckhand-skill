@@ -40,9 +40,12 @@ def write(root: Path) -> dict:
           f"- **Signed-in areas:** {', '.join(admin) or 'none'}",
           f"- **Server dashboard (Coolify):** {((prof.get('coolify') or {}).get('url')) or 'see references/ops/10-bootstrap-vps.md'} — reachable through the SSH tunnel only", ""]
     here = "COOLIFY_TOKEN" in PROFILE.vault_names()["project"]
+    lay = PROFILE.layer_dir(root)
+    # HANDOFF.md can travel (a client, a repo): a folder outside the project is named by the command, not its path
+    own = ("`.deckhand/vault.env` in this project (this project's own; never committed)" if lay == root / ".deckhand"
+           else "this project's own vault, in a folder outside the project on the owner's machine (`dh profile where`)")
     L += ["## Access (where, not what)", "",
-          "- Coolify API token: " + ("`.deckhand/vault.env` in this project (this client's own; never committed)" if here
-                                     else "`~/.deckhand/vault.env`") + " → `COOLIFY_TOKEN`",
+          "- Coolify API token: " + (own if here else "`~/.deckhand/vault.env`") + " → `COOLIFY_TOKEN`",
           "- App environment variables: Coolify → this application → Environment Variables" + (f" ({', '.join(env_names[:12])})" if env_names else ""),
           "- Admin/owner account: created at first deploy (references/ops/30-deploy-app.md §6b); its password is in YOUR password manager",
           "- Source code: this repository" + (f" ({s.get('base', {}).get('repo')})" if (s.get('base') or {}).get('repo') else ""), ""]

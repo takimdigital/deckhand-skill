@@ -72,7 +72,7 @@ Getting the RIGHT key (walk the user through exactly this — they will have no 
 | **Brevo** | Sign up → side menu **SMTP & API** → **API keys and MCP**. | Take the **API key** (`xkeysib-…`). The **MCP server key** beside it is ONLY for the optional MCP session (ref 80) — never for sending. **IPs**: the first API call from a new IP answers `401 unrecognised IP address` — AND Brevo emails the account owner a one-click **"Yes, authorize the new IP"** link (from account-alerts@t.brevo.com; legitimate — if you didn't initiate it, ignore). Both the setup machine AND the app server need authorising (manual fallback: app.brevo.com/security/authorised_ips). **Domain setup is fully API-able**: `POST /v3/senders/domains {"name":"mail2.<domain>"}` returns the records; after DNS, `PUT /v3/senders/domains/<name>/authenticate` → `authenticated:true, verified:true`. |
 
 Hand-over — offer BOTH, default first (never say a bare "drop them into Coolify env"):
-(a) *paste the keys to the agent* — it stores them in the vault (`dh vault set NAME` → `~/.deckhand/vault.env`, chmod 600)
+(a) *paste the keys to the agent* — it stores them in the vault (`dh vault set NAME` → this project's vault, chmod 600)
 and sets the Coolify env vars; values are never echoed or committed again;
 (b) *prefer to enter them yourself?* the agent gives a click-by-click guide: Coolify → the app →
 **Environment Variables** → Add → exact name shown → paste value → Save.

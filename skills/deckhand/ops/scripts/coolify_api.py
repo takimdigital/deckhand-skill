@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Thin Coolify REST client (stdlib only) — used by `dh deploy` and the ops runbooks.
 
-Config precedence: --url/--token flags > COOLIFY_URL/COOLIFY_TOKEN env > the deckhand vault
-(~/.deckhand/vault.env: COOLIFY_TOKEN; ~/.deckhand/profile.json: coolify.url) > v1's ~/.vps-ops/config.json
+Config precedence: --url/--token flags > COOLIFY_URL/COOLIFY_TOKEN env > this project's own layer (`dh profile where`)
+> the deckhand vault (~/.deckhand/vault.env: COOLIFY_TOKEN; ~/.deckhand/profile.json: coolify.url) > v1's ~/.vps-ops/config.json
 > v1's token fallback in ~/.vps-ops/secrets/env.sh.
 See references/ops/10-bootstrap-vps.md for setup, references/ops/40-change-pipeline.md for usage.
 """
@@ -45,6 +45,22 @@ def deckhand_config(dk):
     return vault, prof
 
 
+def project_layer():
+    """This project's own layer (`dh profile where`: .deckhand/ or the folder the owner chose) when the script runs
+    from the skill inside a Deckhand project, so a runbook command sees the same keys `dh` does. None otherwise."""
+    try:
+        skill = str(Path(__file__).resolve().parents[2])
+        if skill not in sys.path:
+            sys.path.insert(0, skill)
+        from dhlib import profile as P
+        from dhlib.util import project_root
+        if P._PROJECT is None:
+            P.use_project(project_root())
+        return P.layer_dir()
+    except Exception:  # noqa: BLE001 — a copied script keeps working on the machine vault
+        return None
+
+
 def resolve(url_override=None, token_override=None, env=None, home=None):
     """Resolve Coolify URL + token, or raise SystemExit('config error: ...')."""
     live = env is None
@@ -53,6 +69,11 @@ def resolve(url_override=None, token_override=None, env=None, home=None):
     url = url_override or env.get("COOLIFY_URL")
     token = token_override or env.get("COOLIFY_TOKEN")
     dk = env.get("DECKHAND_HOME") or (str(Path.home() / ".deckhand") if live else None)
+    lay = project_layer() if live and (not url or not token) else None
+    if lay:
+        vault, prof = deckhand_config(lay)
+        token = token or vault.get("COOLIFY_TOKEN")
+        url = url or vault.get("COOLIFY_URL") or prof
     if dk and (not url or not token):
         vault, prof = deckhand_config(Path(dk))
         token = token or vault.get("COOLIFY_TOKEN")

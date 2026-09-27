@@ -5,7 +5,7 @@ Purpose: the agent-managed service layer, ONE section per domain. **Append new d
 Policy (never violate):
 - NEVER install MCP servers globally or by default. Wire a server workspace-scoped ONLY when the current step needs it or the user explicitly asks.
 - Prefer official servers; record license + exact install line here.
-- Auth tokens: created by the human ONCE, stored with `dh vault set NAME` (`~/.deckhand/vault.env`, chmod 600) and/or Coolify env — never in a repo.
+- Auth tokens: created by the human ONCE, stored with `dh vault set NAME` (this project's vault, or `--machine` for every project; chmod 600) and/or Coolify env — never in a repo.
 - MCP is convenience, never a dependency: everything here is also plain REST, reachable by our stdlib scripts (`ops/scripts/coolify_api.py`, `ops/scripts/hostinger_api.py`; DNS = plain Cloudflare API calls, as in the bootstrap refs). Use MCP for interactive sessions; scripts for deterministic pipeline steps.
 
 ## Domain: DNS + registrar

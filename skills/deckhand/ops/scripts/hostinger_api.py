@@ -73,12 +73,29 @@ def update_payload(names, ip, ttl=14400):
     return {"overwrite": True, "zone": a_entries(names, ip, ttl)}
 
 
+def project_layer():
+    """This project's own layer (`dh profile where`: .deckhand/ or the folder the owner chose) when the script runs
+    from the skill inside a Deckhand project, so a runbook command sees the same keys `dh` does. None otherwise."""
+    try:
+        skill = str(Path(__file__).resolve().parents[2])
+        if skill not in sys.path:
+            sys.path.insert(0, skill)
+        from dhlib import profile as P
+        from dhlib.util import project_root
+        if P._PROJECT is None:
+            P.use_project(project_root())
+        return P.layer_dir()
+    except Exception:  # noqa: BLE001 — a copied script keeps working on the machine vault
+        return None
+
+
 def _vault_token():
-    """HOSTINGER_API_TOKEN from the deckhand vault, else v1's ~/.vps-ops/secrets/env.sh."""
+    """HOSTINGER_API_TOKEN from this project's vault, the deckhand vault, else v1's ~/.vps-ops/secrets/env.sh."""
     import shlex
     dk = Path(os.environ.get("DECKHAND_HOME") or (Path.home() / ".deckhand"))
     legacy = Path(os.environ.get("VPS_OPS_HOME") or (Path.home() / ".vps-ops")) / "secrets" / "env.sh"
-    for f in (dk / "vault.env", legacy):
+    lay = project_layer()
+    for f in ([lay / "vault.env"] if lay else []) + [dk / "vault.env", legacy]:
         if f.exists():
             for line in f.read_text(encoding="utf-8").splitlines():
                 k, _, v = line.replace("export ", "", 1).partition("=")

@@ -30,7 +30,7 @@ VPS minimum: **Ubuntu 24.04 LTS**, KVM / full-virtualised, root SSH allowed. Coo
 The agent does the rest via `https://developers.hostinger.com`: SSH-key register + attach, firewall
 create/rules/activate/sync, DNS records, snapshots, metrics, restarts — see `10-bootstrap-vps.md`
 Steps 1a/3/7 and `20-domain-dns-ssl.md`. The token is stored with `dh vault set HOSTINGER_API_TOKEN`
-(`~/.deckhand/vault.env`, chmod 600), never in a repo.
+(this project's vault, or `--machine` for every project; chmod 600), never in a repo.
 
 ## 3. Generic path (any other provider)
 
@@ -108,7 +108,7 @@ still nothing that runs on the server.
 
 Login-email apps: the email row is the ONLY human step — create the three free accounts in one sitting
 (email signup, no card), then hand the keys over ONE of two ways (offer, default first): paste to the
-agent — it vaults them (`dh vault set NAME` → `~/.deckhand/vault.env`, chmod 600) and sets the Coolify env, values never echoed
+agent — it vaults them (`dh vault set NAME` → this project's vault, chmod 600) and sets the Coolify env, values never echoed
 again; or ask for the click-by-click Coolify guide. Which key per provider: ref 70 §2. DNS records,
 env wiring, and the failover router are agent work (refs 70 + 80).
 

@@ -7,7 +7,7 @@
 **Prerequisites:** `10-bootstrap-vps.md` done (Coolify live, token stored with `dh vault set COOLIFY_TOKEN`, `coolify` CLI context optional) · `20-domain-dns-ssl.md` A-record step done for `<domain>` **before** §5.
 **Companion refs:** `40-change-pipeline.md` (every later change) · `50-ops-monitoring.md` (status/backups/incidents) · `00-user-checklist.md` (one-time browser approvals).
 
-Run from git-bash. `py ops/scripts/...` paths are relative to the skill root. REST fallbacks need the vault in the shell: `set -a; . ~/.deckhand/vault.env; set +a` (`$COOLIFY_URL`, `$COOLIFY_TOKEN`) — never echo the token.
+Run from git-bash. `py ops/scripts/...` paths are relative to the skill root. REST fallbacks need the vault in the shell: the `shell` line `dh vault list` prints (`$COOLIFY_URL`, `$COOLIFY_TOKEN`) — never echo the token.
 
 ## 0. Prerequisites on the repo
 

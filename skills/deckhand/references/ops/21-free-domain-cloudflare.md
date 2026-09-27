@@ -50,7 +50,7 @@ Let's Encrypt]`. The Let's Encrypt mechanics are unchanged from `20-domain-dns-s
 
 1. After the zone is Active, create the records — DNS-only (grey cloud) is MANDATORY for Coolify's
    HTTP-01 certs. User clicks, or use the API with the token from the vault (`dh vault set CLOUDFLARE_API_TOKEN`,
-   then `set -a; . ~/.deckhand/vault.env; set +a` → `$CLOUDFLARE_API_TOKEN`). **Create that token with the FULL pipeline scope set in one go:**
+   then the `shell` line `dh vault list` prints → `$CLOUDFLARE_API_TOKEN`). **Create that token with the FULL pipeline scope set in one go:**
    `Zone → Zone → Read` + `Zone → DNS → Edit` + **`Zone → Email Routing → Edit`** — the last is what
    brand mailboxes (`support@`) need later; without it every future mail phase bounces back to the
    user (live-seen). Missing a scope later? **EDIT the same token** (dash.cloudflare.com → My

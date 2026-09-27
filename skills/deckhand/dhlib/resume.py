@@ -189,7 +189,7 @@ def gather(root: Path) -> dict | None:
     pend = PEND.summary(root)
     return {
         "name": s.get("name"), "mode": s.get("mode"), "path": s.get("path"),
-        "client": (read_json(dk / "profile.json", {}) or {}).get("scope") == "client",
+        "client": (read_json(dk / "profile.json", {}) or {}).get("scope") == "client", "store": _store(root),
         "n": f"{STATE.PHASE_IDS.index(cur['id']) + 1}/{len(STATE.PHASES)}", "phase": cur["id"], "title": cur["title"], "gate": gate,
         "gate_what": STATE.GATES.get(gate) if gate else None,
         "next": [short(x) for x in (nxt.get("do") or [])[:3]], "read": nxt.get("read"),
@@ -255,6 +255,7 @@ def render(st: dict) -> str:
          f"- Stage: {st['n']} **{st['phase']}** — {st['title']} · mode {st['mode']} · path {st['path']}"
          + (" · **for a client**: `dh profile set`/`dh vault set` write to this project's own layer (never another client's)" if st["client"] else "")
          + (f" · **waiting for the owner: {st['gate']}** ({st['gate_what']})" if st["gate"] else ""),
+         f"- Settings and keys: {st['store']}",
          "- Next (exact, from `dh next`):"] + [f"  - `{x}`" for x in st["next"]]
     if st["read"]:
         rd = Path(st["read"])
@@ -317,6 +318,19 @@ def render(st: dict) -> str:
 def _dh() -> str:
     from . import guide
     return guide.DH
+
+
+def _store(root: Path) -> str:
+    """Where this project's settings and keys are written (`dh profile where`), in one line."""
+    from . import profile as PROFILE
+    b = PROFILE.binding(root)
+    if b is None:
+        return "not chosen yet (the first `dh profile set`/`dh vault set` keeps them in `.deckhand/`, then asks the owner once)"
+    if not b["ok"]:
+        return f"**BROKEN** — `.deckhand/layout.json` {b['problem']}: ask the owner, then `dh profile where --set here|machine|<folder>`"
+    where = {"here": "`.deckhand/` (this project only)", "machine": "`~/.deckhand/` (shared by every project)"}.get(
+        b["location"], f"`{b.get('dir')}` (this project only, outside it)")
+    return where + ("" if b.get("chosen_by") == "owner" else " — default, the owner has not chosen") + " · `dh profile where`"
 
 
 def write(root: Path) -> Path | None:

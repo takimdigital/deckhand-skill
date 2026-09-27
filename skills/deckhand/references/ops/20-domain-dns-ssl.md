@@ -7,7 +7,7 @@ After this file: `30-deploy-app.md` (attach the same domain to the app), then `4
 > the plain server IP (`http://<server-ip>`) — Traefik matches on Host and serves it with no DNS at all;
 > smoke with `py ops/scripts/coolify_api.py smoke http://<server-ip>`.
 
-Prerequisites: the vault loaded into the shell — `set -a; . ~/.deckhand/vault.env; set +a` (`$HOSTINGER_API_TOKEN`, `$COOLIFY_URL`,
+Prerequisites: the vault loaded into the shell — the `shell` line `dh vault list` prints (`$HOSTINGER_API_TOKEN`, `$COOLIFY_URL`,
 `$COOLIFY_TOKEN` — see `10-bootstrap-vps.md` Steps 1a/5); VPS IP known; SSH + Coolify health verified.
 
 > **Free-preview track:** the domain is `name.pp.ua` at nic.ua, DNS hosted at Cloudflare (free).

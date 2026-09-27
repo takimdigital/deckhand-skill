@@ -185,13 +185,19 @@ def set_status(root: Path | None, pid: str, status: str, machine: bool = False) 
 # ------------------------------------------------------------------ the owner's free-form profile notes
 
 def profile_md() -> dict | None:
-    """~/.deckhand/profile.md — the owner's own notes about themselves (accounts, providers, preferences), written by
-    earlier Deckhand versions or by hand. Fields there are answered: never re-ask them. Read-only here; values that look
-    like secrets are masked (the file must not hold any)."""
-    p = home() / "profile.md"
-    if not p.exists():
-        return None
+    """The owner's own notes about themselves (accounts, providers, preferences), written by earlier Deckhand versions
+    or by hand: ~/.deckhand/profile.md, plus this project's own profile.md in its layer (`dh profile where`), listed
+    first. Fields there are answered: never re-ask them. Read-only here; values that look like secrets are masked
+    (the files must not hold any)."""
+    from . import profile as PROFILE
     from .util import redact
-    lines = [redact(l.rstrip()) for l in p.read_text(encoding="utf-8", errors="replace").splitlines()]
-    facts = [l.strip("-* ").strip() for l in lines if re.match(r"^\s*[-*]?\s*[\w .()/+-]{2,40}:\s*\S", l) and not l.startswith("#")]
-    return {"path": str(p), "facts": facts[:60], "say": "these are answered — never ask for them again"}
+    paths = [p for p in (PROFILE.project_notes_path(), home() / "profile.md") if p and p.exists()]
+    if not paths:
+        return None
+    facts = []
+    for p in paths:
+        lines = [redact(l.rstrip()) for l in p.read_text(encoding="utf-8", errors="replace").splitlines()]
+        facts += [l.strip("-* ").strip() for l in lines if re.match(r"^\s*[-*]?\s*[\w .()/+-]{2,40}:\s*\S", l) and not l.startswith("#")]
+    facts = list(dict.fromkeys(facts))
+    return {"path": str(paths[0]), **({"paths": [str(p) for p in paths]} if len(paths) > 1 else {}),
+            "facts": facts[:60], "say": "these are answered — never ask for them again"}

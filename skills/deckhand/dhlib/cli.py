@@ -139,7 +139,8 @@ def build_parser():
     w = where.add_mutually_exclusive_group()
     w.add_argument("--here", dest="where", action="store_const", const="project", help="this project's own layer (.deckhand/, gitignored)")
     w.add_argument("--machine", dest="where", action="store_const", const="machine", help="~/.deckhand (every project)")
-    p = sub.add_parser("profile", parents=[where]); p.add_argument("action", choices=["show", "set", "doctor"]); p.add_argument("pairs", nargs="*"); p.add_argument("--offline", action="store_true")
+    p = sub.add_parser("profile", parents=[where]); p.add_argument("action", choices=["show", "set", "doctor", "where"]); p.add_argument("pairs", nargs="*"); p.add_argument("--offline", action="store_true")
+    p.add_argument("--set", dest="bind_to", metavar="here|machine|FOLDER", help="where: where this project keeps its settings and keys (remembered)")
     p = sub.add_parser("vault", parents=[where]); p.add_argument("action", choices=["set", "list"]); p.add_argument("name", nargs="?")
     p = sub.add_parser("pending", help="what only the owner can do: list · add · done · drop · wait (waiting-confirm) · decide — project PENDING.md or --machine")
     p.add_argument("action", choices=["list", "add", "done", "drop", "wait", "decide"]); p.add_argument("text", nargs="*", help="add/decide: what · done/drop/wait: the ID")
@@ -264,6 +265,10 @@ def dispatch(a):
         from . import profile as PR
         if a.action == "set":
             return PR.set_fields(a.pairs, where=a.where)
+        if a.action == "where":
+            if a.pairs:
+                raise DhError("USAGE", "dh profile where [--set here | machine | <folder outside the project>]")
+            return PR.bind(a.bind_to) if a.bind_to is not None else PR.where_view()
         if a.action == "doctor":
             from . import pending as PEND
             md = PEND.profile_md()
@@ -272,13 +277,14 @@ def dispatch(a):
         from . import pending as PEND
         md = PEND.profile_md()
         return {"profile": PR.load(), "scope": PR.scope(), "path": str(PR.profile_path()),
-                "project_layer": str(pp) if pp and pp.exists() else None, **({"notes_md": md} if md else {})}
+                "project_layer": str(pp) if pp and pp.exists() else None, "where": PR.where_brief(), **({"notes_md": md} if md else {})}
     if c == "vault":
         from . import profile as PR
         if a.action == "list":
             pv = PR.project_vault_path()
             return {"names": sorted(PR.vault_read()), "by_layer": PR.vault_names(), "scope": PR.scope(), "path": str(PR.vault_path()),
-                    "project_layer": str(pv) if pv and pv.exists() else None}
+                    "project_layer": str(pv) if pv and pv.exists() else None, "where": PR.where_brief(),
+                    **({"shell": PR.shell_line()} if PR.shell_line() else {})}
         if not a.name:
             raise DhError("USAGE", "dh vault set NAME [--here|--machine]   (value on stdin or prompted — never on the command line)")
         return PR.vault_set(a.name, where=a.where)
@@ -362,7 +368,8 @@ def dispatch(a):
             out = B.scaffold(Path(a.to), a.pm)
         if who == "client":                              # the app folder keeps the client's own layer too
             PR.set_scope(out["project"], "client")
-        return out
+        carried = PR.carry(root, out["project"])         # … and the same settings/keys choice (`dh profile where`)
+        return {**out, **({"carried": carried} if carried else {})}
     if c in ("compose", "dev"):
         from . import build as B
         if c == "compose":
