@@ -114,6 +114,8 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
     """Mark a phase done — only after its check passes (checks live in dhlib.checks)."""
     from . import checks
     s = load(root)
+    if s.get("moved_to"):
+        raise DhError("MOVED", f"this project continues in {s['moved_to']} (its app folder): run `dh next` there", to=s["moved_to"])
     if phase not in PHASE_IDS:
         raise DhError("BAD_PHASE", f"phase must be one of {PHASE_IDS}")
     idx = PHASE_IDS.index(phase)

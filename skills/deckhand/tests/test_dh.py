@@ -348,6 +348,41 @@ class Harvest(Base):
         self.assertEqual(man["template_names"][0], "Bakery Base")
         self.assertEqual(pool.query({"shape": "catalogue", "features": ["accounts"]}, 1)["top"][0]["name"], "bakery-base")
 
+    def test_nothing_of_the_previous_business_reaches_the_next_one_and_its_data_blocks_until_replaced(self):
+        # the simulation: client B's site showed client A's phone and owner name, and every check stayed green
+        subprocess.run(["git", "init", "-q"], cwd=self.root)
+        (self.root / "package.json").write_text('{"name": "sunny-bakery", "dependencies": {"next": "16"}}')
+        (self.root / "app").mkdir()
+        (self.root / "app" / "page.tsx").write_text(
+            'export default () => <main className="SunnyBakery"><h1>Sunny Bakery</h1><p>Warm bread before breakfast</p>'
+            '<p>Call 06.12.34.56.78 or <a href="tel:+33612345678">+33 6 12 34 56 78</a>, write to orders@sunnybakery.fr or hi@gmail.com</p>'
+            '<p>12 rue des Lilas, 69001 Lyon · founded by Amina Haddad</p><a href="https://instagram.com/sunnybakery">Instagram</a>'
+            '<a href="https://www.sunnybakery.fr/menu">Menu</a></main>')
+        (self.root / "data").mkdir()
+        (self.root / "data" / "customers.json").write_text('[{"name": "Claire Martin", "orders": 12}]')
+        (self.root / ".env.example").write_text("RESEND_API_KEY=\n")
+        write_json(self.root / ".deckhand" / "brief.json", {"brand": {"name": "Sunny Bakery", "tagline": "Warm bread before breakfast",
+                   "social": ["https://instagram.com/sunnybakery"]}, "domain": "sunnybakery.fr", "owner": {"name": "Amina Haddad"},
+                   "seo": {"local": {"phone": "+33 6 12 34 56 78", "email": "orders@sunnybakery.fr",
+                                     "address": {"street": "12 rue des Lilas", "postal": "69001", "city": "Lyon"}}}})
+        r = harvest.harvest(self.root, "bakery-base", to=self.tmp / "bases" / "bakery-base")
+        dest = Path(r["path"])
+        page = (dest / "app" / "page.tsx").read_text()
+        for old in ("Sunny", "sunny", "06.12", "612345678", "6 12 34", "orders@", "hi@gmail", "rue des Lilas", "69001", "Amina", "Haddad",
+                    "instagram.com/sunnybakery", "sunnybakery.fr", "Warm bread"):
+            self.assertNotIn(old, page, old)
+        self.assertIn("BakeryBase", page, "the CamelCase spelling becomes the base's")
+        self.assertIn("bakery-base", (dest / "package.json").read_text())
+        self.assertTrue((dest / ".env.example").exists(), "an env template with no values is part of a base")
+        man = read_json(dest / "deckhand.template.json")
+        self.assertEqual([d["path"] for d in man["owner_data"]], ["/".join(("data", "customers.json"))])
+        chk = brand.check(dest)
+        kinds = {f["kind"] for f in chk["findings"] if f["severity"] == "block"}
+        self.assertFalse(chk["ok"])
+        self.assertTrue({"previous-business-data", "demo-content"} <= kinds, kinds)
+        (dest / "data" / "customers.json").write_text("[]")
+        self.assertNotIn("previous-business-data", {f["kind"] for f in brand.check(dest)["findings"]})
+
 
 class Cli(Base):
     def test_next_without_a_run_explains_init(self):

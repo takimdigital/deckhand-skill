@@ -19,7 +19,7 @@ from . import state as STATE
 NEVER = re.compile(r"(^|/)(LICENSE|LICENCE|NOTICE|THIRD_PARTY_NOTICES)(\.[a-z]+)?$|(^|/)(package-lock\.json|pnpm-lock\.yaml|yarn\.lock|bun\.lockb?)$|(^|/)\.deckhand/", re.I)
 DEMO_NAMES = [r"\bAcme( Inc\.?| Corp\.?)?\b", r"\blorem ipsum\b", r"\bdolor sit amet\b", r"\bJohn Doe\b", r"\bJane Doe\b",
               r"\byour company\b", r"\bCompany Name\b", r"\bYour Brand\b", r"\bexample@example\.com\b", r"\bhello@example\.com\b",
-              r"\b\+1 ?\(?555\)?", r"\b123 Main St"]
+              r"(?<![\w+])\+1 ?\(?555\)?", r"\b123 Main St", r"your-domain\.example", r"example\.com/your-profile", r"\bYour tagline\b"]
 BRAND_LOGO_FILES = re.compile(r"(^|/)(vercel|spotify|supabase|hulu|bolt|beacon|firebase|claude(-ai)?|openai|gemini|slack|figma|linear|twilio|clerk|nvidia|netflix|cisco|stripe|github|lemon-squeezy|laravel|lilly|nike|column|replit|trustpilot|g2|google)\.(tsx|jsx|svg)$", re.I)
 
 
@@ -167,6 +167,13 @@ def check(root: Path, allow: tuple = ()) -> dict:
             add(rel, 1, "lorem", f"{lorem} lorem-ipsum words in this file (placeholder Latin shipped as content)")
         if BRAND_LOGO_FILES.search(rel) and re.search(r"components/(sections|ui-kit)/", rel):
             add(rel, 1, "third-party-logo", "a registry demo logo shipped as social proof — replace with real clients or remove", "block")
+    # a harvested base's previous business: its data files (catalogue, customers, photos) until each is replaced
+    import hashlib
+    for d in (read_json(root / "deckhand.template.json", {}) or {}).get("owner_data") or []:
+        fp = root / str(d.get("path", ""))
+        if d.get("sha") and fp.is_file() and hashlib.sha256(fp.read_bytes()).hexdigest()[:16] == d["sha"]:
+            add(d["path"], 1, "previous-business-data", "the previous business's data, unchanged since its base was harvested "
+                "— replace it with this business's, or delete it")
     # the design's demo copy that try-on/compose could not replace with the owner's words
     ledger = read_json(root / ".deckhand" / "demo-copy.json", {}) or {}
     norm = lambda t: re.sub(r"\s+", " ", t).strip()  # noqa: E731

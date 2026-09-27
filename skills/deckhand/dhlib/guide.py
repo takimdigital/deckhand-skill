@@ -140,6 +140,9 @@ def next_step(root: Path) -> dict:
     if not s:
         return {"state": "no run", "do": [f"{DH} init --name <business> --mode phased|auto --path pool|mine|existing|scratch --project <dir>"],
                 "read": str(SKILL / "references" / "00-define.md"), "dh": DH}
+    if s.get("moved_to"):
+        return {"state": "moved", "to": s["moved_to"], "do": [f"cd {s['moved_to']}", f"{DH} next"],
+                "why": "the app was built in another folder; the run (brief, plan, gates, notes) continues there", "dh": DH}
     gate = STATE.blocking_gate(s)
     cur = STATE.current(s)
     if gate:

@@ -212,6 +212,11 @@ F2 BUILD PATHS (run.json.path)
 - existing: `dh adopt PATH|URL` ([[dhlib/build.py#adopt]]); history kept.
 - scratch: `dh scaffold` ([[dhlib/build.py#scaffold]]: create-next-app + [[templates/scaffold]] tokens/cn/Button) →
   `dh compose` (F3).
+- `--to` another folder than the planning one: the app folder continues the SAME run ([[dhlib/build.py#carry_run]]:
+  brief, sitemap, plan, gates, notes; logs and the settings layer stay, [[dhlib/profile.py#carry]] moves that); the
+  planning folder records `moved_to`, `dh next` there says `cd`, `phase done` there is [[!MOVED]]. Only from a
+  planning folder ([[dhlib/build.py#planning_folder]]: a run with no base yet): run from inside another business,
+  nothing of it (keys, run) comes along.
 - Then:
   - `dh swap scan|check` swaps rented vendor SDKs for owned targets ([[dhlib/swap.py#TARGETS]]; payment processors
     are kept);
@@ -491,7 +496,12 @@ F13 VET
 F14 REUSE
 - `dh harvest --name N [--push]` ([[dhlib/harvest.py#harvest]]):
   1. copy tracked files, minus [[dhlib/harvest.py#DROP]];
-  2. neutralize the brand to N;
+  2. neutralize the business to N ([[dhlib/harvest.py#_facts]]): its name in every spelling (Sunny Bakery,
+     sunny-bakery, SunnyBakery…), phone however written, emails, address, domain, social profiles, owner, tagline,
+     any tel: link → placeholders the rebrand check blocks on (hello@example.com, +1 555 0100, 123 Main St…); its
+     data files (seed, fixtures, data/, public photos) are kept so the base builds and fingerprinted in the
+     manifest (`owner_data`): the next project's `dh rebrand check` blocks (`previous-business-data`) until each
+     is replaced; `.env.example` is kept;
   3. write a manifest (proven by verify and live URL);
   4. register in the personal pool.
 - `--push`:

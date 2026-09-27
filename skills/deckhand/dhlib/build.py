@@ -75,6 +75,49 @@ def _record_base(dest: Path, base: dict, name: str, path: str) -> None:
     STATE.save(dest, s)
 
 
+# what stays with the folder it describes when a run moves: logs, the dev server, try-on sessions, and the settings
+# layer (profile.carry moves that, by the owner's choice)
+STAYS = {"run.json", "runs.jsonl", "failures.jsonl", "history.jsonl", "dev.json", "RESUME.md", "suggest.json", "autopsy",
+         "tryon", "profile.json", "vault.env", "profile.md", "layout.json"}
+
+
+def planning_folder(root) -> bool:
+    """A folder whose run is waiting for its base: the one a clone/adopt/scaffold `--to` elsewhere continues. A
+    project that already has its base is another business: nothing of it goes to the new folder."""
+    s = STATE.load(Path(root), required=False) if root else None
+    return bool(s) and not s.get("base") and not s.get("moved_to")
+
+
+def carry_run(src, dst) -> dict | None:
+    """`dh clone … --to OTHERDIR` from the planning folder: the app folder continues that run (brief, sitemap, plan,
+    gates, notes), never a fresh one at define; the planning folder then points at it."""
+    src, dst = Path(src).resolve(), Path(dst).resolve()
+    if src == dst or not planning_folder(src):
+        return None
+    s, d = STATE.load(src), STATE.load(dst, required=False) or {}
+    if any(ph.get("status") in ("done", "skipped") for ph in (d.get("phases") or {}).values()):
+        return None                                      # the destination has a run of its own: never overwrite it
+    copied = []
+    for p in sorted((src / ".deckhand").iterdir()):
+        if p.name in STAYS or p.suffix == ".log":
+            continue
+        out = dst / ".deckhand" / p.name
+        if p.is_dir():
+            shutil.copytree(p, out, dirs_exist_ok=True)
+        else:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(p, out)
+        copied.append(p.name)
+    moved = {**s, "base": d.get("base")}
+    STATE.save(dst, moved)
+    from . import resume as RESUME
+    RESUME.agent_entry(dst)
+    s["moved_to"], s["base"] = str(dst), d.get("base")
+    STATE.save(src, s)
+    STATE.log(src, {"event": "moved", "to": str(dst)})
+    return {"from": str(src), "to": str(dst), "copied": copied}
+
+
 OWN_FILES = {".deckhand", "AGENTS.md", "CLAUDE.md", "PENDING.md", ".gitignore", ".gitattributes", "HANDOFF.md"}
 
 

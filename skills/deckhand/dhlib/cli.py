@@ -417,10 +417,13 @@ def dispatch(a):
             out = B.adopt(a.source, Path(a.to) if a.to else None, do_install=a.install)
         else:
             out = B.scaffold(Path(a.to), a.pm)
+        if not B.planning_folder(root):                  # run from inside another business: nothing of it comes along
+            return out
         if who == "client":                              # the app folder keeps the client's own layer too
             PR.set_scope(out["project"], "client")
         carried = PR.carry(root, out["project"])         # … and the same settings/keys choice (`dh profile where`)
-        return {**out, **({"carried": carried} if carried else {})}
+        moved = B.carry_run(root, out["project"])        # … and the run itself, when the app lives in another folder
+        return {**out, **({"carried": carried} if carried else {}), **({"run_moved": moved, "next": f"cd {moved['to']} — the project continues there"} if moved else {})}
     if c in ("compose", "dev"):
         from . import build as B
         if c == "compose":

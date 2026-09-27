@@ -59,6 +59,25 @@
   send upstream; `dh slop lint` refuses a pack whose examples disagree with its own rules or whose patterns could
   hang the check.
 
+### Found by simulating the four ways in (pool, mine, existing, scratch)
+- **A "no" never passes a gate.** "don't ship it", "wait, do not proceed" and "this is not good" passed as a go, and
+  "ok but add a blog page" passed with a change. A held-back go is now a change request; a go carries a change only
+  when it is explicit ("G1 ok, but add a pricing page"). In doubt, the gate asks again.
+- **A harvested base carries nothing of the previous business.** Before, only the brand name was replaced: the next
+  client's site showed the previous client's phone and owner, and every check stayed green. Now its name in every
+  spelling, phone however written, emails, address, domain, social profiles, owner and tagline become placeholders
+  the rebrand check blocks on; its data files (catalogue, customers, photos) are fingerprinted and block the next
+  project's rebrand check until each is replaced. `.env.example` is kept.
+- **Building into another folder continues the same run.** `dh clone|adopt|scaffold --to OTHERDIR` started the app
+  folder over at define and left the planning folder unable to finish. The app folder now continues the run (brief,
+  sitemap, plan, gates, notes); `dh next` in the planning folder says where it went.
+- **Cloning from inside another business takes nothing of it.** Keys and settings come along only from the planning
+  folder of the project being built.
+- **The owner's server keys are asked once.** Server, Coolify, DNS, GitHub, notification and backup settings and keys
+  stay on the machine in a personal project; a business's own keys and a client's everything stay in the project. A
+  client project whose layer is unreadable never falls back to the owner's keys.
+- `dh tryon flags|registry|seo ACTION` answered USAGE every time; it works now.
+
 ### Each project keeps its own settings and keys
 - Before: in a personal project every `dh profile set` and `dh vault set` went to `~/.deckhand`, so one project's
   domain, provider or keys leaked into every other project.

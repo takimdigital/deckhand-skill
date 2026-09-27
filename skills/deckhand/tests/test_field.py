@@ -115,6 +115,42 @@ class BaseIntoInitFolder(Base):
         self.assertIn(".deckhand/runs.jsonl", gi)
         self.assertFalse(any(p.name.endswith(".deckhand-hold") for p in self.tmp.iterdir()))
 
+    def test_a_base_built_in_another_folder_continues_the_same_run_there(self):
+        # the simulation: `--to OTHERDIR` started the app folder over at define; the planning folder never finished
+        state.init(self.root, "CleanKit", "phased", "mine")
+        (self.root / ".deckhand" / "brief.json").write_text('{"business": "x"}', encoding="utf-8")
+        (self.root / ".deckhand" / "sitemap.json").write_text('{"pages": []}', encoding="utf-8")
+        s = state.load(self.root)
+        s["phases"]["define"]["status"] = "done"
+        state.save(self.root, s)
+        app = self.tmp / "cleankit-app"
+        code, out = self.dh("clone", self._local_base(), "--to", str(app), "--no-install")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(Path(out["run_moved"]["to"]), app.resolve())
+        moved = state.load(app)
+        self.assertEqual((moved["name"], moved["phases"]["define"]["status"], moved["base"]["name"]), ("CleanKit", "done", "mybase"))
+        self.assertEqual(read_json(app / ".deckhand" / "brief.json"), {"business": "x"})
+        self.assertTrue((app / ".deckhand" / "sitemap.json").exists())
+        code, out = self.dh("next")                                                   # the planning folder points there
+        self.assertEqual((out["state"], Path(out["to"])), ("moved", app.resolve()))
+        code, out = self.dh("phase", "done", "build")
+        self.assertEqual((code, out["code"]), (1, "MOVED"))
+
+    def test_a_clone_run_from_inside_another_business_takes_nothing_of_it(self):
+        # the simulation: cloning from client A's folder copied A's Stripe and Resend keys into the new project
+        state.init(self.root, "ClientA", "phased", "mine")
+        s = state.load(self.root)
+        s["base"] = {"kind": "scratch"}
+        state.save(self.root, s)
+        (self.root / ".deckhand" / "vault.env").write_text("STRIPE_SECRET_KEY='sk_client_a'\n", encoding="utf-8")
+        app = self.tmp / "client-b"
+        code, out = self.dh("clone", self._local_base(), "--to", str(app), "--no-install")
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("carried", out)
+        self.assertNotIn("run_moved", out)
+        self.assertFalse((app / ".deckhand" / "vault.env").exists())
+        self.assertNotEqual(state.load(app)["name"], "ClientA")
+
     def test_a_folder_with_other_files_is_still_refused(self):
         state.init(self.root, "CleanKit", "phased", "mine")
         (self.root / "notes.txt").write_text("mine", encoding="utf-8")
