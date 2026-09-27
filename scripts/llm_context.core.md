@@ -72,6 +72,8 @@ registries (https, cached in ~/.deckhand/cache/tryon) ─▶ materialize ─▶ 
 | .deckhand/suggest.json (gitignored) | [[dhlib/suggest.py#dismiss]] (`dh suggest dismiss ID --days N`) | [[dhlib/suggest.py#compute]] | {dismissed: {id: until date}} — a quieted suggestion comes back after the date |
 | .deckhand/workflow.json | [[dhlib/workflow.py#use]] (a copy of the pinned workflow) | [[dhlib/workflow.py#progress]], observe, todo, autopsy | the workflow this run follows; run.json `workflow` = {id, version, source, sha, params, done[], skipped[], deviations[]} — a changed file is refused (sha) |
 | .deckhand/copy.json | the agent | [[tryon/compose.mjs]] | section copy (schema in compose.mjs header; footer.columns/social, navbar.links) |
+| .deckhand/slop.json · SLOP.md · slop-report.json | [[dhlib/slop.py#allow]] (`dh slop allow`; `ignore` globs by hand) · [[dhlib/slop.py#check]] (a project scan) | [[dhlib/slop.py#load]] (allow list), [[dhlib/slop.py#project_units]] (ignore) · owner | brand/trade words never flagged on this site · the last copy report: verdict, worst texts with hits and fixes |
+| ~/.deckhand/slop/<lang>.json · slop/outbox/ | [[dhlib/slop.py#add]] (`dh slop add`) · [[dhlib/slop.py#export]] | [[dhlib/slop.py#load]] (merged over the shipped pack) | the owner's own cliché finds, applied at once · a bundle to contribute by PR (allow list left out) |
 | .deckhand/dev.json · dev.log · svc-<name>.log | [[dhlib/build.py#dev_start]] | checks.build, verify, dev_status | url, pid, services{name: pid, up, log} · the dev server log · each service's log |
 | .deckhand/swap-map.json | [[dhlib/swap.py#scan]] | [[dhlib/swap.py#check]] | vendor SDKs found → owned target |
 | .deckhand/demo-copy.json | [[tryon/lib/engine.mjs#recordDemoCopy]] | [[dhlib/brand.py#check]] | demo words a kept design still shows (block), or AI-written words to confirm (ai:true → warn) |
@@ -177,6 +179,9 @@ registries (https, cached in ~/.deckhand/cache/tryon) ─▶ materialize ─▶ 
    other command to the owner first ([[!NEEDS_ACCEPT]]); a community file must match its index sha ([[!SHA_MISMATCH]]).
    Rendered text never carries `{x}` or `<x>` (Hermes delegate_task refuses a batch that does). The workflow autopsy
    writes only its report; accepted proposals go where the owner says (mine / a public bundle), never into the skill.
+18. Copy packs are data anyone may send: [[dhlib/slop.py#lint]] refuses a regex with a nested quantifier, lookaround or
+   backreference (a pack can never hang a check), and a pack whose own examples disagree with its rules (slop example
+   scored clean, clean example flagged, phrase missing its example). The verdict is deterministic: no model, no network.
 
 ## FLOWS (→ = then; each step names its code)
 F1 RUN LOOP
@@ -219,6 +224,8 @@ F3 COMPOSE (scratch landing page, no codegen)
   5. [[tryon/lib/engine.mjs#bake]].
 - Output: components/sections/<slug>/, and the page imports them in order.
 - Rules: one <h1> per page; copy with no room in the design is reported, never dropped silently.
+- Then [[dhlib/build.py#compose]] reads the same copy.json with [[dhlib/slop.py#copy_units]] → `copy_check` in its output
+  (verdict + worst sections) and a `next` to rewrite when it is not clean.
 
 F4 TRY-ON SESSION WIRING
 - `tryon setup` ([[tryon/lib/setup.mjs#setup]]):
@@ -406,7 +413,8 @@ F9 SITE (whole look)
 
 F10 REVIEW `dh verify` → [[dhlib/verify.py#run_verify]]
 - Rows: typecheck · lint (advisory) · build · prod-clean · tryon-closed · secrets · leaks/honesty
-  ([[dhlib/brand.py#check]]) · routes · a11y (advisory) · audit (advisory).
+  ([[dhlib/brand.py#check]], AI-slop copy included) · routes · seo · copy-slop on the rendered routes (advisory,
+  [[dhlib/slop.py#url_units]]) · a11y (advisory) · audit (advisory).
 - routes: every planned static route plus every internal home-page link must answer < 400, on the production build
   served on a free port 4100+ (falls back to --url or the dev server).
 - Writes verify.json and VERIFY.md. Any red blocking row → [[!VERIFY_FAILED]] → G4 can't pass.
@@ -503,7 +511,24 @@ F16 BRAND
 - `dh rebrand scan|apply|check` ([[dhlib/brand.py#apply]]): package name, metadata, template names, primary colour
   token, monogram icon.
 - check blocks on: template names, demo companies, lorem, example contacts, placeholder images, demo-copy markers,
-  third-party logos as social proof.
+  third-party logos as social proof, and copy scored slop (kind `ai-slop`, F24; review-level copy warns).
+
+F24 COPY CHECK (AI slop) `dh slop …` → [[dhlib/slop.py]]
+- One engine, one JSON pack per language ([[data/slop]]: en fr es de it pt nl pl ja ko zh; [[data/slop/_common.json]]
+  weights + thresholds). [[dhlib/slop.py#load]] = shipped pack + ~/.deckhand/slop/<lang>.json + the project allow
+  list + the brand name's words → [[dhlib/slop.py#Pack]] (every entry compiled once).
+- Where the words are: [[dhlib/slop.py#project_units]] = .deckhand/copy.json per section ([[dhlib/slop.py#copy_units]])
+  + site files (JSX/Vue/Svelte/Astro text and prose strings [[dhlib/slop.py#markup_fragments]], md/mdx, html, content
+  json/ts), never README/docs/tests/components/ui ([[dhlib/slop.py#EXCLUDE]]); a line with `dh:slop-ok` is skipped.
+  [[dhlib/slop.py#url_units]] = rendered pages of any URL (home + its internal links, max_pages).
+- Language per text: --lang, else a locale in the path, else [[dhlib/slop.py#detect]] (script: kana/hangul/han, then
+  stopwords among brief.languages). No pack → the language-free features only.
+- [[dhlib/slop.py#analyze]]: phrases (a phrase inside a longer one counts once; words inside a phrase too) → words
+  (strong/buzz) → transitions (from the 2nd) → superlatives without a number → em dashes, "!", emoji over a rate →
+  triads (from the 3rd) → flat rhythm (≥ 8 sentences, low CV). Points per 100 words (floor 40) → clean | review | slop;
+  one strong hit ⇒ ≥ review; kind leak ⇒ slop. Hits carry line (files) or key (copy.json) and the pack's fix.
+- `check` raises [[!SLOP]] on slop and writes SLOP.md; `brief` = what not to write (before writing); `add`/`export` =
+  the owner's finds → a community bundle; `lint` = [[dhlib/slop.py#lint]] ([[!PACK_INVALID]]).
 
 F17 FOUND ON GOOGLE (SEO)
 - Policy: [[data/seo.json]] (rules C/M/T/S/L/O/I/P/E/A, owner facts, owner actions, AI crawlers, schema types).
@@ -613,6 +638,8 @@ F19 RESEARCH EVIDENCE
 | pool ranking / vetting criteria / licence policy | [[dhlib/pool.py#score]] · [[dhlib/vet.py#verdict]] · [[data/licenses.json]] | [[skills/deckhand/tests/test_vet.py]] |
 | clone/adopt/scaffold/dev server | [[dhlib/build.py]] | test_dh.py |
 | rebrand / honesty findings | [[dhlib/brand.py#check]] | test_dh.py |
+| AI-slop copy: features, scoring, extraction, language detection | [[dhlib/slop.py]] · [[data/slop/_common.json]] | [[skills/deckhand/tests/test_slop.py]] |
+| a language pack (words, phrases, examples) | data/slop/<lang>.json (guide: [[data/slop/README.md]]) | `dh slop lint` · test_slop.py (every pack passes its own examples) |
 | verify rows | [[dhlib/verify.py#run_verify]] | test_dh.py (Verify) |
 | deploy / smoke / Coolify client | [[dhlib/deploy.py]] · [[ops/scripts/coolify_api.py]] | [[skills/deckhand/ops/tests/test_coolify_api.py]], test_dh.py (Deploy) |
 | server, DNS, backup and storage clients (used by the ops runbooks) | [[ops/scripts/hostinger_api.py]] · [[ops/scripts/coolify_backup_setup.py]] · [[ops/scripts/backup_verify.py]] · [[ops/scripts/b2_setup.py]] · [[ops/scripts/tigris_bucket.py]] · [[ops/scripts/repo_presence.py]] | [[skills/deckhand/ops/tests]] (pytest) |

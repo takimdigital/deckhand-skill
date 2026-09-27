@@ -258,9 +258,15 @@ def compose(root: Path, page: str, sections: list, copy: str | None) -> dict:
         argv += ["--copy", copy]
     r = run(argv, cwd=root, timeout=900)
     try:
-        return __import__("json").loads(r["out"].strip().splitlines()[-1])
+        out = __import__("json").loads(r["out"].strip().splitlines()[-1])
     except Exception:
         raise DhError("COMPOSE_FAILED", (r["err"] or r["out"])[-800:])
+    if copy and isinstance(out, dict):
+        from . import slop as SLOP                       # the words the model wrote, read before the owner sees them
+        rep = SLOP.summarize(SLOP.copy_units(root, (root / copy) if not Path(copy).is_absolute() else Path(copy)), top=3)
+        out["copy_check"] = {**rep, **({"next": "rewrite what copy_check lists in copy.json, then compose again (dh slop brief first)"}
+                                       if rep["verdict"] != "clean" else {})}
+    return out
 
 
 # ------------------------------------------------------------------ dev server (+ the services it needs)

@@ -1,0 +1,74 @@
+{
+  "schema": "deckhand.slop/1",
+  "lang": "fr",
+  "name": "Français",
+  "maturity": "seed",
+  "maintainers": ["deckhand"],
+  "script": "latin",
+  "suffixes": ["s", "e", "es", "x"],
+  "stopwords": ["le", "la", "les", "de", "des", "du", "et", "en", "un", "une", "est", "pour", "que", "qui", "dans", "sur", "pas", "nous", "vous", "votre", "vos", "notre", "avec", "au", "aux", "ce", "cette", "sont", "par", "plus", "chez", "ou"],
+  "words": {
+    "strong": ["sublimer|sublime|subliment|sublimez|sublimera", "révolutionner|révolutionne|révolutionnez|révolutionnaire",
+               "incontournable", "inégalé|inégalée|inégalés|inégalées", "synergie", "paradigme", "pléthore", "myriade", "holistique",
+               "propulser|propulse|propulsez|propulsera", "tapisserie", "havre", "écrin", "niché|nichée|nichés|nichées", "joyau",
+               "levier", "catalyseur", "redéfinir|redéfinit|redéfinissez|redéfinissons", "transcender|transcende|transcendez",
+               "méticuleux|méticuleuse|méticuleusement", "plongez|plongeons", "embarquez|embarquons", "libérez", "boostez|booster",
+               "disruptif|disruptive", "inoubliable"],
+    "buzz": ["innovant|innovante|innovants|innovantes", "solutions", "fluide|fluidité", "écosystème", "dynamique", "véritable",
+             "passionné|passionnée|passionnés|passionnées", "exceptionnel|exceptionnelle|exceptionnels|exceptionnelles",
+             "sur-mesure", "haut de gamme", "harmonieux|harmonieuse", "minutieusement", "robuste", "intuitif|intuitive",
+             "optimiser|optimisez|optimisation", "maximiser|maximisez", "accompagner|accompagnons|accompagne|accompagnement",
+             "valoriser|valorisez", "parcours", "expertise", "unique", "authentique", "savoir-faire", "univers", "incroyable"]
+  },
+  "fixes": {
+    "sublimer": "dire ce qui change concrètement", "révolutionner": "dire ce qui est nouveau", "incontournable": "une preuve : un chiffre, un avis",
+    "innovant": "dire ce qui est nouveau", "solutions": "nommer le service", "accompagner": "dire ce que vous faites (poser, réparer, conseiller)",
+    "véritable": "à supprimer", "havre": "décrire le lieu", "écrin": "décrire le lieu", "niché": "situé rue …", "passionné": "le montrer : années, détail, geste",
+    "exceptionnel": "un fait qui le prouve", "fluide": "dire ce qui ne bloque pas", "parcours": "visite, démarche, séjour", "optimiser": "dire ce qui est plus rapide, de combien",
+    "univers": "gamme, carte, boutique", "expertise": "les années, les diplômes, les réalisations", "unique": "dire ce que personne d'autre ne fait"
+  },
+  "phrases": [
+    {"id": "monde-en-evolution", "kind": "opener", "w": 4, "rx": "dans un monde (en (constante|perpétuelle|pleine) (évolution|mutation)|où|de plus en plus|qui change|hyperconnecté)", "example": "Dans un monde en constante évolution, tout va vite.", "fix": "commencer par le problème du client ou par le fait"},
+    {"id": "ere-du-numerique", "kind": "opener", "w": 3, "rx": "(à|dans) l['’]ère (du numérique|de l['’]ia|digitale|du digital|de l['’]intelligence artificielle)", "example": "À l'ère du numérique, votre site compte.", "fix": "à supprimer"},
+    {"id": "de-nos-jours", "kind": "opener", "w": 2, "rx": "^(de nos jours|aujourd['’]hui plus que jamais)", "example": "De nos jours, chacun cherche du temps.", "fix": "à supprimer"},
+    {"id": "il-est-important", "kind": "hedge", "w": 3, "rx": "il (est|convient) (important |essentiel |crucial |primordial )?(de (noter|souligner|rappeler|garder à l['’]esprit)|d['’](insister|ajouter))", "example": "Il est important de noter que nous fermons le lundi.", "fix": "dire le fait"},
+    {"id": "plongez-au-coeur", "kind": "filler", "w": 3, "rx": "(plongez|plongeons|plonger|embarquez|laissez-vous (emporter|transporter)) (au cœur|dans (l['’]univers|le monde|un voyage))", "example": "Plongez au cœur de nos saveurs.", "fix": "découvrez la carte / voir les produits"},
+    {"id": "bien-plus-que", "kind": "structure", "w": 2, "rx": "(bien )?plus qu['’](un|une) (simple )?[a-zàâçéèêëîïôûùüÿœ]+", "example": "Bien plus qu'une simple boulangerie.", "fix": "dire ce que c'est"},
+    {"id": "ce-nest-pas-cest", "kind": "structure", "w": 3, "rx": "(ce n['’]est|ce n['’]est pas) (pas )?(seulement |simplement |juste |qu['’])?[^.;!?]{1,50}[.,;—–-]+ ?c['’]est", "example": "Ce n'est pas une coupe, c'est un rituel.", "fix": "dire ce que c'est, une fois"},
+    {"id": "non-seulement-mais", "kind": "structure", "w": 2, "rx": "non seulement [^.;!?]{1,60} mais (aussi|également|encore)", "example": "non seulement rapide mais aussi fiable", "fix": "deux faits, deux phrases"},
+    {"id": "que-vous-soyez", "kind": "structure", "w": 2, "rx": "que vous soyez [^,.;]{1,40},? ou ", "example": "Que vous soyez débutant ou confirmé, venez.", "fix": "dire pour qui"},
+    {"id": "nattendez-plus", "kind": "cta", "w": 3, "rx": "n['’]attendez plus|ne cherchez (plus|pas plus loin)", "example": "N'attendez plus, réservez !", "fix": "un bouton clair : Réserver une table"},
+    {"id": "pret-a", "kind": "cta", "w": 2, "rx": "prêt(e|s|es)? à (vous lancer|franchir|passer|transformer|découvrir|vivre|sublimer|booster|démarrer)[^?]{0,40}\\?", "example": "Prêt à transformer votre jardin ?", "fix": "un bouton clair : Demander un devis"},
+    {"id": "niveau-superieur", "kind": "cta", "w": 3, "rx": "(au|à un) (niveau|cap) supérieur|passer à la vitesse supérieure", "example": "Faites passer votre entreprise au niveau supérieur.", "fix": "le résultat : 20 réservations de plus par semaine"},
+    {"id": "liberez-potentiel", "kind": "filler", "w": 3, "rx": "(libérez|libérer|révélez|révéler|exploitez|exploiter|déployez) (tout )?(votre|son|le plein|leur) (plein )?potentiel", "example": "Libérez tout votre potentiel.", "fix": "dire le résultat"},
+    {"id": "symphonie-alchimie", "kind": "filler", "w": 3, "rx": "(une|la|véritable|parfaite) (symphonie|alchimie|harmonie parfaite|ode|invitation au voyage)", "example": "une véritable symphonie de saveurs", "fix": "décrire le plat"},
+    {"id": "au-coeur-de", "kind": "filler", "w": 1, "rx": "au cœur (de|du|des)", "example": "au cœur de Lyon", "fix": "la rue ou le quartier"},
+    {"id": "en-conclusion", "kind": "closer", "w": 2, "rx": "(en conclusion|en somme|en définitive|en fin de compte|pour conclure)[,.]", "example": "En somme, nous sommes là.", "fix": "à supprimer"},
+    {"id": "de-pointe", "kind": "claim", "w": 3, "rx": "(technologies?|solutions?|équipements?|outils?) de pointe|à la pointe (de la technologie|de l['’]innovation)", "example": "des équipements de pointe", "fix": "nommer la machine ou la technique"},
+    {"id": "pierre-angulaire", "kind": "filler", "w": 3, "rx": "pierre angulaire|fer de lance|tirer (pleinement )?parti|sans précédent|en constante évolution|en perpétuelle évolution", "example": "la pierre angulaire de notre métier", "fix": "dire la chose simplement"},
+    {"id": "temoigne-de", "kind": "filler", "w": 2, "rx": "(témoigne|témoignent|est le témoignage) de", "example": "Notre carte témoigne de notre passion.", "fix": "à supprimer ou montrer la preuve"},
+    {"id": "havre-de-paix", "kind": "filler", "w": 3, "rx": "(un|véritable) (havre|écrin|cocon) de (paix|verdure|sérénité|douceur)", "example": "un havre de paix en ville", "fix": "décrire le lieu : jardin, silence, 12 chambres"},
+    {"id": "chez-nous-croyons", "kind": "opener", "w": 3, "rx": "^chez [a-z0-9àâçéèêëîïôûùüÿœ&' -]{2,30}, nous (croyons|comprenons|sommes (convaincus|passionnés)|nous engageons|mettons un point d['’]honneur)", "example": "Chez Bloom, nous croyons que la beauté est personnelle.", "fix": "dire ce que vous faites et pour qui"},
+    {"id": "engagement-excellence", "kind": "claim", "w": 2, "rx": "(engagement|engagés|exigence) (envers |pour |de )?l['’](excellence|qualité)", "example": "notre engagement envers l'excellence", "fix": "un fait qui le prouve"},
+    {"id": "experience-inoubliable", "kind": "filler", "w": 3, "rx": "(vivez|offrez-vous|découvrez) une expérience|expérience (utilisateur )?(fluide|sans (faille|couture|accroc)|inoubliable|immersive|unique|inégalée|sur-mesure)", "example": "Vivez une expérience inoubliable.", "fix": "dire ce qui se passe concrètement"},
+    {"id": "rejoignez-milliers", "kind": "claim", "w": 2, "rx": "rejoignez (les |des )?(milliers|centaines|millions)", "example": "Rejoignez des milliers de clients satisfaits.", "fix": "le vrai chiffre, ou à supprimer"},
+    {"id": "chat-leak", "kind": "leak", "w": 5, "rx": "en tant qu['’](ia|intelligence artificielle|assistant|modèle de langage)|j['’]espère que cela (vous )?aide|excellente question|bien sûr ! voici|voici (une|la) (version|proposition) (révisée|améliorée)|n['’]hésitez pas à (adapter|personnaliser)|\\[insérer [a-zàâçéèêëîïôûùüÿœ ]+\\]", "example": "Bien sûr ! Voici une section d'accueil pour votre boulangerie.", "fix": "une réponse de chatbot collée sur la page : à supprimer"}
+  ],
+  "transitions": ["de plus", "en outre", "par ailleurs", "ainsi", "par conséquent", "de surcroît", "en effet", "néanmoins", "toutefois",
+                  "cependant", "en somme", "finalement", "notamment", "d'ailleurs", "également", "enfin", "au final"],
+  "superlatives": ["meilleur", "meilleure", "meilleurs", "meilleures", "leader", "numéro un", "n°1", "#1", "inégalé", "inégalée", "ultime",
+                   "parfait", "parfaite", "incomparable", "sans égal", "imbattable", "le plus grand", "la plus grande"],
+  "and": ["et", "ou"],
+  "examples": {
+    "slop": [
+      "Dans un monde en constante évolution, notre solution innovante vous accompagne pour libérer tout votre potentiel. De plus, nos experts passionnés optimisent chaque étape de votre parcours client.",
+      "Nichée au cœur de Lyon, notre boulangerie est un véritable havre de paix — bien plus qu'une simple boulangerie, c'est une expérience inoubliable. Que vous soyez gourmand ou curieux, n'attendez plus !",
+      "Bien sûr ! Voici une section d'accueil pour votre salon de coiffure."
+    ],
+    "clean": [
+      "Pain au levain, baguettes et croissants cuits chaque matin dès 5 h, rue Mercière. Commandez avant 20 h, retrait le lendemain.",
+      "Nous réparons fuites, chaudières et chauffe-eau à Nantes. Le déplacement coûte 60 €, la plupart des interventions durent moins d'une heure.",
+      "Ana coupe les cheveux rue Mercière depuis 2009. Une coupe avec brushing dure 45 minutes et coûte 38 €."
+    ]
+  }
+}

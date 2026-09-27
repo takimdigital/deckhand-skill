@@ -8,10 +8,15 @@ a placeholder the owner has not accepted. **Output:** `dh rebrand check` 0 block
 2. `dh brief set brand.name=… brand.tagline=… brand.primary=#hex` (if not set), then `dh rebrand apply`
    (`--dry` first when unsure): package name, metadata title/description, config names, template display
    names, `--primary` token, monogram `app/icon.svg` when there is no logo.
-3. Copy pass (the model's real job here): rewrite page copy from `copy.json`/brief in the owner's voice
-   and languages. Headlines state the outcome for the audience; one CTA verb per section; no superlatives
-   the owner cannot prove. RTL languages: `dir="rtl"` on `<html>` + logical CSS properties.
-4. `dh rebrand check` until 0 blocking. Warnings (placeholder images, docs mentions) are listed to the owner.
+3. Copy pass (the model's real job here): `dh slop brief` first (the words and patterns to avoid, per language),
+   then rewrite page copy from `copy.json`/brief in the owner's voice and languages. Headlines state the outcome for
+   the audience; one CTA verb per section; no superlatives the owner cannot prove; concrete nouns (prices, streets,
+   hours, names) over adjectives. RTL languages: `dir="rtl"` on `<html>` + logical CSS properties.
+4. `dh rebrand check` until 0 blocking — it includes `ai-slop`: a text scored slop blocks, one to review warns. Each
+   hit names its fix; rewrite, never reword the same cliché. `dh slop check` alone is the fast loop. A brand or trade
+   word: `dh slop allow "word"`. A real customer quote: `dh:slop-ok` on its line. Warnings (placeholder images, docs
+   mentions, review-level copy) are listed to the owner.
+   Existing site (adopt): `dh slop check --url <their live URL>` shows the owner which pages already read as AI.
 5. SEO — `references/45-seo.md`: page titles/descriptions into `copy.json → seo.pages`, then `dh seo apply` (new
    and existing sites) or `dh seo audit` + DECISION NEEDED (bases). The owner's missing facts land in PENDING.md.
 

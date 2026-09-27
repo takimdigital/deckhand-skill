@@ -74,7 +74,7 @@ define → research → plan ─✋→ build ─✋→ brand → try-on ─✋�
 | research | your top 3 competitors: what they do well, where they're weak | 3 real links with strengths and gaps |
 | plan | every page, button and form, wired. **No dead ends allowed** | a checker refuses orphan pages, links to nowhere, forms with no success or error state |
 | build | from a vetted open-source base, **your own** past site, your existing site, or from scratch | the site runs on your computer, and you click around |
-| brand | your name, colours, icon; the template's traces out | a leak check finds no leftovers |
+| brand | your name, colours, icon; the template's traces out; your words, not AI filler | a leak check finds no leftovers, and a copy check finds no AI slop (11 languages) |
 | try-on | you click sections and swap or tune them (below) | nothing open, nothing half-done |
 | review | build, types, secrets, every link answers, honesty | a green report |
 | deploy | your server via Coolify, then a smoke test | a live URL, and `HANDOFF.md` with everything you own |
@@ -210,7 +210,7 @@ Run for real in this release:
   in code, each with a test: a gate passed on the agent's paraphrase of a change request, a base that could not land
   in the planning folder, a database kept alive by hand for hours, ports Windows reserves, 22 work packages for 4
   builders, and a Windows `HOSTNAME` trap.
-- CI on every push, Ubuntu and Windows: 137 try-on + 153 control-plane + 40 server-client + 17 repo tests.
+- CI on every push, Ubuntu and Windows: 137 try-on + 176 control-plane + 40 server-client + 17 repo tests.
 
 Not yet proven live: a full `dh deploy ship` against a real server (it uses the same Coolify client that
 was proven live in v1), the first real run of the $0 Oracle track, and the Claude Code session hook inside a
@@ -242,6 +242,9 @@ do (like creating an account), each with exact click paths. → [Use cases](docs
 
 **Will it look AI-generated?** No. Sections are human-designed and MIT-licensed, restyled to your brand and
 filled with your words, and you pick them by clicking. When the AI does write a design, it's labelled.
+The words are checked too: a script (no AI) flags copy that reads as machine-written ("elevate your…",
+"in today's fast-paced world", em dashes everywhere) in 11 languages, and the brand step does not pass until it
+is rewritten. It can read your current site as well: `dh slop check --url https://your-site`.
 
 **I already have a site.** Say *"take my existing site and make it look premium."* Try-on, Tune and Site work
 on it directly.

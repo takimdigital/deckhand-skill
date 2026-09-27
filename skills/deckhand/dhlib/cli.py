@@ -110,6 +110,44 @@ def cmd_workflow(a, root: Path):
     raise DhError("USAGE", act)
 
 
+def cmd_slop(a, root: Path):
+    from . import slop as SLOP
+    act = a.action
+    in_project = (root / ".deckhand").is_dir() or (root / "package.json").exists()
+    proj = root if in_project else None
+    if act == "check":
+        text = sys.stdin.read() if a.text == "-" else a.text
+        r = SLOP.check(proj, paths=a.target, text=text, url=a.url, lang=SLOP.lang_code(a.lang) if a.lang else None)
+        if r["verdict"] == "slop":
+            raise DhError("SLOP", "this copy reads as written by a model — rewrite what the hits list (each has a fix)", **r)
+        return r
+    if act == "brief":
+        langs = [SLOP.lang_code(a.lang)] if a.lang else (SLOP._langs(proj) if proj else []) or ["en"]
+        return {"briefs": [SLOP.brief(x, proj) for x in langs]}
+    if act == "langs":
+        return SLOP.langs()
+    if act == "lint":
+        files = [Path(x) for x in a.target] or list(SLOP.shipped().values())
+        rows = [{"file": str(f), **SLOP.lint(read_json(f, {}) or {})} for f in files]
+        bad = [r for r in rows if not r["ok"]]
+        if bad:
+            raise DhError("PACK_INVALID", f"{len(bad)} pack(s) fail their own test", packs=rows)
+        return {"packs": rows}
+    if act == "add":
+        if not a.lang:
+            raise DhError("USAGE", "dh slop add \"word or phrase\" --lang fr [--buzz] [--phrase] [--fix \"plainer word\"]")
+        return SLOP.add(" ".join(a.target), SLOP.lang_code(a.lang), phrase=a.phrase, buzz=a.buzz, fix=a.fix)
+    if act == "allow":
+        if not a.target:
+            raise DhError("USAGE", "dh slop allow \"brand or trade word\"")
+        return SLOP.allow(root, " ".join(a.target))
+    if act == "export":
+        if not a.lang:
+            raise DhError("USAGE", "dh slop export --lang fr")
+        return SLOP.export(SLOP.lang_code(a.lang))
+    raise DhError("USAGE", act)
+
+
 def build_parser():
     ap = argparse.ArgumentParser(prog="dh", description="Deckhand control plane — `dh next` tells you what to do.")
     ap.add_argument("--project", help="project folder (default: nearest with .deckhand/ or package.json)")
@@ -188,6 +226,12 @@ def build_parser():
     p.add_argument("--note", default=""); p.add_argument("--source")
 
     p = sub.add_parser("rebrand"); p.add_argument("action", choices=["scan", "apply", "check"]); p.add_argument("pairs", nargs="*"); p.add_argument("--dry", action="store_true"); p.add_argument("--allow", default="")
+    p = sub.add_parser("slop", help="AI-sounding copy, found by script: check [PATH…|--text T|--url U] · brief · langs · lint · add · allow · export")
+    p.add_argument("action", choices=["check", "brief", "langs", "lint", "add", "allow", "export"]); p.add_argument("target", nargs="*")
+    p.add_argument("--text", help="the text itself, or - for stdin"); p.add_argument("--url", help="read the rendered pages of any site")
+    p.add_argument("--lang", help="en, fr, es… (default: brief.languages, else detected per text)")
+    p.add_argument("--buzz", action="store_true", help="add: a weaker word (use sparingly), not a strong tell")
+    p.add_argument("--phrase", action="store_true"); p.add_argument("--fix", default="", help="add: the plainer word to use instead")
     p = sub.add_parser("swap"); p.add_argument("action", choices=["scan", "check"])
     p = sub.add_parser("verify"); p.add_argument("--url"); p.add_argument("--skip", default=""); p.add_argument("--allow", default="")
 
@@ -410,6 +454,8 @@ def dispatch(a):
         if not r["ok"]:
             raise DhError("LEAKS", f"{r['blocking']} blocking findings", **r)
         return r
+    if c == "slop":
+        return cmd_slop(a, root)
     if c == "swap":
         from . import swap as SW
         if a.action == "scan":
