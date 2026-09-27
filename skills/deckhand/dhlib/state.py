@@ -157,15 +157,24 @@ CHANGE_RX = re.compile(r"(?i)\b(change|make it|instead|but|however|add|remove|re
                        r"should|must|needs? to|wrong|redo|rather|prefer|modif|chang|ajout|enl[eè]v|pas encore|plut[oô]t|mais)\b")
 
 
+# a go the owner holds back is no go: "don't ship it", "wait, do not proceed", "this is not good"
+HOLD_RX = re.compile(r"(?i)(\b(don'?t|do not|does not|doesn'?t|not|never|no|nope|wait|hold|stop|non|pas|attends?|arr[êe]te)\b|n't\b)")
+# …except the negations that are themselves a go: "no changes", "no problem", "pas de souci"
+NO_PROBLEM_RX = re.compile(r"(?i)\b(no (problem|worries|changes?|issues?|notes?)|nothing (to (change|add)|else)|pas de (souci|probl[eè]me|changement))\b")
+# a go explicit enough to carry a change with it ("G1 ok, but add a pricing page"); a bare "ok but add…" is a change
+STRONG_RX = re.compile(r"(?i)(\b(g[1-4] ok|approved?|approve it|go ahead|ship it|lgtm|validated?|go live|let'?s go|genehmigt)\b|valid[ée])")
+
+
 def classify_quote(quote: str) -> str:
-    """approve | approve_with_changes | change_request — deterministic, from the owner's own words."""
-    q = (quote or "").strip()
+    """approve | approve_with_changes | change_request — deterministic, from the owner's own words. When in doubt it
+    is a change request: a gate asks again rather than passing on a "no"."""
+    q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
     ok, change = bool(APPROVE_RX.search(q)), bool(CHANGE_RX.search(q))
-    if ok and not change:
+    if not ok or HOLD_RX.search(q):
+        return "change_request"
+    if not change:
         return "approve"
-    if ok and change:
-        return "approve_with_changes"
-    return "change_request"
+    return "approve_with_changes" if STRONG_RX.search(q) else "change_request"
 
 
 def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -> dict:

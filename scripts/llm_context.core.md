@@ -104,7 +104,7 @@ registries (https, cached in ~/.deckhand/cache/tryon) ─▶ materialize ─▶ 
 | <project>/NOTICE · THIRD_PARTY_NOTICES.md | [[dhlib/build.py#clone]] · [[tryon/lib/engine.mjs#recordNotice]] | never rewritten | upstream + licence of the base and of every kept design |
 | <project>/<components>/sections/ or ui-kit/<slug>/ · dh-tryon/ | keep · open | the app | kept designs · staging (removed on keep/discard/clean) |
 | <project>/globals.css marked blocks | [[tryon/lib/theme.mjs#tokenLayer]] (deckhand:tokens) · [[tryon/lib/engine.mjs#open]] (dh:css per variant) · [[tryon/lib/sitetheme.mjs#themeCss]] (dh:theme) | the app | derived tokens · variant CSS · Site knobs |
-| ~/.deckhand/profile.json · vault.env (0600) | [[dhlib/profile.py#set_fields]] · [[dhlib/profile.py#vault_set]] | [[dhlib/profile.py#secret]] (env → project vault → machine vault → v1 keyring), [[ops/scripts/coolify_api.py#resolve]] | owner facts (owner.*, defaults.* always land here in a personal project) · secrets as `NAME='value'` (single-quoted: [[dhlib/profile.py#shell_line]] sourcing is safe), never printed |
+| ~/.deckhand/profile.json · vault.env (0600) | [[dhlib/profile.py#set_fields]] · [[dhlib/profile.py#vault_set]] | [[dhlib/profile.py#secret]] (env → project vault → machine vault → v1 keyring), [[ops/scripts/coolify_api.py#resolve]] | owner facts and infrastructure (PERSON / PERSON_SECRETS always land here in a personal project; a client project's broken layer reads none of them) · secrets as `NAME='value'` (single-quoted: [[dhlib/profile.py#shell_line]] sourcing is safe), never printed |
 | ~/.vps-ops/ssh/ · ~/.vps-ops/secrets/*.env.sh (v1 keyring) | the ops runbooks (SSH keys) · v1 | [[dhlib/profile.py#legacy_read]] (fallback), backup scripts | SSH keys for the servers · the backup keyring (backup.env.sh, b2-scoped.env.sh) · v1 tokens still honoured |
 | <project>/.gitignore (deckhand block) | [[dhlib/util.py#ensure_gitignore]] (dh init, every build path) | git, verify `logs-ignored` | [[dhlib/util.py#GITIGNORE_LINES]]: runs, failures, *.log, dev.json, autopsy/, tryon/, RESUME.md, notes.jsonl, profile.json, vault.env, profile.md, layout.json; an older block is upgraded in place (every RESUME write calls it) |
 | ~/.deckhand/pool.json · bases/<name>/ | [[dhlib/pool.py#add_local]] · [[dhlib/harvest.py#harvest]] · [[dhlib/pool.py#measure_local]] (`dh pool add D:/path --mine`) | [[dhlib/pool.py#rows]] (ranked first) | personal bases (source mine) |
@@ -143,8 +143,8 @@ registries (https, cached in ~/.deckhand/cache/tryon) ─▶ materialize ─▶ 
    - `harvest --push` refuses on any secret-shaped file or string ([[dhlib/harvest.py#secret_scan]], [[!SECRETS_IN_BASE]]).
    - Every project gitignores the run logs ([[dhlib/util.py#ensure_gitignore]]); verify blocks when they're not ignored.
    - Layers: [[dhlib/profile.py#use_project]] is set by [[dhlib/cli.py#main]] for every command. Where a write lands
-     is [[dhlib/profile.py#_route]]: `--machine`/`--here` for one call; else owner.*/defaults.* → machine (personal
-     project); else the project's binding (.deckhand/layout.json): none → record `here` + return `ask_once` (never
+     is [[dhlib/profile.py#_route]]: `--machine`/`--here` for one call; else the owner's own facts and infrastructure ([[dhlib/profile.py#PERSON]], [[dhlib/profile.py#PERSON_SECRETS]]:
+     server, Coolify, DNS, GitHub, notifications, backups) → machine (personal project: no new project asks them again); else the project's binding (.deckhand/layout.json): none → record `here` + return `ask_once` (never
      asked again in that project); `machine` → ~/.deckhand; `here`/folder → [[dhlib/profile.py#layer_dir]]; broken →
      [[!BINDING_BROKEN]], nothing written (the pipeline's reads keep running on machine + .deckhand/). A client
      project can't bind to machine ([[!CLIENT_PROJECT]]); a folder inside the project is refused ([[!IN_PROJECT]]),
@@ -173,7 +173,10 @@ registries (https, cached in ~/.deckhand/cache/tryon) ─▶ materialize ─▶ 
    model recap. The switch verdict ([[dhlib/resume.py#safe]]) is computed: NO while files changed after the last note
    (dh-managed files excluded: [[dhlib/resume.py#MANAGED]]) or a failure newer than the last note has no known fix.
 16. Gates pass on the owner's words. Phased `dh gate pass` needs `--quote` ([[!NEED_QUOTE]]); a quote that reads as a
-   change request is refused ([[dhlib/state.py#classify_quote]], [[!CHANGE_REQUEST]]) and points at `dh reopen`.
+   change request is refused ([[dhlib/state.py#classify_quote]], [[!CHANGE_REQUEST]]) and points at `dh reopen`. A go the
+   owner holds back ("don't ship it", "wait, do not proceed", "this is not good": [[dhlib/state.py#HOLD_RX]]) is a change
+   request; a go with a change passes only when the go is explicit ("G1 ok, but…", "approved, but…":
+   [[dhlib/state.py#STRONG_RX]]) — a bare "ok but add a blog page" is a change. In doubt, the gate asks again.
 17. Workflows are data an AI runs: [[dhlib/workflow.py#lint]] refuses private calls, user paths, secrets, unknown dh
    commands (checked against the real parser) and, for base/community, anything off the allow-list; `use` shows every
    other command to the owner first ([[!NEEDS_ACCEPT]]); a community file must match its index sha ([[!SHA_MISMATCH]]).

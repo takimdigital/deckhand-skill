@@ -75,6 +75,17 @@ class GateQuote(Base):
         self.assertEqual([c(q) for q in ("approved", "looks good", "oui vas-y", "👍", "not yet", "no, change the hero", "")],
                          ["approve", "approve", "approve", "approve", "change_request", "change_request", "change_request"])
 
+    def test_a_no_never_passes(self):
+        # the simulation: each of these passed a gate
+        c = state.classify_quote
+        for q in ("don't ship it", "wait, do not proceed", "this is not good", "ok but add a blog page", "please don't go live",
+                  "c'est pas bon", "stop"):
+            self.assertEqual(c(q), "change_request", q)
+        for q in ("ok no problem", "yes, no changes", "approved", "G1 ok, but add a pricing page"):
+            self.assertNotEqual(c(q), "change_request", q)
+        code, out = self.dh("gate", "pass", "G1", "--quote", "don't ship it")
+        self.assertEqual((code, out["code"]), (1, "CHANGE_REQUEST"))
+
 
 class BaseIntoInitFolder(Base):
     """D3: `dh init` fills the folder, then clone/scaffold refused it (DEST_NOT_EMPTY); D4: the agent imported a

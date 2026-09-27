@@ -29,10 +29,10 @@ from dhlib.util import DhError  # noqa: E402
 class Base(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
-        self.env = {k: os.environ.get(k) for k in ("DECKHAND_HOME", "VPS_OPS_HOME", "COOLIFY_TOKEN", "COOLIFY_URL", "HOSTINGER_API_TOKEN", "CLOUDFLARE_API_TOKEN")}
+        self.env = {k: os.environ.get(k) for k in ("DECKHAND_HOME", "VPS_OPS_HOME", "COOLIFY_TOKEN", "COOLIFY_URL", "HOSTINGER_API_TOKEN", "CLOUDFLARE_API_TOKEN", "RESEND_API_KEY")}
         os.environ["DECKHAND_HOME"] = str(self.tmp / "home")
         os.environ["VPS_OPS_HOME"] = str(self.tmp / "vps-ops")
-        for k in ("COOLIFY_TOKEN", "COOLIFY_URL", "HOSTINGER_API_TOKEN", "CLOUDFLARE_API_TOKEN"):
+        for k in ("COOLIFY_TOKEN", "COOLIFY_URL", "HOSTINGER_API_TOKEN", "CLOUDFLARE_API_TOKEN", "RESEND_API_KEY"):
             os.environ.pop(k, None)
         self.a, self.b = self.tmp / "shop-a", self.tmp / "shop-b"
         profile.use_project(None)
@@ -138,7 +138,7 @@ class Choose(Base):
         code, out = self.dh(self.b, "profile", "set", "domain.default=b.com")
         self.assertEqual(out["scope"], "machine")                                     # B: as before 2.3
         self.assertNotIn("ask_once", out)
-        code, out = self.dh(self.a, "profile", "set", "dns.provider=cloudflare")
+        code, out = self.dh(self.a, "profile", "set", "email.provider=resend")
         self.assertEqual(out["scope"], "project")                                     # A: its own
         code, out = self.dh(self.b, "profile", "set", "coolify.url=https://c.example.com", "--here")
         self.assertEqual(out["scope"], "project")                                     # --here still overrides once
@@ -148,12 +148,12 @@ class Choose(Base):
         self.project(self.a)
         profile.use_project(self.a)
         profile.set_fields(["domain.default=a.com"])
-        profile.vault_set("COOLIFY_TOKEN", "coolify-a-444")
+        profile.vault_set("RESEND_API_KEY", "coolify-a-444")
         (self.a / ".deckhand" / "profile.md").write_text("- Registrar: Namecheap\n", encoding="utf-8")
         store = self.tmp / "secure" / "shop-a"
         code, out = self.dh(self.a, "profile", "where", "--set", str(store))
         self.assertEqual(code, 0, out)
-        self.assertEqual(out["moved"], {"profile": ["domain.default"], "vault": ["COOLIFY_TOKEN"], "notes_md": True})
+        self.assertEqual(out["moved"], {"profile": ["domain.default"], "vault": ["RESEND_API_KEY"], "notes_md": True})
         self.assertEqual(Path(out["writes"]["vault"]), store / "vault.env")
         self.assertFalse((self.a / ".deckhand" / "vault.env").exists(), "one copy of a secret, not two")
         self.assertFalse((self.a / ".deckhand" / "profile.json").exists())
@@ -161,7 +161,7 @@ class Choose(Base):
         if os.name != "nt":
             self.assertEqual(oct(os.stat(store / "vault.env").st_mode)[-3:], "600")
         profile.use_project(self.a)
-        self.assertEqual(profile.secret("COOLIFY_TOKEN"), "coolify-a-444")
+        self.assertEqual(profile.secret("RESEND_API_KEY"), "coolify-a-444")
         self.assertEqual(profile.load()["domain"]["default"], "a.com")
         code, out = self.dh(self.a, "profile", "set", "email.provider=brevo")
         self.assertEqual(Path(out["path"]), store / "profile.json")
@@ -171,7 +171,7 @@ class Choose(Base):
         code, out = self.dh(self.a, "profile", "where", "--set", "here")
         self.assertEqual(sorted(out["moved"]), ["notes_md", "profile", "vault"])
         profile.use_project(self.a)
-        self.assertEqual(profile.secret("COOLIFY_TOKEN"), "coolify-a-444")
+        self.assertEqual(profile.secret("RESEND_API_KEY"), "coolify-a-444")
         self.assertEqual(profile.load()["email"]["provider"], "brevo")
 
     def test_a_client_project_keeps_its_scope_in_a_folder_and_can_never_share_the_machine(self):
@@ -208,13 +208,13 @@ class Choose(Base):
     def test_a_value_on_both_sides_stops_the_move_and_names_it_without_its_value(self):
         self.project(self.a)
         profile.use_project(self.a)
-        profile.vault_set("COOLIFY_TOKEN", "project-side-555")
+        profile.vault_set("RESEND_API_KEY", "project-side-555")
         store = self.tmp / "store"
         store.mkdir()
-        (store / "vault.env").write_text("COOLIFY_TOKEN='other-side-666'\n", encoding="utf-8")
+        (store / "vault.env").write_text("RESEND_API_KEY='other-side-666'\n", encoding="utf-8")
         before = (self.a / ".deckhand" / "vault.env").read_bytes(), (self.a / ".deckhand" / "layout.json").read_bytes()
         code, out = self.dh(self.a, "profile", "where", "--set", str(store))
-        self.assertEqual((out["code"], out["names"]), ("CONFLICT", ["COOLIFY_TOKEN"]))
+        self.assertEqual((out["code"], out["names"]), ("CONFLICT", ["RESEND_API_KEY"]))
         self.assertNotIn("666", json.dumps(out))
         self.assertNotIn("555", json.dumps(out))
         self.assertEqual(((self.a / ".deckhand" / "vault.env").read_bytes(), (self.a / ".deckhand" / "layout.json").read_bytes()), before)
@@ -225,15 +225,15 @@ class PlanToApp(Base):
         self.project(self.a)
         profile.use_project(self.a)
         profile.set_fields(["domain.default=a.com"])
-        profile.vault_set("COOLIFY_TOKEN", "planned-key-121")
+        profile.vault_set("RESEND_API_KEY", "planned-key-121")
         app = self.tmp / "shop-a-app"
         app.mkdir()
         (app / "package.json").write_text('{"name": "shop-a-app"}', encoding="utf-8")
         code, out = self.dh(self.a, "adopt", str(app))
         self.assertEqual(code, 0, out)
-        self.assertEqual(out["carried"], {"profile": ["domain.default"], "vault": ["COOLIFY_TOKEN"], "location": "here"})
+        self.assertEqual(out["carried"], {"profile": ["domain.default"], "vault": ["RESEND_API_KEY"], "location": "here"})
         profile.use_project(app)
-        self.assertEqual(profile.secret("COOLIFY_TOKEN"), "planned-key-121")         # the build finds what define stored
+        self.assertEqual(profile.secret("RESEND_API_KEY"), "planned-key-121")         # the build finds what define stored
         self.assertEqual(profile.load()["domain"]["default"], "a.com")
         self.assertEqual(profile.binding()["location"], "here")
         if os.name != "nt":
@@ -244,7 +244,7 @@ class PlanToApp(Base):
         store = self.tmp / "store"
         self.dh(self.a, "profile", "where", "--set", str(store))
         profile.use_project(self.a)
-        profile.vault_set("COOLIFY_TOKEN", "folder-key-131")
+        profile.vault_set("RESEND_API_KEY", "folder-key-131")
         app = self.tmp / "app"
         app.mkdir()
         (app / "package.json").write_text('{"name": "app"}', encoding="utf-8")
@@ -253,9 +253,48 @@ class PlanToApp(Base):
         self.assertFalse((app / ".deckhand" / "vault.env").exists())
         profile.use_project(app)
         self.assertTrue(profile.binding()["ok"])
-        self.assertEqual(profile.secret("COOLIFY_TOKEN"), "folder-key-131")
+        self.assertEqual(profile.secret("RESEND_API_KEY"), "folder-key-131")
         code, out = self.dh(app, "profile", "where", "here")
         self.assertEqual(out["code"], "USAGE")                                        # one form: --set
+
+
+class OwnersInfrastructure(Base):
+    """The simulation: the server, DNS and GitHub keys landed in the first project, so every new project asked again."""
+
+    def test_the_owners_server_dns_and_github_stay_on_the_machine_a_business_key_stays_in_its_project(self):
+        self.project(self.a)
+        self.project(self.b)
+        profile.use_project(self.a)
+        for name in ("COOLIFY_TOKEN", "CLOUDFLARE_API_TOKEN", "GITHUB_TOKEN"):
+            self.assertEqual(profile.vault_set(name, f"{name.lower()}-owner")["scope"], "machine", name)
+        self.assertEqual(profile.set_fields(["coolify.url=https://c.example", "vps.ip=203.0.113.9", "github.user=hakim"])["scope"], "machine")
+        self.assertEqual(profile.vault_set("STRIPE_SECRET_KEY", "sk-shop-a")["scope"], "project")
+        profile.use_project(self.b)
+        saved = os.environ.pop("GITHUB_TOKEN", None)
+        try:
+            self.assertEqual(profile.secret("COOLIFY_TOKEN"), "coolify_token-owner", "project B never asks the owner's server again")
+            self.assertEqual(profile.secret("GITHUB_TOKEN"), "github_token-owner")
+        finally:
+            if saved is not None:
+                os.environ["GITHUB_TOKEN"] = saved
+        self.assertIsNone(profile.secret("STRIPE_SECRET_KEY"), "project A's payments key is not project B's")
+
+    def test_a_client_keeps_its_own_server_and_a_broken_client_layer_never_falls_back_to_the_owners_keys(self):
+        profile.vault_set("COOLIFY_TOKEN", "owner-server", where="machine")
+        self.project(self.a, "--for", "client")
+        store = self.tmp / "client-store"
+        self.dh(self.a, "profile", "where", "--set", str(store))
+        profile.use_project(self.a)
+        self.assertEqual(profile.vault_set("COOLIFY_TOKEN", "client-server")["scope"], "project")
+        self.assertEqual(profile.secret("COOLIFY_TOKEN"), "client-server")
+        shutil.rmtree(store)
+        self.assertIsNone(profile.secret("COOLIFY_TOKEN"), "never the owner's server for a client's site")
+
+    def test_dh_tryon_passes_the_project_after_the_action(self):
+        from dhlib.cli import tryon_argv
+        self.assertEqual(tryon_argv(["flags", "report", "--ids", "F1"], "/p"), ["flags", "report", "--ids", "F1", "--project", "/p"])
+        self.assertEqual(tryon_argv(["--", "registry", "check", "--id", "all"], "/p")[:3], ["registry", "check", "--id"])
+        self.assertEqual(tryon_argv(["serve", "--project", "/q"], "/p"), ["serve", "--project", "/q"])
 
 
 class Broken(Base):
@@ -264,7 +303,7 @@ class Broken(Base):
         store = self.tmp / "usb" / "shop-a"
         self.dh(self.a, "profile", "where", "--set", str(store))
         profile.use_project(self.a)
-        profile.vault_set("COOLIFY_TOKEN", "on-the-usb-777")
+        profile.vault_set("RESEND_API_KEY", "on-the-usb-777")
         shutil.move(str(self.tmp / "usb"), str(self.tmp / "usb-unplugged"))           # the drive is not mounted
         code, out = self.dh(self.a, "profile", "set", "domain.default=a.com")
         self.assertEqual((code, out["code"]), (1, "BINDING_BROKEN"))
@@ -279,7 +318,7 @@ class Broken(Base):
             self.assertEqual(self.dh(self.a, *cmd)[0], 0, cmd)                       # the pipeline keeps running
         shutil.move(str(self.tmp / "usb-unplugged"), str(self.tmp / "usb"))           # plugged back in: works again
         profile.use_project(self.a)
-        self.assertEqual(profile.secret("COOLIFY_TOKEN"), "on-the-usb-777")
+        self.assertEqual(profile.secret("RESEND_API_KEY"), "on-the-usb-777")
 
     def test_a_copied_project_never_shares_the_originals_folder_and_a_corrupt_layout_is_reported(self):
         self.project(self.a)
@@ -313,9 +352,9 @@ class Guarantees(Base):
         store = self.tmp / "secret-store"
         self.dh(self.a, "profile", "where", "--set", str(store))
         profile.use_project(self.a)
-        profile.vault_set("COOLIFY_TOKEN", "coolify-folder-999")
-        profile.vault_set("HOSTINGER_API_TOKEN", "hostinger-folder-000")
-        profile.set_fields(["coolify.url=http://127.0.0.1:8000"])
+        profile.vault_set("COOLIFY_TOKEN", "coolify-folder-999", where="here")      # the owner's server, kept with this project
+        profile.vault_set("HOSTINGER_API_TOKEN", "hostinger-folder-000", where="here")
+        profile.set_fields(["coolify.url=http://127.0.0.1:8000"], where="here")
         import coolify_api as CA
         import hostinger_api as HA
         importlib.reload(CA)

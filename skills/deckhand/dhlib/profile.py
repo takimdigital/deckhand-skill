@@ -52,7 +52,13 @@ SECRET_NAMES = ("COOLIFY_TOKEN", "CLOUDFLARE_API_TOKEN", "HOSTINGER_API_TOKEN", 
 
 
 _PROJECT: Path | None = None      # the project whose layer applies (set by the CLI for every command)
-PERSON = ("owner.", "defaults.")  # the owner's own facts: in a personal project they stay on the machine (never re-asked)
+# the owner's own facts and infrastructure (their server, DNS, GitHub, where bots report, backups): in a personal
+# project they stay on the machine, so no new project asks them again; a business's own keys (email, payments) and a
+# client's everything stay in the project
+PERSON = ("owner.", "defaults.", "vps.", "coolify.", "dns.", "github.", "notify.")
+PERSON_SECRETS = ("COOLIFY_TOKEN", "CLOUDFLARE_API_TOKEN", "HOSTINGER_API_TOKEN", "GITHUB_TOKEN", "TELEGRAM_BOT_TOKEN",
+                  "TELEGRAM_CHAT_ID", "DISCORD_WEBHOOK_URL", "NOTIFY_WEBHOOK_URL", "B2_KEY_ID", "B2_APP_KEY",
+                  "TIGRIS_ACCESS_KEY_ID", "TIGRIS_SECRET_ACCESS_KEY")
 LOCATIONS = ("here", "machine")   # … or a folder outside the project
 ASK_ONCE = ("Tell the owner once: this project's settings and keys are kept in {where} (this project only, on this "
             "machine only, never pushed). To keep them somewhere else: `dh profile where --set machine` (shared by "
@@ -180,7 +186,8 @@ def _route(where: str | None, kind: str, key: str | None = None):
     """(file, notice) for one write. --machine / --here are per-call overrides; otherwise the project's remembered
     choice. The first write that needs it records `here` and returns the one-time ask; a broken choice refuses."""
     name = "profile.json" if kind == "profile" else "vault.env"
-    if where == "machine" or (where is None and (not _PROJECT or (key and key.startswith(PERSON) and scope() != "client"))):
+    personal = bool(key) and (key.startswith(PERSON) or key in PERSON_SECRETS)
+    if where == "machine" or (where is None and (not _PROJECT or (personal and scope() != "client"))):
         return home() / name, {}
     if not _PROJECT:
         raise DhError("NO_PROJECT", "no project here (.deckhand/) — run inside the project, or pass --project")
@@ -309,7 +316,7 @@ def vault_set(name: str, value: str | None = None, where: str | None = None) -> 
         value = sys.stdin.readline().rstrip("\n") if not sys.stdin.isatty() else __import__("getpass").getpass(f"{name}: ")
     if not value:
         raise DhError("EMPTY", "no value given")
-    p, notice = _route(where, "vault")
+    p, notice = _route(where, "vault", name)
     data = _vault_file(p)                      # only this layer is rewritten: a client's secret never lands elsewhere
     data[name] = value
     _write_vault(p, data)
@@ -328,9 +335,13 @@ def _write_vault(p: Path, data: dict) -> None:
 
 def secret(name: str):
     """Env first (CI / harness secrets), then this project's vault, the machine vault, v1's ops keyring. Never logged."""
+    if os.environ.get(name):
+        return os.environ[name]
+    b = binding() if _PROJECT else None
+    if b is not None and not b["ok"] and scope() == "client":
+        return None                                   # a client's keys are unreadable: never the owner's instead
     pv = project_vault_path()
-    return (os.environ.get(name) or (_vault_file(pv).get(name) if pv else None) or _vault_file(vault_path()).get(name)
-            or legacy_read().get(name))
+    return (_vault_file(pv).get(name) if pv else None) or _vault_file(vault_path()).get(name) or legacy_read().get(name)
 
 
 def shell_line() -> str:

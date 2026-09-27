@@ -82,7 +82,8 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
    remembered in `.deckhand/layout.json`): `here` = the project's gitignored `.deckhand/` (the first `dh profile set`/
    `dh vault set` records it and returns `ask_once` — relay that line to the owner in your next message, once),
    `machine` = `~/.deckhand/` shared by every project, or a folder outside the project. The owner's own facts
-   (`owner.*`, `defaults.*`) stay on the machine; `--machine` stores a key every project should use; reads always merge
+   and infrastructure (`owner.*`, `defaults.*`, server, Coolify, DNS, GitHub, notifications, backups: `PERSON` in
+   `dhlib/profile.py`) stay on the machine in a personal project, so no new project asks them again; `--machine` stores a key every project should use; reads always merge
    (machine, then the project's, which wins). `BINDING_BROKEN` = ask the owner, never write around it. A client
    project (`dh init --for client`) can never be bound to the machine. Never use one client's keys for another.
 4. **Licences.** Bases and components come from permissive licences only (`data/licenses.json`: MIT,
@@ -96,7 +97,7 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
    The model writes words (copy, research, plans) and app-specific logic — not boilerplate.
 7. **Gates are hard** in phased mode: no clone before G1, no rebrand/extra work before G2, no deploy
    before G4, "even when the work looks obviously right". A gate passes on the owner's own words:
-   `dh gate pass Gx --quote "<their message>"`; words that ask for a change ("make it…", "add…", "but…") are not a go —
+   `dh gate pass Gx --quote "<their message>"`; words that ask for a change ("make it…", "add…", "but…") or hold it back ("don't ship it", "wait") are not a go —
    `dh reopen <phase>`, change it, show it again. Never paraphrase an owner into an approval.
 8. **Failures are paid once.** Run risky commands via `dh run -- <cmd>`; a known error prints its fix
    (`--fix` replays a proven safe recipe). After a hard session: `dh autopsy --latest --apply` (deterministic:

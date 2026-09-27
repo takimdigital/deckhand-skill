@@ -148,6 +148,13 @@ def cmd_slop(a, root: Path):
     raise DhError("USAGE", act)
 
 
+def tryon_argv(rest: list, root) -> list:
+    """`dh tryon flags report …` → the engine's argv. `--project` goes last: after the command it would split
+    `flags report` (the engine reads its action at argv[1])."""
+    rest = list(rest[1:] if rest and rest[0] == "--" else rest)
+    return rest if "--project" in rest else rest + ["--project", str(root)]
+
+
 def build_parser():
     ap = argparse.ArgumentParser(prog="dh", description="Deckhand control plane — `dh next` tells you what to do.")
     ap.add_argument("--project", help="project folder (default: nearest with .deckhand/ or package.json)")
@@ -572,10 +579,7 @@ def dispatch(a):
         node = shutil.which("node")
         if not node:
             raise DhError("NO_NODE", "try-on needs Node.js 18+")
-        rest = a.rest[1:] if a.rest and a.rest[0] == "--" else a.rest
-        if "--project" not in rest:
-            rest = rest[:1] + ["--project", str(root)] + rest[1:]
-        return {"exit": subprocess.call([node, str(TRYON / "cli.mjs"), *rest])}
+        return {"exit": subprocess.call([node, str(TRYON / "cli.mjs"), *tryon_argv(a.rest, root)])}
     raise DhError("USAGE", c)
 
 
