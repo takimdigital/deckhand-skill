@@ -14,6 +14,8 @@ import path from 'node:path';
 import { parse, walk } from './ast.cjs';
 
 const LABEL_KEYS = ['label', 'name', 'title', 'text'];
+// a footer column's title: `{ group: 'Product', items: [...] }` (Tailark) as well as `{ title, links }`
+const COLUMN_KEYS = [...LABEL_KEYS, 'group', 'heading', 'category', 'section'];
 const HREF_KEYS = ['href', 'url', 'link', 'to'];
 const SOCIAL = /^(github|git hub|discord|slack|x|twitter|x \/ twitter|x\.com|linkedin|linked in|instagram|facebook|youtube|tiktok|threads|mastodon|bluesky|dribbble|behance|pinterest|reddit|telegram|whatsapp|twitch|medium|substack|rss)$/i;
 const NETWORK = [
@@ -100,7 +102,7 @@ function columnShape(o) {
   for (const p of o.properties) {
     if (p.type !== 'ObjectProperty') continue;
     const k = keyName(p);
-    if (!titleKey && LABEL_KEYS.includes(k) && strVal(p.value) != null) titleKey = k;
+    if (!titleKey && COLUMN_KEYS.includes(k) && strVal(p.value) != null) titleKey = k;
     else if (!linksKey && linkArray(p.value)) { linksKey = k; inner = linkArray(p.value); }
   }
   return titleKey && linksKey ? { titleKey, linksKey, inner } : null;

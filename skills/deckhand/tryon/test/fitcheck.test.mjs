@@ -245,3 +245,12 @@ test('a primitive\'s part (CardHeader beside Card) stays in the design; a site h
   assert.deepEqual(p.removed, ['HeroHeader']);
   assert.match(p.code, /<CardHeader><CardTitle>\{content\.heading1 \?\?/);
 });
+
+test('footer columns titled by `group` (Tailark: `{ group, items: [{ title, href }] }`) take the plan\'s columns', async () => {
+  const { fillLinks } = await import('../lib/sitelinks.mjs');
+  const code = `const links = [{ group: 'Product', items: [{ title: 'Features', href: '#' }, { title: 'Solution', href: '#' }] }, { group: 'Company', items: [{ title: 'About', href: '#' }] }];\nexport default function F() { return <footer>{links.map((l) => <div key={l.group}>{l.group}{l.items.map((i) => <a key={i.title} href={i.href}>{i.title}</a>)}</div>)}</footer>; }`;
+  const r = fillLinks('f.tsx', code, { header: [], footerCols: [{ title: 'Maison Levain', links: [{ label: 'Legal notice', href: '/legal' }] }], social: [], known: true }, 'footer');
+  assert.deepEqual(r.filled, [{ array: 'links', kind: 'columns', count: 1 }]);
+  assert.match(r.code, /\{ group: "Maison Levain", items: \[\{ href: "\/legal", title: "Legal notice" \}\] \}/);
+  assert.doesNotMatch(r.code, /Features|Solution/);
+});

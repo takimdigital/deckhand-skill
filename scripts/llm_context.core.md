@@ -468,7 +468,11 @@ F13 VET
     carries its action like the Radix `asChild` twin ([[tryon/lib/transplant.mjs#renderedBy]]); a primitive's part
     (`CardHeader` beside `Card`) is never stripped as site chrome; a shadcn block read raw gets its page's one
     component as the entry, `from "cn"` as the project's utils ([[tryon/lib/materialize.mjs#rawSource]]; read as a
-    package it would install an unrelated npm `cn`), and a fetched primitive's own primitives in turn.
+    package it would install an unrelated npm `cn`), and a fetched primitive's own primitives in turn; footer columns
+    titled by `group` (`{ group, items }`) take the plan's columns ([[tryon/lib/sitelinks.mjs#columnShape]]);
+  - refusals left on purpose: a one-quote testimonial or a logo-only integrations row cannot hold the reference's
+    content (an owner with less still gets it: the gate runs again on the real section); a text effect whose words
+    are a required array prop (`words`, `texts`) has no place for one heading.
 
 F14 REUSE
 - `dh harvest --name N [--push]` ([[dhlib/harvest.py#harvest]]):
