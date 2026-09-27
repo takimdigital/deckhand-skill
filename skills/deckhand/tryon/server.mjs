@@ -5,7 +5,8 @@
  *                                with the overlay injected into every HTML page;
  *   /__dh/overlay.js           the picker UI;
  *   /__dh/api/*                inspect · open · show · keep · discard · more · save · state · draft ·
- *                              draft-status · tune-* · theme-* (token-gated; the engine does every write).
+ *                              draft-status · tune-* · theme-* · flag-add · flags · flag-remove · flags-clear ·
+ *                              flag-report (token-gated; the engine does every write).
  *
  * AI drafts: the owner's request is written to .deckhand/tryon/drafts/ and printed on stdout as ONE
  * JSON line ({"event":"draft_request",…}) for an agent watching this process; the overlay polls only
@@ -28,6 +29,7 @@ import * as draft from './lib/draft.mjs';
 import { tuneOpen, tuneSet, tuneKeep, tuneReset } from './lib/tune.mjs';
 import { themeState, themeVars, themeApply, themeUndo } from './lib/sitetheme.mjs';
 import { BLOCK_SLOTS, UI_SLOTS, EFFECT_SLOTS } from './lib/slots.mjs';
+import { REASONS, addFlag, listFlags, publicFlag, removeFlag, clearFlags, buildReport } from './lib/flags.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
@@ -98,6 +100,12 @@ export function startServer({ root: rootIn, port = 3999, target, host = '127.0.0
       case 'more': return serial(() => engine.more(root, body.id, { batch: body.batch || body.count, probe: body.probe, onProgress: (p) => emit({ type: 'progress', ...p }),
         url: upstream.origin, page: body.page }));
       case 'save': return serial(() => saveToLibrary(root, body.id, { name: body.name }));
+      // flags: a variant that does not work, captured for a report an AI can fix the engine from (stays local)
+      case 'flag-add': return serial(() => addFlag(root, body));
+      case 'flags': return { flags: listFlags(root).map(publicFlag), reasons: REASONS };
+      case 'flag-remove': return serial(() => removeFlag(root, body.id));
+      case 'flags-clear': return serial(() => clearFlags(root));
+      case 'flag-report': return serial(() => buildReport(root, body.ids || null));
       case 'draft': {
         // the owner asks for an AI variant: one request for the agent (it is not in the click loop)
         const r = draft.requestDraft(root, body);
@@ -187,7 +195,7 @@ export function startServer({ root: rootIn, port = 3999, target, host = '127.0.0
         const bad = e instanceof SyntaxError || /BODY_TOO_LARGE/.test(String(e.message));   // the request itself is malformed
         res.writeHead(e.status || (bad ? 400 : e.code ? 200 : 500), { 'content-type': 'application/json' });
         res.end(JSON.stringify({ ok: false, code: e.code || 'ERROR', message: String(e.message).slice(0, 2000), skipped: e.skipped, problems: e.problems, draft: e.draft,
-          reload: e.reload, restored: e.restored, dropped: e.dropped, installedKept: e.installedKept, pool: e.pool, max: e.max }));
+          reload: e.reload, restored: e.restored, dropped: e.dropped, installedKept: e.installedKept, pool: e.pool, max: e.max, allowed: e.allowed }));
       }
       return;
     }

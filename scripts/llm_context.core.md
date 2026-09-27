@@ -94,6 +94,7 @@ registries (https, cached in ~/.deckhand/cache/tryon) ─▶ materialize ─▶ 
 | .deckhand/tryon/sessions/<id>.json · backups/<id>/ | [[tryon/lib/engine.mjs#open]] | show/keep/discard, checks.tryon, verify | open→kept/discarded, variants[], shaBefore/After · original file bytes |
 | .deckhand/tryon/drafts/<D>.json · <D>/draft.tsx | [[tryon/lib/draft.mjs#requestDraft]] · the agent | [[tryon/lib/draft.mjs#checkDraft]], completeDraft | AI draft brief + state pending/rejected/done · the agent's component |
 | .deckhand/tryon/tune/<id>.json(+.orig) | [[tryon/lib/tune.mjs#tuneOpen]] | tuneSet/Keep/Reset | dials, original file bytes and sha (FILE_CHANGED guard) |
+| .deckhand/tryon/flags.json · reports/tryon-flags-<sha10>.md | [[tryon/lib/flags.mjs#addFlag]] (overlay ⚑ Flag) · [[tryon/lib/flags.mjs#buildReport]] | `tryon flags`, the owner, the AI they send it to | flagged variants with everything to reproduce them · the report (the owner's text: never committed, never published) |
 | .deckhand/tryon/theme/last.json | [[tryon/lib/sitetheme.mjs#themeApply]] | [[tryon/lib/sitetheme.mjs#themeUndo]] | the files before the last Site apply |
 | <project>/PENDING.md · HANDOFF.md | [[dhlib/state.py#init]] (from [[templates/PENDING.md]]) · [[dhlib/handoff.py#write]] | owner | facts only the owner holds · access LOCATIONS, commands, pending |
 | <project>/NOTICE · THIRD_PARTY_NOTICES.md | [[dhlib/build.py#clone]] · [[tryon/lib/engine.mjs#recordNotice]] | never rewritten | upstream + licence of the base and of every kept design |
@@ -291,6 +292,12 @@ F5 OPEN (swap) [[tryon/lib/engine.mjs#open]]
    own files via `aiItem`), then the next batch from the pool after them, up to [[tryon/lib/engine.mjs#MAX_VARIANTS]].
    A spent pool ([[!POOL_EMPTY]]) or a full try ([[!TOO_MANY_VARIANTS]]) touches nothing. Per-candidate staging is
    ONE function, [[tryon/lib/engine.mjs#stageCandidate]], shared with the registry fit check (F-FIT).
+   Compare (overlay only, zero writes): variant 0 and the variant shown share one grid cell of the wrapper; the
+   original is on top, clipped at the dragged line (`clip-path`), over the page background; `apply()` clears it
+   before any display toggle (it restores the styles it saved). Flags: [[tryon/lib/flags.mjs#addFlag]] captures the
+   variant, fit, usage, the owner's element from the session backup, [[tryon/lib/flags.mjs#designSlots]], the
+   overlay's `autoCheck()` and the env into .deckhand/tryon/flags.json; [[tryon/lib/flags.mjs#buildReport]] writes
+   ONE deterministic Markdown file named by its hash (no clock in it) with a `try --only` reproduce per flag.
 9. Nothing fits → [[!NO_CANDIDATES]] or [[!NO_VARIANTS]] with `draft:{file,line,col,slot}`; the overlay offers an
    AI draft (F7). The message says why in the owner's words ([[tryon/lib/engine.mjs#noVariantsWhy]]: no room for
    your content, the closest fit, or no place for your form).

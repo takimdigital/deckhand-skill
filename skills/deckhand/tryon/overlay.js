@@ -22,6 +22,17 @@
     }).then(function (r) { return r.json(); });
   }
 
+  /* ------------------------------------------------------------ errors on the page (a flag records them) */
+  var pageErrors = [], errMark = 0;
+  function noteErr(x) { pageErrors.push(String(x && (x.stack || x.message) || x).slice(0, 400)); if (pageErrors.length > 60) { pageErrors.splice(0, 20); errMark = Math.max(0, errMark - 20); } }
+  var origErr = console.error;
+  console.error = function () {
+    try { noteErr([].map.call(arguments, function (a) { return a && a.message ? a.message : typeof a === 'string' ? a : (function () { try { return JSON.stringify(a); } catch (e) { return String(a); } })(); }).join(' ')); } catch (e) { /* never break the page's logging */ }
+    return origErr.apply(console, arguments);
+  };
+  window.addEventListener('error', function (e) { noteErr(e.error || e.message); });
+  window.addEventListener('unhandledrejection', function (e) { noteErr(e.reason); });
+
   /* ------------------------------------------------------------ ui shell */
   var host = document.createElement('div');
   host.setAttribute('data-dh-ui', '');
@@ -60,10 +71,29 @@
     '.sw{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #d4d4d8;cursor:pointer;padding:0}.sw.on{box-shadow:0 0 0 2px #18181b}',
     '.site{pointer-events:auto;position:fixed;right:122px;bottom:18px;padding:9px 13px;border-radius:999px;background:#fff;color:#18181b;border:1px solid #e4e4e7;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.14);font-weight:600}',
     // a phone (or a narrow window): the bar wraps — the design's name on its own row, every button reachable
-    '@media (max-width:640px){.bar{left:8px;right:8px;bottom:10px;transform:none;max-width:none;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px}.bar .meta{order:-1;flex:1 1 100%;text-align:center}.bar button{padding:5px 8px;font-size:12.5px}}',
+    // (lifted above the corner buttons — the flags list and a dev server's own badge stay reachable)
+    '@media (max-width:640px){.bar{left:8px;right:8px;bottom:64px;transform:none;max-width:none;flex-wrap:wrap;justify-content:center;gap:6px;padding:8px}.bar .meta{order:-1;flex:1 1 100%;text-align:center}.bar button{padding:5px 8px;font-size:12.5px}}',
+    // before/after: the original over the variant, cut at the line; the knob drags it (the page stays clickable)
+    '.cmp{position:fixed;pointer-events:none;display:none}.cmp.on{display:block}',
+    '.cmp .line{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(17,17,19,.35),0 0 12px rgba(0,0,0,.25)}',
+    '.cmp .hit{position:absolute;top:0;bottom:0;width:28px;margin-left:-14px;cursor:ew-resize;pointer-events:auto;touch-action:none}',
+    '.cmp .knob{position:absolute;width:38px;height:38px;margin:-19px 0 0 -19px;border-radius:50%;background:rgba(17,17,19,.92);color:#fff;border:2px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-size:12px;letter-spacing:-1px;cursor:ew-resize;pointer-events:auto;touch-action:none;user-select:none}',
+    '.cmp .knob:hover,.cmp.drag .knob{transform:scale(1.08)}',
+    '.cmp .lab{position:absolute;padding:3px 9px;border-radius:999px;background:rgba(17,17,19,.78);color:#fff;font-size:11.5px;font-weight:600;white-space:nowrap;max-width:40%;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(6px)}',
+    '.bar button.on{background:#2563eb;border-color:#2563eb}.bar button.flag{color:#fecaca}',
+    // flags: the list of variants that did not work, and the report an AI can fix the engine from
+    '.flags{pointer-events:auto;position:fixed;left:72px;bottom:18px;display:none;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:#fff;color:#b91c1c;border:1px solid #fecaca;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.14);font-weight:600}',
+    '.flags.on{display:flex}.flags .n{background:#dc2626;color:#fff;border-radius:999px;padding:0 7px;font-size:11.5px;line-height:18px}',
+    '.fl{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid #f4f4f5;border-radius:10px;margin-top:6px}.fl .t{flex:1;min-width:0}.fl .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+    '.fl button{padding:2px 8px;border-radius:999px;line-height:1.2}.why{display:flex;flex-direction:column;gap:5px;margin-top:6px}.why label{display:flex;gap:8px;align-items:center;cursor:pointer}',
+    '.auto{margin-top:8px;padding:8px 10px;border-radius:8px;background:#fff7ed;color:#9a3412;font-size:12px}',
+    'pre.rep{max-height:220px;overflow:auto;margin:8px 0 0;padding:8px;border-radius:8px;background:#f4f4f5;font:11px/1.4 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word}',
     '.spin{width:14px;height:14px;border:2px solid #d4d4d8;border-top-color:#2563eb;border-radius:50%;animation:s .8s linear infinite;display:inline-block;vertical-align:-2px;margin-right:6px}@keyframes s{to{transform:rotate(360deg)}}',
   ].join('') + '</style>';
   (document.body || document.documentElement).appendChild(host);
+  // a framework that re-renders the whole body (a hydration mismatch, an app without a root layout) drops foreign
+  // nodes: the overlay puts itself back, state intact
+  setInterval(function () { if (!host.isConnected) (document.body || document.documentElement).appendChild(host); }, 1000);
   var demoCss = document.createElement('style');
   demoCss.textContent = '[data-dh-demo]{text-decoration:underline dashed #f59e0b 1.5px;text-underline-offset:4px}';
 
@@ -76,9 +106,15 @@
   var siteBtn = el('div', 'site', 'Site');
   siteBtn.title = 'Tune the whole site: accent colour, warmth, corners, density, headline size, fonts';
   root.appendChild(siteBtn);
+  var flagsPill = el('div', 'flags');
+  flagsPill.title = 'Variants you flagged as not working — make the report an AI can fix try-on from';
+  root.appendChild(flagsPill);
+  var flagState = { flags: [], reasons: {} };
 
   var picking = false, outline = null, tag = null, panel = null, bar = null, session = null, idx = 1, state = null, busy = false;
   var batch = 4;                                   // how many variants a pick (and each More) brings
+  var cmpOn = true, cmpPos = 50;                   // before/after slider: on by default, remembered per browser
+  try { cmpOn = localStorage.getItem('dh-compare') !== '0'; } catch (e) { /* private mode */ }
 
   /* ------------------------------------------------------------ stamps + slots */
   function fiberOf(n) {
@@ -650,10 +686,105 @@
   }
   function flash(n) { if (!n) return; var o = el('div', 'outline'); root.appendChild(o); place(o, n.getBoundingClientRect()); setTimeout(function () { o.remove(); }, 700); }
 
+  /* ------------------------------------------------------------ before / after (compare slider) */
+  // The original (variant 0) and the variant being looked at share one grid cell; the original sits on top, cut at
+  // the line (clip-path), over the page's own background so nothing shows through. Pure display: nothing is written.
+  var cmp = el('div', 'cmp'), cmpLine = el('div', 'line'), cmpHit = el('div', 'hit'), cmpKnob = el('div', 'knob', '◀▶');
+  var cmpL = el('div', 'lab', 'Original'), cmpR = el('div', 'lab', '');
+  [cmpLine, cmpHit, cmpKnob, cmpL, cmpR].forEach(function (x) { cmp.appendChild(x); });
+  root.insertBefore(cmp, root.firstChild.nextSibling);            // under the bar and the panels
+  var cmpState = null, cmpRaf = 0;
+  var CMP_PROPS = ['display', 'gridArea', 'position', 'zIndex', 'isolation', 'background', 'clipPath', 'minWidth'];
+  function pageBg(n) {
+    for (var x = n; x && x.nodeType === 1; x = x.parentElement) {
+      var b = getComputedStyle(x).backgroundColor;
+      if (b && !/rgba\(0, 0, 0, 0\)|transparent/.test(b)) return b;
+    }
+    var h = getComputedStyle(document.documentElement).backgroundColor;
+    return h && !/rgba\(0, 0, 0, 0\)|transparent/.test(h) ? h : '#ffffff';
+  }
+  function saveStyle(n) { var o = {}; CMP_PROPS.forEach(function (k) { o[k] = n.style[k]; }); return o; }
+  function restoreStyle(n, o) { CMP_PROPS.forEach(function (k) { n.style[k] = o[k] || ''; }); }
+  function clearCompare() {
+    if (cmpRaf) { cancelAnimationFrame(cmpRaf); cmpRaf = 0; }
+    cmp.className = 'cmp';
+    var c = cmpState; cmpState = null;
+    if (!c) return;
+    restoreStyle(c.w, c.ws); restoreStyle(c.o, c.os); restoreStyle(c.v, c.vs);
+  }
+  function clip() {
+    if (!cmpState) return;
+    cmpState.o.style.clipPath = 'inset(0 ' + (100 - cmpPos) + '% 0 0)';
+    place2();
+  }
+  function place2() {
+    var c = cmpState;
+    if (!c) return;
+    var r = c.w.getBoundingClientRect();
+    if (!r.width || !r.height) { cmp.className = 'cmp'; return; }
+    cmp.className = 'cmp on' + (c.drag ? ' drag' : '');
+    place(cmp, r);
+    var x = r.width * cmpPos / 100;
+    cmpLine.style.left = x + 'px'; cmpHit.style.left = x + 'px'; cmpKnob.style.left = x + 'px';
+    // the knob and labels stay on screen while the section scrolls past
+    var top = Math.max(0, -r.top), bottom = Math.min(r.height, innerHeight - r.top);
+    cmpKnob.style.top = Math.max(top + 24, Math.min(bottom - 24, (top + bottom) / 2)) + 'px';
+    cmpL.style.top = cmpR.style.top = (top + 10) + 'px';
+    cmpL.style.left = '10px'; cmpR.style.right = '10px';
+    cmpL.style.opacity = cmpPos < 12 ? '0' : '1'; cmpR.style.opacity = cmpPos > 88 ? '0' : '1';
+  }
+  function setupCompare() {
+    clearCompare();
+    if (!cmpOn || !session || idx === 0) return;
+    var ws = wrappers();
+    for (var w = 0; w < ws.length; w++) {
+      var o = ws[w].querySelector(':scope > [data-dh-variant="0"]'), v = ws[w].querySelector(':scope > [data-dh-variant="' + idx + '"]');
+      if (!o || !v) continue;
+      cmpState = { w: ws[w], o: o, v: v, ws: saveStyle(ws[w]), os: saveStyle(o), vs: saveStyle(v), drag: false };
+      ws[w].style.display = 'grid';
+      ws[w].style.minWidth = '0';
+      [o, v].forEach(function (n, k) {
+        n.style.display = 'block'; n.style.gridArea = '1 / 1'; n.style.position = 'relative'; n.style.isolation = 'isolate'; n.style.minWidth = '0';
+        n.style.zIndex = k === 0 ? '1' : '0';
+      });
+      o.style.background = pageBg(ws[w].parentElement);
+      var cur = session.variants[idx];
+      cmpR.textContent = cur ? cur.t : 'Variant';
+      clip();
+      (function tick() { if (!cmpState) return; place2(); cmpRaf = requestAnimationFrame(tick); })();
+      return;
+    }
+  }
+  function toggleCompare() {
+    cmpOn = !cmpOn;
+    try { localStorage.setItem('dh-compare', cmpOn ? '1' : '0'); } catch (e) { /* private mode */ }
+    if (session) apply(idx);
+  }
+  function dragFrom(e) {
+    if (!cmpState) return;
+    e.preventDefault(); e.stopPropagation();
+    var t = e.currentTarget;
+    try { t.setPointerCapture(e.pointerId); } catch (x) { /* synthetic */ }
+    cmpState.drag = true;
+    function move(ev) {
+      if (!cmpState) return;
+      var r = cmpState.w.getBoundingClientRect();
+      cmpPos = Math.max(0, Math.min(100, (ev.clientX - r.left) / (r.width || 1) * 100));
+      clip();
+    }
+    function up() { if (cmpState) cmpState.drag = false; t.removeEventListener('pointermove', move); t.removeEventListener('pointerup', up); t.removeEventListener('pointercancel', up); place2(); }
+    t.addEventListener('pointermove', move); t.addEventListener('pointerup', up); t.addEventListener('pointercancel', up);
+    move(e);
+  }
+  cmpKnob.addEventListener('pointerdown', dragFrom);
+  cmpHit.addEventListener('pointerdown', dragFrom);
+
   /* ------------------------------------------------------------ session / variant bar */
   function wrappers() { return document.querySelectorAll('[data-dh-session="' + session.id + '"]'); }
   function apply(i) {
+    clearCompare();                                  // put the page back first: the slider holds the styles it changed
     idx = i;
+    errMark = pageErrors.length;                     // errors from here on belong to the variant now shown
     var ws = wrappers(), first = null;
     for (var w = 0; w < ws.length; w++) {
       var vs = ws[w].querySelectorAll(':scope > [data-dh-variant]');
@@ -664,6 +795,7 @@
       }
     }
     try { sessionStorage.setItem(SS, JSON.stringify({ id: session.id, idx: i })); } catch (e) { /* private mode */ }
+    setupCompare();
     renderBar();
     if (first) {
       var t = first.firstElementChild;
@@ -704,6 +836,10 @@
     var subEl = el('div', 'sub'); if (note) subEl.innerHTML = note; else subEl.textContent = sub;
     meta.appendChild(subEl);
     var keep = el('button', 'keep', 'Keep'), orig = el('button', null, 'Original'), disc = el('button', null, 'Discard');
+    var flagBtn = el('button', 'flag', '⚑ Flag');
+    flagBtn.title = 'This variant does not work? Flag it — the flags become a report an AI can fix try-on from';
+    var cmpBtn = el('button', cmpOn ? 'on' : null, '◐ Compare');
+    cmpBtn.title = 'Before / after: your original and this variant side by side — drag the line (C)';
     // the pool: how many designs this element has not been shown yet (More brings the next batch after these)
     var pool = session.pool, full = vs.length - 1 >= (session.max || 30);
     var more = el('button', null, pool ? (pool.left ? 'More · ' + pool.left + ' left' : 'No more') : 'More');
@@ -711,7 +847,10 @@
       : pool ? pool.left + ' of ' + pool.total + ' ' + session.slot + ' designs not shown yet — the next ' + Math.min(batch, pool.left) + ' come after these' : 'The next designs from the pool';
     var aiBtn = el('button', 'ai', 'AI draft');
     aiBtn.title = 'Ask your AI agent to write one more version for this element (labelled AI-generated)';
-    [prev, count, next, meta, orig, keep, more, aiBtn, disc].forEach(function (x) { bar.appendChild(x); });
+    [prev, count, next, meta, orig, cmpBtn, keep, more, aiBtn, flagBtn, disc].forEach(function (x) { bar.appendChild(x); });
+    cmpBtn.onclick = toggleCompare;
+    flagBtn.onclick = flagForm;
+    if (idx === 0) { cmpBtn.disabled = true; flagBtn.disabled = true; }
     aiBtn.onclick = function () {
       closePanel();
       panel = el('div', 'panel');
@@ -725,10 +864,11 @@
     keep.onclick = doKeep;
     disc.onclick = doDiscard;
     more.onclick = doMore;
-    if (busy || note) [prev, next, orig, keep, more, aiBtn].forEach(function (b) { b.disabled = true; });
+    if (busy || note) [prev, next, orig, keep, more, aiBtn, flagBtn].forEach(function (b) { b.disabled = true; });
     if ((pool && !pool.left) || full) more.disabled = true;
   }
   function endSession() {
+    clearCompare();
     session = null;
     try { sessionStorage.removeItem(SS); } catch (e) { /* ignore */ }
     if (demoCss.parentNode) demoCss.remove();
@@ -801,16 +941,163 @@
     panel = t;
   }
 
+  /* ------------------------------------------------------------ flags (a variant that does not work) */
+  function variantBox() {
+    var ws = wrappers();
+    for (var w = 0; w < ws.length; w++) { var v = ws[w].querySelector(':scope > [data-dh-variant="' + idx + '"]'); if (v) return v; }
+    return null;
+  }
+  var flat = function (t) { return String(t || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ''); };
+  /** What the page shows for the variant on screen: the owner's words missing, demo words, overflow, broken images, errors. */
+  function autoCheck() {
+    var box = variantBox(), out = { missing: [], foreign: [], overflow: 0, brokenImages: [], errors: pageErrors.slice(errMark).slice(-10), viewport: { w: innerWidth, h: innerHeight } };
+    if (!box || !session) return out;
+    var shown = flat(box.innerText || box.textContent);
+    (session.owner || []).forEach(function (t) { var f = flat(t); if (f.length >= 3 && shown.indexOf(f) < 0 && out.missing.length < 20) out.missing.push(String(t).slice(0, 160)); });
+    var demo = box.querySelectorAll('[data-dh-demo]');
+    for (var d = 0; d < demo.length && out.foreign.length < 20; d++) {
+      var r0 = demo[d].getBoundingClientRect(), tx = (demo[d].innerText || '').replace(/\s+/g, ' ').trim();
+      if (r0.width && r0.height && tx && out.foreign.indexOf(tx.slice(0, 120)) < 0) out.foreign.push(tx.slice(0, 120));
+    }
+    var all = box.querySelectorAll('*'), vw = document.documentElement.clientWidth || innerWidth;
+    for (var k = 0; k < all.length && k < 1500; k++) {
+      var r = all[k].getBoundingClientRect();
+      if (r.width && (r.right > vw + 2 || r.left < -2) && getComputedStyle(all[k]).position !== 'fixed') out.overflow++;
+    }
+    var ims = box.querySelectorAll('img');
+    for (var m = 0; m < ims.length; m++) if (ims[m].complete && !ims[m].naturalWidth && out.brokenImages.length < 10) out.brokenImages.push(ims[m].currentSrc || ims[m].getAttribute('src') || '(no src)');
+    return out;
+  }
+  function refreshFlags() {
+    return api('flags').then(function (r) {
+      if (!r.ok) return;
+      flagState = r;
+      flagsPill.innerHTML = '';
+      flagsPill.appendChild(el('span', null, '⚑ Flagged'));
+      flagsPill.appendChild(el('span', 'n', String(r.flags.length)));
+      flagsPill.className = 'flags' + (r.flags.length ? ' on' : '');
+    }).catch(function () { /* the helper is gone */ });
+  }
+  function flagForm() {
+    if (!session || !idx) return;
+    var v = session.variants[idx], a = autoCheck();
+    closePanel();
+    panel = el('div', 'panel');
+    panel.appendChild(el('p', 'h', 'What is wrong with this variant?'));
+    panel.appendChild(el('div', 'small muted', v.t + ' · ' + v.r + ' — for a ' + session.slot));
+    var pre = { missing: a.missing.length > 0, foreign: a.foreign.length > 0, layout: a.overflow > 0 || a.brokenImages.length > 0, mobile: a.overflow > 0 && innerWidth < 700, error: a.errors.length > 0 };
+    var box = el('div', 'why'), checks = {};
+    var reasons = flagState.reasons || {};
+    Object.keys(reasons).forEach(function (k) {
+      var lab = el('label'), cb = el('input');
+      cb.type = 'checkbox'; cb.checked = !!pre[k]; checks[k] = cb;
+      lab.appendChild(cb); lab.appendChild(el('span', null, k === 'wrong-kind' ? 'it is not a ' + session.slot + ' at all' : reasons[k]));
+      box.appendChild(lab);
+    });
+    panel.appendChild(box);
+    var seen = [];
+    if (a.missing.length) seen.push(a.missing.length + ' of your words not on the page (' + a.missing.slice(0, 2).map(function (t) { return '“' + t.slice(0, 40) + '”'; }).join(', ') + ')');
+    if (a.foreign.length) seen.push(a.foreign.length + ' demo word(s) shown');
+    if (a.overflow) seen.push(a.overflow + ' element(s) wider than the screen');
+    if (a.brokenImages.length) seen.push(a.brokenImages.length + ' broken image(s)');
+    if (a.errors.length) seen.push(a.errors.length + ' console error(s)');
+    if (seen.length) panel.appendChild(el('div', 'auto', 'Checked on the page: ' + seen.join(' · ') + '.'));
+    var note = el('textarea');
+    note.placeholder = 'Anything else? (optional) e.g. "the prices are under the wrong plans"';
+    panel.appendChild(note);
+    var row = el('div', 'row'), save = el('button', 'primary', 'Flag it'), cancel = el('button', null, 'Cancel');
+    row.appendChild(save); row.appendChild(cancel);
+    panel.appendChild(row);
+    var msg = el('div', 'small muted', 'Saved on this machine with what the page showed, so the report can reproduce it.');
+    msg.style.marginTop = '8px';
+    panel.appendChild(msg);
+    root.appendChild(panel);
+    cancel.onclick = closePanel;
+    save.onclick = function () {
+      var rs = Object.keys(checks).filter(function (k) { return checks[k].checked; });
+      save.disabled = true;
+      api('flag-add', { session: session.id, idx: idx, reasons: rs, note: note.value.trim(), auto: a }).then(function (r) {
+        save.disabled = false;
+        if (!r.ok) { msg.className = 'err'; msg.textContent = (r.code || 'ERROR') + ': ' + r.message; return; }
+        msg.className = 'ok'; msg.textContent = 'Flagged (' + r.total + ' in all). Keep browsing — ⚑ Flagged, bottom left, makes the report.';
+        refreshFlags();
+        setTimeout(function () { if (panel && panel.contains(msg)) closePanel(); }, 1800);
+      });
+    };
+  }
+  function flagsPanel() {
+    closePanel();
+    panel = el('div', 'panel');
+    panel.appendChild(el('p', 'h', 'Flagged variants'));
+    panel.appendChild(el('div', 'small muted', 'Each one is saved with what the page showed. The report is one detailed file you can send to any AI to improve try-on for designs of that shape.'));
+    var list = el('div');
+    panel.appendChild(list);
+    var row = el('div', 'row'), make = el('button', 'primary', 'Create the error report'), clear = el('button', null, 'Clear all'), close = el('button', null, 'Close');
+    row.appendChild(make); row.appendChild(clear); row.appendChild(close);
+    panel.appendChild(row);
+    var out = el('div');
+    panel.appendChild(out);
+    root.appendChild(panel);
+    function draw() {
+      list.innerHTML = '';
+      if (!flagState.flags.length) { list.appendChild(el('div', 'small muted', 'Nothing flagged.')); make.disabled = clear.disabled = true; return; }
+      make.disabled = clear.disabled = false;
+      flagState.flags.forEach(function (f) {
+        var it = el('div', 'fl'), t = el('div', 't');
+        t.appendChild(el('b', null, f.slot + ' · ' + f.title));
+        t.appendChild(el('div', 'small muted', (f.reasons.map(function (k) { return (flagState.reasons || {})[k] || k; }).join('; ') || 'note') + (f.fit ? ' · content ' + f.fit : '') + (f.note ? ' — “' + f.note.slice(0, 80) + '”' : '')));
+        var x = el('button', null, '×');
+        x.title = 'Remove this flag';
+        x.onclick = function () { api('flag-remove', { id: f.id }).then(function () { refreshFlags().then(draw); }); };
+        it.appendChild(t); it.appendChild(x);
+        list.appendChild(it);
+      });
+    }
+    draw();
+    close.onclick = closePanel;
+    clear.onclick = function () {
+      if (!confirm('Remove all ' + flagState.flags.length + ' flags?')) return;
+      api('flags-clear', {}).then(function () { out.innerHTML = ''; refreshFlags().then(draw); });
+    };
+    make.onclick = function () {
+      make.disabled = true;
+      out.innerHTML = '<div class="small"><span class="spin"></span>Writing the report…</div>';
+      api('flag-report', {}).then(function (r) {
+        make.disabled = false;
+        out.innerHTML = '';
+        if (!r.ok) { out.appendChild(el('div', 'err', (r.code || 'ERROR') + ': ' + r.message)); return; }
+        out.appendChild(el('div', 'ok', 'Report ready: ' + r.path + ' (' + r.flags + ' flag' + (r.flags > 1 ? 's' : '') + '). It holds your site text: send it, don\'t publish it.'));
+        var r2 = el('div', 'row'), copy = el('button', 'blue', 'Copy the report');
+        copy.onclick = function () {
+          var done = function () { copy.textContent = 'Copied — paste it to your AI'; };
+          try { navigator.clipboard.writeText(r.markdown).then(done, function () { sel(); }); } catch (e) { sel(); }
+          function sel() { var range = document.createRange(); range.selectNodeContents(pre); var s2 = getSelection(); s2.removeAllRanges(); s2.addRange(range); copy.textContent = 'Selected — press Ctrl/Cmd+C'; }
+        };
+        r2.appendChild(copy);
+        out.appendChild(r2);
+        var pre = el('pre', 'rep', r.markdown);
+        out.appendChild(pre);
+      });
+    };
+  }
+  flagsPill.addEventListener('click', function () { if (panel && panel.querySelector('.fl,.rep')) { closePanel(); return; } refreshFlags().then(flagsPanel); });
+
   document.addEventListener('keydown', function (e) {
-    if (!session || busy || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) return;
+    // typing in a field (the page's, or one of ours: the event is retargeted to the shadow host) is never a shortcut
+    var t = (e.composedPath && e.composedPath()[0]) || e.target;
+    if (!session || busy || /^(INPUT|TEXTAREA|SELECT)$/.test((t && t.tagName) || '') || (t && t.isContentEditable)) return;
+    // Escape closes an open panel first; a second Escape discards
+    if (e.key === 'Escape' && panel) { closePanel(); e.preventDefault(); return; }
     var n = session.variants.length;
     if (e.key === 'ArrowRight') { apply((idx + 1) % n); e.preventDefault(); }
     else if (e.key === 'ArrowLeft') { apply((idx - 1 + n) % n); e.preventDefault(); }
     else if (e.key === 'Enter') { doKeep(); e.preventDefault(); }
+    else if (e.key === 'c' || e.key === 'C') { if (!e.metaKey && !e.ctrlKey && !e.altKey) { toggleCompare(); e.preventDefault(); } }
     else if (e.key === 'Escape') { doDiscard(); e.preventDefault(); }
   });
 
   /* ------------------------------------------------------------ boot: resume an open session */
+  refreshFlags();
   api('state').then(function (r) {
     state = r;
     var saved = null;
@@ -824,5 +1111,5 @@
     try { waiting = sessionStorage.getItem(SS + '-draft'); } catch (e) { /* ignore */ }
     (r.drafts || []).forEach(function (d) { if (d.id === waiting) waitDraft(d); });
   });
-  window.__dhTryon = { api: api, crumbsFor: crumbsFor, guessSlot: guessSlot, probe: probe };
+  window.__dhTryon = { api: api, crumbsFor: crumbsFor, guessSlot: guessSlot, probe: probe, autoCheck: autoCheck, setCompare: function (p) { cmpPos = p; clip(); } };
 })();

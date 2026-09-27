@@ -33,6 +33,9 @@
  * SEO (driven by `dh seo`, which builds the plan from the brief's confirmed facts):
  *   node tryon/cli.mjs seo inspect | seo apply --plan plan.json | seo undo
  *
+ * Flags (a variant that does not work, flagged from the try-on bar) and the report an AI can fix the engine from:
+ *   node tryon/cli.mjs flags list | flags report [--ids F1a2b3c4d,…] | flags remove --id F… | flags clear
+ *
  * A registry someone found — vetted (licence, paywall, schema, usable items) before it is indexed:
  *   node tryon/cli.mjs registry vet|add --index https://…/registry.json --repo owner/name [--id x]
  *   node tryon/cli.mjs registry list | registry remove --id x
@@ -50,6 +53,7 @@ import { vetRegistry, addRegistry, listRegistries, removeRegistry } from './lib/
 import { tuneOpen, tuneSet, tuneKeep, tuneReset, DIALS, PRESETS } from './lib/tune.mjs';
 import { themeState, themeApply, themeUndo } from './lib/sitetheme.mjs';
 import { seoInspect, seoApply, seoUndo } from './lib/seo.mjs';
+import { REASONS, listFlags, publicFlag, removeFlag, clearFlags, buildReport } from './lib/flags.mjs';
 
 const argv = process.argv.slice(2);
 const cmd = argv[0];
@@ -151,6 +155,18 @@ async function main() {
       const r = await draft.completeDraft(project, flags.id, { install: false });
       return out({ ok: true, ...r, next: `the owner compares it in the browser (labelled AI-generated) — or \`show --id ${r.id} --idx ${r.ai_variant}\`, then keep/discard` });
     }
+    case 'flags': {
+      const act = argv[1] || 'list';
+      if (act === 'list') return out({ ok: true, flags: listFlags(project).map(publicFlag), reasons: REASONS });
+      if (act === 'remove') { need('id'); return out({ ok: true, ...removeFlag(project, flags.id) }); }
+      if (act === 'clear') return out({ ok: true, ...clearFlags(project) });
+      if (act === 'report') {
+        const r = buildReport(project, typeof flags.ids === 'string' ? flags.ids.split(',').map((x) => x.trim()).filter(Boolean) : null);
+        return out({ ok: true, path: r.path, flags: r.flags, bytes: Buffer.byteLength(r.markdown),
+          next: 'give this file to the AI improving try-on (it holds the site owner\'s text: send it, never publish it)' });
+      }
+      return out({ ok: false, code: 'USAGE', usage: 'flags list | flags report [--ids a,b] | flags remove --id F… | flags clear' }, 2);
+    }
     case 'registry': {
       // a registry the owner (or the agent) found: vetted against written criteria before anything is indexed
       const act = argv[1];
@@ -209,7 +225,7 @@ async function main() {
       return out({ ok: true, discarded, ...r, restartDevServer: true });
     }
     default:
-      return out({ ok: false, code: 'USAGE', commands: ['setup', 'serve', 'doctor', 'slots', 'query', 'inspect', 'try', 'more', 'show', 'keep', 'discard', 'save', 'library', 'status', 'clean', 'draft', 'drafts', 'draft-check', 'draft-done', 'tune', 'theme', 'seo', 'registry'] }, 2);
+      return out({ ok: false, code: 'USAGE', commands: ['setup', 'serve', 'doctor', 'slots', 'query', 'inspect', 'try', 'more', 'show', 'keep', 'discard', 'save', 'library', 'status', 'clean', 'draft', 'drafts', 'draft-check', 'draft-done', 'tune', 'theme', 'seo', 'flags', 'registry'] }, 2);
   }
 }
 

@@ -894,6 +894,8 @@ export function publicSession(s) {
     }))),
     skipped: s.skipped, installed: s.installed,
     pool: s.pool || null, max: MAX_VARIANTS,
+    // the owner's own words (the overlay's auto-check looks for them on the page when a variant is flagged)
+    owner: ((s.variants[0] && s.variants[0].ownerTexts) || []).slice(0, 80).map((t) => String(t).slice(0, 200)),
   };
 }
 

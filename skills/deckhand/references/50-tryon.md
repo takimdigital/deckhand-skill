@@ -16,6 +16,16 @@ cta…) → **Show variants** (4, 6, 8 or 12 at once) → ←/→ to compare (in
 batch from the pool after the ones on screen (never a design already shown or refused; up to 30 per try) →
 **Keep** (Enter) or **Discard** (Esc) → optional **Save to my library** (ranks first next time). The agent does
 nothing per click; do not poll.
+- **◐ Compare** (on by default, C toggles): the original and the variant on screen share the section's place, cut at a
+  line the owner drags — before on the left, after on the right. Display only, nothing is written.
+- **⚑ Flag**: a variant that does not work (words missing, demo words, broken layout, breaks on a phone, an error,
+  wrong kind of section, colours off) is flagged with the owner's reasons and a note; the overlay prefills what it
+  measured on the page (the owner's words not shown, demo words, overflow, broken images, console errors).
+  **⚑ Flagged** (bottom left) lists them; **Create the error report** writes one deterministic Markdown file
+  (`.deckhand/tryon/reports/tryon-flags-<hash>.md`: patterns across flags first, then each flag with the owner's
+  element, what the engine passed, the design's slots and a reproduce command). It holds the owner's site text: it
+  stays on the machine unless the owner sends it. Given one: fix the engine for every design of that shape, add an
+  offline test per flag (`try --only <design>` reproduces it). `$T flags list|report|remove --id F…|clear`.
 
 Headless (no browser in the harness, or scripted):
 ```bash
