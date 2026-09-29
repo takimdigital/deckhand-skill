@@ -21,3 +21,21 @@ test('F13: a demo price and a dead href="#" enter the demo ledger (fit counts un
   const plain = engine.demoTexts(dir, rel, []).map((e) => e.text);   // fit counts (demoVisual) must not move
   assert.ok(!plain.includes('$19 / mo') && !plain.includes('href="#"'), plain.join(' | '));
 });
+
+test('F21: trying a self-closing usage (<Hero />) says its words live elsewhere; a real section does not', async () => {
+  const dir = tempSite();
+  const code = 'import { Hero } from "@/components/hero";\n\nexport default function U() {\n  return (\n    <main>\n      <Hero />\n    </main>\n  );\n}\n';
+  fs.writeFileSync(path.join(dir, 'app/usage.tsx'), code);
+  const at = { line: 6, col: 7 };
+  const ins = engine.inspect(dir, { file: 'app/usage.tsx', ...at, slot: 'hero' });
+  assert.equal(ins.warning && ins.warning.code, 'EMPTY_USAGE');
+  const s = await engine.open(dir, { file: 'app/usage.tsx', ...at, slot: 'hero', count: 1, registry: 'tailark-oss', install: false });
+  assert.equal(s.warning && s.warning.code, 'EMPTY_USAGE');
+  assert.match(s.warning.message, /its own file/);
+  engine.discard(dir, s.id);
+  const hero = fs.readFileSync(path.join(dir, 'components/hero.tsx'), 'utf8');
+  const i = hero.indexOf('<section');
+  const b = hero.slice(0, i);
+  const ok = engine.inspect(dir, { file: 'components/hero.tsx', line: b.split('\n').length, col: i - b.lastIndexOf('\n'), slot: 'hero' });
+  assert.equal(ok.warning, undefined);
+});
