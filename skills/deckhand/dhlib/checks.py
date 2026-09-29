@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import urllib.request
 from pathlib import Path
 
@@ -65,6 +66,24 @@ def plan(root: Path, s: dict) -> dict:
     return _res(not why, why, "fix the sitemap (dh plan lint shows each dead end)", warnings=len(r["warnings"]))
 
 
+def _fetch(url: str) -> tuple:
+    """(status or None, the first 400 kB of HTML). An HTTP error still has a status: that is the evidence."""
+    try:
+        with urllib.request.urlopen(url, timeout=10) as r:
+            return r.status, r.read(400_000).decode("utf-8", "replace")
+    except Exception as e:  # noqa: BLE001 — any failure to answer is the evidence
+        return getattr(e, "code", None), ""
+
+
+def _planned(root: Path) -> tuple:
+    """The plan's public static routes, and each planned form with the route of its page (F9)."""
+    sm = read_json(root / ".deckhand" / "sitemap.json", {}) or {}
+    pages = [p for p in sm.get("pages", []) or [] if p.get("route") and "[" not in p["route"]]
+    public = {p.get("id"): p["route"] for p in pages if (p.get("auth") or "public") == "public"}
+    forms = [(f.get("id"), public[f.get("page")]) for f in sm.get("forms", []) or [] if f.get("page") in public]
+    return list(dict.fromkeys(public.values())), forms
+
+
 def build(root: Path, s: dict) -> dict:
     why = []
     if not s.get("base"):
@@ -76,15 +95,24 @@ def build(root: Path, s: dict) -> dict:
     if not url:
         why.append("the app has not been started (dh dev start)")
     else:
-        try:
-            with urllib.request.urlopen(url, timeout=10) as r:
-                if r.status >= 500:
-                    why.append(f"{url} answered {r.status}")
-        except Exception as e:  # noqa: BLE001 — any failure to answer is the evidence
-            code = getattr(e, "code", None)
-            if not code or code >= 500:
-                why.append(f"{url} does not answer ({e})")
-    return _res(not why, why, "dh dev start — then open the URL; the owner tests it (gate G2)", url=url)
+        base = url.rstrip("/")
+        routes, forms = _planned(root)
+        worst = 400 if routes else 500                # with a plan, a planned page that 404s is not built (F9); without, only the root is judged
+        html_of = {}
+        for r_ in (["/"] + [x for x in routes if x != "/"])[:40]:
+            code, html = _fetch(base + r_)
+            html_of[r_] = html
+            if not code:
+                why.append(f"{base + r_} does not answer")
+            elif code >= worst:
+                why.append(f"{r_} -> {code}" if r_ != "/" else f"{url} answered {code}")
+        for fid, r_ in forms:
+            html = html_of[r_] if r_ in html_of else _fetch(base + r_)[1]
+            if html and re.search(r'<div id="(root|app|__next)"></div>', html) and "<form" not in html.lower():
+                continue                              # drawn by JavaScript: `dh verify` checks it in a browser
+            if "<form" not in html.lower():
+                why.append(f"form {fid}: {r_} has no <form>")
+    return _res(not why, why, "build the pages and forms listed in why (dh plan render shows each one), keep dh dev start running, then dh phase done build — the owner tests it (gate G2)", url=url)
 
 
 def brand(root: Path, s: dict) -> dict:
