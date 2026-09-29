@@ -1,27 +1,29 @@
 {
  "version": 1,
  "registry": "basecn",
- "deckhand": "2.3.0",
+ "deckhand": "2.3.2",
  "verdicts": {
   "basecn/accordion@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/7"
   },
   "basecn/alert-dialog@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/avatar@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "basecn/badge@base-ui": {
    "v": "refused",
    "why": "POOR_FIT: carries 0/1"
   },
   "basecn/breadcrumb@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/button@base-ui": {
    "v": "fits",
@@ -29,8 +31,12 @@
    "of": 1
   },
   "basecn/calendar@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"calendar\""
+   "v": "fits",
+   "needs": [
+    "react-day-picker"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "basecn/card@base-ui": {
    "v": "fits",
@@ -38,16 +44,16 @@
    "of": 2
   },
   "basecn/carousel@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "basecn/checkbox@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "basecn/command@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"command\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED basecn/command@base-ui — https://basecn.dev/r/command.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | https://raw.githubusercontent.com/akash3444/basecn/main/pu"
   },
   "basecn/context-menu@base-ui": {
    "v": "fits",
@@ -55,103 +61,128 @@
    "of": 1
   },
   "basecn/dialog@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/drawer-base@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sheet\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/drawer@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sheet\""
+   "v": "fits",
+   "needs": [
+    "vaul-base"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "basecn/dropdown-menu@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/hover-card@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "fits",
+   "carried": 2,
+   "of": 2
   },
   "basecn/input@base-ui": {
    "v": "fits"
   },
   "basecn/label@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits"
   },
   "basecn/navigation-menu@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "basecn/pagination@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/popover@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "fits",
+   "carried": 2,
+   "of": 2
   },
   "basecn/progress@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   },
   "basecn/radio-group@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/select@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "fits",
+   "carried": 2,
+   "of": 2
   },
   "basecn/separator-extended@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   },
   "basecn/separator@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   },
   "basecn/sheet@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sheet\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/skeleton@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"skeleton\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   },
   "basecn/slider@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "basecn/sonner@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"toast\""
+   "v": "fits",
+   "needs": [
+    "next-themes",
+    "sonner"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "basecn/switch@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   },
   "basecn/table@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "fits",
+   "carried": 6,
+   "of": 6
   },
   "basecn/tabs@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "fits",
+   "carried": 3,
+   "of": 3
   },
   "basecn/textarea@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits"
   },
   "basecn/toggle@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   },
   "basecn/tooltip@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   }
  }
 }

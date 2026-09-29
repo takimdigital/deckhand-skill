@@ -1,147 +1,211 @@
 {
  "version": 1,
  "registry": "shadcnui-blocks",
- "deckhand": "2.3.0",
+ "deckhand": "2.3.2",
  "verdicts": {
   "shadcnui-blocks/accordion-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/7"
   },
   "shadcnui-blocks/accordion-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/accordion-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 7
   },
   "shadcnui-blocks/alert-dialog-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcnui-blocks/alert-dialog-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcnui-blocks/alert-dialog-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
   },
   "shadcnui-blocks/alert-dialog-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcnui-blocks/alert-dialog-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcnui-blocks/alert-dialog-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcnui-blocks/animated-grid-pattern@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "shadcnui-blocks/avatar-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/10"
   },
   "shadcnui-blocks/avatar-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/10"
   },
   "shadcnui-blocks/avatar-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/10"
   },
   "shadcnui-blocks/avatar-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-13@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-14@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcnui-blocks/avatar-15@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 3/10"
   },
   "shadcnui-blocks/avatar-16@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/10"
   },
   "shadcnui-blocks/badge-01@radix": {
    "v": "refused",
@@ -212,64 +276,64 @@
    "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/breadcrumb-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/breadcrumb-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/breadcrumb-13@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/breadcrumb-14@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/breadcrumb-15@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/button-01@radix": {
    "v": "fits",
@@ -298,11 +362,17 @@
   },
   "shadcnui-blocks/button-06@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 1,
    "of": 1
   },
   "shadcnui-blocks/button-07@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 1,
    "of": 1
   },
@@ -353,11 +423,17 @@
   },
   "shadcnui-blocks/button-18@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 1,
    "of": 1
   },
   "shadcnui-blocks/button-19@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 1,
    "of": 1
   },
@@ -371,6 +447,9 @@
   },
   "shadcnui-blocks/button-22@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 1,
    "of": 1
   },
@@ -384,31 +463,49 @@
   },
   "shadcnui-blocks/card-01@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 2,
    "of": 2
   },
   "shadcnui-blocks/card-02@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 2,
    "of": 2
   },
   "shadcnui-blocks/card-03@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 2,
    "of": 2
   },
   "shadcnui-blocks/card-04@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 2,
    "of": 2
   },
   "shadcnui-blocks/card-05@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 2,
    "of": 2
   },
   "shadcnui-blocks/card-06@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 2,
    "of": 2
   },
@@ -421,120 +518,137 @@
    "why": "POOR_FIT: carries 1/2"
   },
   "shadcnui-blocks/carousel-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcnui-blocks/carousel-block-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/5"
   },
   "shadcnui-blocks/carousel-block-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/5"
   },
   "shadcnui-blocks/checkbox-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/checkbox-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/checkbox-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/checkbox-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/checkbox-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-13@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-14@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-15@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/checkbox-16@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/contact-01@radix": {
    "v": "refused",
@@ -542,6 +656,9 @@
   },
   "shadcnui-blocks/contact-02@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 6
   },
@@ -589,48 +706,58 @@
    "of": 3
   },
   "shadcnui-blocks/dot-pattern@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "shadcnui-blocks/dropdown-menu-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/dropdown-menu-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/dropdown-menu-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/dropdown-menu-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/dropdown-menu-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/dropdown-menu-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/dropdown-menu-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcnui-blocks/dropdown-menu-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/faq-01@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 7,
    "of": 7
   },
   "shadcnui-blocks/faq-02@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 7,
    "of": 7
   },
@@ -650,21 +777,33 @@
   },
   "shadcnui-blocks/faq-06@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 7
   },
   "shadcnui-blocks/faq-07@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 7
   },
   "shadcnui-blocks/faq-08@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 7
   },
   "shadcnui-blocks/faq-09@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 7,
    "of": 7
   },
@@ -674,6 +813,9 @@
   },
   "shadcnui-blocks/faq-11@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 7
   },
@@ -689,6 +831,9 @@
   },
   "shadcnui-blocks/faq-14@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 7,
    "of": 7
   },
@@ -709,11 +854,17 @@
   },
   "shadcnui-blocks/features-04@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 7,
    "of": 8
   },
   "shadcnui-blocks/features-05@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 8,
    "of": 8
   },
@@ -740,7 +891,9 @@
   "shadcnui-blocks/features-10@radix": {
    "v": "fits",
    "needs": [
-    "recharts"
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
    ],
    "carried": 8,
    "of": 8
@@ -777,6 +930,9 @@
   },
   "shadcnui-blocks/features-17@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 8,
    "of": 8
   },
@@ -792,26 +948,41 @@
   },
   "shadcnui-blocks/footer-01@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 3,
    "of": 6
   },
   "shadcnui-blocks/footer-02@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 6
   },
   "shadcnui-blocks/footer-03@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 6
   },
   "shadcnui-blocks/footer-04@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 6
   },
   "shadcnui-blocks/footer-05@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 3,
    "of": 6
   },
@@ -826,17 +997,24 @@
   },
   "shadcnui-blocks/hero-01@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 4
   },
   "shadcnui-blocks/hero-02@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 4
   },
   "shadcnui-blocks/hero-03@radix": {
    "v": "partial",
    "needs": [
+    "cn",
     "motion"
    ],
    "carried": 3,
@@ -844,17 +1022,24 @@
   },
   "shadcnui-blocks/hero-04@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 4
   },
   "shadcnui-blocks/hero-05@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 4
   },
   "shadcnui-blocks/hero-06@radix": {
    "v": "fits",
    "needs": [
+    "cn",
     "next-themes"
    ],
    "carried": 4,
@@ -863,6 +1048,7 @@
   "shadcnui-blocks/hero-07@radix": {
    "v": "fits",
    "needs": [
+    "cn",
     "motion"
    ],
    "carried": 4,
@@ -870,50 +1056,85 @@
   },
   "shadcnui-blocks/hero-08@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 4
   },
   "shadcnui-blocks/input-01@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-02@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-03@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-04@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-05@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-06@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-07@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-08@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-09@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-10@radix": {
    "v": "fits",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ]
   },
   "shadcnui-blocks/input-11@radix": {
-   "v": "fits"
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/input-12@radix": {
    "v": "fits",
    "needs": [
+    "cn",
     "react-dropzone"
    ]
   },
@@ -921,6 +1142,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -931,6 +1153,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -941,6 +1164,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -951,6 +1175,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -961,6 +1186,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -971,6 +1197,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -981,6 +1208,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "embla-carousel-react",
     "react-hook-form",
     "zod"
@@ -992,6 +1220,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -1083,115 +1312,150 @@
    "why": "POOR_FIT: carries 2/5"
   },
   "shadcnui-blocks/navigation-menu-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 5
   },
   "shadcnui-blocks/navigation-menu-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 5
   },
   "shadcnui-blocks/navigation-menu-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcnui-blocks/navigation-menu-03@radix — https://raw.githubusercontent.com/akash3444/shadcn-ui-blocks/main/public/r/navigation-menu-03.json: UNRESOLVED_REGISTRY_DEP @/components/logo"
   },
   "shadcnui-blocks/navigation-menu-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 5
   },
   "shadcnui-blocks/navigation-menu-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 5
   },
   "shadcnui-blocks/navigation-menu-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 4,
+   "of": 5
   },
   "shadcnui-blocks/navigation-menu-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 5
   },
   "shadcnui-blocks/navigation-menu-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 5
   },
   "shadcnui-blocks/pagination-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/pagination-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/pagination-13@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-14@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/pagination-15@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/particles@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "shadcnui-blocks/pricing-01@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 12
   },
   "shadcnui-blocks/pricing-02@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 12
   },
   "shadcnui-blocks/pricing-03@radix": {
    "v": "partial",
    "needs": [
-    "@number-flow/react"
+    "@number-flow/react",
+    "cn"
    ],
    "carried": 6,
    "of": 12
@@ -1199,18 +1463,25 @@
   "shadcnui-blocks/pricing-04@radix": {
    "v": "partial",
    "needs": [
-    "@number-flow/react"
+    "@number-flow/react",
+    "cn"
    ],
    "carried": 6,
    "of": 12
   },
   "shadcnui-blocks/pricing-05@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 12
   },
   "shadcnui-blocks/pricing-06@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 12
   },
@@ -1231,165 +1502,201 @@
    "why": "POOR_FIT: carries 2/12"
   },
   "shadcnui-blocks/progress-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/progress-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/radio-group-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/radio-group-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/radio-group-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/radio-group-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/radio-group-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/radio-group-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/radio-group-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/radio-group-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/radio-group-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"radio-group\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
   },
   "shadcnui-blocks/select-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/2"
   },
   "shadcnui-blocks/select-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/2"
   },
   "shadcnui-blocks/select-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/2"
   },
   "shadcnui-blocks/select-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/2"
   },
   "shadcnui-blocks/select-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcnui-blocks/select-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/2"
   },
   "shadcnui-blocks/select-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/2"
   },
   "shadcnui-blocks/select-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "next-themes"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcnui-blocks/select-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcnui-blocks/select-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcnui-blocks/select-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/2"
   },
   "shadcnui-blocks/separator-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/separator-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/separator-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/separator-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/separator-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/separator-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/separator-with-label-vertical@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/signup-01@radix": {
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -1400,6 +1707,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -1410,6 +1718,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -1420,6 +1729,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -1430,6 +1740,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -1440,6 +1751,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -1450,6 +1762,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "embla-carousel-react",
     "react-hook-form",
     "zod"
@@ -1461,6 +1774,7 @@
    "v": "partial",
    "needs": [
     "@hookform/resolvers",
+    "cn",
     "react-hook-form",
     "zod"
    ],
@@ -1468,64 +1782,68 @@
    "of": 7
   },
   "shadcnui-blocks/slider-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/slider-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-13@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-14@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/slider-15@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/stats-01@radix": {
    "v": "partial",
@@ -1583,148 +1901,148 @@
    "of": 8
   },
   "shadcnui-blocks/switch-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/switch-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/switch-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/switch-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/switch-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/switch-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/switch-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcnui-blocks/table-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "shadcnui-blocks/table-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/6"
   },
   "shadcnui-blocks/table-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/6"
   },
   "shadcnui-blocks/tabs-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-13@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-14@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-15@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-16@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-17@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcnui-blocks/tabs-18@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcnui-blocks/team-01@radix": {
    "v": "fits",
@@ -1774,6 +2092,7 @@
   "shadcnui-blocks/team-10@radix": {
    "v": "fits",
    "needs": [
+    "cn",
     "embla-carousel-react"
    ],
    "carried": 10,
@@ -1796,16 +2115,25 @@
   },
   "shadcnui-blocks/testimonials-01@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 5
   },
   "shadcnui-blocks/testimonials-02@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 5
   },
   "shadcnui-blocks/testimonials-03@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 5
   },
@@ -1815,6 +2143,9 @@
   },
   "shadcnui-blocks/testimonials-05@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 5
   },
@@ -1824,11 +2155,17 @@
   },
   "shadcnui-blocks/testimonials-07@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 5
   },
   "shadcnui-blocks/testimonials-08@radix": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 5
   },
@@ -1845,6 +2182,7 @@
   "shadcnui-blocks/testimonials-11@radix": {
    "v": "fits",
    "needs": [
+    "cn",
     "embla-carousel-react"
    ],
    "carried": 5,
@@ -1855,61 +2193,107 @@
    "carried": 5,
    "of": 5
   },
+  "shadcnui-blocks/testimonials-13@radix": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcnui-blocks/testimonials-13@radix — https://raw.githubusercontent.com/akash3444/shadcn-ui-blocks/main/public/r/testimonials-13.json: UNRESOLVED_REGISTRY_DEP @/components/logos"
+  },
   "shadcnui-blocks/textarea-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/textarea-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/textarea-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/textarea-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/textarea-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/textarea-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/textarea-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcnui-blocks/tooltip-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/tooltip-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/tooltip-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/tooltip-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/tooltip-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/tooltip-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcnui-blocks/tooltip-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   }
  }
 }

@@ -1,15 +1,15 @@
 {
  "version": 1,
  "registry": "magicui",
- "deckhand": "2.3.0",
+ "deckhand": "2.3.2",
  "verdicts": {
   "magicui/animated-beam@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/animated-circular-progress-bar@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "magicui/animated-gradient-text@any": {
    "v": "fits",
@@ -17,8 +17,8 @@
    "of": 1
   },
   "magicui/animated-grid-pattern@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/animated-shiny-text@any": {
    "v": "fits",
@@ -26,8 +26,8 @@
    "of": 1
   },
   "magicui/animated-theme-toggler@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "magicui/aurora-text@any": {
    "v": "fits",
@@ -35,20 +35,20 @@
    "of": 1
   },
   "magicui/avatar-circles@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "magicui/bento-grid@any": {
    "v": "refused",
    "why": "POOR_FIT: carries 0/8"
   },
   "magicui/border-beam@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/client-tweet-card@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"embed\""
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: registry/magicui/client-tweet-card.tsx: cannot resolve @/registry/magicui/tweet-card"
   },
   "magicui/comic-text@any": {
    "v": "fits",
@@ -63,32 +63,32 @@
    "why": "POOR_FIT: carries 0/1"
   },
   "magicui/dot-pattern@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/flickering-grid@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/floating-3d-particles@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/globe@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/grid-pattern@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/hero-video-dialog@any": {
    "v": "refused",
    "why": "POOR_FIT: carries 0/4"
   },
   "magicui/hexagon-pattern@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/highlighter@any": {
    "v": "fits",
@@ -108,8 +108,8 @@
    "of": 1
   },
   "magicui/interactive-grid-pattern@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/interactive-hover-button@any": {
    "v": "fits",
@@ -142,8 +142,8 @@
    "why": "POOR_FIT: carries 0/5"
   },
   "magicui/meteors@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/morphing-text@any": {
    "v": "refused",
@@ -159,20 +159,20 @@
    "why": "POOR_FIT: carries 0/1"
   },
   "magicui/number-ticker@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"number-ticker\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
   },
   "magicui/particles@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/pointer@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"cursor\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/progressive-blur@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "magicui/pulsating-button@any": {
    "v": "fits",
@@ -185,8 +185,8 @@
    "of": 1
   },
   "magicui/retro-grid@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/ripple-button@any": {
    "v": "fits",
@@ -194,12 +194,16 @@
    "of": 1
   },
   "magicui/ripple@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/scroll-progress@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "magicui/shimmer-button@any": {
    "v": "fits",
@@ -207,8 +211,9 @@
    "of": 1
   },
   "magicui/shine-border@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"border-effect\""
+   "v": "fits",
+   "carried": 2,
+   "of": 2
   },
   "magicui/shiny-button@any": {
    "v": "fits",
@@ -219,8 +224,8 @@
    "of": 1
   },
   "magicui/smooth-cursor@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"cursor\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/sparkles-text@any": {
    "v": "fits",
@@ -239,8 +244,8 @@
    "of": 1
   },
   "magicui/striped-pattern@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/text-3d-flip@any": {
    "v": "fits",
@@ -267,8 +272,8 @@
    "of": 1
   },
   "magicui/tweet-card@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"embed\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "magicui/typing-animation@any": {
    "v": "fits",
@@ -284,8 +289,8 @@
    "of": 1
   },
   "magicui/warp-background@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "magicui/word-rotate@any": {
    "v": "refused",

@@ -31,6 +31,12 @@ const { parse, findElementAt } = require('./ast.cjs');
 export const VERDICTS = ['fits', 'partial', 'refused', 'broken', 'unreachable', 'unchecked'];
 const BROKEN = new Set(['UNRESOLVED_IMPORT', 'NO_EXPORT', 'PARAMETERIZE_FAILED']);
 
+/** A fetch that failed for a reason no retry fixes: the design needs a file its own registry does not ship (or a 404 on a
+ *  dependency). That is a broken design, not a network blip: an `unreachable` is never recorded, so it would be retried forever. */
+export function permanentFetchFailure(detail) {
+  return /UNRESOLVED_REGISTRY_DEP|UNRESOLVED_REGISTRY_FILE|UNRESOLVED_IMPORTS|HTTP 404/.test(String(detail || ''));
+}
+
 /* ------------------------------------------------------------------ the owner's sections (one per kind) */
 
 const LINK = 'import Link from "next/link";\n';
@@ -365,10 +371,206 @@ export function Order() {
   );
 }
 ` },
+  tabs: { at: '<div className="tabs', code: `export function MenuTabs() {
+  return (
+    <div className="tabs mx-auto max-w-3xl py-12">
+      <div role="tablist" className="flex gap-2"><button role="tab">Breads</button><button role="tab">Pastries</button></div>
+      <div role="tabpanel"><p>Country sourdough, rye and a seeded loaf every morning.</p></div>
+    </div>
+  );
+}
+` },
+  dialog: { at: '<div role="dialog"', code: `export function OrderDialog() {
+  return (
+    <div role="dialog" aria-label="Order confirmed" className="rounded-xl border p-6">
+      <h2 className="font-semibold">Your order is in</h2>
+      <p className="text-sm text-muted-foreground">We bake it at 4am and deliver before 8am.</p>
+      <button className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground">Close</button>
+    </div>
+  );
+}
+` },
+  sheet: { at: '<aside className="fixed', code: `export function CartSheet() {
+  return (
+    <aside className="fixed right-0 top-0 h-full w-80 border-l bg-background p-6">
+      <h2 className="font-semibold">Your basket</h2>
+      <p className="text-sm">1 x Country sourdough</p>
+      <button className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground">Checkout</button>
+    </aside>
+  );
+}
+` },
+  popover: { at: '<div className="popover', code: `export function AllergenInfo() {
+  return (
+    <div className="popover rounded-md border p-4 text-sm shadow">
+      <p className="font-medium">Allergens</p>
+      <p>Wheat, rye. Baked in a kitchen that uses nuts.</p>
+    </div>
+  );
+}
+` },
+  tooltip: { at: '<span title', code: `export function Hint() {
+  return (
+    <p className="text-sm">Delivery <span title="Before 8am, anywhere in Lyon">before breakfast</span></p>
+  );
+}
+` },
+  'dropdown-menu': { at: '<nav className="menu', code: LINK + `export function AccountMenu() {
+  return (
+    <nav className="menu flex flex-col gap-1 rounded-md border p-2 text-sm">
+      <Link href="/account">My orders</Link>
+      <Link href="/account/settings">Settings</Link>
+      <Link href="/logout">Sign out</Link>
+    </nav>
+  );
+}
+` },
+  select: { at: '<select', code: `export function Pickup() {
+  return (
+    <form action="/api/pickup" method="post">
+      <label htmlFor="shop">Pick up at</label>
+      <select id="shop" name="shop"><option>Croix-Rousse</option><option>Part-Dieu</option></select>
+    </form>
+  );
+}
+` },
+  checkbox: { at: '<label className="flex', code: `export function Consent() {
+  return (
+    <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="news" /> Send me the weekly menu</label>
+  );
+}
+` },
+  switch: { at: '<label className="switch', code: `export function Weekly() {
+  return (
+    <label className="switch flex items-center gap-2 text-sm"><input type="checkbox" role="switch" name="weekly" /> Deliver every Saturday</label>
+  );
+}
+` },
+  'radio-group': { at: '<fieldset', code: `export function Size() {
+  return (
+    <fieldset className="flex gap-4 text-sm">
+      <legend>Loaf size</legend>
+      <label><input type="radio" name="size" value="small" /> Small (500 g)</label>
+      <label><input type="radio" name="size" value="large" /> Large (1 kg)</label>
+    </fieldset>
+  );
+}
+` },
+  textarea: { at: '<textarea', code: `export function Note() {
+  return (
+    <form action="/api/order-note" method="post">
+      <textarea name="note" placeholder="Leave it with the concierge" className="w-full rounded-md border p-2" />
+      <button type="submit">Add the note</button>
+    </form>
+  );
+}
+` },
+  slider: { at: '<label className="slider', code: `export function Slices() {
+  return (
+    <label className="slider block text-sm">Slice thickness<input type="range" name="thickness" min="8" max="20" /></label>
+  );
+}
+` },
+  progress: { at: '<div className="progress', code: `export function Baking() {
+  return (
+    <div className="progress space-y-2">
+      <p className="text-sm">Your loaf is proofing, out of the oven at 5:40am</p>
+      <div className="h-2 rounded bg-muted"><div className="h-2 w-2/3 rounded bg-primary" /></div>
+    </div>
+  );
+}
+` },
+  skeleton: { at: '<div className="skeleton', code: `export function Loading() {
+  return (
+    <div className="skeleton space-y-2"><p className="text-sm text-muted-foreground">Loading today's breads</p><div className="h-4 w-48 animate-pulse rounded bg-muted" /></div>
+  );
+}
+` },
+  separator: { at: '<div className="separator', code: `export function Divider() {
+  return (
+    <div className="separator my-8 flex items-center gap-4 text-sm text-muted-foreground"><hr className="flex-1" />Our breads<hr className="flex-1" /></div>
+  );
+}
+` },
+  breadcrumb: { at: '<nav aria-label="Breadcrumb"', code: LINK + `export function Crumbs() {
+  return (
+    <nav aria-label="Breadcrumb" className="text-sm"><Link href="/">Home</Link> / <Link href="/menu">Menu</Link> / <span>Country sourdough</span></nav>
+  );
+}
+` },
+  pagination: { at: '<nav aria-label="Pagination"', code: LINK + `export function Pages() {
+  return (
+    <nav aria-label="Pagination" className="flex gap-2 text-sm"><Link href="/blog?page=1">Previous</Link><span>Page 2</span><Link href="/blog?page=3">Next</Link></nav>
+  );
+}
+` },
+  table: { at: '<table', code: `export function Hours() {
+  return (
+    <table className="w-full text-sm">
+      <thead><tr><th>Day</th><th>Opening hours</th></tr></thead>
+      <tbody><tr><td>Monday to Saturday</td><td>6am to 7pm</td></tr><tr><td>Sunday</td><td>7am to 1pm</td></tr></tbody>
+    </table>
+  );
+}
+` },
+  toast: { at: '<div role="status"', code: `export function Added() {
+  return (
+    <div role="status" className="rounded-md border p-4 text-sm shadow">Country sourdough added to your basket</div>
+  );
+}
+` },
+  command: { at: '<div className="command', code: `export function Search() {
+  return (
+    <div className="command rounded-md border p-2">
+      <input type="search" name="q" placeholder="Search breads and pastries" className="w-full" />
+      <p className="text-sm">Country sourdough, Rye, Croissant</p>
+    </div>
+  );
+}
+` },
+  calendar: { at: '<div className="calendar', code: `export function DeliveryDay() {
+  return (
+    <div className="calendar rounded-md border p-4 text-sm">
+      <p className="font-medium">Choose your delivery day</p>
+      <input type="date" name="day" />
+    </div>
+  );
+}
+` },
+  chart: { at: '<figure', code: `export function Sales() {
+  return (
+    <figure className="rounded-xl border p-6">
+      <figcaption className="font-semibold">Loaves delivered this week</figcaption>
+      <p className="text-sm">Monday 120, Tuesday 134, Wednesday 128</p>
+    </figure>
+  );
+}
+` },
+  sidebar: { at: '<aside className="sidebar', code: LINK + `export function AccountNav() {
+  return (
+    <aside className="sidebar w-60 border-r p-4 text-sm">
+      <p className="font-semibold">My account</p>
+      <Link href="/account">Orders</Link>
+      <Link href="/account/addresses">Addresses</Link>
+    </aside>
+  );
+}
+` },
+  dashboard: { at: '<section className="dashboard', code: `export function Overview() {
+  return (
+    <section className="dashboard grid gap-4 p-6 md:grid-cols-3">
+      <div className="rounded-xl border p-4"><p className="text-sm">Orders today</p><p className="text-2xl font-bold">42</p></div>
+      <div className="rounded-xl border p-4"><p className="text-sm">Subscribers</p><p className="text-2xl font-bold">318</p></div>
+    </section>
+  );
+}
+` },
 };
 
 /** Slots checked against another kind's owner section (the section an owner would click to be offered them). */
-export const REF_OF = { signup: 'login', 'forgot-password': 'login', integrations: 'features', marquee: 'logo-cloud' };
+export const REF_OF = { signup: 'login', 'forgot-password': 'login', integrations: 'features', marquee: 'logo-cloud',
+  accordion: 'faq', 'navigation-menu': 'navbar', label: 'input', 'number-ticker': 'stats', 'border-effect': 'card',
+  background: 'hero', cursor: 'hero', embed: 'testimonials', carousel: 'testimonials', avatar: 'team' };
 
 export function referenceFor(slot) {
   return REFERENCE[slot] ? slot : (REF_OF[slot] || null);
@@ -434,7 +636,7 @@ export async function checkItem(site, item, { explain = false } = {}) {
   if (r.skip) {
     const why = r.skip.why + (r.skip.detail ? ': ' + r.skip.detail : '');
     if (r.skip.why === 'POOR_FIT') return { ...out, verdict: 'refused', why };
-    if (BROKEN.has(r.skip.why)) return { ...out, verdict: 'broken', why };
+    if (BROKEN.has(r.skip.why) || (r.skip.why === 'FETCH_FAILED' && permanentFetchFailure(r.skip.detail))) return { ...out, verdict: 'broken', why };
     return { ...out, verdict: 'unreachable', why };
   }
   const v = r.v || r.held;

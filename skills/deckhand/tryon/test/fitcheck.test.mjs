@@ -15,7 +15,7 @@ offline();
 const HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fit-home-'));
 process.env.DECKHAND_LIBRARY = path.join(HOME, 'library');
 
-const { REFERENCE, REF_OF, referenceFor, makeSite, contextFor, checkItem, openSite, fitCheck, sampleOf, recordVerdicts, fitMarkdown, VERDICTS } = await import('../lib/fitcheck.mjs');
+const { REFERENCE, REF_OF, permanentFetchFailure, referenceFor, makeSite, contextFor, checkItem, openSite, fitCheck, sampleOf, recordVerdicts, fitMarkdown, VERDICTS } = await import('../lib/fitcheck.mjs');
 const { loadCatalog, rank, localChecksDir, kitOf } = await import('../lib/catalog.mjs');
 const { detectProject } = await import('../lib/project.mjs');
 const engine = await import('../lib/engine.mjs');
@@ -46,7 +46,7 @@ test('every owner section parses, is found where a click lands, and holds the ow
     }
     for (const [slot, ref] of Object.entries(REF_OF)) assert.ok(REFERENCE[ref], slot + ' -> ' + ref);
     assert.equal(referenceFor('signup'), 'login');
-    assert.equal(referenceFor('chart'), null);
+    assert.equal(referenceFor('no-such-kind'), null);
   } finally { site.close(); }
 });
 
@@ -67,7 +67,7 @@ test('the site is what `dh scaffold` gives an owner: Next, Tailwind 4, tokens, B
 
 test('verdicts: fits / partial / refused / broken / unreachable / unchecked, the staged files always removed', async () => {
   const broken = libraryItem('broken-hero', 'hero', { 'hero.tsx': 'import { Thing } from "@/lib/nowhere";\nexport default function H() { return <section><h1>Build faster</h1><Thing /></section>; }\n' });
-  const chart = { ...libraryItem('a-chart', 'chart', { 'chart.tsx': 'export default function C() { return <div>chart</div>; }\n' }) };
+  const chart = { ...libraryItem('a-chart', 'no-such-kind', { 'chart.tsx': 'export default function C() { return <div>chart</div>; }\n' }) };   // a kind with no owner section: still honestly unchecked
   const gone = { id: 'nope/none@radix', r: 'nope', n: 'none', t: 'None', slot: 'hero', kind: 'block', json: 'https://example.invalid/r/none.json' };
   const items = tailark().filter((x) => fixtureIds.includes(x.id)).concat([broken, chart, gone]);
   const res = await fitCheck({ id: 'mixed', items });
@@ -301,4 +301,33 @@ test('a login design whose form lives beside it (`<LoginForm />` from "./login-f
   assert.match(p.code, /\{content\.form1 \?\? \(<LoginForm \/>\)\}/);
   const q = parameterize('l.tsx', code.replace('<LoginForm />', '<ContactForm />'), { kind: 'default' }, { forms: 'swap' });
   assert.deepEqual(q.formSwaps, [], 'only a form component kept beside the design, never an import from elsewhere');
+});
+
+test('every slot the catalog ships has an owner section to be checked against (no kind is untestable)', async () => {
+  const { BLOCK_SLOTS, UI_SLOTS, EFFECT_SLOTS } = await import('../lib/slots.mjs');
+  const idx = JSON.parse(fs.readFileSync(new URL('../../data/components.index.json', import.meta.url), 'utf8'));
+  const slots = new Set([...BLOCK_SLOTS, ...UI_SLOTS, ...EFFECT_SLOTS, ...idx.items.map((i) => i.slot)]);
+  const missing = [...slots].filter((sl) => !referenceFor(sl));
+  assert.deepEqual(missing, []);
+});
+
+test('the shipped verdicts cover every catalog design, and none is "unchecked"', () => {
+  const idx = JSON.parse(fs.readFileSync(new URL('../../data/components.index.json', import.meta.url), 'utf8'));
+  const dir = new URL('../../data/checks/', import.meta.url);
+  const v = new Map();
+  for (const f of fs.readdirSync(dir)) {
+    if (!f.endsWith('.json')) continue;
+    for (const [id, x] of Object.entries(JSON.parse(fs.readFileSync(new URL(f, dir), 'utf8')).verdicts)) v.set(id, x.v);
+  }
+  const none = idx.items.filter((i) => !v.has(i.id)).map((i) => i.id);
+  const unchecked = [...v].filter(([, x]) => x === 'unchecked').map(([id]) => id);
+  assert.deepEqual({ none: none.length, unchecked: unchecked.length }, { none: 0, unchecked: 0 }, none.concat(unchecked).slice(0, 20).join(', '));
+});
+
+test('a fetch that can never succeed (a dependency its registry does not ship, a 404) is broken; a network failure stays unreachable', () => {
+  assert.equal(permanentFetchFailure('FETCH_FAILED smoothui/team-1@any — https://smoothui.dev/r/team-1.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data'), true);
+  assert.equal(permanentFetchFailure('x: HTTP 404 https://raw.githubusercontent.com/a/b'), true);
+  assert.equal(permanentFetchFailure('gh: UNRESOLVED_IMPORTS components/x/header.tsx | https://oss'), true);
+  assert.equal(permanentFetchFailure('getaddrinfo ENOTFOUND example.invalid'), false);
+  assert.equal(permanentFetchFailure(undefined), false);
 });

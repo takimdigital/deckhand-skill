@@ -1,31 +1,43 @@
 {
  "version": 1,
  "registry": "shadcn",
- "deckhand": "2.3.0",
+ "deckhand": "2.3.2",
  "verdicts": {
   "shadcn/accordion@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/accordion@base-ui — https://ui.shadcn.com/r/styles/base-nova/accordion.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gith"
   },
   "shadcn/accordion@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/7"
   },
   "shadcn/alert-dialog@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/alert-dialog@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/avatar@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "shadcn/avatar@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
+  },
+  "shadcn/badge@base-ui": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcn/badge@radix": {
    "v": "fits",
@@ -36,12 +48,24 @@
    "of": 1
   },
   "shadcn/breadcrumb@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/breadcrumb@base-ui — https://ui.shadcn.com/r/styles/base-nova/breadcrumb.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/breadcrumb@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
+  },
+  "shadcn/button@base-ui": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/button@radix": {
    "v": "fits",
@@ -52,12 +76,27 @@
    "of": 1
   },
   "shadcn/calendar@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"calendar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/calendar@base-ui — https://ui.shadcn.com/r/styles/base-nova/calendar.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.github"
   },
   "shadcn/calendar@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"calendar\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "date-fns",
+    "react-day-picker",
+    "react-day-picker@latest"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "shadcn/card@base-ui": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/card@radix": {
    "v": "fits",
@@ -68,324 +107,739 @@
    "of": 2
   },
   "shadcn/carousel@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/carousel@base-ui — https://ui.shadcn.com/r/styles/base-nova/carousel.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.github"
   },
   "shadcn/carousel@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcn/chart-area-axes@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-default@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-gradient@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-icons@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-interactive@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-legend@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-linear@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-stacked-expand@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-stacked@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-area-step@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-bar-active@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-bar-default@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-bar-horizontal@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-bar-interactive@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-bar-label-custom@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-bar-label@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-bar-mixed@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-bar-multiple@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-bar-negative@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-bar-stacked@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-line-default@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-line-dots-colors@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-line-dots-custom@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-line-dots@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-line-interactive@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-line-label-custom@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-line-label@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-line-linear@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-line-multiple@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-line-step@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-pie-donut-active@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-pie-donut-text@radix": {
    "v": "fits",
    "needs": [
-    "recharts"
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
    ],
    "carried": 1,
    "of": 1
   },
   "shadcn/chart-pie-donut@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-pie-interactive@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-pie-label-custom@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-pie-label-list@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-pie-label@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-pie-legend@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-pie-separator-none@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-pie-simple@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-pie-stacked@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radar-default@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radar-dots@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-radar-grid-circle-fill@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-radar-grid-circle-no-lines@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-radar-grid-circle@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-radar-grid-custom@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-radar-grid-fill@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-radar-grid-none@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-radar-icons@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radar-label-custom@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-radar-legend@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radar-lines-only@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radar-multiple@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radar-radius@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radial-grid@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "partial",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 4
   },
   "shadcn/chart-radial-label@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ]
   },
   "shadcn/chart-radial-shape@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radial-simple@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radial-stacked@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart-radial-text@radix": {
    "v": "fits",
    "needs": [
-    "recharts"
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
    ],
    "carried": 1,
    "of": 1
   },
   "shadcn/chart-tooltip-advanced@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-tooltip-default@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-tooltip-formatter@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-tooltip-icons@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-tooltip-indicator-line@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-tooltip-indicator-none@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-tooltip-label-custom@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-tooltip-label-formatter@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart-tooltip-label-none@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/chart@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/chart@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/checkbox@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/checkbox@base-ui — https://ui.shadcn.com/r/styles/base-nova/checkbox.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.github"
   },
   "shadcn/checkbox@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcn/command@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"command\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/command@base-ui — https://ui.shadcn.com/r/styles/base-nova/command.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.githubus"
   },
   "shadcn/command@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"command\""
+   "v": "fits",
+   "needs": [
+    "cmdk",
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "shadcn/context-menu@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/context-menu@base-ui — https://ui.shadcn.com/r/styles/base-nova/context-menu.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://ra"
   },
   "shadcn/context-menu@radix": {
    "v": "fits",
@@ -396,44 +850,75 @@
    "of": 1
   },
   "shadcn/dashboard-01@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dashboard\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/dashboard-01@base-ui — https://ui.shadcn.com/r/styles/base-nova/dashboard-01.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://ra"
   },
   "shadcn/dashboard-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dashboard\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "shadcn/dialog@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/dialog@base-ui — https://ui.shadcn.com/r/styles/base-nova/dialog.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.githubuser"
   },
   "shadcn/dialog@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/drawer@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sheet\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/drawer@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sheet\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "vaul"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/dropdown-menu@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/dropdown-menu@base-ui — https://ui.shadcn.com/r/styles/base-nova/dropdown-menu.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://"
   },
   "shadcn/dropdown-menu@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/hover-card@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/hover-card@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
+  },
+  "shadcn/input@base-ui": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcn/input@radix": {
    "v": "fits",
@@ -442,12 +927,24 @@
    ]
   },
   "shadcn/label@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcn/label@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"label\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
+  },
+  "shadcn/login-01@base-ui": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 5,
+   "of": 7
   },
   "shadcn/login-01@radix": {
    "v": "partial",
@@ -457,9 +954,17 @@
    "carried": 5,
    "of": 7
   },
+  "shadcn/login-02@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/login-02@base-ui — https://ui.shadcn.com/r/styles/base-nova/login-02.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.github"
+  },
   "shadcn/login-02@radix": {
    "v": "refused",
    "why": "POOR_FIT: has no place for your form"
+  },
+  "shadcn/login-03@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/login-03@base-ui — https://ui.shadcn.com/r/styles/base-nova/login-03.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.github"
   },
   "shadcn/login-03@radix": {
    "v": "partial",
@@ -467,6 +972,14 @@
     "cn"
    ],
    "carried": 6,
+   "of": 7
+  },
+  "shadcn/login-04@base-ui": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 4,
    "of": 7
   },
   "shadcn/login-04@radix": {
@@ -477,6 +990,10 @@
    "carried": 4,
    "of": 7
   },
+  "shadcn/login-05@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/login-05@base-ui — https://ui.shadcn.com/r/styles/base-nova/login-05.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.github"
+  },
   "shadcn/login-05@radix": {
    "v": "partial",
    "needs": [
@@ -486,205 +1003,264 @@
    "of": 7
   },
   "shadcn/navigation-menu@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/navigation-menu@base-ui — https://ui.shadcn.com/r/styles/base-nova/navigation-menu.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 http"
   },
   "shadcn/navigation-menu@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"navigation-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "shadcn/pagination@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/pagination@base-ui — https://ui.shadcn.com/r/styles/base-nova/pagination.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/pagination@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/popover@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/popover@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/progress@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/progress@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcn/select@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/select@base-ui — https://ui.shadcn.com/r/styles/base-nova/select.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.githubuser"
   },
   "shadcn/select@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "shadcn/separator@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/separator@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"separator\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/sheet@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sheet\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sheet@base-ui — https://ui.shadcn.com/r/styles/base-nova/sheet.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.githubuserco"
   },
   "shadcn/sheet@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sheet\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/sidebar-01@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-01@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-01.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-01@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcn/sidebar-02@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-02@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-02.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-02@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcn/sidebar-03@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-03@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-03.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-03@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcn/sidebar-04@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-04@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-04.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-04@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcn/sidebar-05@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-05@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-05.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-05@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcn/sidebar-06@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-06@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-06.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-06@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcn/sidebar-07@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-07@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-07.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-07@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcn/sidebar-08@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-08@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-08.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-08@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcn/sidebar-09@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-09@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-09.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-09@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 3
   },
   "shadcn/sidebar-10@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-10@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-10.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-10@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcn/sidebar-11@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-11@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-11.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-11@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcn/sidebar-12@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-12@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-12.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-12@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcn/sidebar-13@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-13@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-13.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-13@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 3
   },
   "shadcn/sidebar-14@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-14@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-14.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-14@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "shadcn/sidebar-15@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-15@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-15.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-15@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcn/sidebar-16@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar-16@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar-16.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gi"
   },
   "shadcn/sidebar-16@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "shadcn/sidebar@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sidebar@base-ui — https://ui.shadcn.com/r/styles/base-nova/sidebar.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.githubus"
   },
   "shadcn/sidebar@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
+  },
+  "shadcn/signup-01@base-ui": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 5,
+   "of": 7
   },
   "shadcn/signup-01@radix": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 7
+  },
+  "shadcn/signup-02@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/signup-02@base-ui — https://ui.shadcn.com/r/styles/base-nova/signup-02.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gith"
   },
   "shadcn/signup-02@radix": {
    "v": "refused",
    "why": "POOR_FIT: has no place for your form"
+  },
+  "shadcn/signup-03@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/signup-03@base-ui — https://ui.shadcn.com/r/styles/base-nova/signup-03.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gith"
   },
   "shadcn/signup-03@radix": {
    "v": "partial",
@@ -692,6 +1268,14 @@
     "cn"
    ],
    "carried": 6,
+   "of": 7
+  },
+  "shadcn/signup-04@base-ui": {
+   "v": "partial",
+   "needs": [
+    "cn"
+   ],
+   "carried": 4,
    "of": 7
   },
   "shadcn/signup-04@radix": {
@@ -702,6 +1286,10 @@
    "carried": 4,
    "of": 7
   },
+  "shadcn/signup-05@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/signup-05@base-ui — https://ui.shadcn.com/r/styles/base-nova/signup-05.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.gith"
+  },
   "shadcn/signup-05@radix": {
    "v": "partial",
    "needs": [
@@ -711,80 +1299,129 @@
    "of": 7
   },
   "shadcn/skeleton@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"skeleton\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/skeleton@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"skeleton\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/slider@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcn/slider@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcn/sonner@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"toast\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/sonner@base-ui — https://ui.shadcn.com/r/styles/base-nova/sonner.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.githubuser"
   },
   "shadcn/sonner@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"toast\""
+   "v": "fits",
+   "needs": [
+    "next-themes",
+    "sonner"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/switch@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcn/switch@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "shadcn/table@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 6
   },
   "shadcn/table@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 6,
+   "of": 6
   },
   "shadcn/tabs@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/tabs@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "shadcn/textarea@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcn/textarea@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"textarea\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ]
   },
   "shadcn/toast@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"toast\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED shadcn/toast@base-ui — https://ui.shadcn.com/r/styles/base-nova/toast.json: UNRESOLVED_REGISTRY_DEP @/app/(create)/components/icon-placeholder | ghFiles: HTTP 404 https://raw.githubuserco"
   },
   "shadcn/toggle@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/toggle@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/tooltip@base-ui": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "shadcn/tooltip@radix": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   }
  }
 }
