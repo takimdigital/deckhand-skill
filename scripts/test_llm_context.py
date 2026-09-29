@@ -69,6 +69,11 @@ class LlmContext(unittest.TestCase):
         self.assertTrue(all(b.startswith(f"{L.CORE}:2:") for b in broken))
         self.assertIn("⚠UNRESOLVED[dhlib/state.py#no_such_function]", text)
 
+    def test_flags_added_in_loops_and_parent_parsers_are_listed(self):
+        # review 2026-09-27 (N5): a cold agent reading §8 thought `pending add --why` and `vault set --here` did not exist
+        self.assertRegex(self.text, r"(?m)^- dh pending .*\[--why WHY\].*\[--when WHEN\]")
+        self.assertRegex(self.text, r"(?m)^- dh vault \[--here\|--machine\]")
+
     def test_every_command_and_code_file_is_listed(self):
         dh, _ = L.dh_commands(self.files, L.analyze(self.files))
         for cmd, _spec in dh:

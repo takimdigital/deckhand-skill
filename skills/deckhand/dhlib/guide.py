@@ -16,7 +16,7 @@ TRYON = f'node "{SKILL / "tryon" / "cli.mjs"}"'
 STEPS = {
     "define": ["{dh} profile doctor            # what access exists (never ask for what a token already covers)",
                "{dh} workflow query            # the 3 proven paths that fit: show them, the owner picks one (dh workflow use REF) or none",
-               "{dh} brief set business=\"…\" shape=saas|booking|catalogue|marketplace|leadgen|internal languages=en,… audience=\"…\" brand.name=\"…\"",
+               "{dh} brief set business=\"…\" shape=saas|booking|catalogue|marketplace|leadgen|internal languages=en,… audience=\"…\" brand.name=\"…\" deliverable=own|client|product category=\"3–5 words\"",
                "ask ONLY what the brief + profile cannot answer — one batched message, defaults proposed",
                "{dh} phase done define"],
     "research": ["{dh} research brief --focus competitors --agent A1   # one brief per focus (competitors, pricing, audience, conversion, discovery, local-rules, vocabulary); read the card it names",
@@ -172,7 +172,7 @@ def _next_step(root: Path) -> dict:
     root = Path(root)
     s = STATE.load(root, required=False)
     if not s:
-        return {"state": "no run", "do": [f"{DH} init --name <business> --mode phased|auto --path pool|mine|existing|scratch --project <dir>"],
+        return {"state": "no run", "do": [f"{DH} init --name <business> --mode phased|auto --path pool|mine|existing|scratch --for me|client --project <dir>"],
                 "read": str(SKILL / "references" / "00-define.md"), "dh": DH}
     if s.get("moved_to"):
         return {"state": "moved", "to": s["moved_to"], "do": [f"cd {s['moved_to']}", f"{DH} next"],

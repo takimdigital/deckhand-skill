@@ -12,7 +12,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <a href="https://github.com/takimdigital/deckhand-skill/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/takimdigital/deckhand-skill/ci.yml?branch=main&label=CI"></a>
-  <img alt="Version: 2.3.0" src="https://img.shields.io/badge/version-2.3.0-blueviolet.svg">
+  <img alt="Version: 2.3.1" src="https://img.shields.io/badge/version-2.3.1-blueviolet.svg">
   <img alt="Works with Claude Code, Codex, Cursor, Hermes, OpenCode, Gemini CLI" src="https://img.shields.io/badge/works%20with-Claude%20Code%20%7C%20Codex%20%7C%20Cursor%20%7C%20Hermes-black.svg">
 </p>
 
@@ -210,7 +210,7 @@ Run for real in this release:
   in code, each with a test: a gate passed on the agent's paraphrase of a change request, a base that could not land
   in the planning folder, a database kept alive by hand for hours, ports Windows reserves, 22 work packages for 4
   builders, and a Windows `HOSTNAME` trap.
-- CI on every push, Ubuntu and Windows: 137 try-on + 193 control-plane + 40 server-client + 17 repo tests.
+- CI on every push, Ubuntu and Windows: 137 try-on + 193 control-plane + 40 server-client + 18 repo tests.
 
 Not yet proven live: a full `dh deploy ship` against a real server (it uses the same Coolify client that
 was proven live in v1), the first real run of the $0 Oracle track, and the Claude Code session hook inside a

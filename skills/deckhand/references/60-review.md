@@ -23,7 +23,7 @@ green on every blocking row; `.deckhand/VERIFY.md`. **Gate G4:** the owner says 
 | seo | yes (launch-breakers only) | the site blocks crawlers, a public page is noindex, a page has no real title, a preview is indexable, live canonicals point elsewhere — the rest is scored in `.deckhand/SEO.md` (`references/45-seo.md`) |
 
 ## Procedure
-`$T clean` (try-on) → `dh verify` (it builds, then serves the build itself for the route check) → fix every red blocking row at its root
+`dh tryon clean` (try-on) → `dh verify` (it builds, then serves the build itself for the route check) → fix every red blocking row at its root
 (never by weakening the check) → re-run → `dh phase done review` → show VERIFY.md → G4
 (`dh gate pass G4 --quote "<their words>"`; for a product, G4 means "package it").
 Security floor before G4: auth routes rate-limited or provider-protected; admin routes server-checked;

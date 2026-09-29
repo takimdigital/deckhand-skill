@@ -396,13 +396,46 @@ def dh_commands(files: dict, mods: dict) -> tuple:
     def lit(n):
         return n.value if isinstance(n, ast.Constant) else None
 
-    for st in ast.walk(fns["build_parser"]):
+    class Unroll(ast.NodeTransformer):                     # `for f in ("--why", …): p.add_argument(f, …)` → one call per flag
+        def visit_For(self, node):
+            if isinstance(node.target, ast.Name) and isinstance(node.iter, (ast.Tuple, ast.List)) and all(isinstance(e, ast.Constant) for e in node.iter.elts):
+                out = []
+                for e in node.iter.elts:
+                    for b in node.body:
+                        c = __import__("copy").deepcopy(b)
+                        for n in ast.walk(c):
+                            for f, v in ast.iter_fields(n):
+                                if isinstance(v, ast.Name) and v.id == node.target.id:
+                                    setattr(n, f, ast.Constant(e.value))
+                                elif isinstance(v, list):
+                                    v[:] = [ast.Constant(e.value) if isinstance(x, ast.Name) and x.id == node.target.id else x for x in v]
+                        out.append(c)
+                return out
+            return node
+
+    bp = Unroll().visit(fns["build_parser"])
+    groups: dict = {}                                       # parent parsers (`parents=[where]`): their flags join each command
+    for st in ast.walk(bp):
+        if isinstance(st, ast.Assign) and isinstance(st.value, ast.Call) and isinstance(st.value.func, ast.Attribute) \
+                and st.value.func.attr == "add_mutually_exclusive_group" and isinstance(st.value.func.value, ast.Name):
+            groups[st.targets[0].id] = st.value.func.value.id
+    shared: dict = {}
+    for st in ast.walk(bp):
+        if isinstance(st, ast.Call) and isinstance(st.func, ast.Attribute) and st.func.attr == "add_argument" \
+                and isinstance(st.func.value, ast.Name) and st.func.value.id in groups and st.args and isinstance(lit(st.args[0]), str):
+            shared.setdefault(groups[st.func.value.id], []).append(lit(st.args[0]))
+    for st in ast.walk(bp):
         call = st.value if isinstance(st, (ast.Assign, ast.Expr)) and isinstance(getattr(st, "value", None), ast.Call) else None
         if not call or not isinstance(call.func, ast.Attribute):
             continue
         if call.func.attr == "add_parser" and call.args and isinstance(lit(call.args[0]), str):
             cur = lit(call.args[0])
             cmds[cur] = {"args": [], "help": next((lit(k.value) for k in call.keywords if k.arg == "help"), None), "line": st.lineno}
+            for k in call.keywords:
+                if k.arg == "parents" and isinstance(k.value, ast.List):
+                    for e in k.value.elts:
+                        if isinstance(e, ast.Name) and shared.get(e.id):
+                            cmds[cur]["args"].append("[" + "|".join(shared[e.id]) + "]")
             order.append(cur)
             if isinstance(st, ast.Expr):
                 cur = None
