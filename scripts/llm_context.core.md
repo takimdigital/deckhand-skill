@@ -199,6 +199,10 @@ F1 RUN LOOP
   - red → [[!CHECK_FAILED]] with `why[]`;
   - green → in phased mode a gate may block → owner says go → `dh gate pass Gn`.
 - `dh reopen X` resets X and every later phase and gate.
+- Order is one rule, [[dhlib/state.py#reached]]: every earlier phase done or skipped, no gate owed before it
+  ([[!OUT_OF_ORDER]] / [[!GATE_BLOCKED]]). Used by `phase done|skip` and, via [[dhlib/state.py#require]], by clone/scaffold
+  (build), `rebrand apply` (brand), `deploy ship` (deploy). A gate passes only once its phase is done ([[!GATE_NOT_DUE]]);
+  review is never skipped ([[!NOT_SKIPPABLE]]); a skipped try-on passes G3 only in auto mode.
 - Phases and their gates: [[dhlib/state.py#PHASES]]. G1 plan, G2 build, G3 tryon, G4 review.
 
 F2 BUILD PATHS (run.json.path)

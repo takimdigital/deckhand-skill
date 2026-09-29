@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.3.1] — 2026-09-29 — the pipeline does what its docs say
+
+From a coherence review of the whole pipeline (define → operate) against the code.
+
+### The run order is enforced, not only described
+- A gate passes only after its phase is done (`GATE_NOT_DUE`): `gate pass G2` during build is refused.
+- `phase skip` takes only the phase the run is at (`OUT_OF_ORDER`), and review can never be skipped (`NOT_SKIPPABLE`):
+  an auto run could skip review, pass G4 and deploy with no verify.
+- Skipping try-on in phased mode no longer approves the design: G3 still waits for the owner, so the rebranded site
+  is shown before review. In auto mode the skip passes G3 as before.
+- `dh clone`, `dh scaffold`, `dh rebrand apply` (not `--dry`) and `dh deploy ship` refuse before their phase
+  (`OUT_OF_ORDER` / `GATE_BLOCKED`): no clone before G1, no rebrand before G2, no deploy before G4. `dh adopt` stays
+  allowed at define (a read-only analysis).
+
+### `dh next` fits the run
+- Auto mode is no longer told to "wait for the owner's go" after plan and build.
+- Lines for other paths drop out (`pool query` only for pool/mine). A scratch run is asked for `.deckhand/copy.json`
+  at plan, where references/20-plan.md says it belongs; `dh compose` without it says what to write (`NO_COPY`)
+  instead of a Node stack trace.
+- The define line asks for `deliverable` and `category`; the no-run line carries `--for me|client`.
+- Placeholders are `[x]`, never `<x>`, in `dh next`, RESUME, `AGENT-n.md`, `CONVENTIONS.md` and the shipped workflow
+  (Hermes refuses a whole `delegate_task` batch over one `<x>` or `{x}`).
+
+### Checks that can fail
+- The untouched `dh plan init` example sitemap no longer passes plan (in auto mode it passed G1 by itself).
+- Research with fewer than 3 quotes found on their pages (claims + terms) is not done: a run where every fetch was
+  blocked passed. With the owner's word, `dh phase skip research --reason "…"` is the honest way through.
+
+### Docs
+- SKILL §4 lists `dh phase done|skip`; 60-review no longer uses `$T` (defined only in 50-tryon); AGENTS.md's SKILL
+  length is right. LLM_CONTEXT §8 lists flags added in loops and by parent parsers (`pending add --why --when`,
+  `vault set --here|--machine`).
+
 ## [2.3.0] — 2026-09-27 — try-on: more designs, compared, checked before you see them
 
 ### Browse more, compare, report what breaks

@@ -101,7 +101,9 @@ class Suggestions(Base):
         write_json(self.root / ".deckhand" / "brief.json", {"business": "b", "shape": "saas", "languages": ["en"], "audience": "a"})
         state.phase_done(self.root, "define")
         state.phase_skip(self.root, "research", "declined")
-        write_json(self.root / ".deckhand" / "sitemap.json", json.loads((SKILL / "templates" / "sitemap.json").read_text(encoding="utf-8")))
+        sm = json.loads((SKILL / "templates" / "sitemap.json").read_text(encoding="utf-8"))
+        sm["pages"][0]["title"] = "Bakery home"                               # the untouched example does not pass
+        write_json(self.root / ".deckhand" / "sitemap.json", sm)
         state.phase_done(self.root, "plan")
         g = next(i for i in suggest.compute(self.root, limit=0)["items"] if i["id"] == "gate")
         self.assertEqual((g["level"], g["what"]), ("now", "Your turn (G1): approve the plan, or say what to change"))
@@ -275,11 +277,15 @@ class AuditEdges(Base):
 
     def test_gates_in_auto_mode_need_no_quote_and_empty_quotes_are_refused(self):
         state.init(self.root, "X", "auto", "scratch")
+        for p in ("define", "research", "plan"):
+            state.phase_done(self.root, p, force_reason="test")
         code, out = self.dh("gate", "pass", "G1")
         self.assertEqual(code, 0)
         other = self.tmp / "p2"
         other.mkdir()
         state.init(other, "Y", "phased", "scratch")
+        for p in ("define", "research", "plan"):
+            state.phase_done(other, p, force_reason="test")
         buf = io.StringIO()
         with redirect_stdout(buf):
             main(["--project", str(other), "gate", "pass", "G1", "--quote", ""])

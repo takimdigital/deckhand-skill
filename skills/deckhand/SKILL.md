@@ -1,7 +1,7 @@
 ---
 name: deckhand
 description: "Idea → live, owned web business on a $5 VPS (or $0), or a boilerplate product to sell: define, research, plan the page/feature graph, build from a vetted MIT base or scratch with parallel sub-agents, rebrand, live-swap sections for licensed designs (try-on), verify, deploy to Coolify, operate with bots; follow proven workflows (query the best 3, step by step) and improve them from each run's autopsy; resume any project from any fresh session or AI (Claude Code, Hermes, Codex…). Use for building, launching, redesigning, deploying or maintaining a website/SaaS/booking/catalogue/lead-gen business, for component try-on/swap, for ops bots/crons, or to turn a project into a reusable base or workflow."
-version: 2.3.0
+version: 2.3.1
 license: MIT
 compatibility: "Any agent harness that can run shell commands (Claude Code, Codex, Cursor, Hermes, OpenCode, Gemini CLI …). Needs Python 3.9+ (stdlib) and Node 18+ for try-on/compose. Windows: `py` instead of `python3`."
 metadata:
@@ -125,7 +125,7 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 | what now? | `dh next` · `dh status` · `dh suggest [--all]` (what the owner could do next, by importance) · `dh suggest dismiss ID [--days N]` |
 | start / brief | `dh init --name N --mode phased\|auto --path pool\|mine\|existing\|scratch --for me\|client --project DIR` · `dh brief set k=v …` (`deliverable=own\|client\|product`, `category="3–5 words"`) |
 | proven paths | `dh workflow query [--industry --deliverable --features --min-level]` (top 3) · `dh workflow use REF [--set k=v] [--accept]` · `dh workflow status\|todo [--format md]\|step ID done\|skip --why` · `dh workflow show\|list\|lint\|sync` · `dh workflow new --from-run` · `dh workflow save --from-autopsy ID --proposals P1,P3 [--public]` · `dh workflow publish REF` |
-| gates | `dh gate pass Gx --quote "the owner's words"` · `dh reopen PHASE --reason "…"` |
+| phases + gates | `dh phase done PHASE` (runs its check) · `dh phase skip PHASE --reason "…"` (the current phase only; never review) · `dh gate pass Gx --quote "the owner's words"` (once its phase is done) · `dh reopen PHASE --reason "…"` |
 | owner's tasks | `dh pending list [--all]` · `dh pending add "what" --why --how --where [--machine] [--when T]` · `dh pending decide "question" --rec X` · `dh pending done\|wait\|drop P-0NN [--reason]` |
 | resume a session | `dh resume [--check [--online]]` · `dh note decision\|doing\|next "…"` · `dh resume --install-hook claude` (adds `dh resume --hook` as a SessionStart hook) |
 | owner profile / secrets | `dh profile show\|doctor\|set k=v [--here\|--machine]` · `dh profile where [--set here\|machine\|FOLDER]` · `dh vault set NAME [--here\|--machine]` (value via stdin) · `dh vault list` (names + `shell` line) |

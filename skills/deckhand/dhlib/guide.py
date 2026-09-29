@@ -16,7 +16,7 @@ TRYON = f'node "{SKILL / "tryon" / "cli.mjs"}"'
 STEPS = {
     "define": ["{dh} profile doctor            # what access exists (never ask for what a token already covers)",
                "{dh} workflow query            # the 3 proven paths that fit: show them, the owner picks one (dh workflow use REF) or none",
-               "{dh} brief set business=\"…\" shape=saas|booking|catalogue|marketplace|leadgen|internal languages=en,… audience=\"…\" brand.name=\"…\"",
+               "{dh} brief set business=\"…\" shape=saas|booking|catalogue|marketplace|leadgen|internal languages=en,… audience=\"…\" brand.name=\"…\" deliverable=own|client|product category=\"3–5 words\"",
                "ask ONLY what the brief + profile cannot answer — one batched message, defaults proposed",
                "{dh} phase done define"],
     "research": ["{dh} research brief --focus competitors --agent A1   # one brief per focus (competitors, pricing, audience, conversion, discovery, local-rules, vocabulary); read the card it names",
@@ -24,13 +24,15 @@ STEPS = {
                  "claims (label + url + verbatim quote) and vocabulary (harvested terms) → .deckhand/research/agents/A1.json; summary fields → .deckhand/research.json (template: {skill}/templates/research.json)",
                  "{dh} research verify                # merges the agents' files, fetches every cited page, checks each quote",
                  "{dh} phase done research            # or: {dh} phase skip research --reason \"owner declined\""],
-    "plan": ["{dh} pool query                     # path=pool/mine: top 3 bases for this brief (reasons + gaps)",
+    "plan": ["path=pool|mine: {dh} pool query     # top 3 bases for this brief (reasons + gaps)",
              "write .deckhand/sitemap.json: every page, section, action and its target, every form's success+error (template in .deckhand/ after `{dh} plan init`)",
+             "path=scratch: write .deckhand/copy.json now — the words compose places at build, per section slot (schema: references/20-plan.md § Copy); owner facts only, the rest → PENDING.md",
              "{dh} plan lint                      # until 0 errors — no dead ends, no orphan pages, no un-owned API",
              "{dh} plan render && {dh} plan split --agents N   # PLAN.md for the owner; N = the sub-agents you will really run (AGENT-n.md + CONVENTIONS.md)",
              "{dh} phase done plan  → show .deckhand/PLAN.md + the chosen base; wait for the owner's go (G1)"],
     "build": ["path=pool|mine: {dh} clone <template> --to <dir>   (the planning folder itself is fine: Deckhand's files step aside and come back)",
-              "path=existing: {dh} adopt <folder|git-url>     path=scratch: {dh} scaffold --to <dir> && {dh} compose --sections hero,features,pricing,faq,cta,footer --copy .deckhand/copy.json",
+              "path=existing: {dh} adopt <folder|git-url>",
+              "path=scratch: {dh} scaffold --to <dir> && {dh} compose --sections hero,features,pricing,faq,cta,footer --copy .deckhand/copy.json",
               "built another way (by hand, another generator)? {dh} base record --kind scratch|existing --note \"how\"   (never a private function)",
               "the app needs a database/queue running? {dh} dev add db --cmd \"…\" --port N [--env-file .env]   # once; dev start/stop/status then handle it",
               "build the shell (WP-00: layout, nav, shared UI, schema, seed) yourself; then one sub-agent per .deckhand/work/AGENT-n.md (references/team.md)",
@@ -134,11 +136,43 @@ def _fresh_session(root: Path) -> str | None:
             "it starts with `dh resume` (tell the owner; never required)") if ok else None
 
 
+PATH_RX = re.compile(r"^path=([a-z|]+): ")
+WAIT_RX = re.compile(r"\s*→ (show|give|wait|owner says).*$")
+
+
+def _fit(steps: list, mode: str, path: str) -> list:
+    """Only the lines for this run: `path=X|Y:` lines of other paths drop out, and in auto mode a gate passes itself,
+    so nothing says to wait for the owner (review 2026-09-27: an auto run was told to stop at G1 and G2)."""
+    out = []
+    for x in steps:
+        m = PATH_RX.match(x)
+        if m:
+            if path not in m.group(1).split("|"):
+                continue
+            x = x[m.end():]
+        if mode == "auto" and "phase done" in x and WAIT_RX.search(x):
+            x = WAIT_RX.sub("   # auto mode: the gate passes by itself — run `dh next`", x)
+        out.append(x)
+    return out
+
+
+ANGLE_RX = re.compile(r"<([^<>\n]{1,40})>")
+
+
 def next_step(root: Path) -> dict:
+    """`dh next`. Placeholders are written `[x]`, never `<x>`: some harnesses refuse a task that carries `<x>` or `{x}`
+    (Hermes `delegate_task`), and these lines are pasted into tasks and RESUME as they are (findings 18, 22)."""
+    out = _next_step(root)
+    if isinstance(out.get("do"), list):
+        out["do"] = [ANGLE_RX.sub(r"[\1]", x) for x in out["do"]]
+    return out
+
+
+def _next_step(root: Path) -> dict:
     root = Path(root)
     s = STATE.load(root, required=False)
     if not s:
-        return {"state": "no run", "do": [f"{DH} init --name <business> --mode phased|auto --path pool|mine|existing|scratch --project <dir>"],
+        return {"state": "no run", "do": [f"{DH} init --name <business> --mode phased|auto --path pool|mine|existing|scratch --for me|client --project <dir>"],
                 "read": str(SKILL / "references" / "00-define.md"), "dh": DH}
     if s.get("moved_to"):
         return {"state": "moved", "to": s["moved_to"], "do": [f"cd {s['moved_to']}", f"{DH} next"],
@@ -160,7 +194,7 @@ def next_step(root: Path) -> dict:
             if seo.get("auto_fixable") and seo.get("policy") == "suggest":
                 out["do"].insert(0, "DECISION NEEDED — SEO is not applied to this base yet: recommend `dh seo apply` before going live (.deckhand/SEO.md)")
         return out
-    steps = [x.format(dh=DH, tryon=TRYON, skill=SKILL) for x in STEPS[cur["id"]]]
+    steps = _fit([x.format(dh=DH, tryon=TRYON, skill=SKILL) for x in STEPS[cur["id"]]], s["mode"], s["path"])
     if cur["id"] == "brand":
         steps[-1:-1] = _seo_steps(s["path"])
     out = {"phase": cur["id"], "n": f"{STATE.PHASE_IDS.index(cur['id']) + 1}/{len(STATE.PHASES)}", "title": cur["title"],

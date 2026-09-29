@@ -4,6 +4,7 @@
   "labels": ["VERIFIED", "SECONDARY", "INFERRED", "NOT_FOUND"],
   "vocabulary_kinds": ["customer", "trade", "search"],
   "min_vocabulary": 3,
+  "min_found": 3,
   "focus": {
     "competitors": {
       "budget": {"searches": 8, "pages": 10},

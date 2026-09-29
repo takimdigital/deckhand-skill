@@ -86,7 +86,7 @@
        {"id": "B8", "delegate": "one sub-agent per .deckhand/work/AGENT-n.md ({{agents}} at most), all in ONE batch; each reads CONVENTIONS.md first (references/team.md)"},
        {"id": "B9", "do": "dh bb read --kind done", "expect": "a done line per agent (or a blocker you resolve)"},
        {"id": "B10", "do": "npx tsc --noEmit", "expect": "exit 0 across all packages (re-proved by the orchestrator, not taken from the builders)"},
-       {"id": "B11", "check": "curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/", "expect": "200 — then every route per role, signed in (route matrix), on dev AND on the production build"},
+       {"id": "B11", "check": "curl -sI http://localhost:3000/ | head -n 1", "expect": "200 — then every route per role, signed in (route matrix), on dev AND on the production build"},
        {"id": "B12", "write": "visual QA: screenshots desktop + phone for each role (vision when the harness has it) — fix what they show"},
        {"id": "B13", "do": "dh phase done build", "expect": "ok: true, gate G2"},
        {"id": "B14", "gate": "dh gate pass G2 --quote \"the owner's words\"", "expect": "passed — the G2 message had the logins table, what was tested, what was fixed, ONE question"}
@@ -121,7 +121,7 @@
     {"id": "PF1", "at": "B7", "when": {"os": "windows"}, "sig": "EACCES|permission denied.*:\\d+", "fix": "a reserved port: Deckhand picks bind-tested ports; for your own scripts use `dh dev port`"},
     {"id": "PF2", "at": "B11", "when": {"os": "windows"}, "sig": "getaddrinfo ENOTFOUND", "fix": "HOSTNAME from git-bash: Deckhand sets HOSTNAME=127.0.0.1 for servers it starts — start the production build with `dh verify`, not by hand"},
     {"id": "PF3", "at": "B5", "sig": "too many clients|Connection terminated", "fix": "PGlite takes one connection: pool max 1 in dev"},
-    {"id": "PF4", "at": "B8", "when": {"harness": "hermes"}, "fix": "delegate_task: no {x} or <x> in any task text (the whole batch is refused); browser_navigate refuses localhost — builders check pages with curl; each builder uses its own scratch folder"},
+    {"id": "PF4", "at": "B8", "when": {"harness": "hermes"}, "fix": "delegate_task: no curly-brace or angle-bracket placeholder in any task text (the whole batch is refused); browser_navigate refuses localhost — builders check pages with curl; each builder uses its own scratch folder"},
     {"id": "PF5", "at": "B8", "fix": "builders never run a production build (it rewrites .next under the dev server) and never restart the dev server"},
     {"id": "PF6", "at": "B12", "when": {"os": "windows"}, "sig": "EBUSY", "fix": "a shell's working directory inside .next/standalone locks it: cd to the project root everywhere, then rebuild"},
     {"id": "PF7", "at": "D3", "fix": "a key pasted in chat: `dh vault set NAME` at once, tell the owner once that it sits in the chat history (rotate it if that history leaves the machine)"}

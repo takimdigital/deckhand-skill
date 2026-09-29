@@ -410,6 +410,8 @@ def dispatch(a):
         return {"entries": PL.bb_read(root, None if a.wp == "all" else a.wp, None if a.kind == "note" else a.kind, a.last)}
     if c in ("clone", "adopt", "scaffold"):
         from . import build as B, profile as PR
+        if c != "adopt":                                 # adopt is a read-only analysis, allowed at define
+            STATE.require(root, "build")                 # no clone before G1
         who = PR.scope()                                 # the planning folder's: for me, or for a client
         if c == "clone":
             out = B.clone(a.template, Path(a.to), do_install=not a.no_install)
@@ -458,6 +460,8 @@ def dispatch(a):
         if a.action == "scan":
             return BR.scan(root)
         if a.action == "apply":
+            if not a.dry:
+                STATE.require(root, "brand")             # no rebrand before G2
             brand = {k.replace("brand.", ""): v for k, v in _kv(a.pairs).items()}
             return BR.apply(root, brand, dry=a.dry)
         r = BR.check(root, allow=tuple(x for x in a.allow.split(",") if x))
@@ -485,6 +489,7 @@ def dispatch(a):
         if a.action == "target":
             return D.target(root, a.app, a.url)
         if a.action == "ship":
+            STATE.require(root, "deploy")                # no deploy before G4
             return D.ship(root, force=a.force)
         if a.action == "smoke":
             sm = D.smoke(root, a.url)

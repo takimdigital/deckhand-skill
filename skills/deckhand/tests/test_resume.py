@@ -218,8 +218,11 @@ class ColdStart(Base):
     def test_dh_next_offers_a_fresh_session_right_after_a_gate_when_nothing_is_only_in_the_chat(self):
         state.init(self.root, "Maison Pain")
         self.assertNotIn("fresh_session", guide.next_step(self.root))
+        for p in ("define", "research", "plan"):
+            state.phase_done(self.root, p, force_reason="test")
         state.gate_pass(self.root, "G1", "plan approved")
         self.assertIn("fresh_session", guide.next_step(self.root))
+        state.phase_done(self.root, "build", force_reason="test")
         state.gate_pass(self.root, "G2")
         append_jsonl(self.root / ".deckhand" / "runs.jsonl", {"at": "2999-01-01T00:00:00Z", "cmd": "npm run build", "exit": 1, "out": "Error: boom"})
         self.assertNotIn("fresh_session", guide.next_step(self.root))
