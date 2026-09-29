@@ -156,7 +156,19 @@ def _fit(steps: list, mode: str, path: str) -> list:
     return out
 
 
+ANGLE_RX = re.compile(r"<([^<>\n]{1,40})>")
+
+
 def next_step(root: Path) -> dict:
+    """`dh next`. Placeholders are written `[x]`, never `<x>`: some harnesses refuse a task that carries `<x>` or `{x}`
+    (Hermes `delegate_task`), and these lines are pasted into tasks and RESUME as they are (findings 18, 22)."""
+    out = _next_step(root)
+    if isinstance(out.get("do"), list):
+        out["do"] = [ANGLE_RX.sub(r"[\1]", x) for x in out["do"]]
+    return out
+
+
+def _next_step(root: Path) -> dict:
     root = Path(root)
     s = STATE.load(root, required=False)
     if not s:

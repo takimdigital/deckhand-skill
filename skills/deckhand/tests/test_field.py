@@ -175,6 +175,24 @@ class NextFitsTheRun(Base):
         self.assertNotIn("copy.json", do)
         self.assertIn("wait for the owner's go (G1)", do)
 
+    def test_no_angle_or_brace_placeholders_for_hermes(self):
+        # findings 18, 22: one `<x>` or `{x}` in a delegate_task refuses the whole batch
+        import re
+        from dhlib import guide, plan
+        bad = re.compile(r"<[^<>\s][^<>]*>|\{[a-z_]+\}")
+        state.init(self.root, "H", "phased", "pool")
+        for upto in (None, "define", "research", "plan", "build", "brand", "tryon", "review", "deploy"):
+            if upto:
+                reach(self.root, upto)
+            for line in guide.next_step(self.root)["do"]:
+                self.assertIsNone(bad.search(line), line)
+        plan.init(self.root)
+        plan.split(self.root, 2)
+        for f in (self.root / ".deckhand" / "work").glob("*.md"):
+            if f.name.startswith(("AGENT-", "CONVENTIONS")):
+                text = f.read_text(encoding="utf-8")
+                self.assertIsNone(bad.search(text), (f.name, bad.search(text)))
+
     def test_compose_without_copy_says_what_to_write(self):
         state.init(self.root, "C", "phased", "scratch")
         with self.assertRaises(DhError) as e:

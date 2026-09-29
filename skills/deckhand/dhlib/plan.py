@@ -381,9 +381,9 @@ def _agent_package(i: int, lane: list, owns: list, pages: dict) -> str:
     cons = sorted({c for wp in lane for c in wp.get("consumes", [])})
     L += ["", "## You consume (link to these, never edit them)", ""] + ([f"- {c}" for c in cons] or ["- (nothing)"])
     L += ["", "## Report", "",
-          f"- after EACH page works: `dh bb post --wp A{i} --kind progress --msg \"<route> done: <evidence>\"`",
-          f"- finished: `dh bb post --wp A{i} --kind done --msg \"<routes shipped> · tsc clean · <what is left>\"` then `dh bb flag A{i}-done`",
-          f"- blocked (a frozen file must change, a fact is missing): `dh bb post --wp A{i} --kind blocker --msg \"<exact need>\"` and stop",
+          f"- after EACH page works: `dh bb post --wp A{i} --kind progress --msg '[route] done: [evidence]'`",
+          f"- finished: `dh bb post --wp A{i} --kind done --msg '[routes shipped] · tsc clean · [what is left]'` then `dh bb flag A{i}-done`",
+          f"- blocked (a frozen file must change, a fact is missing): `dh bb post --wp A{i} --kind blocker --msg '[exact need]'` and stop",
           "- your final answer to the orchestrator: ONE line of status + the routes + evidence. Never raw logs.", ""]
     return "\n".join(L)
 
@@ -395,20 +395,20 @@ def _conventions(agents: list, shell_wp: dict, pages: dict) -> str:
          "- the database schema, migrations and seed (`db/`, `prisma/`, `drizzle/`…) — a new column is a `question`",
          "- `app/layout.tsx`, `globals.css`, `components/ui/**`, `lib/**`, `middleware.*`, `.env*`",
          "- shell pages (WP-00): " + (", ".join(f"`{pages[p]['route']}`" for p in shell_wp["pages"]) or "(none)"), "",
-         "## Who owns what (write ONLY inside your routes; new shared components go in `components/<your-agent-id>/`)", "",
+         "## Who owns what (write ONLY inside your routes; new shared components go in `components/[your agent id: A1, A2…]/`)", "",
          "| agent | package | owns |", "|---|---|---|"]
     L += [f"| {a['id']} | `{a['package']}` | " + ", ".join(f"`{o}`" for o in a["owns"]) + " |" for a in agents]
     L += ["", "## Hard rules", "",
           "- The dev server belongs to the orchestrator: use its URL (`dh dev status`), never start, stop or restart it.",
           "- Never run a production build (`next build`, `npm run build`) — it rewrites `.next/` under the running dev server.",
           "  Type-check instead: `npx tsc --noEmit` — errors in files you do not own are reported, not fixed.",
-          "- Scratch files (probes, cookies, screenshots): `.deckhand/work/tmp/<your-agent-id>/` only — never a shared temp path.",
-          "- Test data: every row you create is named `TEST-<your-agent-id>-…` and deleted before you post `done`.",
+          "- Scratch files (probes, cookies, screenshots): `.deckhand/work/tmp/[your agent id]/` only — never a shared temp path.",
+          "- Test data: every row you create is named `TEST-[your agent id]-…` and deleted before you post `done`.",
           "- Owner facts (prices, addresses, reviews) are never invented: missing → `dh bb post --kind question`.",
           "- Check pages with `curl` (signed in when needed: cookie jar in your scratch folder). Some harness browsers",
           "  refuse localhost (Hermes `browser_navigate`): curl + the HTML is the evidence, not a screenshot.",
           "- On Windows run native tools with `D:/…` paths (forward slashes); `/d/…` works only inside bash.",
-          "- Waiting on another builder: `dh bb wait <flag> --max 170` (exit 1 = timeout: proceed and post a note).", "",
+          "- Waiting on another builder: `dh bb wait [flag] --max 170` (exit 1 = timeout: proceed and post a note).", "",
           "## Report protocol", "",
           "- progress after each page · `done` with evidence · `blocker` with the exact need — all via `dh bb post`.",
           "- The orchestrator re-runs your key claims (routes answer, tsc clean) before trusting them.", ""]
