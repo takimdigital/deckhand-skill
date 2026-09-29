@@ -12,9 +12,10 @@ MODE=copy; ONLY=""; HOOK=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --link) MODE=link ;;
-    --only) ONLY="$2"; shift ;;
+    --only) ONLY="${2:?--only needs a harness name}"; shift ;;
     --claude-hook) HOOK=1 ;;
     -h|--help) sed -n '2,8p' "$0"; exit 0 ;;
+    *) echo "install.sh: unknown option: $1 (see --help)" >&2; exit 2 ;;
   esac; shift
 done
 

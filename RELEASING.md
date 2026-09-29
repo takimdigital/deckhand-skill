@@ -8,4 +8,5 @@
 6. Write `docs/releases/vX.Y.Z.md`: first line `# vX.Y.Z — <title>`, then ≤ 8 user-facing bullets.
 7. Publish: push the tag (`git tag vX.Y.Z <main sha> && git push origin vX.Y.Z`), or run the `release` workflow
    (Actions → release → Run workflow → tag). `.github/workflows/release.yml` re-checks the versions against the tag
-   and creates the GitHub release from that file (it refuses when the file or a version is missing).
+   and creates the GitHub release from that file (it refuses when the file or a version is missing, when the
+   commit is not on main, or when CI is not green on it for both Ubuntu and Windows).

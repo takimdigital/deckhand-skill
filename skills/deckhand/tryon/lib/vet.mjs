@@ -28,14 +28,35 @@ export const acceptable = () => `Accepted: a shadcn-schema registry (registry.js
 
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
 
+/** A refused registry by its host, or by its name anywhere: a GitHub mirror or a CDN serves the same code. */
+export function refusedFor(index, repo) {
+  const host = new URL(index).hostname;
+  const segs = new URL(index).pathname.toLowerCase().split('/').filter(Boolean);
+  const repoName = String(repo || '').toLowerCase().split('/').pop();
+  return REGISTRIES.refused.find((r) => (r.hosts || []).some((h) => host === h || host.endsWith('.' + h))
+    || (r.names || []).some((n) => segs.includes(n) || repoName === n));
+}
+
+/** owner/name when the index is served straight from a GitHub repository (raw, jsDelivr gh, github.com). */
+export function repoInUrl(index) {
+  const u = new URL(index);
+  const s = u.pathname.split('/').filter(Boolean);
+  if (u.hostname === 'raw.githubusercontent.com' || u.hostname === 'github.com') return s.length >= 2 ? `${s[0]}/${s[1]}` : null;
+  if (u.hostname === 'cdn.jsdelivr.net' && s[0] === 'gh' && s.length >= 3) return `${s[1]}/${s[2].split('@')[0]}`;
+  return null;
+}
+
 export async function vetRegistry({ index, repo, id, item: itemTemplate, sample = 3 }) {
   const fails = [], warns = [], passes = [];
   const check = (ok, cid, good, bad, hard = true) => (ok ? passes : hard ? fails : warns).push({ id: cid, detail: ok ? good : bad });
   if (!index || !/^https:\/\//.test(index)) throw Object.assign(new Error('USAGE: --index https://…/registry.json'), { code: 'USAGE' });
   const host = new URL(index).hostname;
   const rid = slug(id || host.replace(/^www\./, '').split('.')[0]);
-  const refused = REGISTRIES.refused.find((r) => (r.hosts || []).some((h) => host === h || host.endsWith('.' + h)));
+  const refused = refusedFor(index, repo);
   check(!refused, 'not refused', 'not on the refused list', refused ? `on the refused list: ${refused.id} — ${refused.reason}` : '');
+  const served = repoInUrl(index);
+  if (served && repo) check(served.toLowerCase() === String(repo).toLowerCase(), 'same repo', `the index is served from ${repo}`,
+    `the index is served from ${served}, not ${repo}: the licence must be the served repository's`);
   const known = REGISTRIES.registries.find((r) => r.id === rid || (r.index || '').includes(host));
   if (known) warns.push({ id: 'already-shipped', detail: `${known.id} is already in the shipped catalog` });
 

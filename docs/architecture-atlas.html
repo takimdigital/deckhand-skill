@@ -406,7 +406,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <p class="small">Owner clicks elements of the running site; N licensed variants are written into source once wearing the site's tokens and carrying the owner's copy; the panel pre-guesses the slot (a slot with no licensed designs reads "— AI draft only" and offers Ask AI to draft one); ←/→ compares instantly, with the before/after slider on by default; Keep bakes + records licence. AI drafts only on request, script-gated. <b>Exit:</b> no open sessions. → G3.</p>
 
 <h3>⑦ review</h3>
-<p class="small"><b>Agent:</b> <code>tryon clean</code> → <code>dh verify</code> (builds, serves production build, checks every row) → fix red blocking rows at root, never weaken checks → show VERIFY.md. <b>Blocking rows:</b> typecheck, build, prod-clean, tryon-closed, secrets, env-ignored, logs-ignored, swaps, honesty, product-kit (products), routes (static public, &lt;400), seo (launch-breakers) — plus prod-serve when the production start fails. <b>Advisory:</b> lint, a11y-basics, deps-audit, copy-slop. Security floor before G4: rate-limited auth, server-checked admin, upload limits, CSP, no debug endpoints. → G4.</p>
+<p class="small"><b>Agent:</b> <code>tryon clean</code> → <code>dh verify</code> (builds, serves production build, checks every row) → fix red blocking rows at root, never weaken checks → show VERIFY.md. <b>Blocking rows:</b> typecheck, build, prod-clean, tryon-closed, tryon-unwired, secrets, env-ignored, logs-ignored, swaps, honesty, product-kit (products), routes (static public, &lt;400), seo (launch-breakers) — plus prod-serve when the production start fails. <b>Advisory:</b> lint, a11y-basics, deps-audit, copy-slop. Security floor before G4: rate-limited auth, server-checked admin, upload limits, CSP, no debug endpoints. → G4.</p>
 
 <h3>⑧ deploy</h3>
 <p class="small">Runbooks in <code>references/ops/</code>. <code>dh deploy target --app UUID --url U</code>; every release: <code>dh deploy ship</code> = clean tree → push → Coolify → wait for THIS commit → smoke (200 + brand name) → deploy.json. After domain live: <code>dh brief set domain</code> → <code>dh seo apply</code> → ship (IndexNow ping) → <code>dh seo audit --url</code>. <code>dh handoff</code> → HANDOFF.md (URL, secret <i>locations</i>, commands, bots, verify summary, open PENDING, licences).</p>
@@ -1204,6 +1204,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td>build</td><td><span class="tag block">yes</span></td><td>production build</td></tr>
 <tr><td>prod-clean</td><td><span class="tag block">yes</span></td><td>no data-dh= stamps in .next/dist/build/out</td></tr>
 <tr><td>tryon-closed</td><td><span class="tag block">yes</span></td><td>no open sessions, no staged dh-tryon/ dirs</td></tr>
+<tr><td>tryon-unwired</td><td><span class="tag block">yes</span></td><td>next/vite config no longer loads try-on from .deckhand/</td></tr>
 <tr><td>secrets</td><td><span class="tag block">yes</span></td><td>secret regex in tracked files; committed .env</td></tr>
 <tr><td>env-ignored</td><td><span class="tag block">yes</span></td><td>.env in .gitignore</td></tr>
 <tr><td>logs-ignored</td><td><span class="tag block">yes</span></td><td>Deckhand runtime state gitignored (when .git exists)</td></tr>
@@ -1215,7 +1216,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td>seo</td><td><span class="tag block">yes</span></td><td>launch-breakers only</td></tr>
 <tr><td>lint · a11y-basics · deps-audit · copy-slop</td><td><span class="tag ok">advisory</span></td><td>reported, never blocks G4</td></tr>
 </table>
-<p class="small muted">Report records git HEAD so <code>dh resume --check</code> can detect drift (verify commit ≠ HEAD → drift). With no URL/build, routes degrades to a non-blocking "not checked" row.</p>
+<p class="small muted">Report records git HEAD so <code>dh resume --check</code> can detect drift (code changed since the verified commit → drift; commits of .deckhand/ alone do not count). With no URL/build, routes degrades to a non-blocking "not checked" row.</p>
 </section>
 
 <!-- ============================================================ 30 -->

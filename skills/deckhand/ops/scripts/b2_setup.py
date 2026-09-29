@@ -90,6 +90,10 @@ def main():
         f.write(f"export B2_BUCKET_ID='{bid}'\n")
         f.write(f"export B2_HOST='https://s3.{region}.backblazeb2.com'\n")
         f.write(f"export B2_REGION='{region}'\n")
+    try:
+        os.chmod(OUT, 0o600)                                    # owner-only on POSIX; on Windows: icacls inheritance:r
+    except OSError:
+        pass
     print(f"scoped key minted ({k['applicationKeyId'][:8]}…) → {OUT}  [lock it down: chmod 600 / icacls inheritance:r]")
 
 

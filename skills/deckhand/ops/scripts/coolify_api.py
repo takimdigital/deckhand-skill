@@ -7,6 +7,7 @@ Config precedence: --url/--token flags > COOLIFY_URL/COOLIFY_TOKEN env > this pr
 See references/ops/10-bootstrap-vps.md for setup, references/ops/40-change-pipeline.md for usage.
 """
 import argparse
+import html
 import json
 import os
 import subprocess
@@ -204,7 +205,7 @@ def smoke(target, expect=200, contains=None, timeout=30, http=None):
     except Exception as exc:
         print(f"FAIL {type(exc).__name__} {target} ({exc})")
         return 4
-    ok = status == expect and (not contains or contains in text)
+    ok = status == expect and (not contains or contains in text or contains in html.unescape(text))   # "L'Atelier" is &#x27; in HTML
     print(f"{'OK' if ok else 'FAIL'} {status} {target}")
     return 0 if ok else 4
 
@@ -423,16 +424,37 @@ def cmd_envs(a, url, token):
     return 0
 
 
-def cmd_envset(a, url, token):
+def env_pairs(pairs=(), file=None):
+    """KEY=VALUE from the arguments (non-secrets) and/or a dotenv file (secrets: never on a command line)."""
+    lines = list(pairs)
+    if file:
+        lines += [ln for ln in Path(file).read_text(encoding="utf-8").splitlines() if ln.strip() and not ln.lstrip().startswith("#")]
     data = []
-    for pair in a.pairs:
+    for pair in lines:
+        pair = pair.strip()
+        if pair.startswith("export "):
+            pair = pair[len("export "):]
         if "=" not in pair:
-            print(f"bad pair (need KEY=VALUE): {pair}")
-            return 4
+            raise ValueError(f"bad line (need KEY=VALUE): {pair.split('=')[0][:40]}")
         k, v = pair.split("=", 1)
-        data.append({"key": k, "value": v})
+        v = v.strip()
+        if len(v) >= 2 and v[0] == v[-1] and v[0] in "'\"":
+            v = v[1:-1]
+        data.append({"key": k.strip(), "value": v})
+    return data
+
+
+def cmd_envset(a, url, token):
+    try:
+        data = env_pairs(a.pairs, getattr(a, "file", None))
+    except (ValueError, OSError) as e:
+        print(str(e))
+        return 4
+    if not data:
+        print("nothing to set: KEY=VALUE (non-secret) or --file .env.production")
+        return 4
     st, body = api(url, token, "PATCH", f"/applications/{a.uuid}/envs/bulk", body={"data": data})
-    print(f"envset {a.uuid}: HTTP {st} {str(body)[:200]}")
+    print(f"envset {a.uuid}: HTTP {st} — keys: {', '.join(d['key'] for d in data)}")   # never the values
     return 0 if 200 <= st < 300 else 4
 
 
@@ -485,7 +507,7 @@ def main(argv=None):
     sp = add("dlogs", cmd_dlogs); sp.add_argument("uuid"); sp.add_argument("--deployment", default=None)
     sp.add_argument("--grep", default=None); sp.add_argument("--tail", type=int, default=120)
     sp = add("envs", cmd_envs); sp.add_argument("uuid")
-    sp = add("envset", cmd_envset); sp.add_argument("uuid"); sp.add_argument("pairs", nargs="+")
+    sp = add("envset", cmd_envset); sp.add_argument("uuid"); sp.add_argument("pairs", nargs="*"); sp.add_argument("--file", help="a dotenv file: the way for secrets")
     add("status", cmd_status)
     sp = add("tunnel", cmd_tunnel); sp.add_argument("--port", type=int, default=0); sp.add_argument("--wait", type=int, default=20)
     sp = add("smoke", cmd_smoke, cfg=False); sp.add_argument("target")

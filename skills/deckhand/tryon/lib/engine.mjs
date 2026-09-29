@@ -1608,7 +1608,8 @@ function sweepStage(root, stageRoot, exceptId) {
 export function inspect(rootIn, { file, line, col, slot }) {
   const prof = detectProject(rootIn);
   const rel = String(file).replace(/\\/g, '/');
-  const abs = path.join(prof.root, rel);
+  const abs = path.resolve(prof.root, rel);
+  if (!abs.startsWith(prof.root + path.sep)) throw new TryonError('OUTSIDE_PROJECT', rel + ' is outside the project');
   if (!fs.existsSync(abs)) throw new TryonError('NO_FILE', rel);
   const code = fs.readFileSync(abs, 'utf8');
   const el = findElementAt(parse(rel, code), code, Number(line), Number(col));

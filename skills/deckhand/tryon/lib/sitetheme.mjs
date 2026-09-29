@@ -11,6 +11,7 @@
  * values that get written, in one marked block at the end of globals.css (`dh:theme`). Undo restores the
  * previous files byte-exact.
  */
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -293,17 +294,27 @@ export function themeApply(rootIn, vIn = {}) {
   }
   const block = themeCss(v, { bodyVar, heading: !!(fonts && v.heading) });
   css = css.replace(/\s*$/, '\n') + (block ? '\n' + block : '');
-  saveHistory(prof.root, history(prof.root).concat([{ at: new Date().toISOString(), files: before }]).slice(-HISTORY_MAX));
   fs.writeFileSync(cssPath, css);
   if (fonts) fs.writeFileSync(path.join(prof.root, fonts.file), fonts.code);
+  const after = Object.fromEntries(Object.keys(before).map((rel) => [rel, shaText(fs.readFileSync(path.join(prof.root, rel), 'utf8'))]));
+  saveHistory(prof.root, history(prof.root).concat([{ at: new Date().toISOString(), files: before, after }]).slice(-HISTORY_MAX));
   return { applied: v, files: [prof.globalsCss, ...(fonts ? [fonts.file] : [])], vars: themeVars(v) };
 }
 
-export function themeUndo(rootIn) {
+const shaText = (s) => crypto.createHash('sha256').update(s).digest('hex');
+
+export function themeUndo(rootIn, { force = false } = {}) {
   const prof = detectProject(rootIn);
   const h = history(prof.root);
   if (!h.length) throw Object.assign(new Error('nothing to undo'), { code: 'NO_UNDO' });
-  const last = h.pop();
+  const last = h[h.length - 1];
+  // byte-exact means back to before the apply: a file edited since would lose that edit, so it is the owner's call
+  const cur = (rel) => { try { return shaText(fs.readFileSync(path.join(prof.root, rel), 'utf8')); } catch { return null; } };
+  const edited = Object.keys(last.after || {}).filter((rel) => cur(rel) !== last.after[rel]);
+  if (edited.length && !force) {
+    throw Object.assign(new Error(`edited since the theme was applied: ${edited.join(', ')} — undo would lose those edits (theme --undo --force to undo anyway)`), { code: 'FILE_CHANGED', files: edited });
+  }
+  h.pop();
   for (const [rel, text] of Object.entries(last.files)) fs.writeFileSync(path.join(prof.root, rel), text);
   saveHistory(prof.root, h);
   return { restored: Object.keys(last.files), mode: 'byte-exact', more: h.length };

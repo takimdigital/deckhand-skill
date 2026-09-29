@@ -104,10 +104,28 @@ def tryon(root: Path, s: dict) -> dict:
     return _res(not open_, [f"try-on session {i} still open (keep or discard it)" for i in open_], "tryon keep|discard --id <id>")
 
 
+def verify_stale(root: Path, r: dict) -> str:
+    """A green verify proves one commit; code committed after it (a reopened phase, a quick fix) is unproven.
+    Committing deckhand's own files (.deckhand/: run.json, verify.json, VERIFY.md) changes no code."""
+    from .util import run
+    vc = (r or {}).get("commit")
+    head = run(["git", "rev-parse", "HEAD"], cwd=root)["out"].strip() if vc else ""
+    if not vc or not head or vc == head:
+        return ""
+    d = run(["git", "diff", "--name-only", vc, "HEAD", "--", ".", ":(exclude).deckhand"], cwd=root)
+    if d["code"] != 0:
+        return f"verify proved {vc[:7]}, which this repository no longer has"
+    files = d["out"].split()
+    return f"{len(files)} file(s) changed since the verify of {vc[:7]} ({', '.join(files[:4])})" if files else ""
+
+
 def review(root: Path, s: dict) -> dict:
     r = read_json(root / ".deckhand" / "verify.json")
     if not r:
         return _res(False, ["no verify report"], "dh verify")
+    stale = verify_stale(root, r)
+    if stale:
+        return _res(False, [stale], "dh verify (again: the code changed since)")
     return _res(bool(r.get("ok")), [f"{x['check']}: {x['detail']}" for x in r.get("rows", []) if not x.get("ok") and x.get("blocking", True)], "dh verify (fix every red row)")
 
 

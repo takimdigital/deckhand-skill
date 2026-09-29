@@ -39,6 +39,9 @@ def state_path(root: Path) -> Path:
 
 def load(root: Path, required: bool = True) -> dict:
     s = read_json(state_path(root))
+    if s is None and state_path(root).exists():         # unreadable is not "no run": gates would stop being enforced
+        raise DhError("RUN_CORRUPT", f"{state_path(root)} is not valid JSON (a merge conflict or a half edit?) — "
+                      "restore it (`git checkout .deckhand/run.json`, or rebuild from .deckhand/history.jsonl); never `dh init` over it")
     if s is None and required:
         raise DhError("NO_RUN", f"no .deckhand/run.json in {root} — start with `dh init`")
     return s
@@ -131,7 +134,7 @@ def reached(s: dict, phase: str) -> None:
             raise DhError("OUT_OF_ORDER", f"phase '{prev}' is not done yet (`dh next` says what is)", phase=phase, first=prev)
     g = blocking_gate(s)
     if g and PHASE_IDS.index(gate_phase(g)) < idx:
-        raise DhError("GATE_BLOCKED", f"gate {g} ({GATES[g]}) needs the owner's go: `dh gate pass {g}`", gate=g)
+        raise DhError("GATE_BLOCKED", f"gate {g} ({GATES[g]}) needs the owner's go: `dh gate pass {g} --quote \"<their words, verbatim>\"`", gate=g)
 
 
 def require(root: Path, phase: str) -> None:
@@ -149,6 +152,8 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
         raise DhError("MOVED", f"this project continues in {s['moved_to']} (its app folder): run `dh next` there", to=s["moved_to"])
     if phase not in PHASE_IDS:
         raise DhError("BAD_PHASE", f"phase must be one of {PHASE_IDS}")
+    if force_reason and phase in NOT_SKIPPABLE:
+        raise DhError("NOT_FORCEABLE", f"phase {phase} cannot be forced: {NOT_SKIPPABLE[phase]}")
     idx = PHASE_IDS.index(phase)
     reached(s, phase)
     result = checks.run(phase, Path(root), s)
@@ -161,7 +166,8 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
         s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "auto"}
     save(root, s)
     log(root, {"event": "phase_done", "phase": phase, "ok": result["ok"], "forced": force_reason})
-    return {"ok": True, "phase": phase, "check": result, **summary(root, s)}
+    summ = summary(root, s)                             # "phase" = the one just done; "now" = where the run stands
+    return {"ok": True, **summ, "phase": phase, "now": summ["phase"], "check": result}
 
 
 NOT_SKIPPABLE = {"review": "nothing reaches production without `dh verify` green (fix the red rows instead)"}
@@ -195,6 +201,10 @@ CHANGE_RX = re.compile(r"(?i)\b(change|make it|instead|but|however|add|remove|re
 
 # a go the owner holds back is no go: "don't ship it", "wait, do not proceed", "this is not good"
 HOLD_RX = re.compile(r"(?i)(\b(don'?t|do not|does not|doesn'?t|not|never|no|nope|wait|hold|stop|non|pas|attends?|arr[êe]te)\b|n't\b)")
+# …and a go put off is no go yet: "ok, I'll look later", "fine, let me think about it", "yes got it, checking tonight"
+DELAY_RX = re.compile(r"(?i)\b(later|tonight|tomorrow|this (evening|weekend)|next week|(let me|i'?ll|i will|need to) (think|check|look|see|review|read)|"
+                      r"think(ing)? (about|it over)|checking|get back to you|haven'?t (looked|read|seen|checked)|(will|to) (look|check)|"
+                      r"plus tard|ce soir|demain|je (vais )?regarde|je v[ée]rifie|m[áa]s tarde|ma[ñn]ana|luego|sp[äa]ter|morgen)\b")
 # …except the negations that are themselves a go: "no changes", "no problem", "pas de souci"
 NO_PROBLEM_RX = re.compile(r"(?i)\b(no (problem|worries|changes?|issues?|notes?)|nothing (to (change|add)|else)|pas de (souci|probl[eè]me|changement))\b")
 # a go explicit enough to carry a change with it ("G1 ok, but add a pricing page"); a bare "ok but add…" is a change
@@ -206,7 +216,7 @@ def classify_quote(quote: str) -> str:
     is a change request: a gate asks again rather than passing on a "no"."""
     q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
     ok, change = bool(APPROVE_RX.search(q)), bool(CHANGE_RX.search(q))
-    if not ok or HOLD_RX.search(q):
+    if not ok or HOLD_RX.search(q) or DELAY_RX.search(q):
         return "change_request"
     if not change:
         return "approve"
@@ -217,7 +227,7 @@ def is_hold(quote: str) -> bool:
     """The owner holds it back ("wait", "don't ship it yet", "hold on, give me a day") without asking for a change:
     the answer is to wait, never to reopen and redo a phase they did not question (SKILL invariant 7)."""
     q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
-    return bool(HOLD_RX.search(q)) and not CHANGE_RX.search(re.sub(r"(?i)\b(not|pas) (yet|encore)\b", " ", q))
+    return bool(HOLD_RX.search(q) or DELAY_RX.search(q)) and not CHANGE_RX.search(re.sub(r"(?i)\b(not|pas) (yet|encore)\b", " ", q))
 
 
 def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -> dict:

@@ -46,8 +46,12 @@ def cmd_brief(a):
             val = [x.strip() for x in v.split(",") if x.strip()] if k in LIST_KEYS else v
             cur = b
             parts = k.split(".")
+            if not all(parts):
+                raise DhError("BAD_KEY", f"'{k}' is not a brief key (name.sub=value, no empty parts)")
             for p in parts[:-1]:
                 cur = cur.setdefault(p, {})
+                if not isinstance(cur, dict):
+                    raise DhError("BAD_KEY", f"'{k}': {p} already holds a value, not a group of keys")
             cur[parts[-1]] = val
         write_json(path, b)
     return b
@@ -268,6 +272,7 @@ def build_parser():
     p.add_argument("--baseline"); p.add_argument("--research"); p.add_argument("--baseline-research")
     p = sub.add_parser("seo", help="be found on Google and in AI answers: audit · apply (add/improve, never overwrite) · undo · ping · facts")
     p.add_argument("action", choices=["audit", "apply", "undo", "ping", "facts"]); p.add_argument("--url")
+    p.add_argument("--force", action="store_true", help="undo: even over files edited since the apply")
     sub.add_parser("handoff")
     p = sub.add_parser("tryon", help="passthrough to the try-on engine (node)"); p.add_argument("rest", nargs=argparse.REMAINDER)
     return ap
@@ -487,6 +492,13 @@ def dispatch(a):
         return r
     if c == "deploy":
         from . import deploy as D
+        if a.action != "raw" and a.rest:                # REMAINDER swallowed the options written after the action
+            dp = argparse.ArgumentParser(prog=f"dh deploy {a.action}", add_help=False)
+            dp.add_argument("--app"); dp.add_argument("--url"); dp.add_argument("--force", action="store_true")
+            more, left = dp.parse_known_args(a.rest)
+            if left:
+                raise DhError("USAGE", f"dh deploy {a.action}: unexpected {' '.join(left)}")
+            a.app, a.url, a.force = more.app or a.app, more.url or a.url, more.force or a.force
         if a.action == "target":
             return D.target(root, a.app, a.url)
         if a.action == "ship":
@@ -497,6 +509,8 @@ def dispatch(a):
             if not sm["ok"]:
                 raise DhError("SMOKE_FAILED", sm["evidence"], smoke=sm)
             return sm
+        if a.rest[:1] == ["deploy"]:
+            STATE.require(root, "deploy")                # `raw deploy` ships a release too: same gates as ship
         return {"exit": D.passthrough(a.rest)}
     if c == "ops":
         from . import ops as O
@@ -566,7 +580,7 @@ def dispatch(a):
         if a.action == "apply":
             return SEO.apply(root)
         if a.action == "undo":
-            return SEO.undo(root)
+            return SEO.undo(root, force=a.force)
         if a.action == "ping":
             return SEO.ping(root)
         if a.action == "facts":
@@ -631,6 +645,10 @@ def main(argv=None) -> int:
         return emit({**e.extra, "ok": False, "code": e.code, "message": e.message}, 1)   # extra never overrides the verdict
     except KeyboardInterrupt:
         return emit({"ok": False, "code": "INTERRUPTED"}, 130)
+    except Exception as e:                              # a hand-edited file of the wrong shape: JSON, never a traceback
+        _log(a, shown, 1, f"INTERNAL: {type(e).__name__}: {e}")
+        return emit({"ok": False, "code": "INTERNAL", "message": f"{type(e).__name__}: {e}",
+                     "hint": "a .deckhand/*.json file may have the wrong shape; `dh resume --check`, then fix or restore it"}, 1)
     finally:
         _refresh(a, root, out)
 

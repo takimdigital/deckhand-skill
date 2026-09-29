@@ -106,7 +106,7 @@ foreach ($label in @('Claude Code', 'Codex', 'Cursor', 'Hermes')) {
 
 $g.DrawString('github.com/takimdigital/deckhand', $fUrl, $brMuted, [float]$tx, [float]472)
 
-$out = 'C:\Users\Takim\deckhand\assets\social-preview.png'
+$out = Join-Path $PSScriptRoot 'social-preview.png'
 $bmp.Save($out, [System.Drawing.Imaging.ImageFormat]::Png)
 $g.Dispose(); $bmp.Dispose()
 $fi = Get-Item $out

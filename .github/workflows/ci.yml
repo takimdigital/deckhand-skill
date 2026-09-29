@@ -16,9 +16,7 @@ jobs:
   test:
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    # Windows is the owner's host; it runs on every push but stays non-blocking until it has
-    # been green on this workflow for two weeks (then delete this line).
-    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    # Windows is the owner's host: a red Windows run fails CI like Ubuntu (blocking since the 2026-09-29 audit).
     strategy:
       fail-fast: false
       matrix:

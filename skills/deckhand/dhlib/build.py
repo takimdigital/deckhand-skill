@@ -203,6 +203,8 @@ def clone(name: str, to: Path, do_install: bool = True) -> dict:
         raise DhError("NO_SUCH_TEMPLATE", f"{name} is not in the pool (dh pool query …)")
     if row.get("license") not in POOL.OK_LICENSES and not (row.get("source") == "mine" and row.get("license") in POOL.OWNER_LICENSES):
         raise DhError("LICENCE_REFUSED", f"{name}: licence {row.get('license')}")
+    if POOL.SECURITY_RISKS & set(row.get("risks") or []):
+        raise DhError("BASE_UNSAFE", f"{name} is flagged {', '.join(sorted(POOL.SECURITY_RISKS & set(row['risks'])))} — pick another base (dh pool query …)")
     to = Path(to).resolve()
     held = _hold(to)
     to.parent.mkdir(parents=True, exist_ok=True)

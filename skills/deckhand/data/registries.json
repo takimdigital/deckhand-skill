@@ -1,15 +1,15 @@
 {
   "version": 2,
   "updated": "2026-09-27",
-  "policy": "MIT / Apache-2.0 only. A registry is indexed only after its LICENSE was read at the URL in license_evidence. Try-on writes an attribution header (source URL + licence) into every staged file; a kept file keeps it.",
+  "policy": "MIT / Apache-2.0 only. A refused entry's names also refuse its code served from anywhere else (a GitHub mirror, a CDN). A registry is indexed only after its LICENSE was read at the URL in license_evidence. Try-on writes an attribution header (source URL + licence) into every staged file; a kept file keeps it.",
   "refused": [
-  {"id": "coss (originui)", "reason": "AGPL-3.0", "hosts": ["coss.com", "originui.com"]},
-  {"id": "animate-ui", "reason": "MIT + Commons Clause (not OSI MIT)", "hosts": ["animate-ui.com"]},
-  {"id": "aceternity", "reason": "custom licence, paid tiers", "hosts": ["aceternity.com"]},
+  {"id": "coss (originui)", "reason": "AGPL-3.0", "hosts": ["coss.com", "originui.com"], "names": ["originui", "coss"]},
+  {"id": "animate-ui", "reason": "MIT + Commons Clause (not OSI MIT)", "hosts": ["animate-ui.com"], "names": ["animate-ui"]},
+  {"id": "aceternity", "reason": "custom licence, paid tiers", "hosts": ["aceternity.com"], "names": ["aceternity", "aceternity-ui"]},
   {"id": "21st.dev", "reason": "marketplace ToS, no redistribution grant", "hosts": ["21st.dev"]},
   {"id": "tailark.com (pro)", "reason": "paywalled blocks (401) — the MIT OSS registry below is the free source", "hosts": ["tailark.com"]},
   {"id": "cult-ui", "reason": "endpoint bot-challenged (429) for every client — not installable", "hosts": ["cult-ui.com"]},
-  {"id": "shadcn-studio", "reason": "MIT + Commons Clause (LICENSE.md, read 2026-09-27) — not OSI MIT", "hosts": ["shadcnstudio.com"]}
+  {"id": "shadcn-studio", "reason": "MIT + Commons Clause (LICENSE.md, read 2026-09-27) — not OSI MIT", "hosts": ["shadcnstudio.com"], "names": ["shadcn-studio", "shadcnstudio"]}
  ],
   "registries": [
     {

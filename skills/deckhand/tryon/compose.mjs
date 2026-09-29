@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { detectProject, specFor } from './lib/project.mjs';
 import { loadCatalog, rank, kitOf } from './lib/catalog.mjs';
-import { fetchBundle, writeBundle, pascal } from './lib/materialize.mjs';
+import { fetchBundle, writeBundle, pascal, slugOf } from './lib/materialize.mjs';
 import { parameterize, bind, contentProp } from './lib/transplant.mjs';
 import { ensureTokens, bake, PLACEHOLDER, logoLocalsFor, install, brandName, ensurePlaceholder, demoTexts, recordDemoCopy } from './lib/engine.mjs';
 import { contentCount } from './lib/transplant.mjs';
@@ -32,9 +32,11 @@ const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i
 const root = path.resolve(opt('project', '.'));
 const page = opt('page', 'app/page.tsx');
 const sections = String(opt('sections', 'hero,features,cta,footer')).split(',').map((s) => s.trim()).filter(Boolean);
-const copy = opt('copy') ? JSON.parse(fs.readFileSync(path.resolve(root, opt('copy')), 'utf8')) : {};
 const registry = opt('registry', null);
 const out = (o, c = 0) => { process.stdout.write(JSON.stringify(o) + '\n'); process.exit(c); };
+let copy = {};
+try { copy = opt('copy') ? JSON.parse(fs.readFileSync(path.resolve(root, opt('copy')), 'utf8')) : {}; }
+catch (e) { out({ ok: false, code: 'BAD_COPY', message: `${opt('copy')}: ${e.message} (fix the JSON, then compose again)` }, 1); }
 
 const esc = (s) => (/[{}<>]/.test(String(s)) ? `{${JSON.stringify(String(s))}}` : String(s));
 const unit = (role, text, href) => ({ role, text: String(text), src: esc(text), href: href ? JSON.stringify(href) : null, list: null });
@@ -62,6 +64,26 @@ function origFromCopy(c = {}) {
   return { units, images, inputs: [], lists, dynamicLists: 0 };
 }
 
+// Candidates stage in <sections>/.dh-stage-N (the same depth as the final folder, so relative imports hold); the winner
+// then moves to <sections>/<slug>, or <slug>-2… when that folder exists: another page or a kept try-on may use it,
+// and the owner may have edited it. Nothing already in <sections> is ever cleared.
+const SECTIONS = (prof) => path.posix.join(prof.componentsDir, 'sections');
+function settle(prof, stage, cand) {
+  let name = slugOf(cand), n = 1;
+  while (fs.existsSync(path.join(root, SECTIONS(prof), name))) name = `${slugOf(cand)}-${++n}`;
+  const to = path.posix.join(SECTIONS(prof), name);
+  try { fs.renameSync(path.join(root, stage.relDir), path.join(root, to)); }
+  catch { fs.cpSync(path.join(root, stage.relDir), path.join(root, to), { recursive: true }); fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true }); }   // Windows: a watcher holds the folder
+  const move = (p) => (typeof p === 'string' && p.startsWith(stage.relDir + '/') ? to + p.slice(stage.relDir.length) : p);
+  const entry = move(stage.entry);
+  return { ...stage, relDir: to, entry, spec: specFor(prof, entry) || './' + entry, files: (stage.files || []).map(move),
+    logoFiles: Array.isArray(stage.logoFiles) ? stage.logoFiles.map(move) : stage.logoFiles };
+}
+const clearStages = (prof) => {
+  const dir = path.join(root, SECTIONS(prof));
+  if (fs.existsSync(dir)) for (const f of fs.readdirSync(dir)) if (f.startsWith('.dh-stage-')) fs.rmSync(path.join(dir, f), { recursive: true, force: true });
+};
+
 async function main() {
   const prof = detectProject(root);
   if (prof.tailwind === 4) ensureTokens(prof, {});
@@ -72,6 +94,8 @@ async function main() {
   const brand = brandName(root);
   const hasPublic = ensurePlaceholder(prof);
   const tries = Number(opt('tries', 8));
+  let stageN = 0;
+  clearStages(prof);
   for (const slot of sections) {
     const orig = origFromCopy(copy[slot]);
     const links = ['footer', 'navbar'].includes(slot) ? siteLinks(root, copy) : null;
@@ -81,10 +105,11 @@ async function main() {
     const staged = [];
     for (const cand of ranked.filter((c) => !placed.some((d) => d.cand.id === c.id)).slice(0, tries * 2)) {
       if (staged.length >= tries) break;
+      let stage = null;
       try {
         const p0 = detectProject(root);
         const bundle = await fetchBundle(p0, cand);
-        const stage = writeBundle(p0, cand, bundle, { baseDir: path.posix.join(p0.componentsDir, 'sections') });
+        stage = writeBundle(p0, cand, bundle, { baseDir: SECTIONS(p0), dirName: `.dh-stage-${++stageN}` });
         if (stage.problems.length || !stage.export) { fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true }); continue; }
         const entryAbs = path.join(root, stage.entry);
         const entryCode = fs.readFileSync(entryAbs, 'utf8');
@@ -101,12 +126,16 @@ async function main() {
         const score = b.carried.length / of - 0.05 * b.demo.length - 0.04 * demoVisual - 0.02 * staged.length + kin;
         staged.push({ cand, stage, p, b, score });
         if (process.env.DH_DEBUG) console.error(slot, cand.id, 'carried', b.carried.length, '/', of, 'demo', b.demo.length, 'visual', demoVisual, 'score', score.toFixed(3));
-      } catch (e) { if (process.env.DH_DEBUG) console.error(slot, cand.id, 'FAILED', e.message); }
+      } catch (e) {
+        if (stage && !staged.some((s) => s.stage.relDir === stage.relDir)) fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true });
+        if (process.env.DH_DEBUG) console.error(slot, cand.id, 'FAILED', e.message);
+      }
     }
     if (!staged.length) { report.push({ slot, ok: false, why: 'no candidate could be staged' }); continue; }
     staged.sort((x, y) => y.score - x.score);
     const best = staged[0];
-    for (const o of staged.slice(1)) if (o.stage.relDir !== best.stage.relDir) fs.rmSync(path.join(root, o.stage.relDir), { recursive: true, force: true });
+    for (const o of staged.slice(1)) fs.rmSync(path.join(root, o.stage.relDir), { recursive: true, force: true });
+    best.stage = settle(prof, best.stage, best.cand);
     fs.writeFileSync(path.join(root, best.stage.entry), best.p.code);
     let local = pascal(best.cand.n).slice(0, 40);
     while (used.has(local)) local += '2';
@@ -119,8 +148,11 @@ async function main() {
   const imports = placed.map((d) => (d.stage.export.kind === 'default'
     ? `import ${d.local} from ${JSON.stringify(specFor(prof, d.stage.entry))}`
     : `import { ${d.stage.export.name} as ${d.local} } from ${JSON.stringify(specFor(prof, d.stage.entry))}`)).join('\n');
+  clearStages(prof);
   const pageAbs = path.join(root, page);
-  if (fs.existsSync(pageAbs)) fs.copyFileSync(pageAbs, pageAbs + '.before-compose');
+  if (!placed.length) out({ ok: false, code: 'NOTHING_PLACED', message: `no section could be placed: ${page} is unchanged`, sections: report }, 1);
+  // the first backup is the owner's own page: a later compose must not replace it with an earlier compose
+  if (fs.existsSync(pageAbs) && !fs.existsSync(pageAbs + '.before-compose')) fs.copyFileSync(pageAbs, pageAbs + '.before-compose');
   fs.mkdirSync(path.dirname(pageAbs), { recursive: true });
   fs.writeFileSync(pageAbs, `${imports}\n\nexport default function Page() {\n  return (\n    <main>\n${placed.map((d) => '      ' + d.usage).join('\n')}\n    </main>\n  );\n}\n`);
   const ownerTexts = Object.values(copy).flatMap((c) => [c.eyebrow, c.heading, ...[].concat(c.text || []), ...[].concat(c.actions || []).map((a) => a.label),

@@ -75,15 +75,21 @@ def raw_pack(lang: str) -> dict:
 
 def _merge(pack: dict, extra: dict) -> dict:
     out = json.loads(json.dumps(pack))
+    extra = extra if isinstance(extra, dict) else {}     # a hand-edited layer of the wrong shape adds nothing, never crashes
+    words = extra.get("words") if isinstance(extra.get("words"), dict) else {}
     for tier in ("strong", "buzz"):
         out.setdefault("words", {}).setdefault(tier, [])
-        out["words"][tier] += [w for w in (extra.get("words") or {}).get(tier, []) if w not in out["words"][tier]]
+        out["words"][tier] += [w for w in _list(words.get(tier)) if isinstance(w, str) and w not in out["words"][tier]]
     ids = {x["id"] for x in out.get("phrases", [])}
-    out["phrases"] = out.get("phrases", []) + [x for x in extra.get("phrases", []) if x.get("id") not in ids]
-    out["fixes"] = {**out.get("fixes", {}), **(extra.get("fixes") or {})}
+    out["phrases"] = out.get("phrases", []) + [x for x in _list(extra.get("phrases")) if isinstance(x, dict) and x.get("id") and x.get("id") not in ids]
+    out["fixes"] = {**out.get("fixes", {}), **(extra.get("fixes") if isinstance(extra.get("fixes"), dict) else {})}
     for k in ("transitions", "superlatives"):
-        out[k] = out.get(k, []) + [x for x in extra.get(k, []) if x not in out.get(k, [])]
+        out[k] = out.get(k, []) + [x for x in _list(extra.get(k)) if isinstance(x, str) and x not in out.get(k, [])]
     return out
+
+
+def _list(v) -> list:
+    return v if isinstance(v, list) else []
 
 
 class Pack:
@@ -752,7 +758,10 @@ def add(term: str, lang: str, phrase: bool = False, buzz: bool = False, fix: str
 
 def allow(root, term: str) -> dict:
     p = Path(root) / ".deckhand" / "slop.json"
-    conf = read_json(p, None) or {"allow": [], "ignore": []}
+    conf = read_json(p, None)
+    conf = conf if isinstance(conf, dict) else {"allow": [], "ignore": []}
+    if not isinstance(conf.get("allow"), list):
+        conf["allow"] = []
     if term not in conf["allow"]:
         conf["allow"].append(term)
     write_json(p, conf)
