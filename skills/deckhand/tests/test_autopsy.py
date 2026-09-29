@@ -144,7 +144,7 @@ class Runs(Base):
         script.write_text("import os, sys\nif not os.path.exists('ready.flag'):\n    print('MISSING READY FLAG'); sys.exit(1)\nprint('ok')\n", encoding="utf-8")
         r = learn.run_cmd(self.root, [sys.executable, str(script)])
         self.assertFalse(r["ok"])
-        touch = f'"{sys.executable}" -c "open(\'ready.flag\', \'w\').close()"'   # not `touch`: cmd.exe has none (field test F1)
+        touch = "mkdir ready.flag"            # not `touch`: cmd.exe has none (field test F1); mkdir quotes nothing in either shell
         learn.add(None, "build", "MISSING READY FLAG", "not prepared", "create the flag", signature="MISSING READY FLAG",
                   extra={"recipe": [["run", touch]], "auto": True})
         r = learn.run_cmd(self.root, [sys.executable, str(script)], fix=True)
