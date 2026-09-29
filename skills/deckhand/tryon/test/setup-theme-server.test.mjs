@@ -51,6 +51,21 @@ test('next.config is wrapped once (ts, mjs, cjs, function config) and still pars
   assert.match(vite.code, /plugins: \[dhTryon\(\), react\(\)\]/);
 });
 
+test('unsetup takes back the .gitignore lines setup added: byte-exact, CRLF too, and a file it created goes', () => {
+  const dir = tempSite();
+  assert.ok(!fs.existsSync(path.join(dir, '.gitignore')));
+  setup(dir);
+  unsetup(dir);
+  assert.ok(!fs.existsSync(path.join(dir, '.gitignore')), 'setup created it: clean removes it');
+  const own = 'node_modules/\r\n.next/\r\n';
+  fs.writeFileSync(path.join(dir, '.gitignore'), own);
+  setup(dir);
+  // an editor on Windows rewrites the whole file with CRLF
+  fs.writeFileSync(path.join(dir, '.gitignore'), read(dir, '.gitignore').replace(/\r?\n/g, '\r\n'));
+  unsetup(dir);
+  assert.equal(read(dir, '.gitignore'), own);
+});
+
 test('setup -> unsetup is byte-exact and gitignores the state dir', () => {
   const dir = tempSite();
   const cfg = fs.readFileSync(path.join(dir, 'next.config.ts'));

@@ -70,6 +70,31 @@ function projectProvides(prof, spec) {
   return null;
 }
 
+/**
+ * HTML-spelled attributes on host elements, as React spells them (`flood-opacity` → `floodOpacity`,
+ * `xlink:href` → `xlinkHref`): a design pasted from an SVG editor renders, but floods the console with
+ * "Invalid DOM property" warnings, which the overlay's auto-check reads as errors. `data-*` and `aria-*` stay.
+ */
+export function reactAttrs(file, code) {
+  let ast;
+  try { ast = parse(file, code); } catch { return code; }
+  const edits = [];
+  walk(ast, (n) => {
+    if (n.type !== 'JSXOpeningElement' || n.name.type !== 'JSXIdentifier' || !/^[a-z][a-zA-Z0-9]*$/.test(n.name.name)) return true;   // a host tag; a custom element (`<my-el>`) takes attributes as written
+    for (const a of n.attributes) {
+      const nm = a.type === 'JSXAttribute' ? a.name : null;
+      let from = null;
+      if (nm && nm.type === 'JSXIdentifier' && nm.name.includes('-') && !/^(data|aria)-/.test(nm.name)) from = nm.name;
+      else if (nm && nm.type === 'JSXNamespacedName') from = nm.namespace.name + '-' + nm.name.name;
+      if (from) edits.push({ start: nm.start, end: nm.end, text: from.replace(/-([a-z])/g, (_, c) => c.toUpperCase()) });
+    }
+    return true;
+  });
+  edits.sort((a, b) => b.start - a.start);
+  for (const e of edits) code = code.slice(0, e.start) + e.text + code.slice(e.end);
+  return code;
+}
+
 /** Upstream typing bugs fixed deterministically so a kept file passes `next build` type checks. */
 export function compatFixes(file, code) {
   let ast;
@@ -482,7 +507,7 @@ export function writeBundle(prof, item, bundle, { baseDir } = {}) {
       const q = code[imp.start];
       code = code.slice(0, imp.start) + q + t + q + code.slice(imp.end);
     }
-    if (/\.(tsx|jsx)$/.test(f.path)) code = normalizeClasses(f.path, code).code;
+    if (/\.(tsx|jsx)$/.test(f.path)) code = reactAttrs(f.path, normalizeClasses(f.path, code).code);
     if (/\.(tsx|ts)$/.test(f.path)) code = compatFixes(f.path, code);
     if (/\.(tsx|jsx)$/.test(f.path)) code = fitProjectPrimitives(prof, f.path, code);
     if (prof.rsc && /\.(tsx|jsx|ts|js)$/.test(f.path) && needsClient(code)) code = `"use client"\n\n` + code;

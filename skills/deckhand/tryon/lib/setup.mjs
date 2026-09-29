@@ -157,6 +157,7 @@ export function setup(rootIn) {
   const gi = path.join(root, '.gitignore');
   const giText = fs.existsSync(gi) ? fs.readFileSync(gi, 'utf8') : '';
   if (!/^\/?\.deckhand\/tryon\/?$/m.test(giText)) {
+    if (!fs.existsSync(gi)) journal.gitignoreCreated = true;
     fs.writeFileSync(gi, giText.replace(/\s*$/, '\n') + `\n# ${MARK} state (journal, backups, dev runtime)\n.deckhand/tryon/\n`);
     journal.gitignore = true;
   }
@@ -185,7 +186,12 @@ export function unsetup(rootIn, { keepTokens = null } = {}) {
     for (const c of j.created || []) { try { fs.unlinkSync(path.join(root, c)); } catch { /* gone */ } }
     if (j.gitignore) {
       const gi = path.join(root, '.gitignore');
-      if (fs.existsSync(gi)) fs.writeFileSync(gi, fs.readFileSync(gi, 'utf8').replace(new RegExp(`\\n?# ${MARK} state \\(journal, backups, dev runtime\\)\\n\\.deckhand/tryon/\\n?`), '\n'));
+      // the lines setup added, CRLF too (an editor on Windows may have rewritten the file); a file setup created goes
+      if (fs.existsSync(gi)) {
+        const text = fs.readFileSync(gi, 'utf8').replace(new RegExp(`(\\r?\\n)*# ${MARK} state \\(journal, backups, dev runtime\\)\\r?\\n\\.deckhand/tryon/(\\r?\\n)?`), (m, a) => (a || ''));
+        if (j.gitignoreCreated && !text.trim()) fs.unlinkSync(gi);
+        else fs.writeFileSync(gi, text);
+      }
     }
   }
   if (keepTokens === false && prof.globalsCss) {

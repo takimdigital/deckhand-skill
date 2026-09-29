@@ -25,7 +25,7 @@ import { kindOf } from './slots.mjs';
 import { siteLinks, fillLinks, linkTexts, FORM_SLOTS } from './sitelinks.mjs';
 
 const require = createRequire(import.meta.url);
-const { parse, walk, jsxName, findElementAt, attr, lineCol } = require('./ast.cjs');
+const { parse, walk, jsxName, findElementAt, attr, lineCol, offsetOf } = require('./ast.cjs');
 
 export class TryonError extends Error {
   constructor(code, message, extra = {}) { super(message); this.code = code; Object.assign(this, extra); }
@@ -296,6 +296,12 @@ export async function open(rootIn, opts) {
   const before = fs.readFileSync(abs);
   const code = before.toString('utf8');
   const ast = parse(rel, code);
+  // the element is already in a try: the wrapper and its import moved it, so the coordinates the page still shows
+  // (the ones the try was opened at) find nothing, or the wrapper: say that, not "reload the page"
+  const pos = offsetOf(code, Number(opts.line), Number(opts.col));
+  const busyHere = listSessions(root).find((o) => o.state === 'open' && o.file === rel && ((o.line === Number(opts.line) && o.col === Number(opts.col))
+    || (() => { const w = findWrapper(ast, o.id); return w && w.start <= pos && pos < w.end; })()));
+  if (busyHere) throw new TryonError('SESSION_OPEN', `that element is already being tried (session ${busyHere.id}): keep or discard it first`, { id: busyHere.id });
   const picked = pickElement(ast, code, opts.line, opts.col, opts.hint);
   if (!picked) throw new TryonError('ELEMENT_NOT_FOUND', `no JSX element starts at ${rel}:${opts.line}:${opts.col} — the page is older than the file: reload it and pick again`, { reload: true });
   const el = picked.el;
@@ -368,7 +374,10 @@ export async function open(rootIn, opts) {
       if (!variants.length) throw new TryonError('NO_VARIANTS', 'every candidate needs npm packages; re-run with install', { skipped });
     } else {
       const r = install(prof, need, log);
-      if (!r.ok) throw new TryonError('INSTALL_FAILED', r.cmd + '\n' + r.out, { skipped });
+      if (!r.ok) {
+        for (const v of variants) fs.rmSync(path.join(root, v.dir), { recursive: true, force: true });
+        throw new TryonError('INSTALL_FAILED', r.cmd + '\n' + r.out, { skipped });
+      }
       installed = need;
     }
   }
@@ -732,7 +741,8 @@ export function culpritsOf(root, variants, text) {
  * The owner never keeps a broken page.
  */
 export async function openVerified(rootIn, opts, { url, page, deadlineMs = 25000 } = {}) {
-  if (!url) return open(rootIn, opts);
+  // no dev server known: staged, but nobody loaded the page — said, so an `ok` is never read as "the page works"
+  if (!url) return { ...(await open(rootIn, opts)), verified: false, note: 'no dev server known, so the page was not checked: pass --url http://127.0.0.1:<port> (or start it with `dh dev start`), or load the page yourself before showing it' };
   const prof0 = detectProject(rootIn);
   const root = prof0.root;
   const vite = prof0.framework === 'vite';
@@ -742,7 +752,13 @@ export async function openVerified(rootIn, opts, { url, page, deadlineMs = 25000
   const dropped = [];
   const kept = [];                                               // installed by a rolled-back attempt: still there
   for (let attempt = 0; attempt < 3; attempt++) {
-    const s = await open(rootIn, { ...opts, exclude });
+    let s;
+    try { s = await open(rootIn, { ...opts, exclude }); } catch (e) {
+      // the designs that broke the page were dropped and nothing else fits: that is the news, not "no candidates"
+      if (!dropped.length || !['NO_CANDIDATES', 'NO_VARIANTS'].includes(e.code)) throw e;
+      throw new TryonError('BUILD_BROKE', `${dropped.length} design(s) broke the page (${dropped.map((d) => d.id).join(', ')}), so your file was restored; nothing else fits this element. ${e.message}`,
+        { restored: true, dropped, installedKept: kept, ...(e.skipped ? { skipped: e.skipped } : {}) });
+    }
     if (kept.length) {
       const full = loadSession(root, s.id);
       full.installed = [...new Set([...(full.installed || []), ...kept])];
@@ -1565,13 +1581,27 @@ export function discard(rootIn, id, { reason } = {}) {
     if (v.css) removeCss(prof, /dh:css ([^ ]+) \*\//.exec(v.css)[1]);
   }
   const stageRoot = path.join(root, prof.componentsDir, 'dh-tryon');
+  const swept = sweepStage(root, stageRoot, id);
   if (fs.existsSync(stageRoot) && !fs.readdirSync(stageRoot).length) fs.rmdirSync(stageRoot);
   s.state = 'discarded';
   s.discardedAt = now();
   s.reason = reason || null;
   saveSession(root, s);
   // a package the try installed stays (package.json + lockfile): said, never silently left behind
-  return { ok: true, id, restored: s.file, mode, ...(s.installed && s.installed.length ? { installedKept: s.installed } : {}) };
+  return { ok: true, id, restored: s.file, mode, ...(s.installed && s.installed.length ? { installedKept: s.installed } : {}), ...(swept.length ? { swept } : {}) };
+}
+
+/** Staging folders no other open session shows: left by a try that died mid-way. Removed; their names returned. */
+function sweepStage(root, stageRoot, exceptId) {
+  if (!fs.existsSync(stageRoot)) return [];
+  const shown = new Set(listSessions(root).filter((o) => o.id !== exceptId && o.state === 'open').flatMap((o) => o.variants.map((v) => path.resolve(root, v.dir))));
+  const out = [];
+  for (const d of fs.readdirSync(stageRoot, { withFileTypes: true })) {
+    if (!d.isDirectory() || shown.has(path.join(stageRoot, d.name))) continue;
+    fs.rmSync(path.join(stageRoot, d.name), { recursive: true, force: true });
+    out.push(d.name);
+  }
+  return out;
 }
 
 /** Where is this element, what could it be swapped with? (no writes) */

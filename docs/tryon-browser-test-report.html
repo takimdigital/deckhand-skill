@@ -76,6 +76,17 @@
   <p style="margin-bottom:0"><b>But one blocking defect</b>: staging the <code>shadcnui-blocks/footer-01</code> design takes the <b>whole page down (HTTP 500)</b> while <code>try</code> reports <code>ok:true, exit 0</code> — see §8. Six further behaviours are worth correcting in the atlas (§9).</p>
 </div>
 
+<div class="banner">
+  <h3>Review of this report (second pass) <span class="tag t-info">checked in a real Next 16 lab</span></h3>
+  <p>Every finding below was re-checked against the code and, for the blocker, reproduced on a real Next.js 16.3.6 dev server. What changed:</p>
+  <ul>
+    <li><b>The blocker was real and is fixed.</b> Not only <code>footer-01</code>: <code>footer-02</code> and <code>footer-03</code> crashed the same way (see the call stack in Fig&nbsp;15). Cause: with no menu in the plan the design's demo columns are emptied, and the owner's columns were merged over an empty template, so <code>links</code> was undefined. The merge now spreads the item's empty arrays first; all three footers render, page 200.</li>
+    <li><b>§8's explanation of the safety net was wrong.</b> The check does catch a render error: a 500 is a build error to it, and with <code>--url</code> the lab's run dropped the three footers and restored the file. It did not fire here because <code>try</code> was run with no dev URL, so nothing was checked. <code>try</code> now says so (<code>verified:false</code> with a note), and when every design that fits broke the page the error says that instead of "no candidates".</li>
+    <li>Fixed as well: stranded variant folders are swept on discard (§8), picking an element already in a try says <code>SESSION_OPEN</code> (§9.5), sub-actions work after the options (§9.6), one draft rejection lists every problem (§9.7), SVG attributes are written the React way (§9.8), <code>clean</code> takes back its <code>.gitignore</code> lines, CRLF too (§9.10), the fixture site has a root layout and PostCSS config (§9.11), and a busy port says <code>PORT_BUSY</code> (§9.12). Each ships with a test.</li>
+    <li>Confirmed as designed, no change: Compare on by default (§9.2), the pre-guessed slot (§9.3), "AI draft only" slots (§9.4), demo logos marked (§9.9), <code>stampsInHtml</code> until the restart <code>clean</code> asks for.</li>
+  </ul>
+</div>
+
 <div class="kpi">
   <div><b class="ok">7/8</b><span>sections swap cleanly</span></div>
   <div><b class="ok">8/8</b><span>slot guesses correct</span></div>
@@ -146,7 +157,7 @@
 <tr><td>catalog</td><td><b>58</b> slot kinds with inventory for this project (hero 31, features 45, footer 23 …) totalling <b>980</b> base-compatible designs out of the <b>1,247</b> indexed; <code>query --slot hero</code> → <code>total:31, hidden:21</code>, top score 138</td></tr>
 </table>
 
-<div class="callout warn"><b>Hazard found while testing.</b> Port 3999 was already held by a stale try-on server for a <i>different</i> project (<code>D:\TakimDigital\pet-service-next</code> → <code>:3600</code>). <code>serve</code> then dies with <code>EADDRINUSE</code> while the old overlay keeps answering — you can silently test the wrong site. I moved to :4010 and confirmed the proxy target by checking site-specific content every time.</div>
+<div class="callout warn"><b>Hazard found while testing.</b> Port 3999 was already held by a stale try-on server for a <i>different</i> project (another project → <code>:3600</code>). <code>serve</code> then dies with <code>EADDRINUSE</code> while the old overlay keeps answering — you can silently test the wrong site. I moved to :4010 and confirmed the proxy target by checking site-specific content every time.</div>
 
 <h2>2 · Component swapping — 8 sections</h2>
 <p>Each section was picked by clicking its stamped element in the browser, the panel's <b>slot guess</b> recorded, 4 variants staged, then ←/→ cycled while hashing the whole source tree (excluding <code>node_modules</code>, <code>.next</code>, <code>.deckhand</code>).</p>
@@ -377,7 +388,8 @@ exit 0</code></pre>
 
 <p>The engine's own fit data explains it: that variant reported <code>hidden: ["footerSections: the design's demo columns hidden (6) — no menu in your plan"]</code>. Hiding the demo columns leaves the array the component then calls <code>.map()</code> on as <code>undefined</code>.</p>
 
-<h4>Why the documented safety net did not fire</h4>
+<h4>Why the documented safety net did not fire <span class="tag t-warn">corrected on review</span></h4>
+<p class="callout warn">Review: the explanation below is wrong. <code>try</code> was run without <code>--url</code> (and without <code>dh dev start</code>), so no page was loaded at all. With a dev URL the check treats the 500 as a build error, drops the culprits and restores the file. The first paragraph is kept as written.</p>
 <p>The atlas's Fig&nbsp;15.1 step 6 claims <code>openVerified</code> does <i>"parse → ONE wrapper write → probe page → build error? exclude culprits, retry ≤2 (3 attempts) else restore the file"</i>. Here the <b>compile</b> succeeds and the <b>render</b> fails, so the probe passed and the file was left in place. Through the browser the overlay then sat waiting for <code>[data-dh-session]</code> and hit a 420&nbsp;s timeout with <code>pageErrors: ["Cannot read properties of undefined (reading 'map')" ×2]</code>.</p>
 
 <h4>Second defect from the same run — orphaned files</h4>

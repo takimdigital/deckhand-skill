@@ -215,7 +215,9 @@ export function checkDraft(rootIn, id) {
     });
   }
   let fit = null;
-  if (!problems.length) {
+  // content is measured whenever the files can be read, so one rejection lists every problem (a bad link AND the
+  // dropped words), not one round per kind of problem
+  if (!problems.some((p) => ['DRAFT_ENTRY', 'DRAFT_PARSE', 'DRAFT_EXPORT'].includes(p.code))) {
     // content: measured on the files as written (same measure the variant bar shows)
     const orig = origFromBrief(d);
     fit = engine.literalFit(root, rel(root, dir), orig, dynamicOf(d));

@@ -164,3 +164,31 @@ test('the public session carries the owner words the page check looks for', asyn
   engine.discard(dir, s.id);
   assert.ok(!fs.existsSync(path.join(dir, 'components/dh-tryon')));
 });
+
+test('the sub-action may come after the options (`flags --project <dir> list`), as it may before them', async () => {
+  const dir = tempSite();
+  const s = await heroSession(dir);
+  addFlag(dir, { session: s.id, idx: 1, reasons: ['layout'] });
+  for (const args of [['flags', '--project', dir, 'list'], ['flags', 'list', '--project', dir]]) {
+    const r = spawnSync(process.execPath, [CLI, ...args], { encoding: 'utf8', env: process.env });
+    assert.equal(r.status, 0, args.join(' ') + ': ' + r.stdout);
+    assert.equal(JSON.parse(r.stdout).flags.length, 1);
+  }
+});
+
+test('serve on a port already taken says so (an older try-on server may be showing another project)', async () => {
+  const dir = tempSite();
+  const busy = (await import('node:http')).createServer(() => {});
+  await new Promise((r) => busy.listen(0, '127.0.0.1', r));
+  try {
+    const { spawn } = await import('node:child_process');
+    const c = spawn(process.execPath, [CLI, 'serve', '--project', dir, '--port', String(busy.address().port), '--target', 'http://127.0.0.1:9'], { env: process.env });
+    let out = '';
+    c.stdout.on('data', (d) => { out += d; });
+    const code = await new Promise((r) => c.on('exit', r));
+    const j = JSON.parse(out.trim().split('\n').pop());
+    assert.equal(code, 1);
+    assert.equal(j.code, 'PORT_BUSY');
+    assert.match(j.message, /--port/);
+  } finally { busy.close(); }
+});

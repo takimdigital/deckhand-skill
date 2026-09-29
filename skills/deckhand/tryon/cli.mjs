@@ -61,9 +61,10 @@ import { REASONS, listFlags, publicFlag, removeFlag, clearFlags, buildReport } f
 const argv = process.argv.slice(2);
 const cmd = argv[0];
 const flags = {};
+const words = [];                                   // sub-actions (`flags list`), wherever they sit among the options
 for (let i = 1; i < argv.length; i++) {
   const a = argv[i];
-  if (!a.startsWith('--')) continue;
+  if (!a.startsWith('--')) { words.push(a); continue; }
   const k = a.slice(2);
   if (k.startsWith('no-')) { flags[k.slice(3)] = false; continue; }
   const v = argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[++i] : true;
@@ -97,8 +98,12 @@ async function main() {
     case 'serve': {
       const target = flags.target || await detectTarget(project);
       if (!target) out({ ok: false, code: 'NO_DEV_SERVER', hint: 'start the dev server first (npm run dev), or pass --target http://127.0.0.1:<port>' }, 1);
-      const s = await startServer({ root: project, port: Number(flags.port || 3999), target, log: flags.verbose ? (e) => console.error(JSON.stringify(e)) : () => {},
-        onDraft: (r) => process.stdout.write(JSON.stringify({ event: 'draft_request', id: r.id, slot: r.slot, brief_file: r.brief_file, do: r.tell_agent }) + '\n') });
+      const port = Number(flags.port || 3999);
+      // a port already taken is often an older try-on server, maybe for another project: its overlay keeps answering
+      const s = await startServer({ root: project, port, target, log: flags.verbose ? (e) => console.error(JSON.stringify(e)) : () => {},
+        onDraft: (r) => process.stdout.write(JSON.stringify({ event: 'draft_request', id: r.id, slot: r.slot, brief_file: r.brief_file, do: r.tell_agent }) + '\n') })
+        .catch((e) => { if (e.code !== 'EADDRINUSE') throw e;
+          return out({ ok: false, code: 'PORT_BUSY', port, message: `port ${port} is already in use, often by an older try-on server (it may be showing another project): stop it, or pass --port <free port>` }, 1); });
       process.stdout.write(JSON.stringify({ ok: true, open: s.url, proxying: target, note: 'open the URL, click Try-on (bottom right). Ctrl+C stops.' }) + '\n');
       return;
     }
@@ -177,7 +182,7 @@ async function main() {
       return out({ ok: true, ...r, next: `the owner compares it in the browser (labelled AI-generated) — or \`show --id ${r.id} --idx ${r.ai_variant}\`, then keep/discard` });
     }
     case 'flags': {
-      const act = argv[1] || 'list';
+      const act = words[0] || 'list';
       if (act === 'list') return out({ ok: true, flags: listFlags(project).map(publicFlag), reasons: REASONS });
       if (act === 'remove') { need('id'); return out({ ok: true, ...removeFlag(project, flags.id) }); }
       if (act === 'clear') return out({ ok: true, ...clearFlags(project) });
@@ -190,7 +195,7 @@ async function main() {
     }
     case 'registry': {
       // a registry the owner (or the agent) found: vetted against written criteria before anything is indexed
-      const act = argv[1];
+      const act = words[0];
       if (act === 'list') return out({ ok: true, registries: listRegistries() });
       if (act === 'remove') { need('id'); return out({ ok: true, ...removeRegistry(flags.id) }); }
       if (act === 'check') { need('id'); return out({ ok: true, ...(await checkRegistries(String(flags.id), { sample: Number(flags.sample) || 0, md: !!flags.md, ship: !!flags.ship })) }); }
@@ -225,7 +230,7 @@ async function main() {
       return out({ ok: true, ...themeApply(project, knobs), next: 'restart not needed (HMR); `theme --undo` restores the previous files byte-exact' });
     }
     case 'seo': {
-      const act = argv[1];
+      const act = words[0];
       if (act === 'inspect') return out({ ok: true, ...seoInspect(project) });
       if (act === 'undo') return out({ ok: true, ...seoUndo(project) });
       if (act === 'apply') { need('plan'); return out({ ok: true, ...seoApply(project, JSON.parse(fs.readFileSync(path.resolve(String(flags.plan)), 'utf8'))) }); }
