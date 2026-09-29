@@ -81,7 +81,7 @@
 <body>
 
 <nav id="toc">
-  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.3.0</span></div>
+  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.3.1</span></div>
   <div class="grp">Big picture</div>
   <a href="#overview">1 · What Deckhand is</a>
   <a href="#layers">2 · System layers</a>
@@ -131,7 +131,7 @@
   <div class="kicker">Complete system reference</div>
   <h1>Deckhand Architecture Atlas</h1>
   <p>Every layer, every command path, every diagram — how the methodology, control plane, try-on engine,
-  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source.</p>
+  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then fact-checked claim by claim against the 2.3.1 code (about 230 claims; the 2.3.1 ordering rules and the fixes from the real-browser test are folded in).</p>
 </header>
 
 <!-- ============================================================ 1 -->
@@ -245,7 +245,7 @@ The owner only ever interacts at gates, pending asks, and the try-on browser UI.
 
 <div class="callout"><b>The loop:</b> <code>dh next</code> → do what it prints (it names <b>ONE reference file</b> in <code>read</code>, that phase's steps in <code>do</code>, the preflight <code>lessons</code> that apply) → <code>dh phase done &lt;phase&gt;</code> (runs the phase's check; red = not done → exit 1 <code>CHECK_FAILED</code>, the phase stays pending; <code>--force "&lt;reason&gt;"</code> records it done anyway, marked <code>forced</code>) → <code>dh next</code> …
 <b>State events</b> (<code>init · phase_done · phase_skip · gate · reopen · workflow</code>) append to <code>.deckhand/history.jsonl</code>; every command except <code>run · autopsy · next · status · resume · note · suggest</code> is logged separately in <code>.deckhand/runs.jsonl</code>.
-Marking a phase done while <b>any earlier</b> phase is neither done nor skipped is refused <span class="tag block">OUT_OF_ORDER</span> (exit 1); in <b>phased</b> mode a phase whose owed gate is still unpaid is refused <span class="tag block">GATE_BLOCKED</span> (exit 1) — <code>auto</code> mode has no blocking gate, and a skipped <i>optional</i> phase never blocks.</div>
+Marking a phase done while <b>any earlier</b> phase is neither done nor skipped is refused <span class="tag block">OUT_OF_ORDER</span> (exit 1); in <b>phased</b> mode a phase whose owed gate is still unpaid is refused <span class="tag block">GATE_BLOCKED</span> (exit 1) — <code>auto</code> mode has no blocking gate. A skipped phase still owes its gate in phased mode: skip try-on and G3 still waits for the owner before review. The same order check covers <code>phase skip</code> (only the current phase), <code>gate pass</code> (refused <span class="tag block">GATE_NOT_DUE</span> before its phase is done), clone/scaffold, <code>rebrand apply</code> and <code>deploy ship</code> (<code>dh adopt</code> stays allowed at define). Review can never be skipped (<span class="tag block">NOT_SKIPPABLE</span>).</div>
 
 <figure>
 <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
@@ -318,15 +318,15 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
   <text x="340" y="256" text-anchor="middle" font-size="11" fill="#5F6570">phased mode: run STOPS at each gate until owner says go — dh gate pass Gx --quote "&lt;their words&gt;"</text>
   <text x="340" y="274" text-anchor="middle" font-size="11" fill="#5F6570">dh reopen &lt;phase&gt; --reason resets that phase and everything after it to pending</text>
 </svg>
-<figcaption>Fig 3.1 — Nine phases, four hard gates, one continuous operate state. Skipping the optional try-on phase auto-passes G3.</figcaption>
+<figcaption>Fig 3.1 — Nine phases, four hard gates, one continuous operate state. Skipping the optional try-on phase passes G3 only in auto mode; in phased mode the owner still approves the design.</figcaption>
 </figure>
 
 <h3>Exit checks (the exact thing each phase must prove)</h3>
 <table>
 <tr><th style="width:11%">Phase</th><th style="width:47%">Done when (check)</th><th>Reference</th></tr>
 <tr><td><b>define</b></td><td>Brief has required keys: business, shape, languages, audience (+ validated <code>deliverable</code> own|client|product)</td><td><code>00-define.md</code></td></tr>
-<tr><td><b>research</b></td><td><code>research.json</code>: ≥3 competitors (URL + strengths + gaps), audience, conversion plays, day-one features, ≥3 harvested terms, and <code>dh research verify</code> OK after last edit</td><td><code>10-research.md</code></td></tr>
-<tr><td><b>plan</b></td><td><code>dh plan lint</code> = 0 errors (E0–E11; warnings don't block)</td><td><code>20-plan.md</code></td></tr>
+<tr><td><b>research</b></td><td><code>research.json</code>: ≥3 competitors (URL + strengths + gaps), audience, conversion plays, day-one features, ≥3 harvested terms, and <code>dh research verify</code> OK after last edit with at least 3 quotes actually found on their pages (<code>min_found</code> in <code>data/research.json</code>; every fetch blocked = not done, <code>dh phase skip research --reason</code> is the way out)</td><td><code>10-research.md</code></td></tr>
+<tr><td><b>plan</b></td><td><code>dh plan lint</code> = 0 errors (E0–E11; warnings don't block), and <code>sitemap.json</code> is no longer the untouched <code>dh plan init</code> example</td><td><code>20-plan.md</code></td></tr>
 <tr><td><b>build</b></td><td>Base recorded in run state + package manifest + <code>.deckhand/dev.json</code> URL answers without ≥500</td><td><code>30-build.md</code></td></tr>
 <tr><td><b>brand</b></td><td><code>dh rebrand check</code> = 0 blocking findings</td><td><code>40-brand.md</code> + <code>45-seo.md</code></td></tr>
 <tr><td><b>tryon</b> <span class="tag opt">optional</span></td><td>No open session in <code>.deckhand/tryon/sessions/*.json</code></td><td><code>50-tryon.md</code></td></tr>
@@ -344,7 +344,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <div class="grid2">
 <div class="card"><h4>Modes</h4>
 <ul><li><b>phased</b> (default, recommended first business): the run <b>stops</b> at G1–G4 until the owner says go. Quote is mandatory.</li>
-<li><b>auto</b>: gates pass themselves (logged <code>by:"auto"</code>); only genuine forks, owner-only facts and failures stop the run.</li></ul></div>
+<li><b>auto</b>: gates pass themselves (logged <code>by:"auto"</code>, or <code>by:"skip"</code> when a skip passed it); only genuine forks, owner-only facts and failures stop the run.</li></ul></div>
 <div class="card"><h4>Paths (base strategy)</h4>
 <ul><li><b>pool</b> — vetted permissive-licence template via <code>dh clone</code></li>
 <li><b>mine</b> — owner's own harvested base (ranked first)</li>
@@ -364,7 +364,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><th>Gate</th><th>Meaning</th><th>Blocks</th><th>Artifact shown + ONE question</th></tr>
 <tr><td><b>G1</b></td><td>The plan (page map + features) is approved</td><td>no clone before G1</td><td>PLAN.md (+ base choice)</td></tr>
 <tr><td><b>G2</b></td><td>Owner opened the local app and says go</td><td>no rebrand/extra work before G2</td><td>local URL + logins table per role</td></tr>
-<tr><td><b>G3</b></td><td>Design (brand + try-on) approved</td><td>tryon is optional; skip auto-passes G3</td><td>the design / try-on result</td></tr>
+<tr><td><b>G3</b></td><td>Design (brand + try-on) approved</td><td>tryon is optional; skipping it passes G3 in auto mode only (phased: the owner still approves the brand)</td><td>the design / try-on result</td></tr>
 <tr><td><b>G4</b></td><td>Go live: deploy to the server</td><td>no deploy before G4</td><td>VERIFY.md</td></tr>
 </table>
 
@@ -403,7 +403,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <p class="small"><b>Agent:</b> <code>dh rebrand scan</code> → <code>dh brief set brand.*</code> → <code>dh rebrand apply --dry</code> → copy pass (<code>dh slop brief</code> first, then rewrite from copy.json/brief) → <code>dh rebrand check</code> to 0 blocking → SEO step (§22): model writes <code>copy.json → seo.pages</code>, scripts write robots/sitemap/canonicals/OG/JSON-LD/404/llms.txt/IndexNow. <b>Never:</b> edit LICENSE/NOTICE/THIRD_PARTY_NOTICES; stock photos as the business; fake testimonials.</p>
 
 <h3>⑥ tryon <span class="tag opt">optional</span></h3>
-<p class="small">Owner clicks elements of the running site; N licensed variants are written into source once wearing the site's tokens and carrying the owner's copy; ←/→ compares instantly; Keep bakes + records licence. AI drafts only on request, script-gated. <b>Exit:</b> no open sessions. → G3.</p>
+<p class="small">Owner clicks elements of the running site; N licensed variants are written into source once wearing the site's tokens and carrying the owner's copy; the panel pre-guesses the slot (a slot with no licensed designs reads "— AI draft only" and offers Ask AI to draft one); ←/→ compares instantly, with the before/after slider on by default; Keep bakes + records licence. AI drafts only on request, script-gated. <b>Exit:</b> no open sessions. → G3.</p>
 
 <h3>⑦ review</h3>
 <p class="small"><b>Agent:</b> <code>tryon clean</code> → <code>dh verify</code> (builds, serves production build, checks every row) → fix red blocking rows at root, never weaken checks → show VERIFY.md. <b>Blocking rows:</b> typecheck, build, prod-clean, tryon-closed, secrets, env-ignored, logs-ignored, swaps, honesty, product-kit (products), routes (static public, &lt;400), seo (launch-breakers) — plus prod-serve when the production start fails. <b>Advisory:</b> lint, a11y-basics, deps-audit, copy-slop. Security floor before G4: rate-limited auth, server-checked admin, upload limits, CSP, no debug endpoints. → G4.</p>
@@ -520,7 +520,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><td><code>dh init --name N --mode phased|auto --path pool|mine|existing|scratch --for me|client</code></td><td>Idempotent project start (<code>--project DIR</code> optional, also accepted after any subcommand); writes run.json, PENDING.md, gitignore + AGENTS.md cold-start blocks</td></tr>
 <tr><td><code>dh status</code></td><td>Full phase/gate/base snapshot JSON</td></tr>
 <tr><td><code>dh next</code></td><td>The one next instruction (§9)</td></tr>
-<tr><td><code>dh phase done|skip &lt;phase&gt; [--reason] [--force]</code></td><td>Done only after its check passes; skip needs a reason; out-of-order/gate-blocked refused</td></tr>
+<tr><td><code>dh phase done|skip &lt;phase&gt; [--reason] [--force]</code></td><td>Done only after its check passes; skip needs a reason and only the current phase can be skipped; review is never skippable; out-of-order/gate-blocked refused</td></tr>
 <tr><td><code>dh gate pass Gx --quote "…"</code></td><td>Phased: quote mandatory; classifier decides approve / approve_with_changes / change_request</td></tr>
 <tr><td><code>dh reopen &lt;phase&gt; --reason "…"</code></td><td>Resets this phase + all after it (and their gates) to pending</td></tr>
 <tr><td><code>dh brief show|set k=v …</code></td><td>Dotted-key brief edits (deliverable validated)</td></tr>
@@ -531,7 +531,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 </table>
 <p class="small muted"><b>Refusals you will actually see</b> (all exit 1, one JSON object): <code>MOVED</code> (the run continues in another folder — <code>cd</code> there) ·
 <code>BAD_PHASE</code> · <code>OUT_OF_ORDER</code> (an earlier phase is neither done nor skipped) · <code>GATE_BLOCKED</code> (phased mode, owed gate unpaid) ·
-<code>CHECK_FAILED</code> (the phase's check is red) · <code>NEED_QUOTE</code> (gate pass without the owner's words) · <code>NEED_REASON</code> (skip / drop without one).</p>
+<code>CHECK_FAILED</code> (the phase's check is red) · <code>NEED_QUOTE</code> (gate pass without the owner's words) · <code>NEED_REASON</code> (skip / drop without one) · <code>GATE_NOT_DUE</code> (gate pass before its phase is done) · <code>NOT_SKIPPABLE</code> (skipping review) · <code>CHANGE_REQUEST</code> (the owner's words were not a go, §5).</p>
 
 <h3>Owner asks &amp; identity</h3>
 <table>
@@ -789,12 +789,13 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
   <rect x="24" y="256" width="632" height="30" rx="6" fill="#17191D"/>
   <text x="340" y="276" text-anchor="middle" font-size="11" fill="#E8E6DF">before release: tryon clean (unwire byte-exact) + verify row prod-clean (no data-dh stamps in build)</text>
 </svg>
-<figcaption>Fig 14.1 — Compare is free; only Keep/Discard mutate source. Sessions journal everything; backups are byte-exact.</figcaption>
+<figcaption>Fig 14.1 — Compare is free (the before/after slider is on by default, C toggles it, remembered per browser); only Keep/Discard mutate source. Sessions journal everything; backups are byte-exact.</figcaption>
 </figure>
 
 <h3>Headless path (no browser / harness without one)</h3>
 <pre><code>node tryon/cli.mjs query --slot hero                 # rank only, no writes
-node tryon/cli.mjs try --file F --line N --col C --slot hero --count 4
+node tryon/cli.mjs try --file F --line N --col C --slot hero --count 4 --url http://127.0.0.1:PORT
+                                                     # no --url and no dh dev start: verified:false, page not checked
 node tryon/cli.mjs more --id S --batch 4             # next batch from pool
 node tryon/cli.mjs show --id S --idx 2               # persist display choice
 node tryon/cli.mjs keep --id S --idx 2  |  discard --id S
@@ -856,7 +857,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <!-- ============================================================ 16 -->
 <section id="transplant">
 <h2><span class="no">16</span>Transplant engine</h2>
-<p class="sub"><code>transplant.mjs</code> — a 1,609-line three-pass deterministic transform. The heart of "variants wearing your copy".</p>
+<p class="sub"><code>transplant.mjs</code> — a 1,600-line three-pass deterministic transform. The heart of "variants wearing your copy".</p>
 <ol>
 <li><b>Pass A — extractUnits(owner element)</b>: AST-walk the clicked subtree → content units in document order with roles (heading, text, action, price, figure, quote, label…); deepest text host kept verbatim; module-level literal arrays and <code>.map()</code> loops <b>unrolled</b> into concrete items; forms/inputs/images captured; outputs shape + content-count (the fit denominator).</li>
 <li><b>Pass B — parameterize(candidate)</b>: find the component function + returned JSX, inject a typed <code>content</code> prop; cut embedded chrome (headers/navs; a nested <code>&lt;main&gt;</code> becomes a plain block); static text → <code>{content.heading1 ?? &lt;&gt;demo&lt;/&gt;}</code>; demo arrays → list slots with fallback; prop defaults → slots; conditional chrome → show/hide keys; record form-swap and logo-row decisions.</li>
@@ -881,12 +882,12 @@ node tryon/cli.mjs status | clean</code></pre>
 <div class="card"><h4>Discard / undo semantics</h4><ol class="small">
 <li>File unchanged since try (sha match) → <b>byte-exact restore</b> from backup</li>
 <li>File edited meanwhile → <b>surgical</b> unwrap: keep variant 0, remove marked imports, preserve owner edits</li>
-<li>Variant folders + CSS blocks cleaned; session → <code>discarded</code></li>
+<li>Variant folders + CSS blocks cleaned; staging folders no open session shows (left by a try that died mid-way) are swept and listed as <code>swept</code>; session → <code>discarded</code></li>
 <li>Installed packages stay (never silently reverted) — reported as installedKept</li>
-<li><b>Save to library</b> (kept only): final dir → <code>~/.deckhand/library/</code> + index row ranks +60 next time; refuses NO_LICENCE or credential-shaped values</li></ol></div>
+<li><b>Save to library</b> (kept only): final dir → <code>~/.deckhand/library/</code> + index row ranks first next time for the same slot (+60, exact slot only); refuses NO_LICENCE or credential-shaped values</li></ol></div>
 </div>
 
-<div class="callout"><b>Dev tooling never ships.</b> Stamps/loader are dev-only (Next plugin applies only in NODE_ENV=development). <code>tryon clean</code> unwires configs byte-exact (or surgically strips markers if the owner edited them), keeps the token layer only if a kept section uses it. <code>dh verify</code> has the blocking <code>prod-clean</code> row.</div>
+<div class="callout"><b>Dev tooling never ships.</b> Stamps/loader are dev-only (Next plugin applies only in NODE_ENV=development). <code>tryon clean</code> unwires configs byte-exact (or surgically strips markers if the owner edited them), keeps the token layer only if a kept section uses it, takes back the <code>.gitignore</code> lines it added (a <code>.gitignore</code> it created goes), and discards any open session first. It asks for a dev-server restart: the running server keeps stamping, and <code>doctor</code> reports stamps, until then. <code>dh verify</code> has the blocking <code>prod-clean</code> row.</div>
 </section>
 
 <!-- ============================================================ 18 -->
@@ -904,7 +905,7 @@ node tryon/cli.mjs status | clean</code></pre>
 </ol>
 
 <h3>Fit check — offline proof a design actually works here</h3>
-<p class="small">Builds a throwaway scaffold site per base (Next + Tailwind 4 + radix-ui umbrella + Button, or the Base UI equivalent), with reference owner sections, then stages each sampled design through the <b>same engine.stageCandidate</b> used in a real try — so what passes is exactly what the owner gets offered. Verdicts: <code>fits · partial · refused · broken · unreachable · unchecked</code> → recorded to <code>data/checks/&lt;reg&gt;.json</code> (shipped) or <code>~/.deckhand/catalog/checks/</code>. <code>rank()</code> hides broken, sinks refused.</p>
+<p class="small">Builds a throwaway scaffold site per base (Next + Tailwind 4 + radix-ui umbrella + Button, or the Base UI equivalent), with reference owner sections, then stages each sampled design through the <b>same engine.stageCandidate</b> used in a real try — so what passes is exactly what the owner gets offered. Verdicts: <code>fits · partial · refused · broken · unchecked</code> → recorded (a registry that cannot be reached is reported, never recorded as a verdict) to <code>data/checks/&lt;reg&gt;.json</code> (shipped) or <code>~/.deckhand/catalog/checks/</code>. <code>rank()</code> hides broken, sinks refused.</p>
 
 <h3>Flags</h3>
 <p class="small">The overlay auto-checks each variant (missing owner words, visible demo text, overflow, broken images, console errors) and prefills a flag. <code>tryon flags report</code> → one deterministic Markdown with a <code>try --only &lt;id&gt;</code> reproduce command. Stays local.</p>
@@ -1114,10 +1115,10 @@ node tryon/cli.mjs status | clean</code></pre>
 <li><b>Card loop</b> (research-card.md): before a search → <code>dh research seen URL</code>; open a page only when snippet is TARGET/PRIMARY; diagnose results → ONE change → re-query (never reword a failed query blindly).</li>
 <li><b>Add:</b> <code>dh research add URL --by ID --note "dense facts"</code> — thin-note guard (<code>NOTE_TOO_THIN</code>), per-agent dedupe, other agents' prior notes returned. Each agent writes ONLY its own <code>agents/ID.json</code>; sources append to shared <code>sources.jsonl</code> (no race).</li>
 <li><b>Merge:</b> single-writer fold into <code>research.json</code> (bad JSON → nothing merged; dup claim ids → error).</li>
-<li><b>Verify:</b> structural checks (labels, url+quote for VERIFIED/SECONDARY (quote ≤400 chars; the research card advises ≤300), vocabulary terms must contain themselves, INFERRED needs from[], NOT_FOUND needs tried) → re-fetch every URL (cache, PDF → unchecked, blocked statuses) → NFKC-normalized quote match → <b>ok = 0 mismatch, 0 invalid, 0 bad vocabulary</b>. Red → <code>RESEARCH_UNVERIFIED</code> blocks phase done.</li>
+<li><b>Verify:</b> structural checks (labels, url+quote for VERIFIED/SECONDARY (quote ≤400 chars; the research card advises ≤300), vocabulary terms must contain themselves, INFERRED needs from[], NOT_FOUND needs tried) → re-fetch every URL (cache, PDF → unchecked, blocked statuses) → NFKC-normalized quote match → <b>ok = 0 mismatch, 0 invalid, 0 bad vocabulary</b>. Red → <code>RESEARCH_UNVERIFIED</code> blocks phase done. The phase check also needs at least 3 quotes and terms actually found on their pages (<code>min_found</code>): a run where every fetch was blocked is not done.</li>
 <li><b>Score:</b> parses the session log into searches/fetches/tokens → repeated queries, cross-agent repeats, zero-gain streaks, searches-per-proven-claim (with --baseline deltas).</li>
 </ol>
-<p class="small muted">Labels: VERIFIED · SECONDARY · INFERRED · NOT_FOUND. Vocabulary kinds: customer | trade | search (card guidance: at least 3). Owner may skip: <code>dh phase skip research --reason</code>.</p>
+<p class="small muted">Labels: VERIFIED · SECONDARY · INFERRED · NOT_FOUND. Vocabulary kinds: customer | trade | search (at least 3 terms, enforced at phase exit: <code>min_vocabulary</code> in <code>data/research.json</code>). Owner may skip: <code>dh phase skip research --reason</code>, only while the run is at research.</p>
 </section>
 
 <!-- ============================================================ 26 -->
@@ -1183,6 +1184,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td><b>dh scaffold --to</b></td><td>create-next-app (ts, tailwind, app dir) + canonical UI base (button, utils, tokens) + deps (clsx, tailwind-merge, class-variance-authority, radix-ui, lucide-react, tw-animate-css) + fresh git.</td></tr>
 <tr><td><b>dh base record</b></td><td>Project built another way declares its base openly.</td></tr>
 </table>
+<p class="small muted">Order is enforced on the commands too (2.3.1): <code>dh clone</code> and <code>dh scaffold</code> are refused before their phase, <code>dh rebrand apply</code> (not <code>--dry</code>) before G2 and <code>dh deploy ship</code> before G4, with <code>OUT_OF_ORDER</code> or <code>GATE_BLOCKED</code>. <code>dh adopt</code> stays allowed at define.</p>
 
 <p class="small"><b>Run carry:</b> cloning from a planning folder moves brief/sitemap/plan/gates/notes into the app folder (excluding logs/dev/tryon/vault) and sets <code>run.json.moved_to</code> → <code>dh next</code> says <code>cd &lt;dest&gt;</code>.</p>
 <p class="small"><b>Dev services:</b> <code>dh dev add NAME --cmd … --port N|--ready REGEX</code> → committed <code>services.json</code> (every session starts the same things) → <code>dh dev start</code> = services first (restart dead DB under live app), then app (pinned port, HOSTNAME=127.0.0.1, waits for HTTP &lt;500); failures print log tail + lesson hint. <code>dh dev port --from N</code> = bind-tested, skips Windows reserved ranges.</p>
@@ -1380,7 +1382,7 @@ node tryon/cli.mjs status | clean</code></pre>
 
 <h3>Path C — The try-on engine (design surface)</h3>
 <div class="pathline">
-<p class="small"><b class="pt">Setup path:</b> setup → restart dev → serve → owner clicks. <b class="pt">Per slot:</b> pick → guess slot → Show variants → [extract owner units → rank → materialize + wear tokens → bind copy → fit gates → ONE wrapper write → build verify] → ←/→ (free) → More (pool batch) → Keep (bake + prune + notice) or Discard (byte-exact/surgical) → optional Save (library +60). <b class="pt">Escape hatches:</b> no fits → AI draft (gated) · imperfect fit → tune (dials/presets) · whole look → theme (10-deep undo) · broken variant → flag → report. <b class="pt">Exit:</b> sessions closed → <code>tryon clean</code> → prod-clean verified.</p>
+<p class="small"><b class="pt">Setup path:</b> setup → restart dev → serve → owner clicks. <b class="pt">Per slot:</b> pick → guess slot → Show variants → [extract owner units → rank → materialize + wear tokens → bind copy → fit gates → ONE wrapper write → build verify (needs the dev URL; else <code>verified:false</code>)] → ←/→ (free) → More (pool batch) → Keep (bake + prune + notice) or Discard (byte-exact/surgical) → optional Save (library +60). <b class="pt">Escape hatches:</b> no fits → AI draft (gated) · imperfect fit → tune (dials/presets) · whole look → theme (10-deep undo) · broken variant → flag → report. <b class="pt">Exit:</b> sessions closed → <code>tryon clean</code> → restart the dev server → prod-clean verified.</p>
 </div>
 
 <h3>Path D — The business after launch (operate surface)</h3>
@@ -1431,8 +1433,8 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td><code>dhlib/research.py · plan.py · pool.py · vet.py</code></td><td>Research brief/merge/verify/score; sitemap lint + split + blackboard; pool scoring + licence vetting</td></tr>
 <tr><td><code>dhlib/build.py · brand.py · swap.py · slop.py · seo.py · verify.py · deploy.py · ops.py · handoff.py · util.py · github.py</code></td><td>The phase machinery (§28–30)</td></tr>
 <tr><td><code>dhlib/learn.py · autopsy.py · harvest.py</code></td><td>Lesson ledger, failure→recipe autopsy, base harvesting</td></tr>
-<tr><td><code>tryon/cli.mjs · server.mjs · overlay.js</code></td><td>Engine CLI, proxy+API+token server, browser overlay (71 KB)</td></tr>
-<tr><td><code>tryon/lib/engine.mjs · transplant.mjs · materialize.mjs</code></td><td>Swap engine (94 KB), 3-pass copy transplant (97 KB), fetch/write bundles</td></tr>
+<tr><td><code>tryon/cli.mjs · server.mjs · overlay.js</code></td><td>Engine CLI, proxy+API+token server, browser overlay (~70 KB)</td></tr>
+<tr><td><code>tryon/lib/engine.mjs · transplant.mjs · materialize.mjs</code></td><td>Swap engine (~95 KB), 3-pass copy transplant (~96 KB), fetch/write bundles</td></tr>
 <tr><td><code>tryon/lib/draft.mjs · tune.mjs · sitetheme.mjs · theme.mjs · sitelinks.mjs</code></td><td>AI draft protocol + gates; dial transforms; whole-site theme; token wearing; menu wiring</td></tr>
 <tr><td><code>tryon/lib/seo.mjs · fitcheck.mjs · vet.mjs · catalog.mjs · slots.mjs · library.mjs</code></td><td>SEO writes, offline fit checks, registry vetting, 1,247-item catalog + ranking, slot vocabulary, personal library</td></tr>
 <tr><td><code>data/*</code></td><td>components.index.json · checks/*.json (8 registries) · pool.json + pool/*.json · licenses.json · slop packs (11 langs) · seo.json rules · bots.json · harness.json · research.json · industries.json · lessons.seed.jsonl · registries.json · secrets.json (redaction policy)</td></tr>
