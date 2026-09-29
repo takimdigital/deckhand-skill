@@ -676,6 +676,7 @@ def new_from_run(root: Path, wid: str | None = None, title: str | None = None) -
     runs = read_jsonl(root / ".deckhand" / "runs.jsonl")
     wid = wid or re.sub(r"[^a-z0-9]+", "-", f"{b.get('deliverable') or 'own'}-{b.get('shape') or 'app'}-{normalize_industry(str(b.get('category') or b.get('business') or ''))[0] or 'business'}").strip("-")
     phases, cur, errors = {}, "define", 0
+    params = {}
     proj = str(root.resolve())
     for r in runs:
         cmd = str(r.get("cmd") or "")
@@ -687,8 +688,16 @@ def new_from_run(root: Path, wid: str | None = None, title: str | None = None) -
         m = re.match(r"^dh phase (done|skip) (\w+)", cmd)
         if not (STATEFUL.match(cmd) or ALLOWED.match(cmd)) or cmd.startswith("dh workflow"):
             continue
-        if re.match(r"^dh (brief set|gate pass|note)", cmd):
-            continue                                      # answers and quotes are the owner's facts, not the path
+        if re.match(r"^dh (gate pass|note)", cmd):
+            continue                                      # quotes and notes are the owner's words, not the path
+        bm = re.match(r"^dh brief set\s+(.*)$", cmd)
+        if bm:                                            # F12: the step stays (define needs the brief); its VALUES become the next owner's
+            keys = list(dict.fromkeys(re.findall(r"(?:^|\s)([a-z][\w.]*)=", bm.group(1))))
+            if not keys:
+                continue
+            cmd = "dh brief set " + " ".join(f'{k}="{{{{{k.replace(".", "_")}}}}}"' for k in keys)
+            for k in keys:
+                params.setdefault(k.replace(".", "_"), {"default": "", "why": f"the owner's answer for brief.{k} (asked at define)"})
         steps = phases.setdefault(cur, [])
         if not any(_norm(x["do"]) == _norm(cmd) for x in steps):
             steps.append({"id": f"{ABBR[cur]}{len(steps) + 1}", "do": cmd, "expect": "ok: true"})
@@ -707,7 +716,7 @@ def new_from_run(root: Path, wid: str | None = None, title: str | None = None) -
                     **({"industry": [ind], "family": fam} if ind else {}), "features": b.get("features") or []},
           "proof": {"runs": [{"date": today(), "harness": harness(), "os": os_name(), "errors": errors,
                               "complete": s["phases"].get("deploy", {}).get("status") in ("done", "skipped"), "source": "new --from-run"}]},
-          "ask_upfront": asked, "params": {},
+          "ask_upfront": asked, "params": params,
           "phases": [{"id": pid, "steps": st, "exit": f"dh phase done {pid}"} for pid, st in phases.items() if st],
           "pitfalls": [], "creative": ["the copy on every page", "the design direction", "features beyond the plan", "the business around it"],
           "changelog": [{"version": 1, "date": today(), "change": "extracted from a run", "why": "a path that worked once", "evidence": f"runs.jsonl of {s.get('name')}"}]}
