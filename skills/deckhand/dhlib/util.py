@@ -269,16 +269,22 @@ def run(argv: list, cwd=None, timeout: int = 900, env=None, check=False) -> dict
 
 
 def project_root(p=None) -> Path:
-    """The project: --project, else the nearest parent with .deckhand/ or package.json, else cwd."""
+    """The project: --project, else the nearest parent with .deckhand/run.json or package.json, else cwd.
+    Never the owner's home folder or anything above it (F23: a stray ~/package.json once received a run.json), and a
+    git repository's root bounds the package.json search."""
     if p:
         return Path(p).resolve()
     cur = Path.cwd().resolve()
-    for d in [cur, *cur.parents]:
+    home = Path.home().resolve()
+    below = [d for d in [cur, *cur.parents] if d != home and d not in home.parents]
+    for d in below:
         if (d / ".deckhand" / "run.json").exists():
             return d
-    for d in [cur, *cur.parents]:
+    for d in below:
         if (d / "package.json").exists() or (d / "pyproject.toml").exists():
             return d
+        if (d / ".git").exists():
+            break
     return cur
 
 
