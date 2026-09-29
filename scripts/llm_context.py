@@ -71,9 +71,11 @@ def load_tree(index: bool = False) -> dict:
                 if p and (ROOT / p.decode("utf-8")).is_file():
                     raw[p.decode("utf-8")] = (ROOT / p.decode("utf-8")).read_bytes()
     except (OSError, subprocess.CalledProcessError):
-        skip = {".git", "node_modules", "__pycache__", ".pytest_cache", ".deckhand"}
+        skip = {".git", "node_modules", "__pycache__", ".pytest_cache"}
         for dp, dns, fns in os.walk(ROOT):
-            dns[:] = [d for d in dns if d not in skip]
+            # a run's own state (<root>/.deckhand) is local; a `.deckhand` folder deeper down is content that ships
+            # (the playground snapshot's brief and plan), and the git listing above already counts it
+            dns[:] = [d for d in dns if d not in skip and not (d == ".deckhand" and Path(dp) == ROOT)]
             for f in fns:
                 full = Path(dp) / f
                 raw[full.relative_to(ROOT).as_posix()] = full.read_bytes()
