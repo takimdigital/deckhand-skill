@@ -40,7 +40,7 @@ jobs:
         run: python -m pip install -q pytest && python -m pytest skills/deckhand/ops/tests -q
       - name: try-on engine (node --test, offline fixtures)
         run: node --test skills/deckhand/tryon/test/*.test.mjs
-      - name: try-on playground (source-only snapshot: every import resolves, no local path)
+      - name: try-on playground (source-only snapshot, every import resolves)
         run: node --test playground/playground.test.mjs
       - name: version consistency
         run: python scripts/version_check.py
