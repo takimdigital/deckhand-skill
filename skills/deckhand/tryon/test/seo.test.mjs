@@ -132,3 +132,20 @@ test('undo refuses to throw away an edit made after the apply, unless forced (fi
   assert.match(read(dir, f), /owner edit/);
   seoUndo(dir, { force: true });
 });
+
+test('F17: a wrong literal <html lang> is corrected to the brief\'s first language; an expression is left alone', () => {
+  const fr = { ...PLAN, site: { ...PLAN.site, languages: ['fr'], locale: 'fr_FR' } };
+  const dir = nextApp();
+  fs.writeFileSync(path.join(dir, 'app/layout.tsx'), read(dir, 'app/layout.tsx').replace('<html>', '<html lang="en">'));
+  seoApply(dir, fr);
+  assert.match(read(dir, 'app/layout.tsx'), /<html lang="fr">/);
+  const dir2 = nextApp();
+  fs.writeFileSync(path.join(dir2, 'app/layout.tsx'), read(dir2, 'app/layout.tsx').replace('<html>', '<html lang={locale}>'));
+  seoApply(dir2, fr);
+  assert.match(read(dir2, 'app/layout.tsx'), /<html lang=\{locale\}>/);      // i18n code is the owner's
+  const dir3 = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-seo-vite-'));
+  fs.writeFileSync(path.join(dir3, 'package.json'), JSON.stringify({ name: 'v', devDependencies: { vite: '6.0.0' } }));
+  fs.writeFileSync(path.join(dir3, 'index.html'), '<!doctype html>\n<html lang="en">\n  <head>\n    <title>Vite + React</title>\n  </head>\n  <body><div id="root"></div></body>\n</html>\n');
+  seoApply(dir3, fr);
+  assert.match(read(dir3, 'index.html'), /<html lang="fr">/);
+});
