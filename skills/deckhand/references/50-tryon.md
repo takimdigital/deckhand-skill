@@ -94,7 +94,9 @@ the fit check on a sample. `registry list` / `registry remove --id x`.
 
 Fit check: `$T registry check --id x|all [--sample N] [--md]` stages each design exactly as a try would, against
 a reference section of its kind, and records a verdict: fits · partial · refused (the fit gate would skip it) ·
-broken (cannot be staged) · unchecked (no reference for its kind). A broken design is never offered (unless
+broken (cannot be staged) · unreachable (the item's source could not be fetched) · unchecked (no reference for
+its kind). The summary counts also carry `unreachable`: it is counted there but never recorded as a verdict.
+A broken design is never offered (unless
 `try --only` names it); a refused one ranks last. Run it before offering a registry the owner just added; `--md`
 writes the report beside the verdicts.
 
