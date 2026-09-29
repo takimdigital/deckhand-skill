@@ -258,7 +258,8 @@ class ApplyAndPaths(Base):
         site = (self.root / "lib/seo.ts").read_text(encoding="utf-8")
         self.assertIn('"https://maisonpain.fr"', site)
         self.assertIn('"Bakery"', site)
-        key = read_json(self.root / ".deckhand" / "brief.json")["seo"]["indexnow_key"]
+        key = read_json(self.root / ".deckhand" / "indexnow.json")["key"]           # F19: never written into brief.json
+        self.assertNotIn("indexnow_key", (read_json(self.root / ".deckhand" / "brief.json") or {}).get("seo") or {})
         self.assertTrue((self.root / "public" / f"{key}.txt").exists())
         code, again = self.dh("seo", "apply")
         self.assertEqual(again["written"], [])                                      # idempotent (and keeps the undo journal)

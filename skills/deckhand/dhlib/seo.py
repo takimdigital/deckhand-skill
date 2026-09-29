@@ -59,6 +59,20 @@ def _get(d: dict, dotted: str):
     return cur
 
 
+def indexnow_key(root: Path, b: dict, create: bool = False) -> str | None:
+    """IndexNow key: in .deckhand/indexnow.json, never in brief.json — the brief's mtime is the approved plan's, and
+    `resume --check` flags a brief edited after G1 (F19). A key an older version wrote into the brief is still used."""
+    old = _get(b, "seo.indexnow_key")
+    if old:
+        return old
+    f = Path(root) / ".deckhand" / "indexnow.json"
+    key = (read_json(f, {}) or {}).get("key")
+    if not key and create:
+        key = secrets.token_hex(16)
+        write_json(f, {"key": key})
+    return key
+
+
 def _list(v) -> list:
     if not v:
         return []
@@ -244,11 +258,7 @@ def plan(root: Path) -> dict:
     words = (copy.get("seo") or {}).get("pages") or {}
     pages = public_pages(ctx)
     auth = [p["route"] for p in ctx["sitemap"].get("pages", []) if (p.get("auth") or "public") != "public" and "[" not in p.get("route", "")]
-    key = _get(b, "seo.indexnow_key")
-    if not key:
-        key = secrets.token_hex(16)
-        b.setdefault("seo", {})["indexnow_key"] = key
-        write_json(root / ".deckhand" / "brief.json", b)
+    key = indexnow_key(root, b, create=True)
     primary = brand.get("primary") or ""
     langs = ctx["languages"]
     locale = {"en": "en_US", "fr": "fr_FR", "es": "es_ES", "de": "de_DE", "it": "it_IT", "pt": "pt_PT", "nl": "nl_NL", "ar": "ar_AR"}.get(langs[0], f"{langs[0]}_{langs[0].upper()}")
@@ -842,7 +852,7 @@ def pending_summary(root: Path) -> dict:
 def ping(root: Path, urls: list | None = None, post=None) -> dict:
     root = Path(root)
     b = brief_of(root)
-    key = _get(b, "seo.indexnow_key")
+    key = indexnow_key(root, b)
     site = site_url(root, b)
     if not key or not site:
         return {"pinged": False, "why": "no IndexNow key (dh seo apply) or no production domain (dh brief set domain=…)"}
