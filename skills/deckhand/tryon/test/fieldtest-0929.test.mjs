@@ -39,3 +39,13 @@ test('F21: trying a self-closing usage (<Hero />) says its words live elsewhere;
   const ok = engine.inspect(dir, { file: 'components/hero.tsx', line: b.split('\n').length, col: i - b.lastIndexOf('\n'), slot: 'hero' });
   assert.equal(ok.warning, undefined);
 });
+
+test('entry export: a file exporting its parts first ({ BentoCard, BentoGrid }) binds to the export named like the file', async () => {
+  const { entryExport } = await import('../lib/materialize.mjs');
+  const code = 'const BentoGrid = () => null;\nconst BentoCard = () => null;\nexport { BentoCard, BentoGrid }\n';
+  assert.deepEqual(entryExport('components/sections/magicui-bento-grid/magicui-bento-grid.tsx', code), { kind: 'named', name: 'BentoGrid' });
+  // no name matches the file: the first component export, as before
+  assert.deepEqual(entryExport('x/thing.tsx', 'export const Alpha = () => null;\nexport const Beta = () => null;\n'), { kind: 'named', name: 'Alpha' });
+  // a default export still wins over everything
+  assert.equal(entryExport('x/bento-grid.tsx', 'export default function Grid() { return null; }\nexport const BentoGrid = () => null;\n').kind, 'default');
+});

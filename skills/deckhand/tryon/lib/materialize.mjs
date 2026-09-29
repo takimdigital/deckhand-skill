@@ -262,11 +262,17 @@ function exportsOf(file, code) {
   return out;
 }
 
-/** The export a variant usage binds to: default, else the first PascalCase named export. */
+/**
+ * The export a variant usage binds to: default, else the PascalCase named export named like the file (`bento-grid.tsx`
+ * exports `{ BentoCard, BentoGrid }`: the container, not its first part), else the first PascalCase named export.
+ */
 export function entryExport(file, code) {
   const e = exportsOf(file, code);
   if (e.hasDefault) return { kind: 'default', name: e.defaultName };
-  const comp = e.named.find((n) => /^[A-Z]/.test(n));
+  const comps = e.named.filter((n) => /^[A-Z]/.test(n));
+  const base = path.basename(String(file)).replace(/\.[a-z]+$/i, '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+  const byFile = comps.filter((n) => base.endsWith(n.toLowerCase())).sort((a, b) => b.length - a.length)[0];
+  const comp = byFile || comps[0];
   return comp ? { kind: 'named', name: comp } : null;
 }
 
