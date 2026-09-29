@@ -20,7 +20,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-from .util import ensure_gitignore, DhError, TEMPLATES, TRYON, free_port, now, package_json, package_manager, read_json, rmtree, run, slugify, write_json
+from .util import ensure_gitignore, DhError, TEMPLATES, TRYON, free_port, git_files, now, package_json, package_manager, read_json, rmtree, run, slugify, write_json
 from . import pool as POOL
 from . import state as STATE
 
@@ -214,21 +214,67 @@ def clone(name: str, to: Path, do_install: bool = True) -> dict:
         _unhold(held, to)
         raise
     lic = next((p.name for p in to.iterdir() if p.name.upper().startswith(("LICENSE", "LICENCE"))), None)
-    (to / "NOTICE").write_text(
-        f"This project started from {row.get('repo') or row['name']} ({row.get('license')}), commit {commit}.\n"
-        f"The upstream licence is kept in {lic or 'LICENSE'} — keep this file and that licence in the project.\n", encoding="utf-8")
+    warn = None if lic else (f"no licence file came with the base (the pool says {row.get('license')}): "
+                             "add that licence's text as LICENSE before shipping")
+    if not (to / "NOTICE").exists():                    # a base's own NOTICE is a licence condition: never rewritten (invariant 4)
+        (to / "NOTICE").write_text(
+            f"This project started from {row.get('repo') or row['name']} ({row.get('license')}), commit {commit}.\n"
+            + (f"The upstream licence is kept in {lic} — keep this file and that licence in the project.\n" if lic else
+               f"The upstream licence ({row.get('license')}) must be added as LICENSE — keep this file and that licence in the project.\n"),
+            encoding="utf-8")
     made = seed_env(to)
     _fresh_git(to, f"base: {row['name']} @ {commit[:12]} ({row.get('license')})")
     kept = _unhold(held, to)
     _record_base(to, {"kind": "template", "name": row["name"], "repo": row.get("repo"), "commit": commit, "at": now()}, name=to.name, path="mine" if row.get("source") == "mine" else "pool")
     inst = install(to) if do_install and (to / "package.json").exists() else None
     return {"project": str(to), "template": row["name"], "commit": commit, "local_secrets_generated": made, "install": inst,
-            **({"kept": kept} if kept else {}), "next": "dh dev start --project " + str(to)}
+            **({"kept": kept} if kept else {}), **({"licence_warning": warn} if warn else {}), "next": "dh dev start --project " + str(to)}
+
+
+COPY_SKIP = {"node_modules", ".git", ".next", ".deckhand"}
+
+
+def _gitignored(rel: str, patterns: list) -> bool:
+    """A small .gitignore match for a base that is not inside a git repository (no negations)."""
+    import fnmatch
+    parts = rel.split("/")
+    for p in patterns:
+        p = p.strip()
+        if not p or p.startswith(("#", "!")):
+            continue
+        anchored, p = p.startswith("/"), p.strip("/")
+        if "/" in p or anchored:
+            if fnmatch.fnmatch(rel, p) or fnmatch.fnmatch(rel, p + "/*"):
+                return True
+        elif any(fnmatch.fnmatch(x, p) for x in parts):
+            return True
+    return False
+
+
+def _copy_base(src: Path, to: Path) -> None:
+    """A local base copied the way git sees it: tracked + untracked-not-ignored (its .gitignore and its parents'), never
+    node_modules/.git/.next/.deckhand or .env files (F10: a clone committed what the base's git had ignored)."""
+    src = Path(src).resolve()
+    inside = run(["git", "rev-parse", "--is-inside-work-tree"], cwd=src, timeout=30)
+    if inside["code"] == 0 and inside["out"].strip() == "true":
+        r = run(["git", "ls-files", "-co", "--exclude-standard"], cwd=src, timeout=60)
+        files = [src / l for l in r["out"].splitlines() if l.strip()]
+    else:
+        pats = (src / ".gitignore").read_text(encoding="utf-8", errors="replace").splitlines() if (src / ".gitignore").exists() else []
+        files = [Path(dp) / f for dp, dns, fns in os.walk(src) for f in fns
+                 if not _gitignored(os.path.relpath(Path(dp) / f, src).replace(os.sep, "/"), pats)]
+    for f in files:
+        rel = f.relative_to(src)
+        if not f.is_file() or set(rel.parts) & COPY_SKIP or rel.name == ".env" or rel.name.startswith(".env."):
+            continue
+        (to / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(f, to / rel)
 
 
 def _fetch_base(row: dict, to: Path) -> str:
     if row.get("path") and Path(row["path"]).exists():   # a harvested base on this machine
-        shutil.copytree(row["path"], to, dirs_exist_ok=True, ignore=shutil.ignore_patterns("node_modules", ".git", ".next", ".deckhand", ".env", ".env.*"))
+        to.mkdir(parents=True, exist_ok=True)
+        _copy_base(Path(row["path"]), to)
         commit = "local"
     elif row.get("source") == "mine" and row.get("repo"):  # the owner's private library base, from their GitHub
         from . import github as GH
