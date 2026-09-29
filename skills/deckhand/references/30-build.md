@@ -8,7 +8,7 @@
 |---|---|---|
 | pool / mine | `dh clone <template> --to <dir>` | shallow clone at the measured commit, fresh history, `NOTICE`, `.env` from the example with LOCAL secrets generated (never vendor keys), deps installed. The planning folder itself is fine: Deckhand's own files (.deckhand, AGENTS.md, PENDING.md) step aside and come back |
 | existing | `dh adopt <folder\|git-url>` | history kept; stack detected; nothing rewritten |
-| scratch | `dh scaffold --to <dir>` then `dh compose --sections hero,features,pricing,faq,cta,footer --copy .deckhand/copy.json` | create-next-app + UI base (tokens, `cn`, Button); compose assembles licensed blocks filled with the plan's copy — no code generation |
+| scratch | `dh scaffold --to <dir>` then `dh compose --sections navbar,hero,features,pricing,faq,cta,footer --copy .deckhand/copy.json` | create-next-app + UI base (tokens, `cn`, Button); compose assembles licensed blocks filled with the plan's copy — no code generation |
 | built another way | `dh base record --kind scratch\|existing --note "how"` | a generator, a hand-written app: the base is stated in the open (never through a private function) |
 
 ### copy.json (scratch path) — the only input the model writes: words, never code

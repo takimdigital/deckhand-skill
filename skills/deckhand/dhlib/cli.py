@@ -210,7 +210,7 @@ def build_parser():
     p = sub.add_parser("clone"); p.add_argument("template"); p.add_argument("--to", required=True); p.add_argument("--no-install", action="store_true")
     p = sub.add_parser("adopt"); p.add_argument("source"); p.add_argument("--to"); p.add_argument("--install", action="store_true")
     p = sub.add_parser("scaffold"); p.add_argument("--to", required=True); p.add_argument("--pm", default="npm", choices=["npm", "pnpm", "bun", "yarn"])
-    p = sub.add_parser("compose"); p.add_argument("--page", default="app/page.tsx"); p.add_argument("--sections", default="hero,features,pricing,faq,cta,footer"); p.add_argument("--copy")
+    p = sub.add_parser("compose"); p.add_argument("--page", default="app/page.tsx"); p.add_argument("--sections", default="navbar,hero,features,pricing,faq,cta,footer"); p.add_argument("--copy")
     p = sub.add_parser("dev", help="start|stop|status the app and the services it needs · add|remove NAME a service (database, queue…)")
     p.add_argument("action", choices=["start", "stop", "status", "add", "remove", "port"]); p.add_argument("name", nargs="?"); p.add_argument("--port", type=int)
     p.add_argument("--from", dest="from_port", type=int, default=3000, help="port: the first port to try")

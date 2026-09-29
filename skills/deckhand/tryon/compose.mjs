@@ -2,7 +2,7 @@
 /**
  * compose.mjs — a page from licensed blocks + the plan's copy, no code generation.
  *
- *   node tryon/compose.mjs --project . --page app/page.tsx --sections hero,features,pricing,faq,cta,footer
+ *   node tryon/compose.mjs --project . --page app/page.tsx --sections navbar,hero,features,pricing,faq,cta,footer
  *                          [--copy .deckhand/copy.json] [--registry tailark-oss]
  *
  * copy.json (the one input a model writes, from the plan — words, never code):
@@ -31,7 +31,7 @@ const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const root = path.resolve(opt('project', '.'));
 const page = opt('page', 'app/page.tsx');
-const sections = String(opt('sections', 'hero,features,cta,footer')).split(',').map((s) => s.trim()).filter(Boolean);
+const sections = String(opt('sections', 'navbar,hero,features,pricing,faq,cta,footer')).split(',').map((s) => s.trim()).filter(Boolean);
 const registry = opt('registry', null);
 const out = (o, c = 0) => { process.stdout.write(JSON.stringify(o) + '\n'); process.exit(c); };
 let copy = {};

@@ -32,7 +32,7 @@ STEPS = {
              "{dh} phase done plan  → show .deckhand/PLAN.md + the chosen base; wait for the owner's go (G1)"],
     "build": ["path=pool|mine: {dh} clone <template> --to <dir>   (the planning folder itself is fine: Deckhand's files step aside and come back)",
               "path=existing: {dh} adopt <folder|git-url>",
-              "path=scratch: {dh} scaffold --to <dir> && {dh} compose --sections hero,features,pricing,faq,cta,footer --copy .deckhand/copy.json",
+              "path=scratch: {dh} scaffold --to <dir> && {dh} compose --sections navbar,hero,features,pricing,faq,cta,footer --copy .deckhand/copy.json",
               "built another way (by hand, another generator)? {dh} base record --kind scratch|existing --note \"how\"   (never a private function)",
               "the app needs a database/queue running? {dh} dev add db --cmd \"…\" --port N [--env-file .env]   # once; dev start/stop/status then handle it",
               "build the shell (WP-00: layout, nav, shared UI, schema, seed) yourself; then one sub-agent per .deckhand/work/AGENT-n.md (references/team.md)",

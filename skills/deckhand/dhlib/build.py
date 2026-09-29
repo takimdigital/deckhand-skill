@@ -302,7 +302,7 @@ def scaffold(to: Path, pm: str = "npm") -> dict:
     _fresh_git(to, "base: create-next-app + deckhand UI base (tokens, cn, Button)")
     kept = _unhold(held, to)
     _record_base(to, {"kind": "scratch", "at": now()}, name=to.name, path="scratch")
-    return {"project": str(to), "deps_ok": ir["code"] == 0, **({"kept": kept} if kept else {}), "next": "dh compose --sections hero,features,pricing,faq,cta,footer (or build pages from the plan)"}
+    return {"project": str(to), "deps_ok": ir["code"] == 0, **({"kept": kept} if kept else {}), "next": "dh compose --sections navbar,hero,features,pricing,faq,cta,footer (or build pages from the plan)"}
 
 
 def compose(root: Path, page: str, sections: list, copy: str | None) -> dict:
