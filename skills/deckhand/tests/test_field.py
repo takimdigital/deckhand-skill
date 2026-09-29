@@ -148,6 +148,40 @@ class OrderIsEnforced(Base):
         self.assertEqual((code, out["code"]), (1, "OUT_OF_ORDER"))                 # no deploy before review + G4
 
 
+class NextFitsTheRun(Base):
+    """Review 2026-09-27 (N1, N2): auto runs were told to wait for the owner; scratch runs never asked for copy.json."""
+
+    def test_auto_mode_never_says_wait_and_lines_follow_the_path(self):
+        from dhlib import guide
+        state.init(self.root, "A", "auto", "scratch")
+        reach(self.root, "research")
+        do = "\n".join(guide.next_step(self.root)["do"])
+        self.assertIn("copy.json", do)
+        self.assertNotIn("pool query", do)                                      # pool/mine only
+        self.assertNotIn("wait for", do)
+        self.assertIn("gate passes by itself", do)
+        reach(self.root, "plan")
+        do = "\n".join(guide.next_step(self.root)["do"])
+        self.assertNotIn("clone", do.split("base record")[0])                   # scratch: no clone line
+        self.assertIn("scaffold", do)
+        self.assertNotIn("wait for", do)
+
+    def test_phased_pool_keeps_the_owner_gate_and_the_pool_query(self):
+        from dhlib import guide
+        state.init(self.root, "B", "phased", "pool")
+        reach(self.root, "research")
+        do = "\n".join(guide.next_step(self.root)["do"])
+        self.assertIn("pool query", do)
+        self.assertNotIn("copy.json", do)
+        self.assertIn("wait for the owner's go (G1)", do)
+
+    def test_compose_without_copy_says_what_to_write(self):
+        state.init(self.root, "C", "phased", "scratch")
+        with self.assertRaises(DhError) as e:
+            build.compose(self.root, "app/page.tsx", ["hero"], ".deckhand/copy.json")
+        self.assertEqual(e.exception.code, "NO_COPY")
+
+
 class BaseIntoInitFolder(Base):
     """D3: `dh init` fills the folder, then clone/scaffold refused it (DEST_NOT_EMPTY); D4: the agent imported a
     private function to record the base."""

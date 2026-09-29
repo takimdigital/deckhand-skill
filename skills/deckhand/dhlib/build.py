@@ -293,6 +293,11 @@ def scaffold(to: Path, pm: str = "npm") -> dict:
 
 
 def compose(root: Path, page: str, sections: list, copy: str | None) -> dict:
+    if copy:
+        cp = Path(copy) if Path(copy).is_absolute() else root / copy
+        if not cp.is_file():
+            raise DhError("NO_COPY", f"{copy} does not exist: write the words first (per section slot; schema in references/20-plan.md § Copy)",
+                          path=str(cp), do=["write .deckhand/copy.json from the plan and the brief, then compose again"])
     node = shutil.which("node")
     if not node:
         raise DhError("NO_NODE", "node is required for compose")
