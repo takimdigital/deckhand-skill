@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deckhand try-on — real-browser test report</title>
+<style>
+  :root{
+    --bg:#FCFBF7; --ink:#1C1E21; --muted:#5F6570; --line:#E3DFD6;
+    --panel:#FFFFFF; --teal:#0F766E; --amber:#B45309; --red:#B91C1C; --green:#15803D;
+    --code-bg:#17191D; --code-ink:#E8E6DF;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:48px 24px 96px}
+  h1{font-size:34px;line-height:1.2;margin:0 0 8px;letter-spacing:-.02em}
+  h2{font-size:21px;margin:52px 0 6px;letter-spacing:-.01em;padding-top:20px;border-top:2px solid var(--ink)}
+  h3{font-size:16px;margin:28px 0 8px}
+  h4{font-size:14px;margin:20px 0 6px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  p{margin:10px 0}
+  .lede{font-size:17px;color:var(--muted);margin-top:0}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+       padding:3px 8px;border-radius:4px;vertical-align:middle;margin-left:8px}
+  .t-ok{background:#DCFCE7;color:#14532D}
+  .t-bad{background:#FEE2E2;color:#7F1D1D}
+  .t-warn{background:#FEF3C7;color:#78350F}
+  .t-info{background:#E6F3F1;color:#0F5F58}
+  .banner{border:2px solid var(--ink);background:var(--panel);border-radius:12px;padding:20px 22px;margin:26px 0}
+  .banner.bad{border-color:var(--red);background:#FEF6F6}
+  .banner.ok{border-color:var(--teal);background:#F3FAF8}
+  .banner h3{margin-top:0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;background:var(--panel)}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#F3F1EC;font-weight:600;font-size:12.5px;letter-spacing:.03em}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+  code{background:#F0EEE8;padding:1px 5px;border-radius:4px;font-size:13px}
+  pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:8px;overflow-x:auto;
+      font-size:12.5px;line-height:1.55;margin:12px 0}
+  pre code{background:none;padding:0;color:inherit}
+  .ok{color:var(--green);font-weight:600}
+  .bad{color:var(--red);font-weight:600}
+  .warn{color:var(--amber);font-weight:600}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+  figure{margin:22px 0}
+  figcaption{font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
+  .shot{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .callout{border-left:4px solid var(--teal);background:#F3FAF8;padding:12px 16px;margin:16px 0;border-radius:0 8px 8px 0}
+  .callout.warn{border-left-color:var(--amber);background:#FEF9F2}
+  .callout.bad{border-left-color:var(--red);background:#FEF6F6}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+  .kpi div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
+  .kpi b{display:block;font-size:26px;letter-spacing:-.02em}
+  .kpi span{font-size:12px;color:var(--muted)}
+  @media(max-width:760px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .foot{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  ul{padding-left:22px}li{margin:5px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Deckhand try-on — real-browser test report</h1>
+<p class="lede">Eight sections swapped, an AI draft taken end-to-end, tuning/theme/flags/keep verified against source hashes — all driven in headless Chromium against a real Next.js site.</p>
+
+<div class="banner ok">
+  <h3>Verdict <span class="tag t-warn">works with 1 blocker</span></h3>
+  <p style="margin-bottom:6px"><b>Component swapping works</b>: slot guessing was correct on 8/8 sections, 7/8 staged 4 variants each, cycling between them performs <b>zero file writes</b>, and every discard restored the source <b>byte-exact</b>. The <b>AI draft</b> path is complete (request → gates → labelled variant → keep). <b>Watching/HMR</b> renders source edits in ~514&nbsp;ms without a reload.</p>
+  <p style="margin-bottom:0"><b>But one blocking defect</b>: staging the <code>shadcnui-blocks/footer-01</code> design takes the <b>whole page down (HTTP 500)</b> while <code>try</code> reports <code>ok:true, exit 0</code> — see §8. Six further behaviours are worth correcting in the atlas (§9).</p>
+</div>
+
+<div class="kpi">
+  <div><b class="ok">7/8</b><span>sections swap cleanly</span></div>
+  <div><b class="ok">8/8</b><span>slot guesses correct</span></div>
+  <div><b class="ok">0</b><span>writes while cycling</span></div>
+  <div><b class="bad">1</b><span>blocking defect</span></div>
+</div>
+
+<h2>1 · What was tested</h2>
+<p>The skill ships no runnable site — <code>tryon/test/fixtures/site</code> has no <code>app/layout.tsx</code>, no PostCSS config and no lockfile (its tests stub <code>node_modules</code>). So I built a real 8-section bakery landing page (Navbar · Hero · Features · Pricing · Testimonials · FAQ · CTA · Footer) from that scaffold, plus Tailwind&nbsp;4 semantic tokens, and wired it with the skill's own <code>setup</code>.</p>
+<p>Four <b>isolated labs</b> were stood up so parallel agents could not corrupt each other's state (the personal library under <code>~/.deckhand/library</code> is machine-wide, so keeping projects apart mattered):</p>
+
+<table>
+<tr><th>Lab</th><th>Project</th><th>Dev server</th><th>Try-on overlay</th><th>Used for</th></tr>
+<tr><td>A</td><td><code>…\dh-tryon-lab\site</code></td><td>:3000</td><td><b>:4010</b></td><td>watching/HMR, protocol, wrapper anatomy, footer bug</td></tr>
+<tr><td>B</td><td><code>…\lab-swap\site</code></td><td>:3010</td><td>:4020</td><td>swap across all 8 sections</td></tr>
+<tr><td>C</td><td><code>…\lab-draft\site</code></td><td>:3020</td><td>:4030</td><td>AI draft end-to-end</td></tr>
+<tr><td>D</td><td><code>…\lab-adjust\site</code></td><td>:3030</td><td>:4040</td><td>tune · site theme · flags · keep/save · clean</td></tr>
+</table>
+
+<figure>
+<svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="rA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker>
+  </defs>
+  <text x="340" y="20" text-anchor="middle" font-size="14" font-weight="600">Test rig — one harness, four isolated projects</text>
+
+  <rect x="30" y="44" width="180" height="76" rx="10" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="120" y="66" text-anchor="middle" font-size="12" font-weight="600">Playwright 1.63.0</text>
+  <text x="120" y="84" text-anchor="middle" font-size="10.5" fill="#5F6570">headless Chromium</text>
+  <text x="120" y="100" text-anchor="middle" font-size="10.5" fill="#5F6570">pierces the shadow root</text>
+  <text x="120" y="116" text-anchor="middle" font-size="10.5" fill="#5F6570">clicks · keys · screenshots</text>
+
+  <rect x="250" y="44" width="200" height="76" rx="10" fill="#E6F3F1" stroke="#0F766E" stroke-width="1.5"/>
+  <text x="350" y="66" text-anchor="middle" font-size="12" font-weight="600" fill="#0F766E">try-on server :4010…:4040</text>
+  <text x="350" y="84" text-anchor="middle" font-size="10.5" fill="#5F6570">reverse proxy → dev server</text>
+  <text x="350" y="100" text-anchor="middle" font-size="10.5" fill="#5F6570">injects overlay + token</text>
+  <text x="350" y="116" text-anchor="middle" font-size="10.5" fill="#5F6570">127.0.0.1 only</text>
+
+  <rect x="500" y="44" width="150" height="76" rx="10" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="575" y="66" text-anchor="middle" font-size="12" font-weight="600">Next 16 dev</text>
+  <text x="575" y="84" text-anchor="middle" font-size="10.5" fill="#5F6570">stamped JSX</text>
+  <text x="575" y="100" text-anchor="middle" font-size="10.5" fill="#5F6570">HMR · SSR</text>
+  <text x="575" y="116" text-anchor="middle" font-size="10.5" fill="#5F6570">data-dh="f:l:c"</text>
+
+  <rect x="30" y="156" width="620" height="60" rx="10" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="340" y="178" text-anchor="middle" font-size="12" font-weight="600" fill="#B45309">Deckhand skill (node tryon/cli.mjs, driven through the dh CLI)</text>
+  <text x="340" y="197" text-anchor="middle" font-size="10.5" fill="#5F6570">setup → doctor → try/show/keep/discard → draft/gates → tune/theme → flags → clean</text>
+  <text x="340" y="210" text-anchor="middle" font-size="10.5" fill="#5F6570">every claim checked twice: once through the browser, once against source hashes</text>
+
+  <rect x="30" y="244" width="620" height="40" rx="8" fill="#17191D"/>
+  <text x="340" y="268" text-anchor="middle" font-size="11" fill="#E8E6DF">evidence: 19 screenshots · 30+ JSON captures · sha256 before/after · raw CLI JSON + exit codes</text>
+
+  <line x1="212" y1="82" x2="248" y2="82" stroke="#5F6570" stroke-width="1.3" marker-end="url(#rA)"/>
+  <line x1="452" y1="82" x2="498" y2="82" stroke="#5F6570" stroke-width="1.3" marker-end="url(#rA)"/>
+  <line x1="350" y1="122" x2="350" y2="154" stroke="#5F6570" stroke-width="1.3" marker-end="url(#rA)"/>
+</svg>
+<figcaption>Fig 1 — the overlay lives in an open shadow root on <code>div[data-dh-ui]</code>; Playwright pierces it, so plain CSS and text selectors reach every control.</figcaption>
+</figure>
+
+<h3>Setup chain (all verified, exact outputs)</h3>
+<table>
+<tr><th>Step</th><th>Observed</th></tr>
+<tr><td><code>doctor</code> (fresh)</td><td><code>{"ok":true,"framework":"next","supported":true,"wired":false,"devServer":"http://127.0.0.1:3000","stampsInHtml":false,"tailwind":4,"tokens":{"primary":true,"muted":true,"border":true,"radius":true},"base":"radix","next":"run `setup`, then restart the dev server"}</code></td></tr>
+<tr><td><code>setup</code></td><td><code>{"ok":true,"config":"next.config.ts","patched":true,"restartDevServer":true}</code> — original saved to <code>.deckhand/tryon/backups/setup/next.config.ts.orig</code>, runtime copied, <code>.gitignore</code> gained <code>.deckhand/tryon/</code></td></tr>
+<tr><td>restart dev</td><td><b>115</b> <code>data-dh="file:line:col"</code> attributes across <b>10</b> source files, 0 malformed, 0 in <code>&lt;head&gt;</code></td></tr>
+<tr><td><code>doctor</code> (wired)</td><td><code>"wired":true, "stampsInHtml":true, "next":"run `serve` and open its URL"</code></td></tr>
+<tr><td><code>serve --port 4010</code></td><td><code>{"ok":true,"open":"http://127.0.0.1:4010","proxying":"http://127.0.0.1:3000"}</code> — HTML carries <code>&lt;script src="/__dh/overlay.js" data-dh-token="…" defer&gt;</code></td></tr>
+<tr><td>catalog</td><td><b>58</b> slot kinds with inventory for this project (hero 31, features 45, footer 23 …) totalling <b>980</b> base-compatible designs out of the <b>1,247</b> indexed; <code>query --slot hero</code> → <code>total:31, hidden:21</code>, top score 138</td></tr>
+</table>
+
+<div class="callout warn"><b>Hazard found while testing.</b> Port 3999 was already held by a stale try-on server for a <i>different</i> project (<code>D:\TakimDigital\pet-service-next</code> → <code>:3600</code>). <code>serve</code> then dies with <code>EADDRINUSE</code> while the old overlay keeps answering — you can silently test the wrong site. I moved to :4010 and confirmed the proxy target by checking site-specific content every time.</div>
+
+<h2>2 · Component swapping — 8 sections</h2>
+<p>Each section was picked by clicking its stamped element in the browser, the panel's <b>slot guess</b> recorded, 4 variants staged, then ←/→ cycled while hashing the whole source tree (excluding <code>node_modules</code>, <code>.next</code>, <code>.deckhand</code>).</p>
+
+<table>
+<tr><th>Section</th><th>Stamp</th><th>Guess</th><th>Staged</th><th>Fit pills ("your content n/N")</th><th>Verdict</th></tr>
+<tr><td>navbar</td><td><code>components/navbar.tsx:12:5</code></td><td class="ok">navbar ✓</td><td>4</td><td>5/5 · 5/5 · 5/5 · 5/5</td><td class="ok">works</td></tr>
+<tr><td>hero</td><td><code>components/hero.tsx:6:5</code></td><td class="ok">hero ✓</td><td>4</td><td>4/4 · 4/4 · 4/4 · 4/4</td><td class="ok">works</td></tr>
+<tr><td>features</td><td><code>components/features.tsx:23:5</code></td><td class="ok">features ✓</td><td>4</td><td>8/8 · 8/8 · 8/8 · 8/8</td><td class="ok">works</td></tr>
+<tr><td>pricing</td><td><code>components/pricing.tsx:20:5</code></td><td class="ok">pricing ✓</td><td>4</td><td>12/12 · 12/12 · <b class="warn">10/12</b> · <b class="warn">10/12</b></td><td class="ok">works (kept)</td></tr>
+<tr><td>testimonials</td><td><code>components/testimonials.tsx:21:5</code></td><td class="ok">testimonials ✓</td><td>4</td><td>7/7 · 7/7 · 7/7 · <b class="warn">5/7</b></td><td class="ok">works</td></tr>
+<tr><td>faq</td><td><code>components/faq.tsx:18:5</code></td><td class="ok">faq ✓</td><td>4</td><td>7/7 · 7/7 · 7/7 · 7/7</td><td class="ok">works</td></tr>
+<tr><td>cta</td><td><code>components/cta.tsx:6:5</code></td><td class="ok">cta ✓</td><td>4</td><td>3/3 · 3/3 · 3/3 · <b class="warn">2/3</b></td><td class="ok">works</td></tr>
+<tr><td>footer</td><td><code>components/footer.tsx:30:5</code></td><td class="ok">footer ✓</td><td class="bad">0</td><td>—</td><td class="bad"><b>BROKEN</b> (§8)</td></tr>
+</table>
+<p class="small muted">Slot guessing was correct on all 8. Every section staged 4 variants from 4 different registries (tailark-oss, shadcnui-blocks, kokonutui …). Fit pills are coloured <span class="ok">green</span> when carried = total and <span class="warn">amber</span> when partial — and the numbers matched the CLI's own <code>fit.carried / fit.of</code> exactly.</p>
+
+<div class="grid">
+<figure><img class="shot" src="tryon-test-evidence/02-panel-slot-guessed.png" alt="Try-on panel with slot pre-guessed">
+<figcaption>Fig 2 — the panel pre-selects the correct slot before the owner touches the dropdown.</figcaption></figure>
+<figure><img class="shot" src="tryon-test-evidence/03-variants-staged.png" alt="Variant bar after staging">
+<figcaption>Fig 3 — the bar: <code>◀ 1 / 4 ▶</code>, fit pill, registry + licence + demo-copy note, Keep · More · AI draft · Flag · Discard.</figcaption></figure>
+</div>
+<div class="grid">
+<figure><img class="shot" src="tryon-test-evidence/01-baseline-page.png" alt="Baseline page">
+<figcaption>Fig 3a — the untouched 8-section site (115 stamps, no overlay controls yet).</figcaption></figure>
+<figure><img class="shot" src="tryon-test-evidence/10-features-staged.png" alt="Features staged">
+<figcaption>Fig 3b — features, all four variants at <b>your content 8/8</b>.</figcaption></figure>
+</div>
+<div class="grid">
+<figure><img class="shot" src="tryon-test-evidence/07-hero-staged.png" alt="Hero staged">
+<figcaption>Fig 3c — hero staged, fit 4/4, demo placeholder flagged in the sub-line.</figcaption></figure>
+<figure><img class="shot" src="tryon-test-evidence/08-pricing-variant.png" alt="Pricing variant">
+<figcaption>Fig 3d — pricing: two variants green (12/12), two amber (10/12).</figcaption></figure>
+</div>
+<figure><img class="shot" src="tryon-test-evidence/09-faq-cycling.png" alt="FAQ cycling">
+<figcaption>Fig 3e — FAQ while cycling variants; the page keeps the owner's questions verbatim in every one.</figcaption></figure>
+
+<h2>3 · What a swap actually writes</h2>
+<p>Staging a hero via the browser touched <b>one</b> pre-existing file (<code>components/hero.tsx</code>) plus 21 new variant files. The wrapper is exactly what the atlas describes:</p>
+<pre><code>&lt;div data-dh-session="s1ce35" style={{ display: "contents" }}&gt;
+  &lt;div data-dh-variant="0" data-dh-label="Original" style={{ display: "none" }}&gt;
+    &lt;section id="pricing" …&gt;              ← the owner's JSX, untouched
+  &lt;/div&gt;
+  &lt;div data-dh-variant="1" data-dh-label="Veil · pricing 1" style={{ display: "contents" }}&gt;
+    &lt;DhVeilPricing1 content={{ heading1: &lt;&gt;Two boxes, no contracts&lt;/&gt;,
+      list1: [{ name: "Weekly loaf", price: "€9", … }, { name: "Family box", price: "€24", … }] }} /&gt;
+  &lt;/div&gt;
+  …variants 2..4, display: none
+&lt;/div&gt;
+
+import DhVeilPricing1 from "@/components/dh-tryon/tailark-oss-veil-pricing-1/…" // dh-tryon:s1ce35</code></pre>
+
+<table>
+<tr><th>Claim</th><th>Measured</th></tr>
+<tr><td>Owner content extracted <b>before</b> candidates are staged</td><td class="ok"><code>owner[22]</code> — the <code>plans</code> array was <b>unrolled</b> into concrete units: <code>"Weekly loaf", "€9", "One classic sourdough every Saturday.", "Free first delivery", "Subscribe"</code> ×2 plans</td></tr>
+<tr><td>ONE wrapper edit per open</td><td class="ok">only <code>components/hero.tsx</code> changed among existing sources; the other 21 writes are new variant files</td></tr>
+<tr><td>Variant 0 = original, hidden</td><td class="ok"><code>data-dh-variant="0" … style={{display:"none"}}</code></td></tr>
+<tr><td>Imports tagged <code>// dh-tryon:&lt;id&gt;</code></td><td class="ok">4 tagged imports for 4 variants</td></tr>
+<tr><td>Byte-copy backup written before disk is touched</td><td class="ok">backup sha256 <code>51102931fb…</code> == <code>session.shaBefore</code></td></tr>
+<tr><td>File after staging == <code>shaAfter</code></td><td class="ok"><code>5db823c1c1…</code> == <code>session.shaAfter</code></td></tr>
+<tr><td><b>Cycling ←/→ performs zero writes</b></td><td class="ok"><b>0 files changed</b> across 7 presses (verified by hashing the tree before/after) — reproduced on all 7 working sections</td></tr>
+<tr><td>Discard is byte-exact</td><td class="ok">CLI: <code>{"ok":true,"mode":"byte-exact"}</code>; sha after == sha of <code>.orig</code> == original; session → <code>discarded</code>; staged folders and import tags removed</td></tr>
+<tr><td>UTF-8 survives the rewrite</td><td class="ok">rewritten file is valid UTF-8, <b>0</b> mojibake bytes, the 6 <code>€</code> signs written into <code>content</code> props are <code>e2 82 ac</code> (the <code>â‚¬</code> seen in PowerShell output was a console-decoding artefact, not the file)</td></tr>
+<tr><td>Rejected registries / poor fits are excluded, with reasons</td><td class="ok">footer: <code>POOR_FIT (carries 1/6)</code>, <code>POOR_FIT (carries 2/6)</code>, <code>NEEDS_DEPS (motion)</code></td></tr>
+</table>
+
+<div class="callout"><b>Partial fits are still offered — honestly.</b> Pricing variant 4 reported <code>carried:10, dropped:[€9, €24]</code>, and indeed its binding put <code>price: "One classic sourdough every Saturday."</code> — the blurb landing where a price belongs. The metadata was accurate and the fit pill turned amber, so the owner is warned; but a visibly wrong variant still gets staged, which is what <code>⚑ Flag</code> exists for.</div>
+
+<h2>4 · Watching — HMR and overlay resilience</h2>
+<table>
+<tr><th>Behaviour</th><th>Result</th></tr>
+<tr><td>External source edit reaches the rendered DOM</td><td class="ok"><b>514 ms</b> — <code>hero.tsx</code> edited on disk, heading changed to "…PIERCINGLY-HOT…" with <b>no reload</b></td></tr>
+<tr><td>Really HMR, not a reload?</td><td class="ok"><code>window.__dhMarker</code> set before the edit was still present after it; page <code>load</code> events stayed at <b>1</b></td></tr>
+<tr><td>Overlay survives the update</td><td class="ok"><code>div[data-dh-ui]</code> still attached, shadow root still contains <code>.pill</code></td></tr>
+<tr><td>Overlay re-attaches if the framework wipes it</td><td class="ok">host deleted programmatically → <b>0</b> immediately → back to <b>1</b> within 2.5 s (documented 1 s interval)</td></tr>
+<tr><td>Source edit reverted</td><td class="ok">heading returned to "…warm…" and the DOM followed</td></tr>
+<tr><td>HMR websockets reach the browser through the proxy</td><td class="ok">the edit landed while browsing :4010, i.e. proxied HMR works</td></tr>
+</table>
+<figure><img class="shot" src="tryon-test-evidence/06-hmr-live-edit.png" alt="HMR live edit">
+<figcaption>Fig 4 — the page after an on-disk edit, with no navigation.</figcaption></figure>
+
+<h2>5 · Compare: two variants painted is by design</h2>
+<p>My first measurement flagged <b>two</b> painted variants at once (the original plus the chosen one), which looked like duplicated content. Reading <code>overlay.js:116</code> resolved it: <b>Compare is ON by default</b>.</p>
+<pre><code>var cmpOn = true, cmpPos = 50;   // before/after slider: on by default, remembered per browser
+try { cmpOn = localStorage.getItem('dh-compare') !== '0'; } catch (e) {}</code></pre>
+<table>
+<tr><th>State</th><th>Measured</th></tr>
+<tr><td><b>Compare ON</b> (default)</td><td>wrapper → <code>display:grid</code>; original + active variant both <code>display:block</code> in <code>grid-area:1/1</code>; original clipped <code>inset(0 50% 0 0)</code> at <code>z-index:1</code>; knob + labels <code>Original</code> / <code>Veil · hero section 5</code> visible → a genuine before/after split</td></tr>
+<tr><td><b>Compare OFF</b> (<code>c</code>)</td><td><code>clearCompare()</code> resets <code>cmp.className='cmp'</code> and <code>.cmp{display:none}</code>; exactly <b>one</b> variant gets <code>display:contents</code>, all others <code>none</code></td></tr>
+<tr><td>Cycling with Compare off</td><td class="ok">1/4→Veil · 2/4→Hero 01 · 3/4→Dusk · 4/4→Mist · original→variant 0 — one at a time, <b>0 file writes</b></td></tr>
+<tr><td>Counter wrap</td><td class="ok">4/4 → <code>original</code> → 1/4 (wraps both ways with ←/→)</td></tr>
+</table>
+<div class="grid">
+<figure><img class="shot" src="tryon-test-evidence/04-compare-slider-on.png" alt="Compare slider on">
+<figcaption>Fig 5 — Compare ON: your version left, the variant right.</figcaption></figure>
+<figure><img class="shot" src="tryon-test-evidence/05-compare-off-single.png" alt="Compare off">
+<figcaption>Fig 6 — Compare OFF: a single variant in place.</figcaption></figure>
+</div>
+
+<h2>6 · AI draft — request → gates → labelled variant → keep</h2>
+<h3>From the browser</h3>
+<table>
+<tr><th>Step</th><th>Observed</th></tr>
+<tr><td>Slot with no licensed designs</td><td>the <code>blog</code> option reads literally <b>"blog — AI draft only"</b>; the panel's primary button becomes <b>Ask AI to draft one</b> (class <code>ai</code>)</td></tr>
+<tr><td>The offer</td><td><i>"No licensed blog designs exist for this site yet. Your AI agent can write one for this element. It will be labelled AI-generated. Deckhand checks it before you see it: your colours, all your words and links, no invented facts, nothing to install."</i></td></tr>
+<tr><td>Request raised</td><td>id <code>dm2ef3n2e51</code> (panel path) and <code>dm2eiis67b8</code> (staged bar's <b>AI draft</b> button) → waiting panel: <i>"AI draft requested · Waiting for your AI agent to write it… · Write the try-on AI draft &lt;id&gt;"</i></td></tr>
+<tr><td>Polling</td><td><b>8</b> <code>draft-status</code> calls in 8 s (12 recorded overall) — the overlay polls, the agent does not</td></tr>
+<tr><td>After completion</td><td>bar shows <b>AI draft · hero</b> with a purple <b>AI-generated</b> pill and sub-line <i>"written by your AI agent, not a licensed human design"</i>; variant count became <b>1 / 5</b> so the AI draft joins ←/→</td></tr>
+<tr><td>Content</td><td class="ok">all 4 owner strings present, hrefs <code>/order</code> and <code>#menu</code> intact</td></tr>
+<tr><td>Keep</td><td class="ok"><code>Kept "AI draft · hero" → components/sections/ai-hero-draft-dm2eiis67b8/…</code> + <b>Save to my library</b> + <b>Done</b></td></tr>
+</table>
+
+<h3>The gates — tested directly with 4 crafted drafts</h3>
+<table>
+<tr><th>#</th><th>Draft content</th><th>Exit</th><th>Problems reported</th></tr>
+<tr><td>A</td><td>only the heading + intro — <b>drops 6 of 8</b> owner units, no links</td><td class="bad">1</td><td><b>6 × <code>DRAFT_DROPPED_CONTENT</code></b>, each naming the exact missing unit (<code>missing heading: "Baked at 4am"</code> …), <code>fit: {carried:2, of:8}</code></td></tr>
+<tr><td>B</td><td>all 8 units verbatim, token classes only, no links</td><td class="ok">0</td><td>none — <code>fit: {carried:8, of:8}</code></td></tr>
+<tr><td>C</td><td>all 8 units + <code>style={{color:"#ff6600"}}</code></td><td class="bad">1</td><td><code>DRAFT_RAW_COLOR</code> — <i>"draft.tsx:13 style uses a raw colour — use the site's token classes"</i></td></tr>
+<tr><td>D</td><td>all 8 units + a link the owner never gave</td><td class="bad">1</td><td><code>DRAFT_LINK</code> — <i>"href \"/nope\" — links go only where the owner's did (none given)"</i></td></tr>
+<tr><td>finish</td><td>draft B submitted</td><td class="ok">0</td><td><code>draft-done</code> → session <code>s463fc</code>, variant <code>ai/features-draft-dm40o6j240f</code>, <code>lic:"AI-generated"</code>, <code>generated:true</code>, <code>ai_variant:1</code></td></tr>
+</table>
+<p class="small">The brief itself carries the full owner content: <b>8 units</b> for the features section (2 top-level + 3 cards × 2), plus 10 explicit rules (use every unit verbatim, invent no facts, token colours only, allowed imports, placeholder images only, RSC/client rule, semantic HTML…). <code>draft-done</code> on a bad draft returns <code>DRAFT_REJECTED</code>, exit 1, listing the problems and the file to fix.</p>
+
+<div class="callout warn"><b>Nuance.</b> Problems come back in stages: a draft that has both a bad link <i>and</i> dropped units reports only <code>DRAFT_LINK</code> first (<code>fit</code> stays <code>null</code>), so the owner fixes and re-runs to surface the drops. The atlas says a rejection "lists every problem" — it lists every problem <i>of the failing stage</i>.</div>
+
+<div class="grid">
+<figure><img class="shot" src="tryon-test-evidence/12-ai-draft-no-fit-panel.png" alt="AI draft panel when nothing fits">
+<figcaption>Fig 7 — "blog — AI draft only" → Ask AI to draft one.</figcaption></figure>
+<figure><img class="shot" src="tryon-test-evidence/13-ai-draft-waiting.png" alt="AI draft waiting panel">
+<figcaption>Fig 8 — the waiting panel with the id the agent must pick up.</figcaption></figure>
+</div>
+<div class="grid">
+<figure><img class="shot" src="tryon-test-evidence/14-ai-generated-pill.png" alt="AI-generated pill in the bar">
+<figcaption>Fig 9 — the AI variant in the compare set, labelled <b>AI-generated</b>.</figcaption></figure>
+<figure><img class="shot" src="tryon-test-evidence/15-ai-draft-kept.png" alt="AI draft keep toast">
+<figcaption>Fig 10 — graduated to <code>components/sections/</code> on Keep.</figcaption></figure>
+</div>
+
+<h2>7 · Tune · Site theme · Flags · Keep/Save · clean</h2>
+
+<h3>Tune — deterministic and reversible</h3>
+<table>
+<tr><th>Claim</th><th>Measured</th></tr>
+<tr><td>CLI and browser produce the <b>same</b> transform</td><td class="ok"><code>cliAiry == browserAiry == fead738b0d437509…</code> — byte-identical for the same preset</td></tr>
+<tr><td>Live feedback text</td><td class="ok"><code>"Live on the page (3 class changes). Keep it, or Reset."</code> / <code>"Kept in components/hero.tsx."</code> / <code>"Back to the original (byte-exact)."</code> — exactly as documented</td></tr>
+<tr><td>Reset is byte-exact</td><td class="ok"><code>resetByteExact:true</code>, <code>mergedResetByteExact:true</code> — the file returned to the session's origin snapshot</td></tr>
+<tr><td>Every set recomputes from the original</td><td class="ok">re-applying the preset yielded the same dials <code>[3,1,3]</code>; merged state reported <code>{density:1}</code> — no cumulative drift</td></tr>
+<tr><td>Keep commits (reset no longer reverts it)</td><td class="ok"><code>finalIsKeptAiry:true</code>, <code>finalIsOriginal:false</code></td></tr>
+<tr><td>Surgical reset when you edited meanwhile</td><td class="ok"><code>mode:"surgical (your edits kept)"</code> — and it reported honestly: <code>undone:0, left:1</code> + <i>"1 class change(s) could not be matched — check components/cta.tsx"</i> instead of clobbering</td></tr>
+</table>
+
+<h3>Site theme — 10-deep undo, exactly</h3>
+<table>
+<tr><th>Claim</th><th>Measured</th></tr>
+<tr><td>Preview writes nothing</td><td class="ok"><code>cssAfterPreviewOnly == cssBefore</code> (same sha), yet the change was <code>visibleWithoutReload:true</code></td></tr>
+<tr><td>Apply writes a <code>/* dh:theme */</code> block</td><td class="ok"><code>cssAfterApply != cssBefore</code>; block carries a metadata comment <code>{"accent":"#0f766e","neutrals":"cool","corners":"soft","density":"snug","headlines":"larger"}</code> and <code>oklch()</code> variable values</td></tr>
+<tr><td>Undo is byte-exact</td><td class="ok"><code>undoByteExact:true</code></td></tr>
+<tr><td><b>10-deep history</b></td><td class="ok"><b>11</b> applies succeeded → only <b>10</b> undos succeeded → the 11th returned <code>{"ok":false,"code":"NO_UNDO","message":"nothing to undo"}</code> exit 1</td></tr>
+<tr><td>Invalid knobs refused</td><td class="ok"><code>BAD_THEME</code> exit 1 for <code>--corners wobbly</code>, <code>--accent notacolour</code>, <code>--neutrals beige</code>, <code>--body ComicSans</code></td></tr>
+<tr><td>Arbitrary hex accent accepted</td><td class="ok"><code>--accent #0f766e --neutrals cool --corners soft --density snug --headlines larger</code> → exit 0</td></tr>
+</table>
+<div class="grid">
+<figure><img class="shot" src="tryon-test-evidence/16-tune-dial.png" alt="Tune dials">
+<figcaption>Fig 11 — Tune tab: 7 dials + 7 presets.</figcaption></figure>
+<figure><img class="shot" src="tryon-test-evidence/17-site-theme-applied.png" alt="Site theme applied">
+<figcaption>Fig 12 — Site panel applied without a reload.</figcaption></figure>
+</div>
+
+<h3>Flags</h3>
+<table>
+<tr><th>Step</th><th>Measured</th></tr>
+<tr><td>Reason list</td><td class="ok">8 reasons, with the slot substituted: <i>"it is not a pricing at all"</i></td></tr>
+<tr><td>Add #1 → #2</td><td class="ok">badge <code>shown:none → ⚑ Flagged1 → ⚑ Flagged2</code>; disk <code>count 1 → 2</code>; ids <code>F0c4de1b4</code>, <code>F0aa71234</code></td></tr>
+<tr><td><b>Clear</b></td><td class="ok"><code>{"ok":true,"cleared":2,"total":0}</code> → disk <code>flags:[]</code> → CLI <code>flags list</code> returns <code>[]</code> (an earlier "still 2" reading in an agent log was a stale capture, not a defect)</td></tr>
+<tr><td>Report when empty</td><td class="ok">exit 1, <code>NO_FLAGS</code>: <i>"nothing is flagged yet: flag a variant from the try-on bar (⚑ Flag)"</i></td></tr>
+<tr><td>Report content</td><td class="ok">a full reproduce package: <code>where</code> (file/line/col/session/idx), <code>variant</code> (licence, source URL, deps, fit), the exact <code>usage</code>, <code>owner.jsx</code> + all units, <code>design.slots</code> demo values, the <b>full design code</b>, <code>auto</code> checks, <code>env</code> (deckhand 2.3.0, catalog 2026-09-27, next, radix, tailwind 4)</td></tr>
+<tr><td>Auto-check prefills the flag</td><td class="ok">the record's <code>auto.missing</code> listed exactly the owner words the variant dropped (<code>"Free first delivery"</code>, <code>"Pause any week"</code>)</td></tr>
+</table>
+<figure><img class="shot" src="tryon-test-evidence/18-flags-badge.png" alt="Flag badge">
+<figcaption>Fig 13 — the flag badge appears once a variant is flagged.</figcaption></figure>
+
+<h3>Keep · Save · clean</h3>
+<table>
+<tr><th>Claim</th><th>Measured</th></tr>
+<tr><td>Keep bakes and graduates</td><td class="ok">toast <code>Kept "Veil · pricing 1" → components/sections/tailark-oss-veil-pricing-1/…</code>; <code>pricingShaBefore ≠ pricingShaAfterKeep</code>; session → <code>kept</code></td></tr>
+<tr><td>Save to personal library</td><td class="ok">toast <code>Saved — ranks first next time</code>; row <code>mine/adjust-pricing-fud6@radix</code>; files <code>[card.tsx, tailark-oss-veil-pricing-1.tsx]</code></td></tr>
+<tr><td>Refusals</td><td class="ok"><code>BAD_NAME</code> (<code>--name x</code>), <code>NO_SESSION</code> (unknown id) — exit 1</td></tr>
+<tr><td><code>clean</code> unwires byte-exact</td><td class="ok"><code>{"ok":true,"discarded":["s21075"],"restored":["next.config.ts (byte-exact)"],"tokens":"kept (kept variants use them)","restartDevServer":true}</code>; sha(<code>next.config.ts</code>) after == its original backup</td></tr>
+<tr><td>Token layer kept only if a kept section uses it</td><td class="ok"><code>globalsCssTokensKept:true</code> (a kept pricing variant needed it); journal + runtime removed; theme dir removed</td></tr>
+<tr><td><b><code>prod-clean</code>: no stamps in the build</b></td><td class="ok">after <code>clean</code> + dev restart: <b>0</b> <code>data-dh</code> attributes and no overlay script tag in the served HTML (page 200)</td></tr>
+<tr><td>Kept tunes survive <code>clean</code></td><td class="ok">hero.tsx still differs from pristine and its tune state reads <code>state:kept</code> — correct, keep is a commitment</td></tr>
+</table>
+<div class="callout warn"><b>Two small leaks.</b> (1) <code>clean</code> does <b>not</b> remove the <code>.deckhand/tryon/</code> line it appended to <code>.gitignore</code> (sha unchanged before/after). (2) Right after <code>clean</code>, <code>doctor</code> still reports <code>stampsInHtml:true</code> because the dev process is still running the loader — it only goes to 0 after the restart that <code>clean</code> tells you to do.</div>
+<div class="grid">
+<figure><img class="shot" src="tryon-test-evidence/19-keep-toast.png" alt="Keep toast">
+<figcaption>Fig 14 — Keep → graduated path + Save/Done.</figcaption></figure>
+<figure><img class="shot" src="tryon-test-evidence/11-FOOTER-crash.png" alt="Footer crash screenshot">
+<figcaption>Fig 15 — the footer failure (§8).</figcaption></figure>
+</div>
+
+<h2>8 · BLOCKER — staging a footer design returns HTTP 500</h2>
+
+<div class="banner bad">
+<h3>Reproduced 3 ways: browser, CLI, and plain HTTP</h3>
+<p style="margin-bottom:6px">The design <code>shadcnui-blocks/footer-01@radix</code> is offered as footer variant 4. When it is written into the wrapper it <b>crashes during React Server Component rendering</b>, and because every variant in a wrapper is rendered (the inactive ones merely <code>display:none</code>), <b>the entire page stops rendering</b>.</p>
+<p style="margin-bottom:0">The pipeline reports success anyway: <code>try</code> returned <b><code>{"ok":true,"id":"s7278c",…}</code> with exit 0</b> and left the session open, while the page was already down.</p>
+</div>
+
+<pre><code>$ node tryon/cli.mjs try --file components/footer.tsx --line 30 --col 5 \
+      --slot footer --count 4 --project &lt;site&gt;
+{"ok":true,"id":"s7278c","state":"open","shown":1,
+ "variants":[… idx 4 = shadcnui-blocks/footer-01 …],
+ "skipped":[{"id":"…mist-footer-1","why":"POOR_FIT"}, …]}
+exit 0</code></pre>
+
+<table>
+<tr><th>Probe</th><th>Before staging</th><th>After <code>try</code></th><th>After <code>discard</code></th></tr>
+<tr><td>dev server :3000</td><td class="ok">200 · 51902 bytes</td><td class="bad"><b>500</b> · error page</td><td class="ok">200 · 51902 bytes</td></tr>
+<tr><td>try-on proxy :4010</td><td class="ok">200 · 51997 bytes</td><td class="bad"><b>500</b> · error page</td><td class="ok">200 · 51997 bytes</td></tr>
+<tr><td><code>try</code> exit code</td><td>—</td><td class="bad"><b>0 (ok:true)</b></td><td>—</td></tr>
+</table>
+
+<pre><code>TypeError: Cannot read properties of undefined (reading 'map')
+    at …/components/dh-tryon/shadcnui-blocks-footer-01/shadcnui-blocks-footer-01.tsx [app-rsc]
+    at Array.map
+    at Footer (…shadcnui-blocks-footer-01.tsx [app-rsc])</code></pre>
+
+<p>The engine's own fit data explains it: that variant reported <code>hidden: ["footerSections: the design's demo columns hidden (6) — no menu in your plan"]</code>. Hiding the demo columns leaves the array the component then calls <code>.map()</code> on as <code>undefined</code>.</p>
+
+<h4>Why the documented safety net did not fire</h4>
+<p>The atlas's Fig&nbsp;15.1 step 6 claims <code>openVerified</code> does <i>"parse → ONE wrapper write → probe page → build error? exclude culprits, retry ≤2 (3 attempts) else restore the file"</i>. Here the <b>compile</b> succeeds and the <b>render</b> fails, so the probe passed and the file was left in place. Through the browser the overlay then sat waiting for <code>[data-dh-session]</code> and hit a 420&nbsp;s timeout with <code>pageErrors: ["Cannot read properties of undefined (reading 'map')" ×2]</code>.</p>
+
+<h4>Second defect from the same run — orphaned files</h4>
+<p>When staging fails mid-way, the variant folders it already wrote are stranded: <b>5</b> directories under <code>components/dh-tryon/</code> were referenced by no session at all (<code>shadcnui-blocks-footer-02</code>, <code>shadcnui-blocks-footer-03</code>, <code>smoothui-footer-1</code>, <code>tailark-oss-mist-footer-3</code>, <code>tailark-oss-veil-footer-3</code>), and a later <code>discard</code> could not remove them because it only knows what its session recorded.</p>
+
+<h4>Workaround</h4>
+<p><code>discard</code> restores the file byte-exact and the page recovers immediately (200). The safe path today is to avoid <code>shadcnui-blocks/footer-01</code>, or to stage with <code>--only</code> excluding it.</p>
+
+<h2>9 · Findings &amp; corrections for the atlas</h2>
+<table>
+<tr><th>#</th><th>What I found</th><th>Effect</th></tr>
+<tr><td>1</td><td><b><code>shadcnui-blocks/footer-01</code> crashes SSR → page 500 while <code>try</code> says <code>ok:true</code>; failed staging strands orphan variant folders</b></td><td class="bad">blocking defect</td></tr>
+<tr><td>2</td><td><b><code>◐ Compare</code> is ON by default</b> (<code>overlay.js:116</code>) — the original and the variant are painted together as a before/after split</td><td>atlas §13/§14 never states this; without it a reviewer reads "two heroes" as a bug</td></tr>
+<tr><td>3</td><td><b>The slot is pre-guessed</b> before the owner touches the dropdown (8/8 correct here)</td><td>atlas wording implies the owner chooses</td></tr>
+<tr><td>4</td><td><b><code>blog</code> has no licensed entries</b> and is labelled <code>blog — AI draft only</code>, which flips the primary button to <i>Ask AI to draft one</i></td><td>atlas lists the slot vocabulary without noting any AI-draft-only ones</td></tr>
+<tr><td>5</td><td><b><code>ELEMENT_NOT_FOUND</code> message is misleading</b>: wrapping moves the element (faq <code>18:5</code> → <code>22:5</code>), so retrying the same coordinates fails with <i>"the page is older than the file: reload it and pick again"</i> — but reloading will not help while a session is open</td><td>misdiagnosis; should say "already inside an open try-on session"</td></tr>
+<tr><td>6</td><td><b>Sub-actions must precede options</b> for <code>flags</code>/<code>seo</code>/<code>registry</code> (they read <code>argv[1]</code>): <code>flags --project list</code> → exit 2 <code>USAGE</code>, while <code>flags list --project</code> works</td><td>argument-order gotcha; <code>dh tryon flags list</code> is fine because <code>--project</code> is appended last</td></tr>
+<tr><td>7</td><td><b>AI-draft problems are reported per stage</b> (first failing group), so multiple fix/re-run rounds may be needed</td><td>atlas says a rejection "lists every problem"</td></tr>
+<tr><td>8</td><td><b>Staged designs can emit React warnings</b>: hero variants logged <code>Invalid DOM property flood-opacity / flood-opacity → floodOpacity</code>, <code>color-interpolation-filters</code>, <code>stop-color</code>. The overlay's auto-check counts console errors, so these can prefill a flag</td><td>minor quality issue in staged SVG code</td></tr>
+<tr><td>9</td><td><b>Demo brand logos land in the owner's source</b> (<code>spotify.tsx</code>, <code>vercel.tsx</code>, <code>supabase.tsx</code>, <code>hulu.tsx</code>, <code>firebase.tsx</code>, <code>claude.tsx</code>, <code>bolt.tsx</code>) — but <b>29</b> <code>data-dh-demo</code> marks are applied to them while the owner's own wrapper carries 0</td><td>working as designed; worth stating the volume explicitly</td></tr>
+<tr><td>10</td><td><b><code>clean</code> leaves its own <code>.gitignore</code> line behind</b>, and <code>doctor</code> still says <code>stampsInHtml:true</code> until you restart</td><td>cosmetic</td></tr>
+<tr><td>11</td><td><b>The skill's fixture site is not runnable</b> — no <code>app/layout.tsx</code>, no PostCSS config, no lockfile, no <code>node_modules</code> (tests stub the deps)</td><td>hand-testing needs a root layout + <code>postcss.config.mjs</code> with <code>@tailwindcss/postcss</code> first</td></tr>
+<tr><td>12</td><td><b>Stale server on :3999</b> for another project caused <code>EADDRINUSE</code> while an old overlay kept answering</td><td>operational hazard; always verify the proxy target</td></tr>
+</table>
+
+<h3>Claims that held up completely</h3>
+<ul>
+<li><b>Zero model calls per click</b> — cycling is pure DOM; 0 file writes measured on all 7 working sections.</li>
+<li><b>Loopback-only + per-run token</b> — <code>:4010</code> refused on the LAN IP while the dev server bound <code>::</code>; requests without <code>x-dh-token</code> → <b>403 <code>BAD_TOKEN</code></b>.</li>
+<li><b>Typed refusals return HTTP 200</b> — <code>keep</code> without an id → <b>200</b> <code>{ok:false,code:"NO_SESSION"}</code>; bad id → 200 <code>BAD_ID</code>; unknown API → <b>404 <code>NO_SUCH_API</code></b>.</li>
+<li><b>SSE is token-guarded</b> — <code>/__dh/events</code> → 403 without token, 200 <code>text/event-stream</code> with it (first frame <code>: ok</code>).</li>
+<li><b>Byte-exact reversibility</b> — discard, tune reset, theme undo, <code>clean</code> unwire all restored exact sha256s.</li>
+<li><b>10-deep theme history</b> — 11 applies, 10 undos, then <code>NO_UNDO</code>.</li>
+<li><b><code>dh tryon …</code> passthrough</b> — exit codes verbatim (0 ok / 1 refusal / 2 usage), <code>--project</code> appended automatically.</li>
+<li><b>Overlay re-attaches every 1 s</b>, <b>HMR renders file writes live</b>, <b>stamps are dev-only</b>.</li>
+</ul>
+
+<h2>10 · Reproduce</h2>
+<pre><code># 0. a site with a root layout + postcss.config.mjs (the shipped fixture has neither)
+npm install
+node tryon/cli.mjs doctor   --project &lt;site&gt;
+node tryon/cli.mjs setup    --project &lt;site&gt;   # then RESTART the dev server
+node tryon/cli.mjs serve    --project &lt;site&gt; --port 4010   # open http://127.0.0.1:4010
+
+# swap (verified headless too)
+node tryon/cli.mjs try --file components/pricing.tsx --line 20 --col 5 \
+                       --slot pricing --count 4 --project &lt;site&gt;
+node tryon/cli.mjs status | keep --id s1ce35 --idx 1 | discard --id s1ce35 --project &lt;site&gt;
+
+# THE BUG
+node tryon/cli.mjs try --file components/footer.tsx --line 30 --col 5 \
+                       --slot footer --count 4 --project &lt;site&gt;   # exit 0, ok:true
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3000     # 500
+node tryon/cli.mjs discard --id &lt;id&gt; --project &lt;site&gt;              # back to 200
+
+# AI draft gates
+node tryon/cli.mjs draft     --file components/features.tsx --line 23 --col 5 --slot features
+node tryon/cli.mjs draft-check --id &lt;id&gt;     # DRAFT_RAW_COLOR / DRAFT_LINK / DRAFT_DROPPED_CONTENT
+node tryon/cli.mjs draft-done  --id &lt;id&gt;
+
+# theme history depth
+node tryon/cli.mjs theme --corners round --density airy   # ×11, then:
+node tryon/cli.mjs theme --undo                            # 11th → NO_UNDO (exit 1)
+
+# prod-clean
+node tryon/cli.mjs clean --project &lt;site&gt;   # then restart dev, count data-dh=  → 0</code></pre>
+
+<div class="foot">
+<p><b>Method.</b> Everything above was executed — no claim is inferred from reading source alone unless marked as such. Browser runs used Playwright 1.63.0 + Chromium (headless) against four isolated Next.js projects; file effects were checked with sha256 over the source tree; CLI behaviour was checked through both <code>node tryon/cli.mjs</code> and the <code>dh tryon …</code> passthrough. Raw captures live in <code>&lt;lab&gt;/reports/*.json</code>; 19 screenshots are in <code>./tryon-test-evidence/</code>.</p>
+<p class="muted">Deckhand try-on test report · skill v2.3.0 · catalog 2026-09-27 · 1,247 indexed designs, 980 base-compatible across 58 slot kinds.</p>
+</div>
+
+</div>
+</body>
+</html>
