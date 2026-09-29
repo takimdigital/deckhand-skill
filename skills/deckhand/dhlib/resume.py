@@ -165,7 +165,10 @@ def safety_facts(root: Path) -> dict:
 
 def gather(root: Path) -> dict | None:
     root = Path(root)
-    s = STATE.load(root, required=False)
+    try:
+        s = STATE.load(root, required=False)
+    except DhError:                                     # RUN_CORRUPT: the commands say so; the hook stays quiet
+        return None
     if not s:
         return None
     from . import guide

@@ -433,7 +433,7 @@ F9 SITE (whole look)
   `theme --undo`.
 
 F10 REVIEW `dh verify` → [[dhlib/verify.py#run_verify]]
-- Rows: typecheck · lint (advisory) · build · prod-clean · tryon-closed · secrets · leaks/honesty
+- Rows: typecheck · lint (advisory) · build · prod-clean · tryon-closed · tryon-unwired · secrets · leaks/honesty
   ([[dhlib/brand.py#check]], AI-slop copy included) · routes · seo · copy-slop on the rendered routes (advisory,
   [[dhlib/slop.py#url_units]]) · a11y (advisory) · audit (advisory).
 - routes: every planned static route plus every internal home-page link must answer < 400, on the production build

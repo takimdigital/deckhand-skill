@@ -11,6 +11,7 @@ green on every blocking row; `.deckhand/VERIFY.md`. **Gate G4:** the owner says 
 | build | yes | the production build fails |
 | prod-clean | yes | a try-on stamp is in the build output |
 | tryon-closed | yes | a session is still open |
+| tryon-unwired | yes | next/vite config still loads try-on from `.deckhand/` (run `tryon clean`) |
 | secrets | yes | a credential-shaped value (policy: `data/secrets.json`) or a committed `.env` is in the repo — `.deckhand/` included |
 | env-ignored | yes | `.env` is not gitignored |
 | logs-ignored | yes | deckhand's run logs and local state (`.deckhand/runs.jsonl`, `failures.jsonl`, `*.log`, `autopsy/`, `tryon/`, `RESUME.md`, `notes.jsonl`, `profile.json`, `vault.env`, `profile.md`, `layout.json`) are not gitignored — any `dh` command adds the block; commit `.gitignore` |

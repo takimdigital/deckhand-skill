@@ -4,7 +4,7 @@
                           proven fix is printed at once (no re-debugging), and the failure is recorded
   dh learn add           a fixed failure -> a lesson {signature regex, cause, fix, command, rung}
   dh learn from-failure  the same, with the signature derived from the last recorded failure
-  dh learn preflight P   the lessons for phase P (+ this stack), max 8 lines — `dh next` includes them
+  dh learn preflight --phase P   the lessons for phase P (+ this stack), max 8 lines — `dh next` includes them
   dh learn promote       lessons seen twice -> a patch proposal for the skill itself (fix ladder:
                           eliminate > preflight > reorder > gate > pitfall). Pitfalls are debt.
 Global lessons live in ~/.deckhand/lessons.jsonl (every project benefits); project ones in .deckhand/.

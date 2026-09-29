@@ -78,6 +78,10 @@ def ship(root: Path, force: bool = False, timeout: int = 900) -> dict:
     if dirty:
         raise DhError("DIRTY_TREE", "commit first — Coolify builds what is pushed, not what is on disk", files=dirty.splitlines()[:10])
     head = run(["git", "rev-parse", "HEAD"], cwd=root)["out"].strip()
+    from .checks import verify_stale
+    stale = verify_stale(root, read_json(root / ".deckhand" / "verify.json", {}) or {})
+    if stale:
+        raise DhError("VERIFY_STALE", f"{stale} — run `dh verify` again, then ship")
     push = run(["git", "push"], cwd=root, timeout=300)
     if push["code"] != 0 and "Everything up-to-date" not in push["err"]:
         raise DhError("PUSH_FAILED", push["err"][-400:])

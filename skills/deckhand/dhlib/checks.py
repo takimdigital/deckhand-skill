@@ -104,10 +104,21 @@ def tryon(root: Path, s: dict) -> dict:
     return _res(not open_, [f"try-on session {i} still open (keep or discard it)" for i in open_], "tryon keep|discard --id <id>")
 
 
+def verify_stale(root: Path, r: dict) -> str:
+    """A green verify proves one commit; a later commit (a reopened phase, a quick fix) is unproven."""
+    from .util import run
+    vc = (r or {}).get("commit")
+    head = run(["git", "rev-parse", "HEAD"], cwd=root)["out"].strip() if vc else ""
+    return f"verify proved {vc[:7]}, the code is now at {head[:7]}" if vc and head and vc != head else ""
+
+
 def review(root: Path, s: dict) -> dict:
     r = read_json(root / ".deckhand" / "verify.json")
     if not r:
         return _res(False, ["no verify report"], "dh verify")
+    stale = verify_stale(root, r)
+    if stale:
+        return _res(False, [stale], "dh verify (again: the code changed since)")
     return _res(bool(r.get("ok")), [f"{x['check']}: {x['detail']}" for x in r.get("rows", []) if not x.get("ok") and x.get("blocking", True)], "dh verify (fix every red row)")
 
 

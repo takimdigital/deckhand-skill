@@ -1,6 +1,6 @@
 """REVIEW: one command, evidence rows, a red row blocks the deploy gate.
 
-Rows: typecheck · lint (advisory) · build · prod-clean (no try-on stamp in the build) · tryon-closed ·
+Rows: typecheck · lint (advisory) · build · prod-clean (no try-on stamp in the build) · tryon-closed · tryon-unwired ·
 secrets · leaks/honesty (incl. AI-slop copy) · routes (every planned static route + every internal link on the home page
 answers < 400 — on the production build, served on a free port for the check) · copy-slop on rendered pages (advisory) · a11y basics (advisory) · dependency audit (advisory).
 Writes .deckhand/verify.json + .deckhand/VERIFY.md.
@@ -56,6 +56,19 @@ def product_kit(root: Path, scripts: dict) -> list:
     return miss
 
 
+def tryon_hooked(root: Path) -> list:
+    """`tryon setup` wires next/vite config to .deckhand/tryon/runtime, which git never carries."""
+    out = []
+    for p in list(root.glob("next.config.*")) + list(root.glob("vite.config.*")):
+        try:
+            code = p.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if "deckhand-tryon" in code or ".deckhand/tryon/runtime" in code:
+            out.append(p.name)
+    return out
+
+
 def run_verify(root: Path, url: str | None = None, skip: tuple = (), allow: tuple = ()) -> dict:
     root = Path(root)
     rows = []
@@ -93,6 +106,9 @@ def run_verify(root: Path, url: str | None = None, skip: tuple = (), allow: tupl
     staged = list(root.glob("**/dh-tryon/*"))
     row("tryon-closed", not open_ and not [s for s in staged if "node_modules" not in s.parts],
         "no open try-on session" if not open_ else f"open sessions: {', '.join(open_)} (keep or discard)")
+    hooked = tryon_hooked(root)
+    row("tryon-unwired", not hooked, "the build config does not load try-on" if not hooked else
+        f"{', '.join(hooked)} loads try-on from .deckhand/ (gitignored): a deploy from git fails — `tryon clean` before release")
     leaked = []
     tracked_env = []
     for p in git_files(root):

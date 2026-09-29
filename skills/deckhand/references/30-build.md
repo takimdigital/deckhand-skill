@@ -72,4 +72,4 @@ terminal: a pause or a restart kills it silently. A dev script that pins its por
 said so in that message.
 
 ## Traps
-Read `dh learn preflight build` output — it is printed by `dh next` and is the current list.
+Read `dh learn preflight --phase build` output — it is printed by `dh next` and is the current list.

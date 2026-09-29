@@ -7,6 +7,7 @@ Config precedence: --url/--token flags > COOLIFY_URL/COOLIFY_TOKEN env > this pr
 See references/ops/10-bootstrap-vps.md for setup, references/ops/40-change-pipeline.md for usage.
 """
 import argparse
+import html
 import json
 import os
 import subprocess
@@ -204,7 +205,7 @@ def smoke(target, expect=200, contains=None, timeout=30, http=None):
     except Exception as exc:
         print(f"FAIL {type(exc).__name__} {target} ({exc})")
         return 4
-    ok = status == expect and (not contains or contains in text)
+    ok = status == expect and (not contains or contains in text or contains in html.unescape(text))   # "L'Atelier" is &#x27; in HTML
     print(f"{'OK' if ok else 'FAIL'} {status} {target}")
     return 0 if ok else 4
 

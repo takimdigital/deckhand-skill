@@ -161,6 +161,8 @@ def harvest(root: Path, name: str, to: Path | None = None, repo: str | None = No
         login = GH.me()
         full = repo or f"{login}/deckhand-base-{name}"
         made = GH.ensure_repo(full, description=f"Deckhand base: {manifest['description']}", private=private)
+        if private and made.get("private") is False:
+            raise DhError("REPO_PUBLIC", f"{full} is public — a base carries the business's own data: make it private, or pick another --repo")
         if not made["created"] and not made["empty"]:
             raise DhError("REPO_NOT_EMPTY", f"{full} already has commits — pick another --repo, or delete it first")
         GH.push(dest, full, branch="main")
@@ -218,7 +220,9 @@ def _readme(rows: list) -> str:
 
 def library_upsert(lib: str, row: dict, private: bool = True) -> dict:
     from . import github as GH
-    GH.ensure_repo(lib, description="My Deckhand library: private bases to start new sites from", private=private)
+    made = GH.ensure_repo(lib, description="My Deckhand library: private bases to start new sites from", private=private)
+    if private and made.get("private") is False:
+        raise DhError("REPO_PUBLIC", f"{lib} is public — the library lists private bases: make it private (or set library.repo)")
     text, sha = GH.get_file(lib, "library.json")
     doc = json.loads(text) if text else {"version": 1, "bases": []}
     doc["bases"] = [b for b in doc.get("bases", []) if b.get("name") != row["name"]] + [row]

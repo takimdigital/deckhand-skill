@@ -66,6 +66,13 @@ function readBody(req, limit = 1 << 20) {
   });
 }
 
+/** DNS rebinding: a hostile page whose own name now points at 127.0.0.1 reaches us with its name in Host.
+ * The address itself (127.0.0.1, a LAN IP, [::1]) or localhost is the owner; any other name is not. */
+export function localHost(h) {
+  const name = String(h || '').replace(/:\d+$/, '').replace(/^\[|\]$/g, '').toLowerCase();
+  return name === 'localhost' || /^\d{1,3}(\.\d{1,3}){3}$/.test(name) || (name.includes(':') && /^[0-9a-f:.]+$/.test(name));
+}
+
 export function startServer({ root: rootIn, port = 3999, target, host = '127.0.0.1', log = () => {}, onDraft = () => {} }) {
   const root = path.resolve(rootIn);
   const token = crypto.randomBytes(16).toString('hex');
@@ -165,6 +172,7 @@ export function startServer({ root: rootIn, port = 3999, target, host = '127.0.0
   }
 
   const server = http.createServer(async (req, res) => {
+    if (!localHost(req.headers.host)) { res.writeHead(403, { 'content-type': 'text/plain' }); res.end('deckhand try-on: open it at 127.0.0.1 or localhost'); return; }
     const url = new URL(req.url, 'http://x');
     if (url.pathname === '/__dh/overlay.js') {
       res.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'no-store' });
@@ -204,6 +212,7 @@ export function startServer({ root: rootIn, port = 3999, target, host = '127.0.0
 
   // HMR / websocket passthrough
   server.on('upgrade', (req, sock, head) => {
+    if (!localHost(req.headers.host)) { sock.destroy(); return; }
     const up = net.connect(Number(upstream.port) || 80, upstream.hostname, () => {
       const lines = [`${req.method} ${req.url} HTTP/1.1`];
       for (const [k, v] of Object.entries(req.headers)) lines.push(`${k}: ${k === 'host' ? upHost : (k === 'origin' ? upOrigin : v)}`);

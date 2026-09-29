@@ -32,9 +32,11 @@ const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i
 const root = path.resolve(opt('project', '.'));
 const page = opt('page', 'app/page.tsx');
 const sections = String(opt('sections', 'hero,features,cta,footer')).split(',').map((s) => s.trim()).filter(Boolean);
-const copy = opt('copy') ? JSON.parse(fs.readFileSync(path.resolve(root, opt('copy')), 'utf8')) : {};
 const registry = opt('registry', null);
 const out = (o, c = 0) => { process.stdout.write(JSON.stringify(o) + '\n'); process.exit(c); };
+let copy = {};
+try { copy = opt('copy') ? JSON.parse(fs.readFileSync(path.resolve(root, opt('copy')), 'utf8')) : {}; }
+catch (e) { out({ ok: false, code: 'BAD_COPY', message: `${opt('copy')}: ${e.message} (fix the JSON, then compose again)` }, 1); }
 
 const esc = (s) => (/[{}<>]/.test(String(s)) ? `{${JSON.stringify(String(s))}}` : String(s));
 const unit = (role, text, href) => ({ role, text: String(text), src: esc(text), href: href ? JSON.stringify(href) : null, list: null });
@@ -81,10 +83,11 @@ async function main() {
     const staged = [];
     for (const cand of ranked.filter((c) => !placed.some((d) => d.cand.id === c.id)).slice(0, tries * 2)) {
       if (staged.length >= tries) break;
+      let stage = null;
       try {
         const p0 = detectProject(root);
         const bundle = await fetchBundle(p0, cand);
-        const stage = writeBundle(p0, cand, bundle, { baseDir: path.posix.join(p0.componentsDir, 'sections') });
+        stage = writeBundle(p0, cand, bundle, { baseDir: path.posix.join(p0.componentsDir, 'sections') });
         if (stage.problems.length || !stage.export) { fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true }); continue; }
         const entryAbs = path.join(root, stage.entry);
         const entryCode = fs.readFileSync(entryAbs, 'utf8');
@@ -101,7 +104,10 @@ async function main() {
         const score = b.carried.length / of - 0.05 * b.demo.length - 0.04 * demoVisual - 0.02 * staged.length + kin;
         staged.push({ cand, stage, p, b, score });
         if (process.env.DH_DEBUG) console.error(slot, cand.id, 'carried', b.carried.length, '/', of, 'demo', b.demo.length, 'visual', demoVisual, 'score', score.toFixed(3));
-      } catch (e) { if (process.env.DH_DEBUG) console.error(slot, cand.id, 'FAILED', e.message); }
+      } catch (e) {
+        if (stage && !staged.some((s) => s.stage.relDir === stage.relDir)) fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true });
+        if (process.env.DH_DEBUG) console.error(slot, cand.id, 'FAILED', e.message);
+      }
     }
     if (!staged.length) { report.push({ slot, ok: false, why: 'no candidate could be staged' }); continue; }
     staged.sort((x, y) => y.score - x.score);
@@ -120,7 +126,9 @@ async function main() {
     ? `import ${d.local} from ${JSON.stringify(specFor(prof, d.stage.entry))}`
     : `import { ${d.stage.export.name} as ${d.local} } from ${JSON.stringify(specFor(prof, d.stage.entry))}`)).join('\n');
   const pageAbs = path.join(root, page);
-  if (fs.existsSync(pageAbs)) fs.copyFileSync(pageAbs, pageAbs + '.before-compose');
+  if (!placed.length) out({ ok: false, code: 'NOTHING_PLACED', message: `no section could be placed: ${page} is unchanged`, sections: report }, 1);
+  // the first backup is the owner's own page: a later compose must not replace it with an earlier compose
+  if (fs.existsSync(pageAbs) && !fs.existsSync(pageAbs + '.before-compose')) fs.copyFileSync(pageAbs, pageAbs + '.before-compose');
   fs.mkdirSync(path.dirname(pageAbs), { recursive: true });
   fs.writeFileSync(pageAbs, `${imports}\n\nexport default function Page() {\n  return (\n    <main>\n${placed.map((d) => '      ' + d.usage).join('\n')}\n    </main>\n  );\n}\n`);
   const ownerTexts = Object.values(copy).flatMap((c) => [c.eyebrow, c.heading, ...[].concat(c.text || []), ...[].concat(c.actions || []).map((a) => a.label),

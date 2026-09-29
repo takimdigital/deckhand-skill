@@ -39,6 +39,9 @@ def state_path(root: Path) -> Path:
 
 def load(root: Path, required: bool = True) -> dict:
     s = read_json(state_path(root))
+    if s is None and state_path(root).exists():         # unreadable is not "no run": gates would stop being enforced
+        raise DhError("RUN_CORRUPT", f"{state_path(root)} is not valid JSON (a merge conflict or a half edit?) — "
+                      "restore it (`git checkout .deckhand/run.json`, or rebuild from .deckhand/history.jsonl); never `dh init` over it")
     if s is None and required:
         raise DhError("NO_RUN", f"no .deckhand/run.json in {root} — start with `dh init`")
     return s
@@ -131,7 +134,7 @@ def reached(s: dict, phase: str) -> None:
             raise DhError("OUT_OF_ORDER", f"phase '{prev}' is not done yet (`dh next` says what is)", phase=phase, first=prev)
     g = blocking_gate(s)
     if g and PHASE_IDS.index(gate_phase(g)) < idx:
-        raise DhError("GATE_BLOCKED", f"gate {g} ({GATES[g]}) needs the owner's go: `dh gate pass {g}`", gate=g)
+        raise DhError("GATE_BLOCKED", f"gate {g} ({GATES[g]}) needs the owner's go: `dh gate pass {g} --quote \"<their words, verbatim>\"`", gate=g)
 
 
 def require(root: Path, phase: str) -> None:
@@ -149,6 +152,8 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
         raise DhError("MOVED", f"this project continues in {s['moved_to']} (its app folder): run `dh next` there", to=s["moved_to"])
     if phase not in PHASE_IDS:
         raise DhError("BAD_PHASE", f"phase must be one of {PHASE_IDS}")
+    if force_reason and phase in NOT_SKIPPABLE:
+        raise DhError("NOT_FORCEABLE", f"phase {phase} cannot be forced: {NOT_SKIPPABLE[phase]}")
     idx = PHASE_IDS.index(phase)
     reached(s, phase)
     result = checks.run(phase, Path(root), s)
@@ -161,7 +166,8 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
         s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "auto"}
     save(root, s)
     log(root, {"event": "phase_done", "phase": phase, "ok": result["ok"], "forced": force_reason})
-    return {"ok": True, "phase": phase, "check": result, **summary(root, s)}
+    summ = summary(root, s)                             # "phase" = the one just done; "now" = where the run stands
+    return {"ok": True, **summ, "phase": phase, "now": summ["phase"], "check": result}
 
 
 NOT_SKIPPABLE = {"review": "nothing reaches production without `dh verify` green (fix the red rows instead)"}
