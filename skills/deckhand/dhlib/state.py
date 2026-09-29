@@ -217,7 +217,7 @@ def is_hold(quote: str) -> bool:
     """The owner holds it back ("wait", "don't ship it yet", "hold on, give me a day") without asking for a change:
     the answer is to wait, never to reopen and redo a phase they did not question (SKILL invariant 7)."""
     q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
-    return bool(HOLD_RX.search(q)) and not CHANGE_RX.search(q)
+    return bool(HOLD_RX.search(q)) and not CHANGE_RX.search(re.sub(r"(?i)\b(not|pas) (yet|encore)\b", " ", q))
 
 
 def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -> dict:
@@ -234,7 +234,7 @@ def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -
     if verdict == "change_request" and is_hold(quote):
         raise DhError("HOLD", f"the owner is holding it back, not asking for a change: {quote!r}",
                       gate=gate, do=["wait: change nothing, reopen nothing", "ask what they need before they give the go",
-                                     f"a change asked? `dh reopen {due} --reason \"<their words>\"`; the go given? quote it"])
+                                     f"a change asked? `dh reopen {due} --reason \"[their words]\"`; the go given? quote it"])
     if verdict == "change_request":
         phase = due
         raise DhError("CHANGE_REQUEST", f"the owner's words read as a change request, not a go: {quote!r}",

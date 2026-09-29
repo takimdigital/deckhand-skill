@@ -100,7 +100,7 @@ class GateQuote(Base):
 
     def test_a_hold_waits_and_never_reopens(self):
         # field test 2026-09-29 F6: a hold got the change-request answer, whose first step reopens the plan
-        for q in ("hold on, give me a day to think about it", "wait, dont ship this yet", "stop"):
+        for q in ("hold on, give me a day to think about it", "wait, dont ship this yet", "stop", "not yet"):
             code, out = self.dh("gate", "pass", "G1", "--quote", q)
             self.assertEqual((code, out["code"]), (1, "HOLD"), q)
             self.assertFalse(any(d.startswith("dh reopen") for d in out["do"]), out["do"])
