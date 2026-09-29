@@ -16,6 +16,9 @@ def _post(url: str, payload: dict) -> None:
 
 
 def deliver(text: str, title: str = "deckhand") -> list:
+    if os.environ.get("DECKHAND_NOTIFY") == "stdout":      # a Hermes no-agent cron job: stdout IS the delivered message
+        print(f"{title}\n{text}")
+        return ["stdout"]
     sent = []
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         _post(f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage",

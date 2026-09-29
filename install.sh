@@ -27,7 +27,12 @@ need node "Node 18+ runs try-on and compose"
 need git "git clones bases and versions projects"
 [ "$MISSING" = 1 ] && say "(install what is missing, then re-run — nothing else is required)"
 
-HOMES="claude:$HOME/.claude/skills
+HERMES_EXTRA=""
+[ -n "$HERMES_HOME" ] && HERMES_EXTRA="hermes:$HERMES_HOME/skills
+"
+for p in "$HOME"/.hermes/profiles/*/skills; do [ -d "$p" ] && HERMES_EXTRA="${HERMES_EXTRA}hermes:$p
+"; done
+HOMES="${HERMES_EXTRA}claude:$HOME/.claude/skills
 codex:$HOME/.codex/skills
 agents:$HOME/.agents/skills
 cursor:$HOME/.cursor/skills

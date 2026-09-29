@@ -472,6 +472,9 @@ def agent_entry(root: Path) -> dict:
             f.write_text(new, encoding="utf-8")
             changed.append(f.name)
     upsert(root / "AGENTS.md")
+    for own in (".hermes.md", "HERMES.md"):          # Hermes loads ONE project file and these win over AGENTS.md
+        if (root / own).exists():
+            upsert(root / own)
     cl = root / "CLAUDE.md"
     ct = cl.read_text(encoding="utf-8") if cl.exists() else ""
     if not ct.strip():

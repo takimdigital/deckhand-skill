@@ -699,7 +699,8 @@ F19 RESEARCH EVIDENCE
 | workflow autopsy, session loaders (Hermes, chat) | [[dhlib/wfautopsy.py]] · [[dhlib/autopsy.py#load]] | test_workflow.py |
 | gate quotes, services, ports, split into N agents, product deliverable, pending ledger (field fixes) | [[dhlib/state.py#gate_pass]] · [[dhlib/build.py]] · [[dhlib/util.py#free_port]] · [[dhlib/plan.py#split]] · [[dhlib/verify.py#product_kit]] · [[dhlib/pending.py]] | [[skills/deckhand/tests/test_field.py]] |
 | suggestions after PENDING (rules, scores, dismissals) | [[dhlib/suggest.py]] · [[dhlib/guide.py#_suggest]] · [[dhlib/resume.py#render]] | [[skills/deckhand/tests/test_suggest.py]] |
-| harness syntax `dh next` prints | [[data/harness.json]] · [[dhlib/guide.py#harness_notes]] · [[references/harness.md]] | test_workflow.py / manual |
+| harness syntax `dh next` prints (per-harness rows, per-key fallback to `unknown`; no tool names in code) | [[data/harness.json]] · [[dhlib/guide.py#harness_row]] · [[dhlib/guide.py#harness_notes]] · [[references/harness.md]] | [[skills/deckhand/tests/test_harness.py]] |
+| Hermes cron bots (`dh ops add --runner hermes`: script in $HERMES_HOME/scripts + a no-agent cronjob call), `.hermes.md` resume block | [[dhlib/ops.py#add]] · [[templates/bots/hermes_cron.py]] · [[templates/bots/notify.py#deliver]] · [[dhlib/resume.py#agent_entry]] | [[skills/deckhand/tests/test_harness.py]] |
 | research evidence: labels, quote check, sources, brief questions, scoring | [[dhlib/research.py]] · [[data/research.json]] · [[references/research-card.md]] | [[skills/deckhand/tests/test_research.py]] |
 | SEO rules, owner facts, crawler lists | [[data/seo.json]] · [[dhlib/seo.py]] (checks, PENDING block, ping) · [[tryon/lib/seo.mjs]] (writes) | [[skills/deckhand/tests/test_seo.py]], [[skills/deckhand/tryon/test/seo.test.mjs]] |
 | docs ↔ commands, README numbers | whatever changed (docs, SKILL.md §4, README) | [[scripts/test_repo_coherence.py]] |

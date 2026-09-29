@@ -200,6 +200,8 @@ route matrix and the acceptance rows before `phase done`. Full procedure: `refer
 ## 8. Harness notes
 
 `dh next` returns `harness`: the syntax of the harness it detects (Hermes, Claude Code, Codex, Cursor…) for what this
-phase needs — backgrounding, waiting, delegating, the checklist. `dh dev start` detaches by itself. Hermes: never
-`nohup … &`; `terminal(background=true)` + `process_manage`; no `{x}` or `<x>` in any `delegate_task` text. Full table:
-`references/harness.md`. Paths with spaces MUST be quoted. On Windows use `py`, and `node` must be on PATH.
+phase needs — backgrounding, waiting, delegating, the checklist, the cron bots, the project context file. Follow it:
+the lines are per-harness data (`data/harness.json`), so any harness works and a named one uses its own tools. `dh dev start`
+detaches by itself. Hermes: never `nohup … &`; `terminal(background=true)` + `process_manage`; the checklist is
+`todo_list`; site bots are no-agent `cronjob`s (`dh ops add --runner hermes`); no `{x}` or `<x>` in any `delegate_task`
+text. Full table: `references/harness.md`. Paths with spaces MUST be quoted. On Windows use `py`, and `node` must be on PATH.

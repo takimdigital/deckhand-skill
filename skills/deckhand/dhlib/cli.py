@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -248,7 +249,7 @@ def build_parser():
 
     p = sub.add_parser("deploy"); p.add_argument("action", choices=["target", "ship", "smoke", "raw"]); p.add_argument("rest", nargs=argparse.REMAINDER)
     p.add_argument("--app"); p.add_argument("--url"); p.add_argument("--force", action="store_true")
-    p = sub.add_parser("ops"); p.add_argument("action", choices=["suggest", "add", "list"]); p.add_argument("bot", nargs="?"); p.add_argument("--runner", default="github")
+    p = sub.add_parser("ops"); p.add_argument("action", choices=["suggest", "add", "list"]); p.add_argument("bot", nargs="?"); p.add_argument("--runner", default=None, help="github | cron | local | hermes (default: hermes inside a Hermes session, else github)")
 
     p = sub.add_parser("learn"); p.add_argument("action", choices=["add", "match", "preflight", "promote", "from-failure", "list"])
     p.add_argument("--phase", default="build"); p.add_argument("--symptom"); p.add_argument("--cause", default=""); p.add_argument("--fix", default="")
@@ -519,8 +520,9 @@ def dispatch(a):
         if a.action == "list":
             return {"bots": O.catalog()}
         if not a.bot:
-            raise DhError("USAGE", "dh ops add <bot-id> [--runner github|cron]")
-        return O.add(root, a.bot, a.runner)
+            raise DhError("USAGE", "dh ops add <bot-id> [--runner github|cron|local|hermes]")
+        from . import workflow as WF
+        return O.add(root, a.bot, a.runner or ("hermes" if WF.harness() == "hermes" and os.environ.get("HERMES_HOME") else "github"))
     if c == "learn":
         from . import learn as LE
         r_ = root if (root / ".deckhand").exists() else None

@@ -92,15 +92,23 @@ def _pending(root: Path) -> dict:
 
 
 HARNESS_KEYS = {"build": ("background", "delegate", "limits", "browser"), "research": ("delegate", "limits"), "plan": ("delegate",),
-                "review": ("background", "browser"), "tryon": ("background",), "define": ("todo",)}
+                "review": ("background", "browser"), "tryon": ("background",), "define": ("todo", "context"),
+                "deploy": ("background",), "operate": ("cron",)}
+
+
+def harness_row(name: str | None = None) -> dict:
+    """The detected harness's lines (data/harness.json), each key it does not override filled from `unknown`: every
+    harness gets every line (agnostic), a named one its own syntax. No tool name of any harness lives in the code."""
+    from . import workflow as WF
+    data = read_json(SKILL / "data" / "harness.json", {}) or {}
+    return {**(data.get("unknown") or {}), **(data.get(name or WF.harness()) or {})}
 
 
 def harness_notes(phase: str) -> dict | None:
     """D12: one generic harness line was wrong for Hermes. The detected harness's own syntax, only what this phase needs."""
     from . import workflow as WF
     name = WF.harness()
-    data = read_json(SKILL / "data" / "harness.json", {}) or {}
-    row = data.get(name) or data.get("unknown") or {}
+    row = harness_row(name)
     keys = HARNESS_KEYS.get(phase, ())
     notes = {k: row[k] for k in keys if row.get(k)}
     return {"name": name, **notes} if notes else None
