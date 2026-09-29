@@ -161,7 +161,7 @@ async function main() {
   let demoLeft = [];
   for (const d of placed) {
     bake(root, page, d.local, { entry: d.stage.entry, prop: d.prop });
-    const left = demoTexts(root, d.stage.relDir, ownerTexts);
+    const left = demoTexts(root, d.stage.relDir, ownerTexts, { ledger: true });
     demoLeft = demoLeft.concat(left);
     const r = report.find((x) => x.slot === d.slot);
     if (r) r.demo_copy = left.map((e) => e.text).slice(0, 12);
