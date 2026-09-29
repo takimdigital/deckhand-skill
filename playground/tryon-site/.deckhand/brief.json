@@ -1,0 +1,48 @@
+{
+  "name": "",
+  "business": "Maison Levain bakery",
+  "shape": "booking",
+  "audience": "Lyon locals",
+  "market": "",
+  "languages": [
+    "fr"
+  ],
+  "brand": {
+    "name": "Maison Levain",
+    "tagline": "",
+    "primary": "",
+    "logo": "",
+    "tone": "",
+    "social": []
+  },
+  "features": [],
+  "money": "",
+  "content": "owner-supplied | draft-then-correct",
+  "hosting": "vps | free-preview | undecided",
+  "domain": "",
+  "deadline": "",
+  "assumed": [],
+  "seo": {
+    "keywords": [],
+    "locations": [],
+    "profiles": [],
+    "photos": [],
+    "founder": "",
+    "founded": "",
+    "reviews": "",
+    "local": {
+      "category": "",
+      "address": "",
+      "phone": "",
+      "email": "",
+      "hours": [],
+      "price_range": ""
+    },
+    "ai_crawlers": "allow",
+    "search_console": "",
+    "bing": "",
+    "gbp": "",
+    "places": "",
+    "reviews_asked": ""
+  }
+}

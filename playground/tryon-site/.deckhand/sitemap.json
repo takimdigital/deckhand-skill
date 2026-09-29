@@ -1,0 +1,23 @@
+{
+  "name": "Maison Levain",
+  "nav": { "header": ["route:/", "route:/menu", "route:/contact"], "footer": ["route:/legal", "mailto:bonjour@maisonlevain.fr"] },
+  "pages": [
+    { "id": "home", "route": "/", "title": "Accueil", "auth": "public", "purpose": "turn a visitor into a first order",
+      "sections": [
+        { "id": "hero", "slot": "hero", "actions": [ { "id": "order", "label": "Commander", "to": "route:/contact" } ] },
+        { "id": "how", "slot": "features" },
+        { "id": "plans", "slot": "pricing", "actions": [ { "id": "sub", "label": "S'abonner", "to": "route:/contact" } ] },
+        { "id": "faq", "slot": "faq" },
+        { "id": "cta", "slot": "cta", "actions": [ { "id": "cta-order", "label": "Réserver mon pain", "to": "route:/contact" } ] }
+      ], "features": ["ordering"] },
+    { "id": "menu", "route": "/menu", "title": "Carte", "sections": [ { "id": "list", "slot": "content", "actions": [ { "id": "add", "label": "Commander", "to": "route:/contact" } ] } ] },
+    { "id": "contact", "route": "/contact", "title": "Contact", "features": ["ordering"], "sections": [ { "id": "form", "slot": "contact" } ],
+      "actions": [ { "id": "send", "label": "Envoyer", "to": "api:POST /api/contact", "then": "route:/contact", "error": "state:contact.error" } ] },
+    { "id": "legal", "route": "/legal", "title": "Mentions légales", "sections": [ { "id": "text", "slot": "content" } ] }
+  ],
+  "features": [
+    { "id": "ordering", "title": "Order bread online", "pages": ["home", "contact"], "api": ["POST /api/contact"], "entities": ["Order"], "done": "an order sent on /contact reaches the baker" }
+  ],
+  "forms": [ { "id": "contact-form", "page": "contact", "fields": ["name", "email", "message"], "submit": "api:POST /api/contact", "success": "route:/contact", "error": "state:contact.error" } ],
+  "entities": [ { "id": "Order", "fields": ["id", "name", "email", "message"] } ]
+}
