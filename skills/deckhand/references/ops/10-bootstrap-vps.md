@@ -13,7 +13,8 @@ cosmetic on Windows git-bash; enforce for real with `icacls <file> /inheritance:
 read the vault themselves (this project's, then the machine's); for the raw curl lines load it into the shell with
 the `shell` line `dh vault list` prints (`set -a; . <machine vault>; . <this project's>; set +a`; values are
 single-quoted, so this never executes or splits one). SSH keys stay in `~/.vps-ops/ssh/` and v1's
-`~/.vps-ops/secrets/env.sh` is still read as a fallback, so servers set up with v1 keep working.
+`~/.vps-ops/secrets/env.sh` is still read as a fallback, so servers set up with v1 keep working. Under an explicit
+`DECKHAND_HOME` (a sandbox, a field test) it is read only when `VPS_OPS_HOME` is set.
 
 > **Optional — the Coolify CLI** (MIT, `coollabsio/coolify-cli`): some refs show `coolify …` commands for convenience; nothing requires it — every step also has a stdlib script/curl path. Install only if you want those commands: Linux/macOS `curl -fsSL https://raw.githubusercontent.com/coollabsio/coolify-cli/main/scripts/install.sh | bash` · Windows PowerShell `irm https://raw.githubusercontent.com/coollabsio/coolify-cli/main/scripts/install.ps1 | iex` (user-local: prefix `$env:COOLIFY_USER_INSTALL=1; `) · or `go install github.com/coollabsio/coolify-cli/coolify@latest`.
 

@@ -293,15 +293,22 @@ def _quote(v: str) -> str:
     return "'" + v.replace("'", "'\\''") + "'"
 
 
-def legacy_home() -> Path:
-    return Path(os.environ.get("VPS_OPS_HOME") or (Path.home() / ".vps-ops"))
+def legacy_home() -> Path | None:
+    """v1's ops keyring folder. An explicit VPS_OPS_HOME always wins; under an explicit (isolated) DECKHAND_HOME the real
+    ~/.vps-ops is never read (F2): a sandbox or field test cannot leak the owner's secret names or call their APIs."""
+    if os.environ.get("VPS_OPS_HOME"):
+        return Path(os.environ["VPS_OPS_HOME"])
+    if os.environ.get("DECKHAND_HOME"):
+        return None
+    return Path.home() / ".vps-ops"
 
 
 def legacy_read() -> dict:
     """v1's ops keyring (~/.vps-ops/secrets/*.env.sh) — read-only compatibility, so existing servers keep working."""
     out = {}
-    d = legacy_home() / "secrets"
-    for f in sorted(d.glob("*.sh")) if d.is_dir() else []:
+    h = legacy_home()
+    d = h / "secrets" if h else None
+    for f in sorted(d.glob("*.sh")) if d and d.is_dir() else []:
         for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
             m = re.match(r"^\s*(?:export\s+)?([A-Z][A-Z0-9_]*)=(.*)$", line)
             if m and m.group(1) not in out:
