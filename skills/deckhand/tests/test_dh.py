@@ -18,6 +18,7 @@ from dhlib.cli import main  # noqa: E402
 from dhlib.util import DhError, read_json, write_json  # noqa: E402
 
 EXAMPLE = json.loads((SKILL / "templates" / "sitemap.json").read_text(encoding="utf-8"))
+OWN = {**EXAMPLE, "pages": [{**EXAMPLE["pages"][0], "title": "This business's own home"}] + EXAMPLE["pages"][1:]}   # adapted, not the untouched example
 
 
 class Base(unittest.TestCase):
@@ -54,7 +55,8 @@ class StateMachine(Base):
         self.assertTrue(state.phase_done(self.root, "define")["ok"])
         state.phase_skip(self.root, "research", "owner declined")
         plan.init(self.root)
-        write_json(plan.sitemap_path(self.root), EXAMPLE)
+        self.assertIn("still the `dh plan init` example", state.phase_done(self.root, "plan")["check"]["why"][0])
+        write_json(plan.sitemap_path(self.root), OWN)
         self.assertTrue(state.phase_done(self.root, "plan")["ok"])
         s = state.load(self.root)
         self.assertEqual(state.blocking_gate(s), "G1")
@@ -71,7 +73,7 @@ class StateMachine(Base):
         write_json(self.root / ".deckhand" / "brief.json", {"business": "b", "shape": "leadgen", "languages": ["en"], "audience": "a"})
         state.phase_done(self.root, "define")
         state.phase_skip(self.root, "research", "r")
-        write_json(plan.sitemap_path(self.root), EXAMPLE)
+        write_json(plan.sitemap_path(self.root), OWN)
         state.phase_done(self.root, "plan")
         self.assertEqual(state.load(self.root)["gates"]["G1"]["by"], "auto")
 

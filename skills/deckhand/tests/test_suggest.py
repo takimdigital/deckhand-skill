@@ -101,7 +101,9 @@ class Suggestions(Base):
         write_json(self.root / ".deckhand" / "brief.json", {"business": "b", "shape": "saas", "languages": ["en"], "audience": "a"})
         state.phase_done(self.root, "define")
         state.phase_skip(self.root, "research", "declined")
-        write_json(self.root / ".deckhand" / "sitemap.json", json.loads((SKILL / "templates" / "sitemap.json").read_text(encoding="utf-8")))
+        sm = json.loads((SKILL / "templates" / "sitemap.json").read_text(encoding="utf-8"))
+        sm["pages"][0]["title"] = "Bakery home"                               # the untouched example does not pass
+        write_json(self.root / ".deckhand" / "sitemap.json", sm)
         state.phase_done(self.root, "plan")
         g = next(i for i in suggest.compute(self.root, limit=0)["items"] if i["id"] == "gate")
         self.assertEqual((g["level"], g["what"]), ("now", "Your turn (G1): approve the plan, or say what to change"))

@@ -191,6 +191,20 @@ class Verify(Base):
 
 
 class PhaseCheck(Base):
+    def test_research_with_nothing_found_on_its_pages_is_not_done(self):
+        # finding 14: every fetch blocked, every item unchecked, and the phase still passed
+        base = {"competitors": [{"name": n, "url": f"https://{n}.fr", "strengths": ["s"], "gaps": ["g"]} for n in ("a", "b", "c")],
+                "audience": {"primary": "families"}, "conversion": {"plays": ["instant quote"]}, "features": {"now": ["booking"]},
+                "claims": [{"id": "C-1", "claim": "x", "label": "VERIFIED", "url": "https://a.fr", "quote": "x"}],
+                "vocabulary": [{"term": t, "kind": "customer", "url": "https://a.fr", "quote": t} for t in ("a1", "b2", "c3")]}
+        p = self.root / ".deckhand" / "research.json"
+        write_json(p, base)
+        import hashlib
+        write_json(self.root / ".deckhand" / "research" / "verify.json", {"ok": True, "research_sha": hashlib.sha1(p.read_bytes()).hexdigest(),
+                   "summary": {"found": 0, "terms_found": 0, "unchecked": 1, "mismatch": 0, "invalid": 0, "terms_bad": 0}})
+        why = checks.research(self.root, {})["why"]
+        self.assertTrue(any("found 0 quotes" in w for w in why), why)
+
     def test_research_is_done_only_with_claims_vocabulary_and_a_verify_after_the_last_edit(self):
         base = {"competitors": [{"name": n, "url": f"https://{n}.fr", "strengths": ["s"], "gaps": ["g"]} for n in ("a", "b", "c")],
                 "audience": {"primary": "families"}, "conversion": {"plays": ["instant quote"]}, "features": {"now": ["booking"]}}

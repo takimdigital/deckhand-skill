@@ -48,13 +48,21 @@ def research(root: Path, s: dict) -> dict:
     elif not v.get("ok"):
         s = v["summary"]
         why.append(f"dh research verify: {s['mismatch']} quotes not on their page, {s['invalid']} invalid claims, {s['terms_bad']} bad terms")
+    elif v["summary"].get("found", 0) + v["summary"].get("terms_found", 0) < RS.POLICY.get("min_found", 3):
+        need = RS.POLICY.get("min_found", 3)             # every fetch blocked = nothing proven (review 2026-09-27, finding 14)
+        why.append(f"dh research verify found {v['summary'].get('found', 0) + v['summary'].get('terms_found', 0)} quotes on their pages (need {need}): add claims from pages that "
+                   f"can be fetched, or, with the owner's word, `dh phase skip research --reason \"…\"`")
     return _res(not why, why, "research is evidence: every claim carries its label, URL and a quote that is really on the page")
 
 
 def plan(root: Path, s: dict) -> dict:
     from . import plan as P
+    from .util import SKILL
     r = P.lint(root)
-    return _res(r["ok"], [e["msg"] for e in r["errors"]], "fix the sitemap (dh plan lint shows each dead end)", warnings=len(r["warnings"]))
+    why = [e["msg"] for e in r["errors"]]
+    if read_json(root / ".deckhand" / "sitemap.json") == read_json(SKILL / "templates" / "sitemap.json"):
+        why.insert(0, "sitemap.json is still the `dh plan init` example: write this business's pages from the brief and research")
+    return _res(not why, why, "fix the sitemap (dh plan lint shows each dead end)", warnings=len(r["warnings"]))
 
 
 def build(root: Path, s: dict) -> dict:
