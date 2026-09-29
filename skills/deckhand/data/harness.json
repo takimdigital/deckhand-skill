@@ -26,6 +26,18 @@
     "todo": "`dh workflow todo --format md` as the plan.",
     "transcript": "the run log .deckhand/runs.jsonl (run risky commands through `dh run --`)."
   },
+  "gemini-cli": {
+    "background": "run_shell_command with is_background=true (or a second terminal); `dh dev start` detaches by itself.",
+    "delegate": "no sub-agents you can count on: build the AGENT-n.md packages one after the other, or one Gemini CLI session per package.",
+    "todo": "`dh workflow todo --format md` as the plan.",
+    "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read."
+  },
+  "opencode": {
+    "background": "a second terminal or a background shell; `dh dev start` detaches by itself.",
+    "delegate": "the task tool (sub-agents): one per .deckhand/work/AGENT-n.md, or sequential.",
+    "todo": "the todo tool ← `dh workflow todo` (or `dh workflow todo --format md` as the plan).",
+    "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read."
+  },
   "unknown": {
     "background": "a second terminal, or the harness's background mode; `dh dev start` detaches by itself.",
     "delegate": "parallel sessions, one per AGENT-n.md — or sequential in this one.",
