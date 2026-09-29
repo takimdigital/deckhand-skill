@@ -105,7 +105,7 @@ def redact(text: str, values=()) -> str:
 
 # Deckhand refusing on purpose (a guardrail doing its job) — never a failure to explain, learn from or retry
 # (a red check, a busy folder, a step out of order or past a gate is the agent's work to fix: those stay failures)
-GUARD_CODES = ("CHANGE_REQUEST", "NEED_QUOTE", "NEEDS_ACCEPT", "NEED_REASON", "NEED_HOW_WHERE", "SECRET_IN_TEXT", "SEO_ITEM",
+GUARD_CODES = ("CHANGE_REQUEST", "HOLD", "NEED_QUOTE", "NEEDS_ACCEPT", "NEED_REASON", "NEED_HOW_WHERE", "SECRET_IN_TEXT", "SEO_ITEM",
                "NOTE_TOO_THIN")
 GUARD_RX = re.compile(r"^(" + "|".join(GUARD_CODES) + r"):")
 
@@ -196,7 +196,7 @@ def reserved_ports() -> list:
         if os.name == "nt":
             try:
                 r = subprocess.run(["netsh", "interface", "ipv4", "show", "excludedportrange", "protocol=tcp"],
-                                   capture_output=True, text=True, timeout=10)
+                                   capture_output=True, text=True, timeout=10, encoding="utf-8", errors="replace")
                 _RESERVED = [(int(a), int(b)) for a, b in re.findall(r"^\s*(\d+)\s+(\d+)", r.stdout, re.M)]
             except Exception:  # noqa: BLE001
                 pass

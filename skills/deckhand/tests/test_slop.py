@@ -177,15 +177,15 @@ class Project(Base):
         subprocess.run(["git", "init", "-q"], cwd=self.root)
         (self.root / "app").mkdir()
         (self.root / "components" / "ui").mkdir(parents=True)
-        (self.root / "package.json").write_text('{"name": "maison-levain"}\n')
+        (self.root / "package.json").write_text('{"name": "maison-levain"}\n', encoding="utf-8")
         (self.root / "app" / "page.tsx").write_text(
             "export default function P(){return <main>\n<h1>Elevate your mornings</h1>\n"
             "<p>Nestled in the heart of Lyon, our bakery is a testament to the timeless art of bread.</p>\n"
             "<p>Whether you're a busy professional or a curious foodie, we've got you covered.</p>\n"
-            "<blockquote>Seamless service, the best croissant I have had. dh:slop-ok</blockquote>\n</main>}\n")
-        (self.root / "app" / "about.tsx").write_text("export default function A(){return <p>Ana has baked on Rue Mercière since 2009. We open at 7 am.</p>}\n")
-        (self.root / "components" / "ui" / "button.tsx").write_text('export const b = "a seamless cutting-edge synergy button";\n')
-        (self.root / "README.md").write_text("A cutting-edge, seamless starter that will elevate your workflow.\n")
+            "<blockquote>Seamless service, the best croissant I have had. dh:slop-ok</blockquote>\n</main>}\n", encoding="utf-8")
+        (self.root / "app" / "about.tsx").write_text("export default function A(){return <p>Ana has baked on Rue Mercière since 2009. We open at 7 am.</p>}\n", encoding="utf-8")
+        (self.root / "components" / "ui" / "button.tsx").write_text('export const b = "a seamless cutting-edge synergy button";\n', encoding="utf-8")
+        (self.root / "README.md").write_text("A cutting-edge, seamless starter that will elevate your workflow.\n", encoding="utf-8")
         state.init(self.root, "Bakery", "auto", "pool")
         write_json(self.root / ".deckhand" / "brief.json", {"business": "Sourdough in Lyon", "languages": ["en", "fr"], "brand": {"name": "Maison Levain"}})
         subprocess.run(["git", "add", "-A"], cwd=self.root)
@@ -218,7 +218,7 @@ class Project(Base):
 
     def test_brand_words_and_the_allow_list_are_never_slop(self):
         write_json(self.root / ".deckhand" / "brief.json", {"languages": ["en"], "brand": {"name": "Elevate Fitness"}})
-        (self.root / "app" / "about.tsx").write_text("export default function A(){return <p>Elevate Fitness opens at 6 am on Rue Mercière. A robust squat rack for every member.</p>}\n")
+        (self.root / "app" / "about.tsx").write_text("export default function A(){return <p>Elevate Fitness opens at 6 am on Rue Mercière. A robust squat rack for every member.</p>}\n", encoding="utf-8")
         hits = {h["id"] for u in S.project_units(self.root) if u["where"] == "app/about.tsx" for h in u["hits"]}
         self.assertNotIn("elevate", hits)
         self.assertIn("robust", hits)

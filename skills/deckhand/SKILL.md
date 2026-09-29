@@ -98,7 +98,8 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 7. **Gates are hard** in phased mode: no clone before G1, no rebrand/extra work before G2, no deploy
    before G4, "even when the work looks obviously right". A gate passes on the owner's own words:
    `dh gate pass Gx --quote "<their message>"`; words that ask for a change ("make it…", "add…", "but…") or hold it back ("don't ship it", "wait") are not a go —
-   `dh reopen <phase>`, change it, show it again. Never paraphrase an owner into an approval.
+   a change → `dh reopen <phase>`, change it, show it again; a hold (`HOLD`) → wait and ask, reopen nothing.
+   Never paraphrase an owner into an approval.
 8. **Failures are paid once.** Run risky commands via `dh run -- <cmd>`; a known error prints its fix
    (`--fix` replays a proven safe recipe). After a hard session: `dh autopsy --latest --apply` (deterministic:
    recipes, preflights, skill-fix proposals, playbooks — it never edits the skill itself).

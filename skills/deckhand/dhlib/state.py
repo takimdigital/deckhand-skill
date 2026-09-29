@@ -64,12 +64,22 @@ def init(root: Path, name: str, mode: str = "phased", path: str = "pool", for_: 
     root.mkdir(parents=True, exist_ok=True)
     ensure_gitignore(root)                              # run logs, RESUME, notes, project vault: never in git
     from . import profile as PROFILE, resume as RESUME
+    was = (read_json(root / ".deckhand" / "profile.json", {}) or {}).get("scope", "me")
     if for_:
         (root / ".deckhand").mkdir(parents=True, exist_ok=True)
         PROFILE.set_scope(root, for_)
     entry = RESUME.agent_entry(root)                    # AGENTS.md block (+ CLAUDE.md import): any AI resumes cold
-    if existing:
-        return {"created": False, **summary(root, existing), "agents": entry["written"]}
+    if existing:                                        # never silent: what was kept, what the call changed
+        asked = {"name": name, "mode": mode, "path": path}
+        kept = {k: existing.get(k) for k, v in asked.items() if existing.get(k) != v}
+        out = {"created": False, **summary(root, existing), "agents": entry["written"]}
+        if kept:
+            out["kept"] = kept
+            out["note"] = (f"this folder already has a run: its {', '.join(f'{k}={v}' for k, v in kept.items())} stay "
+                           "(a new run = a new folder)")
+        if for_ and for_ != was:
+            out["scope_changed"] = {"from": was, "to": for_}
+        return out
     s = {"version": 2, "name": name, "mode": mode, "path": path, "created": now(),
          "phases": {p["id"]: {"status": "pending"} for p in PHASES},
          "gates": {g: {"status": "pending"} for g in GATES}}
@@ -203,6 +213,13 @@ def classify_quote(quote: str) -> str:
     return "approve_with_changes" if STRONG_RX.search(q) else "change_request"
 
 
+def is_hold(quote: str) -> bool:
+    """The owner holds it back ("wait", "don't ship it yet", "hold on, give me a day") without asking for a change:
+    the answer is to wait, never to reopen and redo a phase they did not question (SKILL invariant 7)."""
+    q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
+    return bool(HOLD_RX.search(q)) and not CHANGE_RX.search(q)
+
+
 def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -> dict:
     """`quote` = the owner's message, verbatim. A change request does not pass the gate (D2: an agent once passed
     G1 on its own paraphrase of "make it like a real business")."""
@@ -214,6 +231,10 @@ def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -
         raise DhError("GATE_NOT_DUE", f"gate {gate} follows phase {due}, which is not done yet: finish it and show the owner first",
                       gate=gate, phase=due, do=[f"dh phase done {due}"])
     verdict = classify_quote(quote) if quote is not None else None
+    if verdict == "change_request" and is_hold(quote):
+        raise DhError("HOLD", f"the owner is holding it back, not asking for a change: {quote!r}",
+                      gate=gate, do=["wait: change nothing, reopen nothing", "ask what they need before they give the go",
+                                     f"a change asked? `dh reopen {due} --reason \"<their words>\"`; the go given? quote it"])
     if verdict == "change_request":
         phase = due
         raise DhError("CHANGE_REQUEST", f"the owner's words read as a change request, not a go: {quote!r}",

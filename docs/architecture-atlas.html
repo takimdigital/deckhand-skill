@@ -375,7 +375,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <ul>
 <li><span class="tag ok">approve</span> "go", "ok", "yes", "approved", "looks good", "lgtm", "ship it", "go live", "go ahead", confirm(ed), "do it", "let's go", "g[1-4] ok" + fr/de/es/ar equivalents + the thumbs-up / check emoji. "No problem / no worries" is stripped before matching &mdash; still a go.</li>
 <li><span class="tag block">NOT a go</span> change / make it / but / however / add / remove / fix / not yet / should / must / wrong / redo — these words make it a <b>change request</b></li>
-<li><span class="tag block">hold = no go</span> "don't ship it", "wait", "hold", "stop" — a held go is not a go</li>
+<li><span class="tag block">hold = no go</span> "don't ship it", "wait", "hold", "stop" — a held go is not a go. A pure hold (hold words, no change words) returns <code>HOLD</code>: wait and ask, never reopen</li>
 <li><b>strong-go carve-out</b>: only an explicit strong approval ("G1 ok", "approved", "ship it") may carry a change and pass as <i>approve_with_changes</i> — then the change is recorded (<code>dh note decision</code>) and executed next phase. A bare "ok but add…" = change request (the recipe embeds their words truncated to 80 chars).</li>
 <li><b>When in doubt → change request:</b> the gate asks again rather than passing on a "no". A change request returns <code>CHANGE_REQUEST</code> with a <code>do:</code> recipe = <code>dh reopen &lt;phase&gt; --reason "&lt;their words&gt;"</code> → change → show again → ask again.</li>
 </ul>
@@ -531,7 +531,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 </table>
 <p class="small muted"><b>Refusals you will actually see</b> (all exit 1, one JSON object): <code>MOVED</code> (the run continues in another folder — <code>cd</code> there) ·
 <code>BAD_PHASE</code> · <code>OUT_OF_ORDER</code> (an earlier phase is neither done nor skipped) · <code>GATE_BLOCKED</code> (phased mode, owed gate unpaid) ·
-<code>CHECK_FAILED</code> (the phase's check is red) · <code>NEED_QUOTE</code> (gate pass without the owner's words) · <code>NEED_REASON</code> (skip / drop without one) · <code>GATE_NOT_DUE</code> (gate pass before its phase is done) · <code>NOT_SKIPPABLE</code> (skipping review) · <code>CHANGE_REQUEST</code> (the owner's words were not a go, §5).</p>
+<code>CHECK_FAILED</code> (the phase's check is red) · <code>NEED_QUOTE</code> (gate pass without the owner's words) · <code>NEED_REASON</code> (skip / drop without one) · <code>GATE_NOT_DUE</code> (gate pass before its phase is done) · <code>NOT_SKIPPABLE</code> (skipping review) · <code>CHANGE_REQUEST</code> (the owner's words asked for a change, §5) · <code>HOLD</code> (the owner held it back without asking for a change: wait, reopen nothing).</p>
 
 <h3>Owner asks &amp; identity</h3>
 <table>
@@ -1181,7 +1181,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><th style="width:20%">Path</th><th>Mechanics</th></tr>
 <tr><td><b>dh clone T --to</b></td><td>Pool row → licence re-check → <b>hold/unhold</b>: Deckhand's own files step aside to <code>.&lt;name&gt;.deckhand-hold</code>, base lands (shallow at measured commit, fresh history, NOTICE with upstream+commit+licence), files return with merge rules → install → record base. Other files present → DEST_NOT_EMPTY. Seeds LOCAL secrets only (copies .env.example, generates values for the auth/JWT/session key names it finds; .env gitignored).</td></tr>
 <tr><td><b>dh adopt src</b></td><td>Owner's project, git history kept, stack detected, base kind existing.</td></tr>
-<tr><td><b>dh scaffold --to</b></td><td>create-next-app (ts, tailwind, app dir) + canonical UI base (button, utils, tokens) + deps (clsx, tailwind-merge, class-variance-authority, radix-ui, lucide-react, tw-animate-css) + fresh git.</td></tr>
+<tr><td><b>dh scaffold --to</b></td><td>create-next-app (ts, tailwind, app dir; built in a sibling <code>.&lt;name&gt;.deckhand-scaffold</code> and moved in, so the target folder is never removed, even as <code>--to .</code>; a relative <code>--to</code> is the project's, for clone and adopt too) + canonical UI base (button, utils, tokens) + deps (clsx, tailwind-merge, class-variance-authority, radix-ui, lucide-react, tw-animate-css) + fresh git.</td></tr>
 <tr><td><b>dh base record</b></td><td>Project built another way declares its base openly.</td></tr>
 </table>
 <p class="small muted">Order is enforced on the commands too (2.3.1): <code>dh clone</code> and <code>dh scaffold</code> are refused before their phase, <code>dh rebrand apply</code> (not <code>--dry</code>) before G2 and <code>dh deploy ship</code> before G4, with <code>OUT_OF_ORDER</code> or <code>GATE_BLOCKED</code>. <code>dh adopt</code> stays allowed at define.</p>

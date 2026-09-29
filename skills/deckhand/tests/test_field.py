@@ -96,7 +96,18 @@ class GateQuote(Base):
         for q in ("ok no problem", "yes, no changes", "approved", "G1 ok, but add a pricing page"):
             self.assertNotEqual(c(q), "change_request", q)
         code, out = self.dh("gate", "pass", "G1", "--quote", "don't ship it")
-        self.assertEqual((code, out["code"]), (1, "CHANGE_REQUEST"))
+        self.assertEqual((code, out["code"]), (1, "HOLD"))                         # a hold: wait, never reopen
+
+    def test_a_hold_waits_and_never_reopens(self):
+        # field test 2026-09-29 F6: a hold got the change-request answer, whose first step reopens the plan
+        for q in ("hold on, give me a day to think about it", "wait, dont ship this yet", "stop"):
+            code, out = self.dh("gate", "pass", "G1", "--quote", q)
+            self.assertEqual((code, out["code"]), (1, "HOLD"), q)
+            self.assertFalse(any(d.startswith("dh reopen") for d in out["do"]), out["do"])
+        code, out = self.dh("gate", "pass", "G1", "--quote", "no, change the hero")    # a change is still a change
+        self.assertEqual(out["code"], "CHANGE_REQUEST")
+        self.assertEqual(state.load(self.root)["phases"]["plan"]["status"], "done")
+        self.assertNotEqual(state.load(self.root)["gates"]["G1"]["status"], "passed")
 
 
 class OrderIsEnforced(Base):

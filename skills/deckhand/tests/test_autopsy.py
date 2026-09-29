@@ -57,7 +57,7 @@ class Base(unittest.TestCase):
         self.root = self.tmp / "proj"
         (self.root / ".deckhand").mkdir(parents=True)
         self.src = self.tmp / "session.jsonl"
-        self.src.write_text(transcript(SESSION))
+        self.src.write_text(transcript(SESSION), encoding="utf-8")
 
     def tearDown(self):
         if self.old is None:
@@ -130,7 +130,7 @@ class Apply(Base):
         self.assertTrue(les[0]["auto"])
         hit = learn.match(None, "Module not found: Can't resolve 'lucide-react' in '/other/app'")
         self.assertEqual(hit[0]["recipe"], [["run", "npm install lucide-react"]])
-        prop = Path(ap["proposals"][0]).read_text()
+        prop = Path(ap["proposals"][0]).read_text(encoding="utf-8")
         self.assertIn("## Repro", prop)
         self.assertIn("present in the fix", prop)
         self.assertEqual(ap["playbooks"][0]["phase"], "build")
@@ -141,14 +141,15 @@ class Apply(Base):
 class Runs(Base):
     def test_dh_run_logs_every_command_and_replays_a_proven_auto_recipe(self):
         script = self.root / "check.py"
-        script.write_text("import os, sys\nif not os.path.exists('ready.flag'):\n    print('MISSING READY FLAG'); sys.exit(1)\nprint('ok')\n")
+        script.write_text("import os, sys\nif not os.path.exists('ready.flag'):\n    print('MISSING READY FLAG'); sys.exit(1)\nprint('ok')\n", encoding="utf-8")
         r = learn.run_cmd(self.root, [sys.executable, str(script)])
         self.assertFalse(r["ok"])
+        touch = f'"{sys.executable}" -c "open(\'ready.flag\', \'w\').close()"'   # not `touch`: cmd.exe has none (field test F1)
         learn.add(None, "build", "MISSING READY FLAG", "not prepared", "create the flag", signature="MISSING READY FLAG",
-                  extra={"recipe": [["run", "touch ready.flag"]], "auto": True})
+                  extra={"recipe": [["run", touch]], "auto": True})
         r = learn.run_cmd(self.root, [sys.executable, str(script)], fix=True)
         self.assertTrue(r["ok"], r)
-        self.assertEqual(r["replayed"], [{"run": "touch ready.flag", "exit": 0}])
+        self.assertEqual(r["replayed"], [{"run": touch, "exit": 0}])
         runs = read_jsonl(self.root / ".deckhand" / "runs.jsonl")
         self.assertEqual([x["exit"] for x in runs], [1, 1, 0, 0])
         rep = AU.autopsy(self.root)                              # default source: the harness-neutral run log
@@ -169,7 +170,7 @@ class Next(Base):
         r1 = AU.autopsy(self.root, str(self.src), apply=True)
         self.assertNotIn("worked_before", guide.next_step(self.root))          # one session is an anecdote
         other = self.tmp / "session2.jsonl"
-        other.write_text(transcript(SESSION) + "\n")                          # a second session, same workflow
+        other.write_text(transcript(SESSION) + "\n", encoding="utf-8")                          # a second session, same workflow
         AU.autopsy(self.root, str(other), apply=True)
         self.assertTrue(r1["applied"]["playbooks"])
         rows = read_jsonl(Path(os.environ["DECKHAND_HOME"]) / "playbooks.jsonl")

@@ -65,7 +65,7 @@ class Sec(unittest.TestCase):
         profile.vault_set("SMTP_PASSWORD", "only-in-the-vault-77")
         code, out = self.dh("run", "--", sys.executable, "-c", f"print('{GITHUB} only-in-the-vault-77'); raise SystemExit(3)")
         self.assertEqual(code, 1)
-        disk = (self.root / ".deckhand" / "runs.jsonl").read_text() + (self.root / ".deckhand" / "failures.jsonl").read_text()
+        disk = (self.root / ".deckhand" / "runs.jsonl").read_text(encoding="utf-8") + (self.root / ".deckhand" / "failures.jsonl").read_text(encoding="utf-8")
         self.assertNotIn(GITHUB, disk)
         self.assertNotIn("only-in-the-vault-77", disk)
         self.assertNotIn(GITHUB, json.dumps(out))
@@ -73,7 +73,7 @@ class Sec(unittest.TestCase):
     def test_every_project_gitignores_deckhand_run_logs(self):
         state.init(self.root, "Shop")
         state.init(self.root, "Shop")                                   # idempotent
-        gi = (self.root / ".gitignore").read_text()
+        gi = (self.root / ".gitignore").read_text(encoding="utf-8")
         self.assertEqual(gi.count(util.GITIGNORE_MARK), 1)
         subprocess.run(["git", "init", "-q"], cwd=self.root, check=True)
         for probe in util.RUNTIME_STATE:
@@ -88,14 +88,14 @@ class Sec(unittest.TestCase):
         self.assertEqual(profile.vault_read()["COOLIFY_TOKEN"], tricky)
         if shutil.which("bash") and os.name != "nt":
             r = subprocess.run(["bash", "-c", f'set -a; . "{profile.vault_path()}"; set +a; printf %s "$COOLIFY_TOKEN"'],
-                               cwd=self.tmp, capture_output=True, text=True)
+                               cwd=self.tmp, capture_output=True, text=True, encoding="utf-8")
             self.assertEqual(r.stdout, tricky)
             self.assertFalse((self.tmp / "pwned").exists(), "sourcing the vault executed a value")
 
     def test_v1_tokens_still_work_and_the_ops_clients_read_the_vault(self):
         sec = self.tmp / "vps-ops" / "secrets"
         sec.mkdir(parents=True)
-        (sec / "env.sh").write_text(f"export HOSTINGER_API_TOKEN='legacy-host-tok'\nexport COOLIFY_TOKEN=\"{COOLIFY}\"\n")
+        (sec / "env.sh").write_text(f"export HOSTINGER_API_TOKEN='legacy-host-tok'\nexport COOLIFY_TOKEN=\"{COOLIFY}\"\n", encoding="utf-8")
         self.assertEqual(profile.secret("HOSTINGER_API_TOKEN"), "legacy-host-tok")
         self.assertEqual(profile.secret("COOLIFY_TOKEN"), COOLIFY)
         profile.vault_set("COOLIFY_TOKEN", "vault-wins-" + "t" * 10)
@@ -107,10 +107,10 @@ class Sec(unittest.TestCase):
     def test_scanners_share_one_policy(self):
         base = self.tmp / "base"
         base.mkdir()
-        (base / "bot.ts").write_text(f'const t = "{TELEGRAM}"\n')
-        (base / "deploy.sh").write_text(f"curl -H 'Authorization: Bearer {COOLIFY}'\n")
-        (base / "id_ed25519").write_text("x")
-        (base / ".env.example").write_text("COOLIFY_TOKEN=\n")
+        (base / "bot.ts").write_text(f'const t = "{TELEGRAM}"\n', encoding="utf-8")
+        (base / "deploy.sh").write_text(f"curl -H 'Authorization: Bearer {COOLIFY}'\n", encoding="utf-8")
+        (base / "id_ed25519").write_text("x", encoding="utf-8")
+        (base / ".env.example").write_text("COOLIFY_TOKEN=\n", encoding="utf-8")
         hits = harvest.secret_scan(base)
         self.assertEqual(sorted(h.split(":")[0] for h in hits), ["bot.ts", "deploy.sh", "id_ed25519"])
         self.assertTrue(util.SECRET_RX.search("sk_live_" + "9" * 20))
@@ -127,13 +127,13 @@ class Sec(unittest.TestCase):
             lines.append({"type": "assistant", "cwd": "/w/shop", "message": {"content": [{"type": "tool_use", "id": uid, "name": "Bash", "input": {"command": cmd}}]}})
             lines.append({"type": "user", "cwd": "/w/shop", "message": {"content": [{"type": "tool_result", "tool_use_id": uid, "content": out, "is_error": err}]}})
         src = self.tmp / "s.jsonl"
-        src.write_text("".join(json.dumps(l) + "\n" for l in lines))
+        src.write_text("".join(json.dumps(l) + "\n" for l in lines), encoding="utf-8")
         res = AU.autopsy(self.root, str(src), apply=True)
-        written = Path(res["report"]).read_text() + Path(res["report"]).with_suffix(".json").read_text()
+        written = Path(res["report"]).read_text(encoding="utf-8") + Path(res["report"]).with_suffix(".json").read_text(encoding="utf-8")
         home = Path(os.environ["DECKHAND_HOME"])
         for f in home.rglob("*"):
             if f.is_file():
-                written += f.read_text(errors="replace")
+                written += f.read_text(errors="replace", encoding="utf-8")
         self.assertNotIn(COOLIFY, written)
         for l in learn.all_lessons(None):
             self.assertFalse(l.get("auto") and any("***" in step for _, step in l.get("recipe", [])), "a redacted recipe is never replayed")

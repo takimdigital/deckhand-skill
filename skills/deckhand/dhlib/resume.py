@@ -389,7 +389,9 @@ def check(root: Path, online: bool = False) -> dict:
         claims.append({"claim": what, "ok": ok, "detail": detail, "level": level if not ok else "ok"})
 
     for p in ("define", "research", "plan", "brand", "tryon"):
-        if s["phases"][p]["status"] == "done":
+        if s["phases"][p]["status"] == "done" and s["phases"][p].get("forced"):
+            claim(f"{p} done", True, f"forced: {s['phases'][p]['forced']}")   # passed on purpose; its check stays red
+        elif s["phases"][p]["status"] == "done":
             try:
                 r = checks.run(p, root, s)
                 claim(f"{p} done", r["ok"], "; ".join(r.get("why", [])[:3]))

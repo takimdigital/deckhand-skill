@@ -176,7 +176,7 @@ def run_gh(data):
         steps.append(args)
     for step in steps:
         try:
-            r = subprocess.run(step, capture_output=True, text=True, timeout=60)
+            r = subprocess.run(step, capture_output=True, text=True, timeout=60, encoding="utf-8", errors="replace")
             results.append((step[:4], r.returncode, (r.stdout or r.stderr).strip()[:200]))
         except FileNotFoundError:
             results.append((step[:4], 127, "gh CLI not found — run the printed commands manually"))

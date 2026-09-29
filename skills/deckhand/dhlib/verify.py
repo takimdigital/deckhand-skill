@@ -41,13 +41,14 @@ def _get(url: str):
 def product_kit(root: Path, scripts: dict) -> list:
     """What a boilerplate sold to other businesses must carry (brief.deliverable=product)."""
     miss = []
-    if not (root / "README.md").exists():
+    full = lambda p: p.is_file() and bool(p.read_text(encoding="utf-8", errors="replace").strip())  # noqa: E731 — an empty file is not a kit
+    if not full(root / "README.md"):
         miss.append("README.md (what it is, the stack, the quick start)")
-    if not any(p.name.upper().startswith(("LICENSE", "LICENCE")) for p in root.iterdir()):
+    if not any(full(p) for p in root.iterdir() if p.name.upper().startswith(("LICENSE", "LICENCE"))):
         miss.append("LICENSE (the terms the buyer gets)")
-    if not ((root / "CUSTOMIZE.md").exists() or (root / "docs").is_dir() and any((root / "docs").glob("*custom*"))):
+    if not (full(root / "CUSTOMIZE.md") or (root / "docs").is_dir() and any(full(p) for p in (root / "docs").glob("*custom*"))):
         miss.append("CUSTOMIZE.md (rebrand, the buyer's own facts, where each setting lives)")
-    names = " ".join(scripts)
+    names = " ".join(k for k, v in scripts.items() if str(v or "").strip())          # a script that runs nothing is none
     if not re.search(r"seed", names):
         miss.append("a seed script (package.json) that loads the demo company")
     if not re.search(r"reset|wipe|clean", names):
