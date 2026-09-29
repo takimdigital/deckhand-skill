@@ -321,7 +321,9 @@ def scaffold(to: Path, pm: str = "npm") -> dict:
     to = Path(to).resolve()
     held = _hold(to)
     to.mkdir(parents=True, exist_ok=True)
-    fresh = to.parent / f".{to.name}.deckhand-scaffold"
+    # create-next-app names the package after this folder, so it must be a legal npm name: no leading dot, no capitals,
+    # no spaces (a real run failed on ".app.deckhand-scaffold"). Unique, so it never meets a folder of the owner's.
+    fresh = to.parent / f"dh-scaffold-{slugify(to.name, 30)}-{secrets.token_hex(3)}"
     rmtree(fresh)
     try:
         r = run(["npx", "--yes", "create-next-app@latest", str(fresh), "--ts", "--tailwind", "--app", "--no-eslint", "--no-src-dir",
