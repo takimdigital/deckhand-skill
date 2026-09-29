@@ -35,13 +35,15 @@ LEVELS = ("draft", "proven", "trusted")
 STEP_KINDS = ("do", "ask", "write", "delegate", "check", "gate")
 COMMUNITY_URL = "https://raw.githubusercontent.com/takimdigital/deckhand-skill/main/workflows/community/"
 # what a base/community workflow may run besides dh itself: package managers, type/test runners, git, curl reads
-ALLOWED = re.compile(r"^(dh|tryon|(npm|pnpm|yarn|bun) (install|i|ci|add|run|test|exec)\b|npx (--no-install )?(tsc|prisma|drizzle-kit|next|vitest|playwright|eslint)\b"
+ALLOWED = re.compile(r"^((dh|tryon)(\s|$)|(npm|pnpm|yarn|bun) (install|i|ci|add|run|test)\b|npx (--no-install )?(tsc|prisma|drizzle-kit|next|vitest|playwright|eslint)\b"
                      r"|node --test\b|(python3?|py) -m (unittest|pytest)\b|git (add|commit|status|log|diff|push|pull|init|checkout -b|switch -c)\b|curl -s)")
 FORBIDDEN = [(re.compile(r"(python3?|py)(\.exe)?\s+-c\b.*(dhlib|_record_base|import)"), "a private call through `py -c` (use a documented dh command)"),
              (re.compile(r"\b_[a-z]\w*\("), "a private function"),
              (re.compile(r"(?i)([A-Z]:\\+Users\\+|/home/[a-z][\w.-]*/|/Users/[A-Za-z][\w.-]*/)"), "an absolute path of one user's machine"),
              (re.compile(r"curl[^|]*\|\s*(ba|z)?sh\b"), "piping a download into a shell"),
              (re.compile(r"\brm\s+-rf\s+(/|~|\$HOME|\*)(\s|$)"), "a destructive delete")]
+# checked per command, not in prose: substitution, a hidden `;`, a download piped into an interpreter
+SHELL_META = re.compile(r"\$\(|`|;|\|\s*(node|deno|bun|python3?|py|perl|ruby|php|(ba|z|da)?sh|pwsh|powershell)\b|\bwget\b")
 PLACEHOLDER = re.compile(r"\{\{\s*([a-z][a-z0-9_]*)\s*\}\}")
 
 
@@ -249,7 +251,9 @@ def lint(wf: dict, strict: bool = True) -> dict:
             if SECRET_RX.search(text):
                 errors.append(f"{where}: a credential-shaped value")
             for cmd in _commands(st.get(k) if k in ("do", "check", "gate") else ""):
-                if cmd.startswith("dh "):
+                if SHELL_META.search(cmd):
+                    errors.append(f"{where}: shell tricks in `{cmd[:60]}` (substitution, `;`, a download piped into an interpreter)")
+                elif cmd.startswith("dh "):
                     bad = _dh_ok(cmd)
                     if bad:
                         errors.append(f"{where}: {bad}")
@@ -287,7 +291,7 @@ def normalize_industry(text: str) -> tuple:
     best = None
     for fam, words in industries()["families"].items():
         for w in words:
-            if re.search(r"(?<![a-z])" + re.escape(w.replace("-", " ")) + r"|(?<![a-z])" + re.escape(w), t):
+            if re.search(r"(?<![a-z])(" + re.escape(w.replace("-", " ")) + "|" + re.escape(w) + r")(e?s)?(?![a-z])", t):
                 if not best or len(w) > len(best[0]):
                     best = (w, fam)
     return best or (None, None)
@@ -476,7 +480,7 @@ def _pinned_wf(root: Path) -> tuple[dict, dict]:
 
 def custom_commands(wf: dict) -> list:
     return sorted({c for ph in wf.get("phases", []) for st in ph.get("steps", []) for k in ("do", "check")
-                   for c in _commands(st.get(k, "")) if not c.startswith("dh ") and not c.startswith("tryon ")})
+                   for c in _commands(st.get(k, "")) if not re.match(r"(dh|tryon)\s", c) or SHELL_META.search(c)})
 
 
 def use(root: Path, ref: str, accept: bool = False, sets: dict | None = None) -> dict:

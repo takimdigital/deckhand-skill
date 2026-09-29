@@ -43,6 +43,17 @@ def _days(date: str):
         return None
 
 
+def _refused_expr(expr: str) -> bool:
+    """An SPDX expression naming a refused licence anywhere: AGPL-3.0-only, GPL-3.0-or-later, (MIT AND Commons-Clause)."""
+    if "COMMONS" in expr.upper():
+        return True
+    for tok in re.findall(r"[A-Za-z0-9.+-]+", expr):
+        base = re.sub(r"(-only|-or-later|\+)$", "", tok, flags=re.I)
+        if base in REFUSED and base not in ("NONE", "OTHER", "NOASSERTION"):
+            return True
+    return False
+
+
 def verdict(row: dict, mine: bool = False) -> dict:
     """row = pool.measure() output (with its `evidence`). Pure: no network, no clock besides `now` for age."""
     ev = row.get("evidence") or {}
@@ -55,7 +66,7 @@ def verdict(row: dict, mine: bool = False) -> dict:
     check(lic in ACCEPTED, "licence", f"{lic} — {ACCEPTED.get(lic, '')}",
           f"{lic}: {REFUSED.get(lic, REFUSED['OTHER'])}")
     pl = str(ev.get("package_license") or "")
-    contra = pl and (any(pl.upper().startswith(x) for x in POLICY["package_license_refused"]) or pl in REFUSED)
+    contra = pl and (any(pl.upper().startswith(x) for x in POLICY["package_license_refused"]) or pl in REFUSED or _refused_expr(pl))
     check(not contra, "consistent", "package.json licence agrees" if pl else "package.json has no licence field (the repo licence applies)",
           f"package.json says \"{pl}\" — it contradicts the repo licence; the stricter one wins")
     check(not row.get("archived"), "alive", "maintained (not archived)", "archived upstream — no fixes will ever come")

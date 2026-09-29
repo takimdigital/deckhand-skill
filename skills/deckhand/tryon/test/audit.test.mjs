@@ -1,0 +1,72 @@
+// Regressions from the 2026-09-29 final audit (try-on area): each test is one finding, reproduced, and now impossible.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import http from 'node:http';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { tempSite, offline } from './helpers.mjs';
+import * as engine from '../lib/engine.mjs';
+import { startServer, localHost } from '../server.mjs';
+
+offline();
+const COMPOSE = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'compose.mjs');
+
+const get = (port, host, p = '/__dh/api/state', headers = {}) => new Promise((resolve, reject) => {
+  const req = http.request({ host: '127.0.0.1', port, path: p, headers: { host, ...headers } }, (res) => {
+    let body = ''; res.on('data', (c) => { body += c; }); res.on('end', () => resolve({ status: res.statusCode, body }));
+  });
+  req.on('error', reject); req.end();
+});
+
+test('Y4: a request naming another host (DNS rebinding) gets neither the page nor the API', async () => {
+  const dir = tempSite();
+  const up = http.createServer((req, res) => { res.writeHead(200, { 'content-type': 'text/html' }); res.end('<html><head></head><body>hi</body></html>'); });
+  await new Promise((r) => up.listen(0, '127.0.0.1', r));
+  const { server, token } = await startServer({ root: dir, port: 0, target: `http://127.0.0.1:${up.address().port}` });
+  const port = server.address().port;
+  try {
+    for (const p of ['/', '/__dh/api/state']) {
+      const r = await get(port, `attacker.example:${port}`, p, { 'x-dh-token': token });
+      assert.equal(r.status, 403, p);
+      assert.doesNotMatch(r.body, new RegExp(token));
+    }
+    assert.equal((await get(port, `127.0.0.1:${port}`, '/')).status, 200);
+    assert.equal((await get(port, `localhost:${port}`, '/')).status, 200);
+  } finally { server.close(); up.close(); }
+  for (const h of ['127.0.0.1:3999', 'localhost:3999', '[::1]:3999', '192.168.1.20:3999']) assert.ok(localHost(h), h);
+  for (const h of ['attacker.example:3999', 'localhost.attacker.example', '', undefined]) assert.ok(!localHost(h), String(h));
+});
+
+test('Y5: inspect refuses a file outside the project', () => {
+  const dir = tempSite();
+  fs.writeFileSync(path.join(dir, '..', 'outside.tsx'), 'export const a = <p>OUTSIDE-SECRET</p>;\n');
+  assert.throws(() => engine.inspect(dir, { file: '../outside.tsx', line: 1, col: 18 }), (e) => e.code === 'OUTSIDE_PROJECT');
+});
+
+test('Y7: a malformed copy.json is a readable refusal, not a stack trace, and the page is untouched', () => {
+  const dir = tempSite();
+  fs.writeFileSync(path.join(dir, 'copy.json'), '{"hero": {"heading": "x"},}');
+  const page = path.join(dir, 'app', 'page.tsx');
+  const before = fs.existsSync(page) ? fs.readFileSync(page, 'utf8') : null;
+  const r = spawnSync(process.execPath, [COMPOSE, '--project', dir, '--copy', 'copy.json'], { encoding: 'utf8' });
+  assert.equal(r.status, 1);
+  const out = JSON.parse(r.stdout.trim().split('\n').pop());
+  assert.equal(out.code, 'BAD_COPY');
+  assert.doesNotMatch(r.stderr, /at .*compose\.mjs/);
+  assert.equal(fs.existsSync(page) ? fs.readFileSync(page, 'utf8') : null, before);
+});
+
+test('Y1: a compose that places nothing leaves the page and its first backup alone', () => {
+  const dir = tempSite();
+  const page = path.join(dir, 'app', 'page.tsx');
+  fs.mkdirSync(path.dirname(page), { recursive: true });
+  fs.writeFileSync(page, 'export default function Page(){ return <main>OWNER</main> }\n');
+  fs.writeFileSync(page + '.before-compose', 'ORIGINAL\n');
+  const r = spawnSync(process.execPath, [COMPOSE, '--project', dir, '--sections', 'nosuchslot'], { encoding: 'utf8', env: { ...process.env } });
+  const out = JSON.parse(r.stdout.trim().split('\n').pop());
+  assert.equal(out.ok, false);
+  assert.match(fs.readFileSync(page, 'utf8'), /OWNER/);
+  assert.equal(fs.readFileSync(page + '.before-compose', 'utf8'), 'ORIGINAL\n');
+});

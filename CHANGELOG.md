@@ -1,5 +1,35 @@
 # Changelog
 
+## [Unreleased]
+
+### From the 2026-09-29 field test (docs/field-tests/2026-09-29-report.md)
+- 12 of its 23 findings fixed, each with a test (tests/test_fieldtest_0929.py): `scaffold --to` relative/`.`, a second
+  `dh init` says what it kept, a hold ("not yet", "wait") is not a change request, a forced phase no longer drifts,
+  `product-kit` refuses empty files, `plan init` skips research.json when research was skipped, and more.
+
+### From the final audit (five parallel reviews of the whole repo; tests/test_audit_0929.py, tryon/test/audit.test.mjs)
+- `dh deploy target --app X --url U` (the documented form) saves both values; options after the action were dropped,
+  so ship stayed on `NO_TARGET`. `smoke --url` and `ship --force` had the same bug.
+- `dh deploy raw deploy` goes through the same gates as `ship`. Review can no longer be forced (`NOT_FORCEABLE`).
+- A green verify proves one commit: review and `ship` refuse it once the code has moved on (`VERIFY_STALE`).
+- An unreadable `.deckhand/run.json` is `RUN_CORRUPT`, never "no run" (gates stopped applying and `dh init` replaced it).
+- Wrong-shaped hand-edited files answer in JSON (`INTERNAL`), never a Python traceback; `brief set` refuses empty or
+  clashing keys (`BAD_KEY`). `phase done` reports the phase it marked done as `phase`, where the run is as `now`.
+- A pool base flagged `injected-payload` never ranks and cannot be cloned (`BASE_UNSAFE`). `pool add --mine` reads
+  AGPL, GPL, SSPL, BUSL, Elastic and Commons Clause licence texts, and SPDX expressions like `AGPL-3.0-only` or
+  `(MIT AND Commons-Clause)` are refused.
+- Workflow lint refuses shell tricks inside a command (`$(…)`, a hidden `;`, a download piped into an interpreter,
+  `npm exec`), and the owner is shown them before a first run.
+- Industry keywords match whole words ("petrol station" is not pets). Wrong-shaped slop layers no longer crash.
+- `harvest --push` refuses a public repo for a base or the library (`REPO_PUBLIC`). The deploy smoke check matches a
+  brand name with `'` or `&` as the HTML escapes it. The B2 key file is written owner-only.
+- Try-on: the server refuses any Host but an IP or localhost (DNS rebinding could read its token and drive its API);
+  `inspect` stays inside the project; compose refuses a malformed copy.json (`BAD_COPY`), never wipes a page when
+  nothing could be placed, keeps the owner's first backup, and cleans a candidate that failed after staging.
+- `dh verify` row `tryon-unwired`: next/vite config that still loads try-on from `.deckhand/` (a deploy from git fails).
+- install.ps1 is ASCII (Windows PowerShell 5.1 misread it) and removes a `-Link` junction without emptying the clone;
+  install.sh refuses unknown options. 30-build.md: `dh learn preflight --phase build`.
+
 ## [2.3.1] — 2026-09-29 — the pipeline does what its docs say
 
 From a coherence review of the whole pipeline (define → operate) against the code.

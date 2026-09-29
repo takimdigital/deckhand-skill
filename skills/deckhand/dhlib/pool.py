@@ -19,6 +19,11 @@ from . import vet as VET
 
 OK_LICENSES = set(json.loads((DATA / "licenses.json").read_text(encoding="utf-8"))["accepted"])  # one policy: data/licenses.json
 OWNER_LICENSES = {"owner"}          # the owner's own harvested bases
+SECURITY_RISKS = {"injected-payload"}   # a risk no score outweighs: the checkout itself runs someone else's code
+# copyleft / source-available texts, checked before the permissive ones (a Commons Clause LICENSE also quotes MIT)
+REFUSED_TEXTS = (("Commons-Clause", r"Commons Clause"), ("AGPL-3.0", r"GNU AFFERO"), ("LGPL-3.0", r"GNU LESSER"),
+                 ("GPL-3.0", r"GNU GENERAL PUBLIC"), ("SSPL-1.0", r"Server Side Public License"), ("BUSL-1.1", r"Business Source License"),
+                 ("Elastic-2.0", r"Elastic License"), ("PolyForm", r"PolyForm"))
 FEATURE_WORDS = ["accounts", "payments", "billing", "admin", "i18n", "jobs", "search", "notifications", "uploads", "booking",
                  "blog", "docs", "dashboard", "teams", "api", "email", "analytics", "cms", "ecommerce", "marketplace"]
 VENDOR_PKGS = {
@@ -53,6 +58,9 @@ def score(row: dict, brief: dict) -> tuple:
         blockers.append(f"licence {row.get('license')} (permissive licences only: {', '.join(sorted(OK_LICENSES))})")
     if row.get("archived"):
         blockers.append("archived upstream")
+    bad = sorted(SECURITY_RISKS & set(row.get("risks") or []))
+    if bad:
+        blockers.append(f"security: {', '.join(bad)} (see data/pool/{row.get('name')}.json)")
     lane = brief.get("lane") or "web"
     if (row.get("lane") or "web") != lane:
         blockers.append(f"lane {row.get('lane')} (asked {lane})")
@@ -274,9 +282,9 @@ def measure_local(path: Path) -> dict:
     lic = "owner"
     lf = next((f for f in path.iterdir() if f.name.upper().startswith(("LICENSE", "LICENCE"))), None)
     if lf:
-        head = lf.read_text(encoding="utf-8", errors="replace")[:600]
-        lic = next((spdx for spdx, rx in (("MIT", r"MIT License|Permission is hereby granted, free of charge"), ("Apache-2.0", r"Apache License"),
-                                         ("ISC", r"ISC License"), ("BSD-3-Clause", r"BSD 3-Clause|Redistribution and use")) if re.search(rx, head)), "owner")
+        head = lf.read_text(encoding="utf-8", errors="replace")[:4000]
+        lic = next((spdx for spdx, rx in REFUSED_TEXTS + (("MIT", r"MIT License|Permission is hereby granted, free of charge"), ("Apache-2.0", r"Apache License"),
+                                         ("ISC", r"ISC License"), ("BSD-3-Clause", r"BSD 3-Clause|Redistribution and use")) if re.search(rx, head, re.I)), "owner")
     stack = detect_stack(pkg, tree)
     text = (pkg.get("description") or "") + " " + readme
     return {"name": re.sub(r"[^a-z0-9-]+", "-", path.name.lower()).strip("-"), "path": str(path), "source": "mine", "license": lic,
