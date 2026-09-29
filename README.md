@@ -258,7 +258,9 @@ new session, with any AI, and say *"continue my site"*. →
 
 **Working on Deckhand with an AI?** Tell it to read [`LLM_CONTEXT.md`](LLM_CONTEXT.md) first. It's the whole repo
 in one file, written for a model and regenerated from the code on every change, so a brand-new session starts
-with full context.
+with full context. For the human-readable picture — the 9-phase state machine, the gate classifier, the try-on
+click loop, the AI-draft gates and every command, with diagrams — open the
+[architecture atlas](docs/architecture-atlas.html).
 
 **Does it work with Hermes, not only Claude Code?** Yes. `dh` detects the agent it runs in and prints that agent's
 own syntax (Hermes: background terminals, `process_manage`, `delegate_task`; Claude Code: background tasks, sub-agents,
