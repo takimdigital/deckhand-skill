@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deckhand — Complete Architecture Atlas</title>
+<style>
+  :root{
+    --bg:#FAFAF7; --panel:#FFFFFF; --ink:#1C1E21; --muted:#5F6570; --line:#E4E2DB;
+    --accent:#0F766E; --accent-soft:#E6F3F1; --gate:#B45309; --gate-soft:#FCF3E6;
+    --code-bg:#F1F0EB; --danger:#B91C1C; --danger-soft:#FDECEC; --info:#1D4ED8; --info-soft:#EBF0FD;
+    --sidebar:272px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;
+    font-size:15px; line-height:1.72;
+  }
+  /* ---------- sidebar ---------- */
+  nav{
+    position:fixed; top:0; left:0; width:var(--sidebar); height:100vh; overflow-y:auto;
+    background:var(--panel); border-right:1px solid var(--line); padding:20px 0 40px;
+    font-size:13px; z-index:10;
+  }
+  nav .brand{padding:0 20px 14px; border-bottom:1px solid var(--line); margin-bottom:10px}
+  nav .brand b{display:block; font-size:16px; letter-spacing:.02em}
+  nav .brand span{color:var(--muted); font-size:11.5px}
+  nav a{display:block; padding:5px 20px 5px 24px; color:var(--muted); text-decoration:none; border-left:2px solid transparent}
+  nav a:hover{color:var(--ink); background:var(--bg)}
+  nav a.on{color:var(--accent); border-left-color:var(--accent); background:var(--accent-soft); font-weight:600}
+  nav .grp{padding:12px 20px 4px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#9AA0AA; font-weight:700}
+  /* ---------- main ---------- */
+  main{margin-left:var(--sidebar); padding:44px 56px 120px; max-width:1160px}
+  header.hero{margin-bottom:40px}
+  header.hero .kicker{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700}
+  header.hero h1{font-size:34px; line-height:1.2; margin:8px 0 12px; letter-spacing:-.01em}
+  header.hero p{color:var(--muted); max-width:760px}
+  section{margin:56px 0; scroll-margin-top:24px}
+  h2{font-size:23px; letter-spacing:-.01em; margin-bottom:6px; padding-top:8px; border-top:2px solid var(--ink)}
+  h2 .no{color:var(--accent); font-variant-numeric:tabular-nums; margin-right:10px}
+  h3{font-size:17px; margin:30px 0 8px}
+  h4{font-size:14.5px; margin:20px 0 6px; color:var(--accent)}
+  p{margin:8px 0}
+  .sub{color:var(--muted); font-size:14px; margin-bottom:16px}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  code{font-family:ui-monospace,'Cascadia Code',Consolas,monospace; font-size:.88em; background:var(--code-bg); padding:1.5px 6px; border-radius:4px; white-space:nowrap}
+  pre{background:#17191D; color:#E8E6DF; padding:14px 18px; border-radius:8px; overflow-x:auto; font-size:12.5px; line-height:1.6; margin:12px 0; font-family:ui-monospace,Consolas,monospace}
+  pre code{background:none; padding:0; color:inherit; white-space:pre}
+  table{width:100%; border-collapse:collapse; font-size:13.5px; margin:14px 0; background:var(--panel)}
+  th{background:var(--code-bg); text-align:left; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted)}
+  th,td{border:1px solid var(--line); padding:7px 10px; vertical-align:top}
+  tr:nth-child(even) td{background:#FCFCFA}
+  td code{white-space:normal}
+  .tag{display:inline-block; font-size:11px; font-weight:700; padding:1px 8px; border-radius:99px; letter-spacing:.03em}
+  .tag.gate{background:var(--gate-soft); color:var(--gate)}
+  .tag.opt{background:var(--info-soft); color:var(--info)}
+  .tag.block{background:var(--danger-soft); color:var(--danger)}
+  .tag.ok{background:var(--accent-soft); color:var(--accent)}
+  .callout{border-left:3px solid var(--accent); background:var(--accent-soft); padding:10px 16px; margin:14px 0; border-radius:0 8px 8px 0; font-size:14px}
+  .callout.warn{border-color:var(--gate); background:var(--gate-soft)}
+  .callout.danger{border-color:var(--danger); background:var(--danger-soft)}
+  .callout b{font-weight:700}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:16px 0}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px 18px}
+  .card h4{margin-top:0}
+  .card ul{margin-left:18px; font-size:13.5px}
+  figure{margin:22px 0; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 14px 10px; overflow-x:auto}
+  figure svg{display:block; margin:0 auto; max-width:100%}
+  figcaption{font-size:12.5px; color:var(--muted); text-align:center; padding-top:8px; border-top:1px dashed var(--line); margin-top:8px}
+  .pathline{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:12px 0}
+  .pathline b.pt{color:var(--accent)}
+  .kbd{font-family:ui-monospace,monospace; font-size:12px; background:var(--ink); color:#fff; padding:1px 7px; border-radius:4px}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+  @media (max-width:1080px){ nav{display:none} main{margin-left:0; padding:28px 20px 90px} .grid2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<nav id="toc">
+  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.3.1</span></div>
+  <div class="grp">Big picture</div>
+  <a href="#overview">1 · What Deckhand is</a>
+  <a href="#layers">2 · System layers</a>
+  <div class="grp">Methodology</div>
+  <a href="#phases">3 · 9-phase state machine</a>
+  <a href="#modes">4 · Modes &amp; paths</a>
+  <a href="#gates">5 · Gates G1–G4</a>
+  <a href="#phasedetail">6 · Phase-by-phase detail</a>
+  <a href="#invariants">7 · The 12 invariants</a>
+  <a href="#comms">8 · Owner communication</a>
+  <div class="grp">Control plane</div>
+  <a href="#nextloop">9 · The dh next loop</a>
+  <a href="#commands">10 · Full command map</a>
+  <a href="#statefiles">11 · State files on disk</a>
+  <a href="#resume">12 · Resume / suggest / pending</a>
+  <div class="grp">Try-on</div>
+  <a href="#tryon-arch">13 · Try-on architecture</a>
+  <a href="#tryon-life">14 · Try-on lifecycle</a>
+  <a href="#variant-pipe">15 · Variant pipeline</a>
+  <a href="#transplant">16 · Transplant engine</a>
+  <a href="#keep">17 · Keep / discard / save</a>
+  <a href="#registry">18 · Registry vetting</a>
+  <div class="grp">Site features</div>
+  <a href="#draft">19 · AI draft</a>
+  <a href="#tune">20 · Tune &amp; Site theme</a>
+  <a href="#sitelinks">21 · Sitelinks</a>
+  <a href="#seo">22 · SEO</a>
+  <a href="#slop">23 · Slop (AI-text)</a>
+  <div class="grp">Proven paths</div>
+  <a href="#workflow">24 · Workflows</a>
+  <a href="#research">25 · Research</a>
+  <a href="#plan">26 · Plan &amp; lint</a>
+  <a href="#pool">27 · Pool &amp; licences</a>
+  <a href="#build">28 · Build</a>
+  <a href="#verify">29 · Verify</a>
+  <a href="#deploy">30 · Deploy &amp; operate</a>
+  <a href="#learn">31 · Learning loop</a>
+  <a href="#team">32 · Team delegation</a>
+  <div class="grp">Journeys</div>
+  <a href="#paths">33 · User paths</a>
+  <a href="#filemap">34 · File map</a>
+</nav>
+
+<main>
+
+<header class="hero">
+  <div class="kicker">Complete system reference</div>
+  <h1>Deckhand Architecture Atlas</h1>
+  <p>Every layer, every command path, every diagram — how the methodology, control plane, try-on engine,
+  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then fact-checked claim by claim against the 2.3.1 code (about 230 claims; the 2.3.1 ordering rules and the fixes from the real-browser test are folded in).</p>
+</header>
+
+<!-- ============================================================ 1 -->
+<section id="overview">
+<h2><span class="no">1</span>What Deckhand is</h2>
+<p class="sub">One-sentence charter, then the mental model.</p>
+
+<p><b>Deckhand converts an owner's intent into a production business they own</b> — their VPS, their domain,
+their code, their data. The owner supplies decisions and the few facts only they hold; the agent supplies
+everything else; <b>every claim of progress is a script result, never an assertion</b>.</p>
+
+<div class="callout"><b>Mental model in one paragraph.</b> Deckhand is a <b>deterministic state machine</b> (9 phases,
+4 owner gates) wrapped around a <b>Python CLI</b> (<code>dh</code>) that owns all state on disk, plus a
+<b>separate Node engine</b> (<code>tryon</code>) that performs live component swaps with zero model calls per click.
+The AI agent never improvises the process: it asks <code>dh next</code>, does exactly the one thing printed
+(one reference file + applicable lessons), proves completion with <code>dh phase done</code>, and repeats.
+The owner only ever interacts at gates, pending asks, and the try-on browser UI.</div>
+
+<div class="grid2">
+  <div class="card"><h4>The agent does</h4><ul>
+    <li>Words: copy, research claims, plan prose, brief answers</li>
+    <li>App-specific logic the scripts can't know</li>
+    <li>Exactly one AI draft per request (script-gated)</li>
+    <li>Everything via <code>dh</code>/<code>tryon</code> commands whose output is the proof</li></ul></div>
+  <div class="card"><h4>Scripts do (deterministic)</h4><ul>
+    <li>State machine, checks, gates, resume, suggestions</li>
+    <li>Try-on swaps, token wearing, transplant, keep/bake</li>
+    <li>SEO writes, slop scoring, plan lint, verify rows</li>
+    <li>Deploy/smoke, vetting, learning, autopsy</li></ul></div>
+</div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="layers">
+<h2><span class="no">2</span>System layers</h2>
+<p class="sub">How the pieces nest — from spec text down to the owner's live site.</p>
+
+<figure>
+<svg viewBox="0 0 680 470" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="arrL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker>
+    <marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker>
+  </defs>
+  <text x="340" y="20" text-anchor="middle" font-size="14" font-weight="600">Deckhand — layer stack</text>
+
+  <!-- L1 -->
+  <rect x="40" y="36" width="600" height="58" rx="8" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="56" y="58" font-size="13" font-weight="600">① Spec layer — SKILL.md + references/*.md</text>
+  <text x="56" y="78" font-size="11.5" fill="#5F6570">The methodology as text: 9 phases · 12 invariants · per-phase playbooks · harness notes</text>
+
+  <!-- L2 -->
+  <rect x="40" y="112" width="600" height="66" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="56" y="134" font-size="13" font-weight="600">② Control plane — dh.py → dhlib/*.py (37 subcommands)</text>
+  <text x="56" y="154" font-size="11.5" fill="#5F6570">state · guide(next) · checks · resume · pending · profile/vault · workflow · plan · research</text>
+  <text x="56" y="170" font-size="11.5" fill="#5F6570">pool · build · brand · slop · seo · verify · deploy · ops · learn/autopsy · suggest</text>
+
+  <!-- L3a -->
+  <rect x="40" y="196" width="290" height="74" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="56" y="218" font-size="13" font-weight="600">③a Try-on engine (Node)</text>
+  <text x="56" y="237" font-size="11.5" fill="#5F6570">tryon/cli.mjs → server.mjs (127.0.0.1:3999)</text>
+  <text x="56" y="253" font-size="11.5" fill="#5F6570">overlay.js · engine · transplant · draft · tune</text>
+  <text x="56" y="267" font-size="11.5" fill="#5F6570">sitetheme · seo · fitcheck · vet · materialize</text>
+
+  <!-- L3b -->
+  <rect x="350" y="196" width="290" height="74" rx="8" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="366" y="218" font-size="13" font-weight="600">③b Data &amp; knowledge</text>
+  <text x="366" y="237" font-size="11.5" fill="#5F6570">components.index (1,247 variants) · checks/*.json</text>
+  <text x="366" y="253" font-size="11.5" fill="#5F6570">pool.json · licenses · slop packs · seo rules</text>
+  <text x="366" y="267" font-size="11.5" fill="#5F6570">workflows/ · lessons · bots · research.json</text>
+
+  <!-- L4 -->
+  <rect x="40" y="288" width="600" height="60" rx="8" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="56" y="310" font-size="13" font-weight="600">④ Project state — &lt;project&gt;/.deckhand/  (+ PENDING.md, HANDOFF.md)</text>
+  <text x="56" y="330" font-size="11.5" fill="#5F6570">run.json · history · RESUME · brief · sitemap · copy.json · PLAN/VERIFY/SEO/SLOP · tryon/sessions · blackboard</text>
+
+  <!-- L5 -->
+  <rect x="40" y="366" width="600" height="56" rx="8" fill="#E6F3F1" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="56" y="388" font-size="13" font-weight="600">⑤ The owner's business — app source + dev server → Coolify/VPS → live URL</text>
+  <text x="56" y="408" font-size="11.5" fill="#5F6570">rebranded code · baked sections · robots/sitemap · HANDOFF.md · bots running</text>
+
+  <!-- actors -->
+  <rect x="40" y="438" width="180" height="24" rx="6" fill="#1C1E21"/>
+  <text x="130" y="454" text-anchor="middle" font-size="11.5" fill="#fff">AI agent (drives ①→④)</text>
+  <rect x="250" y="438" width="180" height="24" rx="6" fill="#B45309"/>
+  <text x="340" y="454" text-anchor="middle" font-size="11.5" fill="#fff">Owner (gates, clicks, facts)</text>
+  <rect x="460" y="438" width="180" height="24" rx="6" fill="#0F766E"/>
+  <text x="550" y="454" text-anchor="middle" font-size="11.5" fill="#fff">Scripts (prove everything)</text>
+
+  <line x1="340" y1="94" x2="340" y2="110" stroke="#5F6570" stroke-width="1" marker-end="url(#arrL)"/>
+  <line x1="200" y1="178" x2="200" y2="194" stroke="#0F766E" stroke-width="1" marker-end="url(#arrA)"/>
+  <line x1="480" y1="178" x2="480" y2="194" stroke="#5F6570" stroke-width="1" marker-end="url(#arrL)"/>
+  <line x1="340" y1="270" x2="340" y2="286" stroke="#5F6570" stroke-width="1" marker-end="url(#arrL)"/>
+  <line x1="340" y1="348" x2="340" y2="364" stroke="#0F766E" stroke-width="1" marker-end="url(#arrA)"/>
+</svg>
+<figcaption>Fig 2.1 — Five layers. The agent reads ①, drives ②, which reads/writes ③④ and mutates ⑤ only through proven commands.</figcaption>
+</figure>
+
+<table>
+<tr><th style="width:16%">Entry point</th><th>What it is</th></tr>
+<tr><td><code>dh = python3 &lt;skill&gt;/dh.py</code></td><td>Python CLI — every command prints <b>ONE JSON object</b>; exit 0 = ok, 1 = check failed (JSON says why + fix), 2 = usage. On Windows use <code>py</code>.</td></tr>
+<tr><td><code>dh tryon …</code></td><td>Passthrough to <code>node tryon/cli.mjs</code> (requires Node 18+), <code>--project</code> appended last, exit code verbatim.</td></tr>
+<tr><td><code>tryon …</code> direct</td><td>Same engine called directly (the reference docs define <code>T="node &lt;skill&gt;/tryon/cli.mjs"</code>).</td></tr>
+<tr><td><code>dh resume</code></td><td>Cold start for ANY AI/session: regenerates <code>.deckhand/RESUME.md</code> from project files — stage, next command, proof, owner decisions, what waits on owner.</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="phases">
+<h2><span class="no">3</span>The 9-phase state machine</h2>
+<p class="sub">The spine of everything. Fixed order; a check gates every step; state lives in <code>.deckhand/run.json</code>.</p>
+
+<div class="callout"><b>The loop:</b> <code>dh next</code> → do what it prints (it names <b>ONE reference file</b> in <code>read</code>, that phase's steps in <code>do</code>, the preflight <code>lessons</code> that apply) → <code>dh phase done &lt;phase&gt;</code> (runs the phase's check; red = not done → exit 1 <code>CHECK_FAILED</code>, the phase stays pending; <code>--force "&lt;reason&gt;"</code> records it done anyway, marked <code>forced</code>) → <code>dh next</code> …
+<b>State events</b> (<code>init · phase_done · phase_skip · gate · reopen · workflow</code>) append to <code>.deckhand/history.jsonl</code>; every command except <code>run · autopsy · next · status · resume · note · suggest</code> is logged separately in <code>.deckhand/runs.jsonl</code>.
+Marking a phase done while <b>any earlier</b> phase is neither done nor skipped is refused <span class="tag block">OUT_OF_ORDER</span> (exit 1); in <b>phased</b> mode a phase whose owed gate is still unpaid is refused <span class="tag block">GATE_BLOCKED</span> (exit 1) — <code>auto</code> mode has no blocking gate. A skipped phase still owes its gate in phased mode: skip try-on and G3 still waits for the owner before review. The same order check covers <code>phase skip</code> (only the current phase), <code>gate pass</code> (refused <span class="tag block">GATE_NOT_DUE</span> before its phase is done), clone/scaffold, <code>rebrand apply</code> and <code>deploy ship</code> (<code>dh adopt</code> stays allowed at define). Review can never be skipped (<span class="tag block">NOT_SKIPPABLE</span>).</div>
+
+<figure>
+<svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">Phase pipeline &amp; gates</text>
+
+  <rect x="16"  y="40" width="72" height="44" rx="8" fill="#E6F3F1" stroke="#0F766E"/>
+  <text x="52" y="59" text-anchor="middle" font-size="11.5" font-weight="600">define</text>
+  <text x="52" y="75" text-anchor="middle" font-size="9" fill="#5F6570">brief</text>
+
+  <rect x="100" y="40" width="72" height="44" rx="8" fill="#E6F3F1" stroke="#0F766E"/>
+  <text x="136" y="59" text-anchor="middle" font-size="11.5" font-weight="600">research</text>
+  <text x="136" y="75" text-anchor="middle" font-size="9" fill="#5F6570">3 competitors</text>
+
+  <rect x="184" y="40" width="72" height="44" rx="8" fill="#E6F3F1" stroke="#0F766E"/>
+  <text x="220" y="59" text-anchor="middle" font-size="11.5" font-weight="600">plan</text>
+  <text x="220" y="75" text-anchor="middle" font-size="9" fill="#5F6570">lint = 0</text>
+
+  <rect x="284" y="40" width="72" height="44" rx="8" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="320" y="59" text-anchor="middle" font-size="11.5" font-weight="600">build</text>
+  <text x="320" y="75" text-anchor="middle" font-size="9" fill="#5F6570">URL answers</text>
+
+  <rect x="374" y="40" width="66" height="44" rx="8" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="407" y="59" text-anchor="middle" font-size="11.5" font-weight="600">brand</text>
+  <text x="407" y="75" text-anchor="middle" font-size="9" fill="#5F6570">0 blocking</text>
+
+  <rect x="454" y="40" width="66" height="44" rx="8" fill="#EBF0FD" stroke="#1D4ED8" stroke-dasharray="4 3"/>
+  <text x="487" y="59" text-anchor="middle" font-size="11.5" font-weight="600">tryon</text>
+  <text x="487" y="75" text-anchor="middle" font-size="9" fill="#5F6570">optional</text>
+
+  <rect x="536" y="40" width="60" height="44" rx="8" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="566" y="59" text-anchor="middle" font-size="11.5" font-weight="600">review</text>
+  <text x="566" y="75" text-anchor="middle" font-size="9" fill="#5F6570">verify ok</text>
+
+  <rect x="608" y="40" width="58" height="44" rx="8" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="637" y="59" text-anchor="middle" font-size="11.5" font-weight="600">deploy</text>
+  <text x="637" y="75" text-anchor="middle" font-size="9" fill="#5F6570">smoke</text>
+
+  <line x1="88" y1="62" x2="98" y2="62" stroke="#0F766E" stroke-width="1.4" marker-end="url(#arrP)"/>
+  <line x1="172" y1="62" x2="182" y2="62" stroke="#0F766E" stroke-width="1.4" marker-end="url(#arrP)"/>
+  <line x1="256" y1="62" x2="282" y2="62" stroke="#0F766E" stroke-width="1.4" marker-end="url(#arrP)"/>
+  <line x1="356" y1="62" x2="372" y2="62" stroke="#5F6570" stroke-width="1.4" marker-end="url(#arrP)"/>
+  <line x1="440" y1="62" x2="452" y2="62" stroke="#5F6570" stroke-width="1.4" marker-end="url(#arrP)"/>
+  <line x1="520" y1="62" x2="534" y2="62" stroke="#5F6570" stroke-width="1.4" marker-end="url(#arrP)"/>
+  <line x1="596" y1="62" x2="606" y2="62" stroke="#5F6570" stroke-width="1.4" marker-end="url(#arrP)"/>
+
+  <!-- gates -->
+  <rect x="206" y="118" width="110" height="30" rx="15" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="261" y="137" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B45309">G1 · plan ok</text>
+  <line x1="220" y1="86" x2="240" y2="116" stroke="#B45309" stroke-width="1.2" marker-end="url(#arrP)"/>
+
+  <rect x="330" y="118" width="110" height="30" rx="15" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="385" y="137" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B45309">G2 · tested local</text>
+  <line x1="356" y1="86" x2="372" y2="116" stroke="#B45309" stroke-width="1.2" marker-end="url(#arrP)"/>
+
+  <rect x="470" y="118" width="106" height="30" rx="15" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="523" y="137" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B45309">G3 · design ok</text>
+  <line x1="496" y1="86" x2="510" y2="116" stroke="#B45309" stroke-width="1.2" marker-end="url(#arrP)"/>
+
+  <rect x="576" y="118" width="96" height="30" rx="15" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="624" y="137" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B45309">G4 · go live</text>
+  <line x1="600" y1="86" x2="614" y2="116" stroke="#B45309" stroke-width="1.2" marker-end="url(#arrP)"/>
+
+  <!-- operate -->
+  <rect x="16" y="190" width="650" height="40" rx="8" fill="#17191D"/>
+  <text x="341" y="215" text-anchor="middle" font-size="12.5" fill="#E8E6DF" font-weight="600">operate — continuous steady state (check always passes): change loop · bots · lessons · harvest</text>
+
+  <line x1="637" y1="86" x2="637" y2="188" stroke="#0F766E" stroke-width="1.4" marker-end="url(#arrP)"/>
+
+  <text x="340" y="256" text-anchor="middle" font-size="11" fill="#5F6570">phased mode: run STOPS at each gate until owner says go — dh gate pass Gx --quote "&lt;their words&gt;"</text>
+  <text x="340" y="274" text-anchor="middle" font-size="11" fill="#5F6570">dh reopen &lt;phase&gt; --reason resets that phase and everything after it to pending</text>
+</svg>
+<figcaption>Fig 3.1 — Nine phases, four hard gates, one continuous operate state. Skipping the optional try-on phase passes G3 only in auto mode; in phased mode the owner still approves the design.</figcaption>
+</figure>
+
+<h3>Exit checks (the exact thing each phase must prove)</h3>
+<table>
+<tr><th style="width:11%">Phase</th><th style="width:47%">Done when (check)</th><th>Reference</th></tr>
+<tr><td><b>define</b></td><td>Brief has required keys: business, shape, languages, audience (+ validated <code>deliverable</code> own|client|product)</td><td><code>00-define.md</code></td></tr>
+<tr><td><b>research</b></td><td><code>research.json</code>: ≥3 competitors (URL + strengths + gaps), audience, conversion plays, day-one features, ≥3 harvested terms, and <code>dh research verify</code> OK after last edit with at least 3 quotes actually found on their pages (<code>min_found</code> in <code>data/research.json</code>; every fetch blocked = not done, <code>dh phase skip research --reason</code> is the way out)</td><td><code>10-research.md</code></td></tr>
+<tr><td><b>plan</b></td><td><code>dh plan lint</code> = 0 errors (E0–E11; warnings don't block), and <code>sitemap.json</code> is no longer the untouched <code>dh plan init</code> example</td><td><code>20-plan.md</code></td></tr>
+<tr><td><b>build</b></td><td>Base recorded in run state + package manifest + <code>.deckhand/dev.json</code> URL answers without ≥500</td><td><code>30-build.md</code></td></tr>
+<tr><td><b>brand</b></td><td><code>dh rebrand check</code> = 0 blocking findings</td><td><code>40-brand.md</code> + <code>45-seo.md</code></td></tr>
+<tr><td><b>tryon</b> <span class="tag opt">optional</span></td><td>No open session in <code>.deckhand/tryon/sessions/*.json</code></td><td><code>50-tryon.md</code></td></tr>
+<tr><td><b>review</b></td><td><code>.deckhand/verify.json</code> exists and ok — every red blocking row fixed</td><td><code>60-review.md</code></td></tr>
+<tr><td><b>deploy</b></td><td><code>deploy.json</code> has url + smoke.ok AND <code>HANDOFF.md</code> exists</td><td><code>70-deploy.md</code></td></tr>
+<tr><td><b>operate</b></td><td>Check always returns true — steady state forever</td><td><code>80-operate.md</code></td></tr>
+</table>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="modes">
+<h2><span class="no">4</span>Modes &amp; paths</h2>
+<p class="sub">Asked once at define (<code>dh init</code>). Both change what happens next.</p>
+
+<div class="grid2">
+<div class="card"><h4>Modes</h4>
+<ul><li><b>phased</b> (default, recommended first business): the run <b>stops</b> at G1–G4 until the owner says go. Quote is mandatory.</li>
+<li><b>auto</b>: gates pass themselves (logged <code>by:"auto"</code>, or <code>by:"skip"</code> when a skip passed it); only genuine forks, owner-only facts and failures stop the run.</li></ul></div>
+<div class="card"><h4>Paths (base strategy)</h4>
+<ul><li><b>pool</b> — vetted permissive-licence template via <code>dh clone</code></li>
+<li><b>mine</b> — owner's own harvested base (ranked first)</li>
+<li><b>existing</b> — <code>dh adopt</code> their repo/folder; history kept, nothing rewritten</li>
+<li><b>scratch</b> — <code>dh scaffold</code> + <code>dh compose --sections … --copy copy.json</code></li></ul></div>
+</div>
+
+<p class="small muted">SEO default varies by path: scratch/existing → apply by default; pool/mine → strong recommendation as a DECISION NEEDED before launch. Owner changes their mind → <code>dh reopen &lt;phase&gt;</code>.</p>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="gates">
+<h2><span class="no">5</span>Gates G1–G4</h2>
+<p class="sub">The only places the owner holds the pen. Hard in phased mode — "even when the work looks obviously right".</p>
+
+<table>
+<tr><th>Gate</th><th>Meaning</th><th>Blocks</th><th>Artifact shown + ONE question</th></tr>
+<tr><td><b>G1</b></td><td>The plan (page map + features) is approved</td><td>no clone before G1</td><td>PLAN.md (+ base choice)</td></tr>
+<tr><td><b>G2</b></td><td>Owner opened the local app and says go</td><td>no rebrand/extra work before G2</td><td>local URL + logins table per role</td></tr>
+<tr><td><b>G3</b></td><td>Design (brand + try-on) approved</td><td>tryon is optional; skipping it passes G3 in auto mode only (phased: the owner still approves the brand)</td><td>the design / try-on result</td></tr>
+<tr><td><b>G4</b></td><td>Go live: deploy to the server</td><td>no deploy before G4</td><td>VERIFY.md</td></tr>
+</table>
+
+<h3>How a gate passes — deterministic quote classifier</h3>
+<pre><code>dh gate pass G1 --quote "&lt;owner's words, verbatim&gt;"   # phased mode: --quote REQUIRED</code></pre>
+
+<p>The quote runs through a regex classifier → <code>approve</code> | <code>approve_with_changes</code> | <code>change_request</code>:</p>
+<ul>
+<li><span class="tag ok">approve</span> "go", "ok", "yes", "approved", "looks good", "lgtm", "ship it", "go live", "go ahead", confirm(ed), "do it", "let's go", "g[1-4] ok" + fr/de/es/ar equivalents + the thumbs-up / check emoji. "No problem / no worries" is stripped before matching &mdash; still a go.</li>
+<li><span class="tag block">NOT a go</span> change / make it / but / however / add / remove / fix / not yet / should / must / wrong / redo — these words make it a <b>change request</b></li>
+<li><span class="tag block">hold = no go</span> "don't ship it", "wait", "hold", "stop" — a held go is not a go</li>
+<li><b>strong-go carve-out</b>: only an explicit strong approval ("G1 ok", "approved", "ship it") may carry a change and pass as <i>approve_with_changes</i> — then the change is recorded (<code>dh note decision</code>) and executed next phase. A bare "ok but add…" = change request (the recipe embeds their words truncated to 80 chars).</li>
+<li><b>When in doubt → change request:</b> the gate asks again rather than passing on a "no". A change request returns <code>CHANGE_REQUEST</code> with a <code>do:</code> recipe = <code>dh reopen &lt;phase&gt; --reason "&lt;their words&gt;"</code> → change → show again → ask again.</li>
+</ul>
+<div class="callout danger"><b>Never paraphrase an owner into approval.</b> (Embedded incident D2 in the source: an agent once passed G1 on its own paraphrase of "make it like a real business".) Gate pass records <code>by:"owner"</code> + the verbatim quote; the workflow autopsy flags any gate passed without the owner's words.</div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="phasedetail">
+<h2><span class="no">6</span>Phase-by-phase detail</h2>
+<p class="sub">What the agent does, what the owner does, what artifacts appear — per phase.</p>
+
+<h3>① define</h3>
+<p class="small"><b>Agent:</b> <code>dh profile doctor</code> (record access; profile fields are answers — never re-asked) → <code>dh workflow query</code> → owner picks 1 of 3 workflows (or none) → draft every inferable brief field marked <code>assumed[]</code> → ask the rest in ONE batched message with defaults (mode, path, deliverable, languages, hosting…). <b>Owner:</b> answers "1a 3b" or "default". <b>Artifacts:</b> <code>.deckhand/brief.json</code>, mode/path in run state, <code>for</code> as scope in profile.json, <code>PENDING.md</code>, <code>dh note decision</code> for every chat choice, <code>dh pending add … --when</code> for later-phase questions. <b>Exit:</b> 5-line read-back → <code>dh phase done define</code> (no gate).</p>
+
+<h3>② research</h3>
+<p class="small"><b>Agent:</b> one <code>dh research brief --focus F --agent ID</code> per focus (competitors | pricing | audience | conversion | discovery | local-rules | vocabulary); solo or ≤5 parallel agents, each writing ONLY its own <code>.deckhand/research/agents/ID.json</code> + registering pages via <code>dh research add URL</code> (thin notes refused; <code>seen</code> first to avoid double reads). Claims labeled VERIFIED / SECONDARY / INFERRED / NOT_FOUND with verbatim quotes (the verifier caps them at 400 chars; the card advises ≤300). <code>dh research verify</code> re-fetches every URL and fails quotes not on the page. <b>Owner:</b> may decline → <code>dh phase skip research</code>. <b>Rules:</b> no copying competitor copy; every conversion play becomes a section/feature or lands in <code>features.later</code> with reason.</p>
+
+<h3>③ plan</h3>
+<p class="small"><b>Agent:</b> map conversion plays → pages; pool/mine path takes top base and seeds routes from it; write <code>sitemap.json</code> (target grammar: <code>route: · anchor: · modal: · api: · external: · state: · mailto: · tel: · download:</code>); loop <code>dh plan lint</code> to 0 errors; <code>dh plan render</code> → PLAN.md + mermaid; <code>dh plan split --agents N</code> → work packages; scratch path writes <code>copy.json</code> now. <b>Owner:</b> sees PLAN.md → one question → G1.</p>
+
+<h3>④ build</h3>
+<p class="small"><b>Agent:</b> path entry (clone/adopt/scaffold/base record); swap rented vendor services first if env validated at build (<code>dh swap scan</code> → one vendor at a time → <code>dh swap check</code>; payments = KEEP); services via <code>dh dev port/add/start</code>; solo = WP by WP (WP-00 first) or team protocol (§32); everything through <code>dh run -- …</code>. <b>Owner:</b> opens URL, tests → G2 message = URL + logins table + ONE question.</p>
+
+<h3>⑤ brand</h3>
+<p class="small"><b>Agent:</b> <code>dh rebrand scan</code> → <code>dh brief set brand.*</code> → <code>dh rebrand apply --dry</code> → copy pass (<code>dh slop brief</code> first, then rewrite from copy.json/brief) → <code>dh rebrand check</code> to 0 blocking → SEO step (§22): model writes <code>copy.json → seo.pages</code>, scripts write robots/sitemap/canonicals/OG/JSON-LD/404/llms.txt/IndexNow. <b>Never:</b> edit LICENSE/NOTICE/THIRD_PARTY_NOTICES; stock photos as the business; fake testimonials.</p>
+
+<h3>⑥ tryon <span class="tag opt">optional</span></h3>
+<p class="small">Owner clicks elements of the running site; N licensed variants are written into source once wearing the site's tokens and carrying the owner's copy; the panel pre-guesses the slot (a slot with no licensed designs reads "— AI draft only" and offers Ask AI to draft one); ←/→ compares instantly, with the before/after slider on by default; Keep bakes + records licence. AI drafts only on request, script-gated. <b>Exit:</b> no open sessions. → G3.</p>
+
+<h3>⑦ review</h3>
+<p class="small"><b>Agent:</b> <code>tryon clean</code> → <code>dh verify</code> (builds, serves production build, checks every row) → fix red blocking rows at root, never weaken checks → show VERIFY.md. <b>Blocking rows:</b> typecheck, build, prod-clean, tryon-closed, secrets, env-ignored, logs-ignored, swaps, honesty, product-kit (products), routes (static public, &lt;400), seo (launch-breakers) — plus prod-serve when the production start fails. <b>Advisory:</b> lint, a11y-basics, deps-audit, copy-slop. Security floor before G4: rate-limited auth, server-checked admin, upload limits, CSP, no debug endpoints. → G4.</p>
+
+<h3>⑧ deploy</h3>
+<p class="small">Runbooks in <code>references/ops/</code>. <code>dh deploy target --app UUID --url U</code>; every release: <code>dh deploy ship</code> = clean tree → push → Coolify → wait for THIS commit → smoke (200 + brand name) → deploy.json. After domain live: <code>dh brief set domain</code> → <code>dh seo apply</code> → ship (IndexNow ping) → <code>dh seo audit --url</code>. <code>dh handoff</code> → HANDOFF.md (URL, secret <i>locations</i>, commands, bots, verify summary, open PENDING, licences).</p>
+
+<h3>⑨ operate</h3>
+<p class="small"><b>Change loop:</b> edit → <code>dh verify</code> → conventional commit → <code>dh deploy ship</code> → report with smoke evidence. Never edit production directly. New session: <code>dh resume</code> (+ <code>--check</code> before shipping). Bots: <code>dh ops suggest</code> → <code>dh ops add</code> (live only after it fires once). Learning: <code>dh run --fix</code>, <code>dh autopsy --apply</code>, <code>dh autopsy --workflow</code>. Reuse: <code>dh harvest --name BASE --push</code>.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="invariants">
+<h2><span class="no">7</span>The 12 invariants</h2>
+<p class="sub">Rules that hold in every phase, every session, every harness. Violating one is a defect.</p>
+<table>
+<tr><th style="width:4%">#</th><th style="width:26%">Invariant</th><th>Operational meaning</th></tr>
+<tr><td>1</td><td>Owner facts never invented</td><td>Prices, reviews, addresses, licences, testimonials, logos unknown → <code>PENDING.md</code>. An unconfirmed demo value is a defect.</td></tr>
+<tr><td>2</td><td>Access before asks</td><td><code>dh profile doctor</code> first; what access can do, DO. Capability walls proven by cheap probe + verbatim error. Ask ONLY what nothing covers, in ONE batched labeled message; later needs parked with <code>dh pending add … --when</code>, never re-asked.</td></tr>
+<tr><td>3</td><td>Secrets in the vault</td><td><code>dh vault set NAME</code> (0600, stdin, single-quoted shell lines). Secret pasted in chat → vault it + warn it's in history → rotate. Never in chat/profile/commits/logs/HANDOFF. Layout <code>here|machine|folder</code>; <code>BINDING_BROKEN</code> = ask, never write around. Client projects never machine-bound.</td></tr>
+<tr><td>4</td><td>Licences</td><td>Permissive only (MIT, Apache-2.0, BSD-2/3, ISC, 0BSD, Unlicense). NOTICE/THIRD_PARTY never rewritten. Pool/registry vetting refuses copyleft, unknown, paywalls, secrets, dead repos — refusals stay refused.</td></tr>
+<tr><td>5</td><td>Evidence over assertion</td><td>"Works/deployed/fixed" require the command and its output. A check that cannot fail is not a check.</td></tr>
+<tr><td>6</td><td>Deterministic first</td><td>If a script does it, the agent MUST NOT hand-write it. The model writes words + app-specific logic — not boilerplate.</td></tr>
+<tr><td>7</td><td>Gates are hard</td><td>Phased mode: pass on owner's own words with --quote; change/hold words are not a go; never paraphrase into approval.</td></tr>
+<tr><td>8</td><td>Failures are paid once</td><td><code>dh run -- &lt;cmd&gt;</code> (known error prints its fix; <code>--fix</code> replays a proven recipe). After a hard session: <code>dh autopsy --latest --apply</code>.</td></tr>
+<tr><td>9</td><td>Dev-only tooling never ships</td><td>Try-on stamps must be absent from production builds (verify row <code>prod-clean</code>); <code>tryon clean</code> before release.</td></tr>
+<tr><td>10</td><td>Production changes follow the pipeline</td><td>edit → verify → commit → <code>dh deploy ship</code> (proof) → report. Rollback path known before shipping.</td></tr>
+<tr><td>11</td><td>Nothing lives only in the chat</td><td>Decisions recorded the moment they're made (<code>dh note decision</code>). Before stopping: <code>dh resume</code> must say SAFE TO START A FRESH SESSION.</td></tr>
+<tr><td>12</td><td>Proven paths, measured</td><td>A pinned workflow is followed step by step; steps tick from dh commands; leaving the path is recorded, not hidden. Every report ends with open PENDING items + the WORKFLOW line.</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="comms">
+<h2><span class="no">8</span>Owner communication protocol</h2>
+<ul>
+<li><b>Every ask is labeled:</b> <code>DECISION NEEDED — question (options, recommendation)</code> · <code>ACTION NEEDED — P-0NN: exact steps + WHERE</code> · <code>FYI</code>. Never two rounds for the same fact. An ask the owner must decode was written wrong.</li>
+<li><b>Human tasks are written the moment they appear</b> (<code>dh pending add</code>, same message as the ask): project items → <code>PENDING.md</code>; the owner's own accounts/infra → <code>~/.deckhand/pending.md</code> (<code>--machine</code>).</li>
+<li><b>Every report ends, in order, with:</b> 1) <b>Waiting on you</b> — open items of both ledgers with age; 2) <b>Next (optional)</b> — the computed <code>suggest</code> lines (NOW · SOON · LATER, what, why, exact command — never invented; <code>dh suggest dismiss ID</code> quiets one); 3) the <code>WORKFLOW …</code> line when a workflow is pinned.</li>
+<li><b>At each gate:</b> show the artifact, ask ONE question.</li>
+<li><b>Register:</b> terse, evidence-first, no tutorials/recaps/option surveys the owner didn't ask for; one recommendation per decision with the reason in one line.</li>
+</ul>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="nextloop">
+<h2><span class="no">9</span>The <code>dh next</code> loop</h2>
+<p class="sub">The agent's single source of "what now". Decision logic traced through <code>guide.py</code>.</p>
+
+<figure>
+<svg viewBox="0 0 680 520" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrN" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker>
+  <marker id="arrNG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#B45309"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">dh next — decision flow</text>
+
+  <rect x="240" y="34" width="200" height="34" rx="8" fill="#17191D"/>
+  <text x="340" y="55" text-anchor="middle" font-size="12.5" fill="#fff" font-weight="600">dh next</text>
+
+  <path d="M340 68 L340 92" stroke="#5F6570" stroke-width="1.2" marker-end="url(#arrN)"/>
+  <polygon points="340,92 424,124 340,156 256,124" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.3"/>
+  <text x="340" y="128" text-anchor="middle" font-size="11.5">run exists?</text>
+  <text x="252" y="112" font-size="10" fill="#B45309">no</text>
+  <rect x="60" y="100" width="150" height="34" rx="8" fill="#FCF3E6" stroke="#B45309"/>
+  <text x="135" y="121" text-anchor="middle" font-size="11">print dh init + read 00-define</text>
+  <line x1="254" y1="124" x2="212" y2="118" stroke="#B45309" stroke-width="1.2" marker-end="url(#arrNG)"/>
+
+  <path d="M340 156 L340 180" stroke="#5F6570" stroke-width="1.2" marker-end="url(#arrN)"/>
+  <polygon points="340,180 424,212 340,244 256,212" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.3"/>
+  <text x="340" y="216" text-anchor="middle" font-size="11.5">moved_to set?</text>
+  <text x="432" y="200" font-size="10" fill="#B45309">yes</text>
+  <rect x="470" y="196" width="150" height="34" rx="8" fill="#FCF3E6" stroke="#B45309"/>
+  <text x="545" y="217" text-anchor="middle" font-size="11">print "cd &lt;path&gt; → next"</text>
+  <line x1="426" y1="208" x2="468" y2="210" stroke="#B45309" stroke-width="1.2" marker-end="url(#arrNG)"/>
+
+  <path d="M340 244 L340 268" stroke="#5F6570" stroke-width="1.2" marker-end="url(#arrN)"/>
+  <polygon points="340,268 434,304 340,340 246,304" fill="#FFFFFF" stroke="#B45309" stroke-width="1.5"/>
+  <text x="340" y="300" text-anchor="middle" font-size="11.5" font-weight="600">blocking gate?</text>
+  <text x="340" y="316" text-anchor="middle" font-size="10" fill="#5F6570">(phased mode only)</text>
+  <text x="442" y="292" font-size="10" fill="#B45309">yes</text>
+  <rect x="452" y="286" width="204" height="52" rx="8" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="554" y="306" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">waiting for the owner</text>
+  <text x="554" y="324" text-anchor="middle" font-size="10" fill="#5F6570">show gate · ONE question</text>
+  <line x1="436" y1="300" x2="450" y2="304" stroke="#B45309" stroke-width="1.3" marker-end="url(#arrNG)"/>
+
+  <path d="M340 340 L340 364" stroke="#5F6570" stroke-width="1.2" marker-end="url(#arrN)"/>
+  <rect x="150" y="364" width="380" height="66" rx="8" fill="#E6F3F1" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="340" y="386" text-anchor="middle" font-size="12" font-weight="600" fill="#0F766E">current phase → its fixed STEPS</text>
+  <text x="340" y="404" text-anchor="middle" font-size="10.5" fill="#5F6570">+ ONE reference file to read + preflight lessons</text>
+  <text x="340" y="419" text-anchor="middle" font-size="10.5" fill="#5F6570">pinned workflow's remaining steps override generic steps</text>
+
+  <path d="M340 430 L340 452" stroke="#5F6570" stroke-width="1.2" marker-end="url(#arrN)"/>
+  <rect x="90" y="452" width="500" height="52" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="340" y="472" text-anchor="middle" font-size="11.5" font-weight="600">+ enrichment (never changes the core instruction)</text>
+  <text x="340" y="490" text-anchor="middle" font-size="10.5" fill="#5F6570">harness syntax · suggestions (top 3) · playbook "worked before" · pending summary · fresh_session after a gate</text>
+</svg>
+<figcaption>Fig 9.1 — dh next prints one phase step-list + one reference to read. Everything else is attached context.</figcaption>
+</figure>
+
+<h3>The observe hook — why workflow steps tick themselves</h3>
+<p class="small">After every successful dh command (except next/status/resume/note/workflow/autopsy/suggest), <code>_observe</code> normalizes it (<code>dh &lt;sub&gt; &lt;action&gt;</code>) and matches it against the pinned workflow's pending <code>do/check/gate</code> steps → auto-ticks <code>done</code>. A state-changing command no step named is recorded as an <code>unplanned</code> deviation — leaving the path is recorded, not hidden. <code>dh phase done|skip</code> closes the remaining steps: ask/write/delegate/optional → done, the rest → skipped with a <code>not-run</code> deviation, and gate steps are left for <code>dh gate pass</code>.</p>
+
+<h3>The refresh hook — why RESUME.md is never stale</h3>
+<p class="small">After <b>every</b> command (in a finally block, even on failure; except resume/note themselves), RESUME.md is regenerated from project files. Also for clone/adopt/scaffold's target project. So any AI, any session, any harness starts by reading one file that re-proves itself: <code>dh resume</code>.</p>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="commands">
+<h2><span class="no">10</span>Full command map</h2>
+<p class="sub">All 37 <code>dh</code> subcommands by intent, plus the try-on engine's own CLI. One JSON object per command; exit 0 ok / 1 check failed / 2 usage.</p>
+
+<h3>State machine &amp; control</h3>
+<table>
+<tr><th style="width:34%">Command</th><th>Does</th></tr>
+<tr><td><code>dh init --name N --mode phased|auto --path pool|mine|existing|scratch --for me|client</code></td><td>Idempotent project start (<code>--project DIR</code> optional, also accepted after any subcommand); writes run.json, PENDING.md, gitignore + AGENTS.md cold-start blocks</td></tr>
+<tr><td><code>dh status</code></td><td>Full phase/gate/base snapshot JSON</td></tr>
+<tr><td><code>dh next</code></td><td>The one next instruction (§9)</td></tr>
+<tr><td><code>dh phase done|skip &lt;phase&gt; [--reason] [--force]</code></td><td>Done only after its check passes; skip needs a reason and only the current phase can be skipped; review is never skippable; out-of-order/gate-blocked refused</td></tr>
+<tr><td><code>dh gate pass Gx --quote "…"</code></td><td>Phased: quote mandatory; classifier decides approve / approve_with_changes / change_request</td></tr>
+<tr><td><code>dh reopen &lt;phase&gt; --reason "…"</code></td><td>Resets this phase + all after it (and their gates) to pending</td></tr>
+<tr><td><code>dh brief show|set k=v …</code></td><td>Dotted-key brief edits (deliverable validated)</td></tr>
+<tr><td><code>dh note decision|doing|next "…"</code></td><td>One-line redacted note → notes.jsonl → RESUME</td></tr>
+<tr><td><code>dh resume [--check [--online]] [--hook] [--install-hook claude]</code></td><td>Regenerate/prove RESUME.md; plain-text hook; install SessionStart hook</td></tr>
+<tr><td><code>dh suggest [--all] · dh suggest dismiss ID [--days N]</code></td><td>20 deterministic rules → top-3 NOW/SOON/LATER next-actions</td></tr>
+<tr><td><code>dh handoff</code></td><td>Writes HANDOFF.md (URL, secret locations, commands, bots, verify, pending, licences)</td></tr>
+</table>
+<p class="small muted"><b>Refusals you will actually see</b> (all exit 1, one JSON object): <code>MOVED</code> (the run continues in another folder — <code>cd</code> there) ·
+<code>BAD_PHASE</code> · <code>OUT_OF_ORDER</code> (an earlier phase is neither done nor skipped) · <code>GATE_BLOCKED</code> (phased mode, owed gate unpaid) ·
+<code>CHECK_FAILED</code> (the phase's check is red) · <code>NEED_QUOTE</code> (gate pass without the owner's words) · <code>NEED_REASON</code> (skip / drop without one) · <code>GATE_NOT_DUE</code> (gate pass before its phase is done) · <code>NOT_SKIPPABLE</code> (skipping review) · <code>CHANGE_REQUEST</code> (the owner's words were not a go, §5).</p>
+
+<h3>Owner asks &amp; identity</h3>
+<table>
+<tr><th style="width:34%">Command</th><th>Does</th></tr>
+<tr><td><code>dh pending list [--all] · add · decide · done · wait · drop</code></td><td>Two ledgers: project PENDING.md + machine ~/.deckhand/pending.md; add requires HOW+WHERE; <code>--when</code> defers until a phase/gate trigger</td></tr>
+<tr><td><code>dh profile show|set|doctor|where [--set here|machine|FOLDER]</code></td><td>Profile facts (never re-asked); doctor probes access without printing values; layout binding</td></tr>
+<tr><td><code>dh vault set NAME [--here|--machine] · dh vault list</code></td><td>Secrets via stdin (never argv), chmod 600, single-quoted shell lines; list prints names + safe curl line</td></tr>
+</table>
+
+<h3>Proven paths (workflows)</h3>
+<table>
+<tr><th style="width:34%">Command</th><th>Does</th></tr>
+<tr><td><code>dh workflow query [--industry --deliverable --features --min-level]</code></td><td>Top 3 workflows with reasons, proof, gaps</td></tr>
+<tr><td><code>dh workflow use REF [--set k=v] [--accept]</code></td><td>Pins it into run.json (progress survives re-pin/compaction); returns ask_upfront questions</td></tr>
+<tr><td><code>dh workflow status|todo [--format md] · step ID done|skip --why · show|list|lint|sync</code></td><td>Progress, harness-neutral checklist, manual ticks, lint</td></tr>
+<tr><td><code>dh workflow new --from-run · save [--from-autopsy ID --proposals P1,P3] [--public] · publish REF</code></td><td>Extract a workflow from this run; apply autopsy proposals; share</td></tr>
+</table>
+
+<h3>Research → plan → pool → build</h3>
+<table>
+<tr><th style="width:34%">Command</th><th>Does</th></tr>
+<tr><td><code>dh research brief|add|seen|merge|verify|score</code></td><td>Per-focus briefs, shared source ledger, quote re-verification, efficiency scoring</td></tr>
+<tr><td><code>dh plan init|lint|render|split --agents N</code></td><td>Sitemap seed, E0–E11 lint, PLAN.md + mermaid, AGENT-n.md work packages</td></tr>
+<tr><td><code>dh bb post|read|flag NAME|wait NAME --max 170</code></td><td>Blackboard for parallel agents (jsonl + flag files)</td></tr>
+<tr><td><code>dh pool query|show|vet|add|list|sync</code></td><td>Ranked bases, licence vetting (refusals list what WOULD be accepted), personal pool</td></tr>
+<tr><td><code>dh clone T --to DIR · dh adopt PATH|URL · dh scaffold --to DIR · dh base record</code></td><td>Four ways in; deckhand files hold-aside during clone; profile/scope carried</td></tr>
+<tr><td><code>dh compose --sections … --copy .deckhand/copy.json</code></td><td>Assemble page from licensed sections; copy run through slop check</td></tr>
+<tr><td><code>dh dev start|stop|status|add|remove|port</code></td><td>App + services lifecycle; committed services.json; bind-tested ports</td></tr>
+<tr><td><code>dh swap scan|check</code></td><td>Vendor-SDK removal map; payments kept; feeds verify's swaps row</td></tr>
+<tr><td><code>dh run [--fix] -- CMD</code></td><td>Run + log (redacted); known failure prints fix; --fix replays proven recipe</td></tr>
+</table>
+
+<h3>Brand, text quality, SEO, try-on, review</h3>
+<table>
+<tr><th style="width:34%">Command</th><th>Does</th></tr>
+<tr><td><code>dh rebrand scan|apply [--dry]|check</code></td><td>Template identity removal; leaks/demo-copy/slop findings block</td></tr>
+<tr><td><code>dh slop brief|check|allow|add|export|langs|lint</code></td><td>Deterministic AI-tell detector, 11 language packs, per-project allowlist</td></tr>
+<tr><td><code>dh seo audit|apply|undo|ping|facts</code></td><td>Score + launch-breakers; apply never overwrites owner words; IndexNow; owner gaps → PENDING</td></tr>
+<tr><td><code>dh tryon …</code></td><td>Passthrough to node tryon/cli.mjs (§13–18)</td></tr>
+<tr><td><code>dh verify [--url] [--skip] [--allow]</code></td><td>All rows (§29); red blocking → VERIFY_FAILED → blocks G4</td></tr>
+</table>
+
+<h3>Deploy, ops, learning, reuse</h3>
+<table>
+<tr><th style="width:34%">Command</th><th>Does</th></tr>
+<tr><td><code>dh deploy target|ship|smoke|raw</code></td><td>Record target; ship = push→Coolify→wait commit→smoke→IndexNow; raw passthrough</td></tr>
+<tr><td><code>dh ops suggest|add|list</code> · runner <code>github|cron|local</code></td><td>Rank/install bots; schedule live only after its own trigger fires once</td></tr>
+<tr><td><code>dh learn add|match|preflight|promote|from-failure|list</code></td><td>Lesson ledger (rungs: eliminate &gt; preflight &gt; reorder &gt; gate &gt; pitfall)</td></tr>
+<tr><td><code>dh autopsy [transcript|state.db|--latest] [--apply] [--session]</code></td><td>Failures → episodes → recipes → lessons/playbooks/skill-proposals (never edits the skill)</td></tr>
+<tr><td><code>dh autopsy --workflow [--part P]</code></td><td>Timeline / questions (LATE, DIRECTION-CHANGE, LOST) / deviations / costs / proposals</td></tr>
+<tr><td><code>dh harvest --name BASE [--push] [--repo owner/name] · dh pool sync</code></td><td>Freeze run as private base (identity neutralised, secret-scanned) → GitHub library</td></tr>
+</table>
+
+<h3>Try-on engine CLI (node)</h3>
+<table>
+<tr><th style="width:34%">Command</th><th>Does</th></tr>
+<tr><td><code>setup · doctor · serve</code></td><td>Wire config + stamping (dev-only) · read-only diagnosis · start proxy on 127.0.0.1:3999</td></tr>
+<tr><td><code>query · inspect · slots · status · library</code></td><td>Rank-only / element inspect / slot counts / sessions / personal pool — no writes</td></tr>
+<tr><td><code>try · more · show · keep · discard · save · clean</code></td><td>The swap lifecycle (§14–17)</td></tr>
+<tr><td><code>draft · drafts [--wait] · draft-check · draft-done</code></td><td>AI draft protocol (§19)</td></tr>
+<tr><td><code>tune --file F --line N --col C --preset P | --id T --keep/--reset</code></td><td>Deterministic adjust-in-place with byte-exact undo (§20)</td></tr>
+<tr><td><code>theme --accent X --corners Y … | --undo</code></td><td>Whole-site look; 10-deep history (§20)</td></tr>
+<tr><td><code>seo inspect | apply --plan P | undo</code></td><td>Deterministic SEO source writes (engine half of <code>dh seo</code>)</td></tr>
+<tr><td><code>registry vet|add|list|remove|check</code> (check runs fit-check) · <code>flags</code> · compose via <code>dh compose</code></td><td>Vetting pipeline (§18), flags, section composer</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ 11 -->
+<section id="statefiles">
+<h2><span class="no">11</span>State files on disk</h2>
+<p class="sub">Everything is files. Nothing lives only in the chat.</p>
+
+<div class="grid2">
+<div class="card"><h4>Project — <code>&lt;project&gt;/.deckhand/</code> (gitignored runtime)</h4>
+<ul class="small">
+<li><code>run.json</code> — version, name, mode, path, phases{status,check,forced}, gates{status,by,quote,verdict}, base, moved_to, workflow pin</li>
+<li><code>history.jsonl</code> — events: init / phase_done / phase_skip / gate / reopen / workflow</li>
+<li><code>RESUME.md</code> — regenerated after every command (6,000-char budget)</li>
+<li><code>brief.json · sitemap.json · copy.json · research.json</code> + <code>research/agents/*.json</code> + <code>research/verify.json</code></li>
+<li><code>verify.json · deploy.json · dev.json + dev.log · services.json · swap-map.json</code></li>
+<li><code>PLAN.md · VERIFY.md · SEO.md · SLOP.md</code> (reports) · <code>runs.jsonl</code> (redacted cmd log — every command except run/autopsy/next/status/resume/note/suggest) · <code>failures.jsonl</code> · <code>notes.jsonl</code> · <code>suggest.json</code> (dismissals)</li>
+<li><code>tryon/</code> — sessions, backups, runtime, drafts, tune, theme, flags, setup journal</li>
+<li><code>work/</code> — AGENT-n.md, CONVENTIONS.md, WP packages · <code>blackboard.jsonl</code> (at <code>.deckhand/</code> level)</li>
+<li><code>autopsy/</code> · <code>layout.json</code> (profile binding) · <code>profile.json · vault.env</code></li>
+</ul></div>
+<div class="card"><h4>Owner-facing / machine-wide</h4>
+<ul class="small">
+<li>Project root: <code>PENDING.md · HANDOFF.md · AGENTS.md/CLAUDE.md cold-start block</code></li>
+<li>Machine <code>~/.deckhand/</code>: profile.json · vault.env · profile.md · pending.md (cross-project) · workflows/ (mine) · lessons.jsonl · playbooks.jsonl · library/ · catalog/ · registries.json · pool.json · cache/ · autopsy/proposals/</li>
+<li>Skill dir: <code>data/</code> (index, checks, pool, slop packs, seo rules, licenses, bots, harness) · <code>references/</code> · <code>templates/</code> · <code>workflows/</code> (base) · <code>ops/</code></li>
+</ul></div>
+</div>
+
+<div class="callout"><b>Layout binding (where profile/secrets live):</b> <code>dh profile where --set here|machine|FOLDER</code> → recorded once in <code>.deckhand/layout.json</code>. Reads always merge <b>machine then project (project wins)</b>. First write with no binding auto-records <code>here</code> and returns a one-time <code>ask_once</code> line to relay to the owner. <code>BINDING_BROKEN</code> (copied project, missing folder) = ask the owner, never write around it. Client projects can never bind to machine.</div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section id="resume">
+<h2><span class="no">12</span>Resume · suggest · pending</h2>
+<p class="sub">The three mechanisms that make Deckhand survive session boundaries.</p>
+
+<h3>RESUME.md — cold start for any AI</h3>
+<p class="small">Regenerated after every command from project files (never from memory): stage, exact next command, what is done <i>with proof</i>, what's in progress, owner decisions, what waits on the owner, timeline, git HEAD + dirty files, open try-on/tune/draft sessions, services up/down, last failure + known fixes. Line 4 is the verdict:</p>
+<div class="callout"><b>SAFE TO START A FRESH SESSION</b> = yes iff (a) no dirty file modified after the last note, AND (b) no unexplained later failure (non-guard fail, never succeeded afterwards, after last note, no known fix). <code>dh resume --check</code> re-proves claims against reality (re-runs phase checks, G1 drift by mtime, app answers, verify/deploy commit == HEAD, sessions closed) — any drift → exit 1 <code>DRIFT</code>.</div>
+<p class="small"><b>fresh_session signal</b>: last history event is a gate AND safe() → <code>dh next</code> says a fresh session is safer/sharper; tell the owner.</p>
+
+<h3>suggest — computed, never invented</h3>
+<p class="small">20 deterministic rules read local files only (run state, history, runs.jsonl, safety facts, pending ages, autopsy reports, brief/verify/seo/deploy, git, services, session size) → scored NOW ≥80 / SOON ≥50 / LATER. Top 3 shown (unless <code>--all</code>), deduped against what <code>dh next</code> already prints, dismissals honored (default 7 days). Examples of scores: unsaved work 95, gate 88, deferred pending due 86, services down 85, repeated failure 82.</p>
+
+<h3>pending — the two ledgers</h3>
+<p class="small">One line format: <code>- [ ] P-0NN · what · WHY · HOW · WHERE · asked date [· when: trigger]</code>. <code>add</code> requires HOW+WHERE (refuses secret-shaped text). <code>--when</code> sets nag:no → deferred until the named phase/gate is reached → fires as a suggestion at score 86. <code>P-SEO-*</code> items can't be hand-closed — they re-derive from <code>dh seo audit</code>. Every report ends with open items + age.</p>
+</section>
+
+<!-- ============================================================ 13 -->
+<section id="tryon-arch">
+<h2><span class="no">13</span>Try-on architecture</h2>
+<p class="sub">Live component swap with <b>zero model calls per click</b>. The agent is NOT in the click loop — do not poll.</p>
+
+<figure>
+<svg viewBox="0 0 680 470" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="arrT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker>
+    <marker id="arrTA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker>
+    <marker id="arrTG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#B45309"/></marker>
+  </defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">Try-on runtime — who talks to whom</text>
+
+  <!-- owner browser -->
+  <rect x="30" y="44" width="230" height="150" rx="10" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="145" y="66" text-anchor="middle" font-size="12.5" font-weight="600">Owner's browser</text>
+  <rect x="46" y="78" width="198" height="46" rx="6" fill="#E6F3F1" stroke="#0F766E"/>
+  <text x="145" y="97" text-anchor="middle" font-size="11" font-weight="600" fill="#0F766E">overlay.js (Shadow DOM)</text>
+  <text x="145" y="114" text-anchor="middle" font-size="9.5" fill="#5F6570">pick · slot guess · ←/→ toggle · Keep/Discard</text>
+  <rect x="46" y="132" width="198" height="48" rx="6" fill="#F1F0EB" stroke="#5F6570"/>
+  <text x="145" y="151" text-anchor="middle" font-size="11" font-weight="600">stamped page</text>
+  <text x="145" y="168" text-anchor="middle" font-size="9.5" fill="#5F6570">every JSX element stamped data-dh="file:line:col" (built-ins/head tags skipped)</text>
+
+  <!-- server -->
+  <rect x="300" y="44" width="200" height="150" rx="10" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.6"/>
+  <text x="400" y="66" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F766E">try-on server (server.mjs)</text>
+  <text x="400" y="84" text-anchor="middle" font-size="10.5" fill="#5F6570">127.0.0.1:3999 · per-run token</text>
+  <rect x="316" y="94" width="168" height="34" rx="5" fill="#F1F0EB"/>
+  <text x="400" y="109" text-anchor="middle" font-size="10">reverse proxy → dev server</text>
+  <text x="400" y="122" text-anchor="middle" font-size="9.5" fill="#5F6570">injects overlay + strips CSP</text>
+  <rect x="316" y="134" width="168" height="46" rx="5" fill="#E6F3F1"/>
+  <text x="400" y="150" text-anchor="middle" font-size="10">POST /__dh/api/* (x-dh-token)</text>
+  <text x="400" y="164" text-anchor="middle" font-size="9.5" fill="#5F6570">SINGLE serial write queue</text>
+  <text x="400" y="176" text-anchor="middle" font-size="9.5" fill="#5F6570">open·keep·discard·more·tune·theme</text>
+
+  <!-- engine -->
+  <rect x="530" y="44" width="130" height="150" rx="10" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
+  <text x="595" y="66" text-anchor="middle" font-size="12.5" font-weight="600">engine + libs</text>
+  <text x="595" y="88" text-anchor="middle" font-size="10" fill="#5F6570">catalog (1,247)</text>
+  <text x="595" y="106" text-anchor="middle" font-size="10" fill="#5F6570">materialize</text>
+  <text x="595" y="124" text-anchor="middle" font-size="10" fill="#5F6570">transplant</text>
+  <text x="595" y="142" text-anchor="middle" font-size="10" fill="#5F6570">fit gates · bake</text>
+  <text x="595" y="160" text-anchor="middle" font-size="10" fill="#5F6570">tune · theme · seo</text>
+  <text x="595" y="178" text-anchor="middle" font-size="10" fill="#5F6570">draft gate</text>
+
+  <!-- files -->
+  <rect x="300" y="240" width="360" height="70" rx="10" fill="#17191D"/>
+  <text x="480" y="264" text-anchor="middle" font-size="12.5" fill="#fff" font-weight="600">project source files (HMR live)</text>
+  <text x="480" y="284" text-anchor="middle" font-size="10.5" fill="#C9C6BD">components/dh-tryon/ staged · .deckhand/tryon/sessions + backups (byte-exact)</text>
+  <text x="480" y="300" text-anchor="middle" font-size="10.5" fill="#C9C6BD">ONE wrapper edit per open ← ←/→ cycles are pure DOM, zero writes</text>
+
+  <!-- dev server -->
+  <rect x="30" y="240" width="230" height="70" rx="10" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="145" y="264" text-anchor="middle" font-size="12.5" font-weight="600">dev server (Next/Vite)</text>
+  <text x="145" y="284" text-anchor="middle" font-size="10.5" fill="#5F6570">HMR renders file writes instantly</text>
+  <text x="145" y="300" text-anchor="middle" font-size="10.5" fill="#5F6570">stamp plugin: dev-only data-dh</text>
+
+  <!-- agent -->
+  <rect x="30" y="360" width="300" height="84" rx="10" fill="#FCF3E6" stroke="#B45309" stroke-width="1.5"/>
+  <text x="180" y="382" text-anchor="middle" font-size="12.5" font-weight="600" fill="#B45309">AI agent — NOT in the click loop</text>
+  <text x="180" y="402" text-anchor="middle" font-size="10.5" fill="#5F6570">listens once for draft_request stdout events</text>
+  <text x="180" y="418" text-anchor="middle" font-size="10.5" fill="#5F6570">tryon drafts --wait  →  writes draft ONCE  →  draft-done</text>
+  <text x="180" y="434" text-anchor="middle" font-size="10.5" fill="#5F6570">headless: try / show / keep / inspect via CLI</text>
+
+  <rect x="440" y="360" width="220" height="84" rx="10" fill="#FFFFFF" stroke="#5F6570"/>
+  <text x="550" y="382" text-anchor="middle" font-size="12.5" font-weight="600">Owner's other controls</text>
+  <text x="550" y="402" text-anchor="middle" font-size="10.5" fill="#5F6570">chat: "make the hero airier"</text>
+  <text x="550" y="418" text-anchor="middle" font-size="10.5" fill="#5F6570">→ agent runs tryon tune / theme</text>
+  <text x="550" y="434" text-anchor="middle" font-size="10.5" fill="#5F6570">flags auto-check → flag report</text>
+
+  <line x1="262" y1="110" x2="298" y2="110" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrT)"/>
+  <text x="280" y="102" text-anchor="middle" font-size="9" fill="#5F6570">api</text>
+  <line x1="298" y1="128" x2="262" y2="128" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrTA)"/>
+  <line x1="502" y1="110" x2="528" y2="110" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrT)"/>
+  <line x1="400" y1="196" x2="400" y2="238" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrT)"/>
+  <text x="455" y="222" text-anchor="middle" font-size="9" fill="#5F6570">writes</text>
+  <line x1="262" y1="275" x2="298" y2="275" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrT)"/>
+  <path d="M145 240 L145 226 Q145 218 155 218 L300 196" stroke="#5F6570" stroke-width="1.1" fill="none" marker-end="url(#arrT)"/>
+  <path d="M400 360 L400 344 Q400 336 390 336 L310 314" stroke="#B45309" stroke-width="1.1" fill="none" marker-end="url(#arrTG)"/>
+  <text x="370" y="352" font-size="9" fill="#B45309">draft event</text>
+</svg>
+<figcaption>Fig 13.1 — Clicks resolve deterministically in the Node engine. The agent is invoked only for the gated AI draft (one write) and offline CLI commands.</figcaption>
+</figure>
+
+<div class="callout"><b>Protocol facts.</b> Server is loopback-only with a per-run token; API requires <code>x-dh-token</code> (cross-site can never call it); typed refusals return HTTP 200 <code>{ok:false,code}</code> so the owner sees no red console errors; all writes go through one serial queue so two clicks can't interleave; SSE <code>/__dh/events</code> streams progress. Overlay re-attaches every 1s if a framework wipes the body.</div>
+</section>
+
+<!-- ============================================================ 14 -->
+<section id="tryon-life">
+<h2><span class="no">14</span>Try-on lifecycle</h2>
+<p class="sub">Setup once → serve → the owner's loop → keep/discard → clean before release.</p>
+
+<figure>
+<svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrLi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">Owner click loop</text>
+
+  <rect x="24" y="46" width="120" height="56" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="84" y="70" text-anchor="middle" font-size="11.5" font-weight="600">setup</text>
+  <text x="84" y="88" text-anchor="middle" font-size="9.5" fill="#5F6570">patch config + stamp</text>
+
+  <rect x="176" y="46" width="120" height="56" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="236" y="70" text-anchor="middle" font-size="11.5" font-weight="600">restart dev</text>
+  <text x="236" y="88" text-anchor="middle" font-size="9.5" fill="#5F6570">stamps render</text>
+
+  <rect x="328" y="46" width="120" height="56" rx="8" fill="#E6F3F1" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="388" y="70" text-anchor="middle" font-size="11.5" font-weight="600">tryon serve</text>
+  <text x="388" y="88" text-anchor="middle" font-size="9.5" fill="#5F6570">give owner URL :3999</text>
+
+  <rect x="480" y="46" width="176" height="56" rx="8" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="568" y="70" text-anchor="middle" font-size="11.5" font-weight="600">owner picks element</text>
+  <text x="568" y="88" text-anchor="middle" font-size="9.5" fill="#5F6570">slot guessed · count 4/6/8/12</text>
+
+  <line x1="144" y1="74" x2="174" y2="74" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrLi)"/>
+  <line x1="296" y1="74" x2="326" y2="74" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrLi)"/>
+  <line x1="448" y1="74" x2="478" y2="74" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrLi)"/>
+
+  <rect x="480" y="140" width="176" height="56" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="568" y="164" text-anchor="middle" font-size="11.5" font-weight="600">Show variants → open</text>
+  <text x="568" y="182" text-anchor="middle" font-size="9.5" fill="#5F6570">ONE wrapper edit · build verified</text>
+
+  <rect x="328" y="140" width="120" height="56" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="388" y="164" text-anchor="middle" font-size="11.5" font-weight="600">←/→ compare</text>
+  <text x="388" y="182" text-anchor="middle" font-size="9.5" fill="#5F6570">DOM toggle · zero writes</text>
+
+  <rect x="176" y="140" width="120" height="56" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="236" y="164" text-anchor="middle" font-size="11.5" font-weight="600">More · N left</text>
+  <text x="236" y="182" text-anchor="middle" font-size="9.5" fill="#5F6570">batches &le;12 (try max 30)</text>
+
+  <rect x="24" y="140" width="120" height="56" rx="8" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="84" y="164" text-anchor="middle" font-size="11.5" font-weight="600">Keep ⏎ / Discard ⎋</text>
+  <text x="84" y="182" text-anchor="middle" font-size="9.5" fill="#5F6570">+ Save to library</text>
+
+  <line x1="568" y1="102" x2="568" y2="138" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrLi)"/>
+  <line x1="478" y1="168" x2="450" y2="168" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrLi)"/>
+  <line x1="326" y1="168" x2="298" y2="168" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrLi)"/>
+  <line x1="174" y1="168" x2="146" y2="168" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrLi)"/>
+  <path d="M236 196 L236 220 Q236 228 246 228 L556 228 Q568 228 568 218 L568 198" stroke="#5F6570" stroke-width="1.2" fill="none" marker-end="url(#arrLi)"/>
+  <text x="400" y="243" text-anchor="middle" font-size="10" fill="#5F6570">cycling stays in the loop — only Keep/Discard write</text>
+
+  <rect x="24" y="256" width="632" height="30" rx="6" fill="#17191D"/>
+  <text x="340" y="276" text-anchor="middle" font-size="11" fill="#E8E6DF">before release: tryon clean (unwire byte-exact) + verify row prod-clean (no data-dh stamps in build)</text>
+</svg>
+<figcaption>Fig 14.1 — Compare is free (the before/after slider is on by default, C toggles it, remembered per browser); only Keep/Discard mutate source. Sessions journal everything; backups are byte-exact.</figcaption>
+</figure>
+
+<h3>Headless path (no browser / harness without one)</h3>
+<pre><code>node tryon/cli.mjs query --slot hero                 # rank only, no writes
+node tryon/cli.mjs try --file F --line N --col C --slot hero --count 4 --url http://127.0.0.1:PORT
+                                                     # no --url and no dh dev start: verified:false, page not checked
+node tryon/cli.mjs more --id S --batch 4             # next batch from pool
+node tryon/cli.mjs show --id S --idx 2               # persist display choice
+node tryon/cli.mjs keep --id S --idx 2  |  discard --id S
+node tryon/cli.mjs save --id S --name n              # → personal library
+node tryon/cli.mjs status | clean</code></pre>
+</section>
+
+<!-- ============================================================ 15 -->
+<section id="variant-pipe">
+<h2><span class="no">15</span>Variant pipeline</h2>
+<p class="sub">From 1,247 indexed components to a build-verified wrapper edit in one deterministic pass. Owner content is extracted from the clicked element before any candidate is staged.</p>
+
+<figure>
+<svg viewBox="0 0 680 470" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrV" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">Try pipeline — the real order (open &rarr; openVerified)</text>
+
+  <rect x="40" y="34" width="600" height="58" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="56" y="54" font-size="12" font-weight="600">1 · Extract owner units — open() step 0</text>
+  <text x="56" y="72" font-size="10.5" fill="#5F6570">extractUnits on the clicked subtree: roles (heading/action/price/…), deepest text host kept</text>
+  <text x="56" y="86" font-size="10.5" fill="#5F6570">verbatim; .map() arrays unrolled; forms/images captured → content count = fit denominator</text>
+
+  <rect x="40" y="106" width="600" height="58" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="56" y="126" font-size="12" font-weight="600">2 · Rank — catalog.mjs</text>
+  <text x="56" y="144" font-size="10.5" fill="#5F6570">merge owner registries + personal library + shipped index, then overlay fit verdicts</text>
+  <text x="56" y="158" font-size="10.5" fill="#5F6570">exact slot 100 / cousin 40 · base mismatch HIDDEN · mine +60 · missing dep −6 · diversity</text>
+
+  <rect x="40" y="178" width="600" height="58" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="56" y="198" font-size="12" font-weight="600">3 · Materialize + wear tokens — materialize.mjs</text>
+  <text x="56" y="216" font-size="10.5" fill="#5F6570">fetch (disk-cached) → write components/dh-tryon/&lt;slug&gt;/ · reuse project ui primitives</text>
+  <text x="56" y="230" font-size="10.5" fill="#5F6570">next shims for Vite · licence header · compat fixes · token normalize inside writeBundle</text>
+
+  <rect x="40" y="250" width="600" height="58" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="56" y="270" font-size="12" font-weight="600">4 · Parameterize + bind copy (3 shapes)</text>
+  <text x="56" y="288" font-size="10.5" fill="#5F6570">section → content={{…}} props · wrapper → children stay inline · AI draft → measured only</text>
+  <text x="56" y="302" font-size="10.5" fill="#5F6570">menus from copy.json / sitemap · demo photos → placeholder · owner's form swapped or hidden</text>
+
+  <rect x="40" y="322" width="600" height="58" rx="8" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="56" y="342" font-size="12" font-weight="600" fill="#B45309">5 · Gates before offering</text>
+  <text x="56" y="360" font-size="10.5" fill="#5F6570">fitGate: block ≥50% of owner pieces, card/button 100%, a place for the form · else POOR_FIT</text>
+  <text x="56" y="374" font-size="10.5" fill="#5F6570">checkImports → BROKEN_IMPORT · install-needed held last · leftovers marked data-dh-demo</text>
+
+  <rect x="40" y="394" width="600" height="44" rx="8" fill="#17191D"/>
+  <text x="56" y="412" font-size="11.5" fill="#E8E6DF" font-weight="600">6 · openVerified — parse → ONE wrapper write → probe page →</text>
+  <text x="56" y="428" font-size="11.5" fill="#E8E6DF" font-weight="600">build error? exclude culprits, retry ≤2 (3 attempts) else restore the file</text>
+
+  <line x1="340" y1="92" x2="340" y2="104" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrV)"/>
+  <line x1="340" y1="164" x2="340" y2="176" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrV)"/>
+  <line x1="340" y1="236" x2="340" y2="248" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrV)"/>
+  <line x1="340" y1="308" x2="340" y2="320" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrV)"/>
+  <line x1="340" y1="380" x2="340" y2="392" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrV)"/>
+</svg>
+<figcaption>Fig 15.1 — Owner content is extracted first, then candidates are ranked and staged. The wrapper holds variant 0 (the original, hidden) plus variants 1..n; imports are tagged <code>// dh-tryon:&lt;id&gt;</code>; the session journal and a byte-copy backup are written before anything touches disk.</figcaption>
+</figure>
+
+<div class="callout"><b>Wrapper vs section.</b> A <i>wrapper</i> component (renders children) keeps the owner's JSX inline and just empties demo props. A <i>section</i> gets parameterized: the design's static text becomes <code>content.*</code> slots and the owner's units are bound into them. Fit ratio = carried/total units — shown to the owner as "your content 8/8".</div>
+</section>
+
+<!-- ============================================================ 16 -->
+<section id="transplant">
+<h2><span class="no">16</span>Transplant engine</h2>
+<p class="sub"><code>transplant.mjs</code> — a 1,600-line three-pass deterministic transform. The heart of "variants wearing your copy".</p>
+<ol>
+<li><b>Pass A — extractUnits(owner element)</b>: AST-walk the clicked subtree → content units in document order with roles (heading, text, action, price, figure, quote, label…); deepest text host kept verbatim; module-level literal arrays and <code>.map()</code> loops <b>unrolled</b> into concrete items; forms/inputs/images captured; outputs shape + content-count (the fit denominator).</li>
+<li><b>Pass B — parameterize(candidate)</b>: find the component function + returned JSX, inject a typed <code>content</code> prop; cut embedded chrome (headers/navs; a nested <code>&lt;main&gt;</code> becomes a plain block); static text → <code>{content.heading1 ?? &lt;&gt;demo&lt;/&gt;}</code>; demo arrays → list slots with fallback; prop defaults → slots; conditional chrome → show/hide keys; record form-swap and logo-row decisions.</li>
+<li><b>Pass C — bind(owner, candidate)</b>: pair units → props by role + order with heuristics: footer columns flattened to label+href lists; whole <code>&lt;form&gt;</code> swapped in place (else variant not offered); comparison tables filled row-by-row; role degradation (quote→text if needed); whole-item list placement — <i>never half a testimonial</i>; card groups pick the smallest row group that fits, unused rows hidden whole; owner logos replace demo brands. Returns carried / dropped / demo leftovers.</li>
+</ol>
+<p class="small muted">The engine writes the resulting usage <code>&lt;Local content={{heading1: &lt;&gt;…&lt;/&gt;, list1: […]}} /&gt;</code> into the wrapper. Sources for links/menus: copy.json footer/nav, sitemap nav + page titles, brief brand social/name.</p>
+</section>
+
+<!-- ============================================================ 17 -->
+<section id="keep">
+<h2><span class="no">17</span>Keep / discard / save</h2>
+<p class="sub">What happens when the owner commits — and how reversibility works.</p>
+
+<div class="grid2">
+<div class="card"><h4>Keep (bake)</h4><ol class="small">
+<li>Extract chosen variant from wrapper → replace wrapper with it → rename tagged imports → re-parse → write</li>
+<li>Graduate folder: <code>components/dh-tryon/&lt;slug&gt;</code> → <code>components/sections|ui-kit/&lt;slug&gt;</code></li>
+<li><b>bake:</b> inline literal copy INTO the component — <code>??</code> fallbacks → owner literals; show/hide resolved (hidden demo buttons <b>deleted</b>, not dormant); lists rewritten with owner items; only usage-scope expressions stay as props → then <b>prune</b> unused imports/files</li>
+<li>Strip demo marks; leftover design-own words → <code>.deckhand/demo-copy.json</code> (rebrand check blocks on them)</li>
+<li><b>recordNotice</b> → <code>THIRD_PARTY_NOTICES.md</code> (dir · title · registry · licence · sourceUrl). AI drafts exempt (header already carries provenance)</li>
+<li>Losers deleted, their CSS removed, session → <code>kept</code></li></ol></div>
+<div class="card"><h4>Discard / undo semantics</h4><ol class="small">
+<li>File unchanged since try (sha match) → <b>byte-exact restore</b> from backup</li>
+<li>File edited meanwhile → <b>surgical</b> unwrap: keep variant 0, remove marked imports, preserve owner edits</li>
+<li>Variant folders + CSS blocks cleaned; staging folders no open session shows (left by a try that died mid-way) are swept and listed as <code>swept</code>; session → <code>discarded</code></li>
+<li>Installed packages stay (never silently reverted) — reported as installedKept</li>
+<li><b>Save to library</b> (kept only): final dir → <code>~/.deckhand/library/</code> + index row ranks first next time for the same slot (+60, exact slot only); refuses NO_LICENCE or credential-shaped values</li></ol></div>
+</div>
+
+<div class="callout"><b>Dev tooling never ships.</b> Stamps/loader are dev-only (Next plugin applies only in NODE_ENV=development). <code>tryon clean</code> unwires configs byte-exact (or surgically strips markers if the owner edited them), keeps the token layer only if a kept section uses it, takes back the <code>.gitignore</code> lines it added (a <code>.gitignore</code> it created goes), and discards any open session first. It asks for a dev-server restart: the running server keeps stamping, and <code>doctor</code> reports stamps, until then. <code>dh verify</code> has the blocking <code>prod-clean</code> row.</div>
+</section>
+
+<!-- ============================================================ 18 -->
+<section id="registry">
+<h2><span class="no">18</span>Registry vetting &amp; fit checks</h2>
+<p class="sub">Nothing enters the catalog unvetted. Refused registries stay refused.</p>
+
+<h3>Registry vet — 5 hard criteria (any fail → refused, with reason + what WOULD be accepted)</h3>
+<ol class="small">
+<li><b>not refused</b> — host not on the refused list (AGPL / Commons Clause / paid tiers / bot walls)</li>
+<li><b>licence</b> — SPDX from GitHub API or LICENSE file (Commons Clause checked first, never guessed) ∈ accepted set</li>
+<li><b>schema</b> — shadcn-schema index (items typed ui|block|component)</li>
+<li><b>usable</b> — ≥1 item maps to a try-on slot</li>
+<li><b>free</b> — sample items download with real source; 401/402/403 or content-less = paywall → refused</li>
+</ol>
+
+<h3>Fit check — offline proof a design actually works here</h3>
+<p class="small">Builds a throwaway scaffold site per base (Next + Tailwind 4 + radix-ui umbrella + Button, or the Base UI equivalent), with reference owner sections, then stages each sampled design through the <b>same engine.stageCandidate</b> used in a real try — so what passes is exactly what the owner gets offered. Verdicts: <code>fits · partial · refused · broken · unchecked</code> → recorded (a registry that cannot be reached is reported, never recorded as a verdict) to <code>data/checks/&lt;reg&gt;.json</code> (shipped) or <code>~/.deckhand/catalog/checks/</code>. <code>rank()</code> hides broken, sinks refused.</p>
+
+<h3>Flags</h3>
+<p class="small">The overlay auto-checks each variant (missing owner words, visible demo text, overflow, broken images, console errors) and prefills a flag. <code>tryon flags report</code> → one deterministic Markdown with a <code>try --only &lt;id&gt;</code> reproduce command. Stays local.</p>
+</section>
+
+<!-- ============================================================ 19 -->
+<section id="draft">
+<h2><span class="no">19</span>AI draft</h2>
+<p class="sub">When no licensed design fits — or the owner just asks. The agent writes it <b>once</b>; scripts gate it.</p>
+
+<figure>
+<svg viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker>
+  <marker id="arrDG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">AI draft protocol</text>
+
+  <rect x="30" y="44" width="180" height="58" rx="8" fill="#FCF3E6" stroke="#B45309"/>
+  <text x="120" y="66" text-anchor="middle" font-size="11.5" font-weight="600">Owner: "Ask AI"</text>
+  <text x="120" y="84" text-anchor="middle" font-size="9.5" fill="#5F6570">overlay button · or no variant fits</text>
+
+  <rect x="250" y="44" width="200" height="58" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="350" y="66" text-anchor="middle" font-size="11.5" font-weight="600">tryon draft (script)</text>
+  <text x="350" y="84" text-anchor="middle" font-size="9.5" fill="#5F6570">re-pick element · extractUnits · write brief</text>
+
+  <rect x="500" y="44" width="156" height="58" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="578" y="66" text-anchor="middle" font-size="11.5" font-weight="600">stdout event</text>
+  <text x="578" y="84" text-anchor="middle" font-size="9.5" fill="#5F6570">{"event":"draft_request"}</text>
+
+  <rect x="500" y="140" width="156" height="64" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="578" y="162" text-anchor="middle" font-size="11.5" font-weight="600">Agent: drafts --wait</text>
+  <text x="578" y="180" text-anchor="middle" font-size="9.5" fill="#5F6570">ONE blocking call (background it)</text>
+  <text x="578" y="194" text-anchor="middle" font-size="9.5" fill="#5F6570">reads brief_file JSON</text>
+
+  <rect x="250" y="140" width="200" height="64" rx="8" fill="#E6F3F1" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="350" y="162" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0F766E">Agent writes ONCE</text>
+  <text x="350" y="180" text-anchor="middle" font-size="9.5" fill="#5F6570">drafts/&lt;id&gt;/draft.tsx (+ relative files)</text>
+  <text x="350" y="194" text-anchor="middle" font-size="9.5" fill="#5F6570">every owner unit verbatim · no facts</text>
+
+  <rect x="30" y="140" width="180" height="64" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="120" y="162" text-anchor="middle" font-size="11.5" font-weight="600">tryon draft-done --id D</text>
+  <text x="120" y="180" text-anchor="middle" font-size="9.5" fill="#5F6570">(draft-check = optional dry run)</text>
+  <text x="120" y="194" text-anchor="middle" font-size="9.5" fill="#5F6570">runs checkDraft (11 problem codes) ↓</text>
+
+  <rect x="30" y="240" width="626" height="88" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.5"/>
+  <text x="46" y="261" font-size="12" font-weight="600" fill="#0F766E">Script gates (every one must pass — failure lists ALL problems → state rejected)</text>
+  <text x="46" y="281" font-size="10.5" fill="#5F6570">① code files only, entry draft.tsx, default export  ② every file parses (babel AST)  ③ imports resolve: relative in-folder, alias = project ui only, bare = installed deps</text>
+  <text x="46" y="297" font-size="10.5" fill="#5F6570">④ no side effects (fetch / process.env / XMLHttpRequest / axios)  ⑤ no raw colors (hex/rgb/hsl/oklch/arbitrary in className|style/fill/stroke/color)  ⑥ image srcs ∈ owner set ∪ placeholder  ⑦ hrefs ∈ owner set</text>
+  <text x="46" y="313" font-size="10.5" fill="#5F6570">⑧ literalFit: every owner unit present in the written code — dropped unit = problem  → returns ai_copy (invented words) + fit carried/of</text>
+
+  <rect x="30" y="352" width="626" height="36" rx="8" fill="#17191D"/>
+  <text x="343" y="374" text-anchor="middle" font-size="11.5" fill="#E8E6DF">accepted → session candidate (lic: AI-generated, ai:true) → joins ←/→ compare → Keep bakes, NO notice, leftovers warn (not block) in rebrand check</text>
+
+  <line x1="212" y1="72" x2="248" y2="72" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrD)"/>
+  <line x1="452" y1="72" x2="498" y2="72" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrD)"/>
+  <path d="M578 102 L578 122 Q578 130 568 130 L520 130 Q510 130 510 138 L510 140" stroke="#5F6570" stroke-width="1.2" fill="none" marker-end="url(#arrD)"/>
+  <line x1="498" y1="172" x2="452" y2="172" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrD)"/>
+  <line x1="248" y1="172" x2="212" y2="172" stroke="#0F766E" stroke-width="1.4" marker-end="url(#arrDG)"/>
+  <path d="M120 204 L120 238" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrD)"/>
+  <path d="M343 328 L343 350" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrD)"/>
+</svg>
+<figcaption>Fig 19.1 — One model write, eleven deterministic checks, AI label everywhere it's shown or kept.</figcaption>
+</figure>
+
+<h3>Brief rules the agent must follow (written into every brief)</h3>
+<ul class="small">
+<li>Write ONE component using EVERY owner unit verbatim — <b>invent no facts</b> (no numbers/prices/names/reviews/logos/claims/dates; short UI words allowed and labelled AI-written)</li>
+<li><b>Token colour classes only</b> — no hex/rgb/hsl/oklch/arb</li>
+<li>Imports: react/next + project ui utils + installed packages only; images = owner srcs or placeholder; links = exact given hrefs (no "#")</li>
+<li>RSC "use client" rule, mobile-first semantic HTML; no data fetching, no process.env, no new routes</li>
+<li>Files live in <code>.deckhand/tryon/drafts/&lt;id&gt;/</code>; state machine <code>pending → done|rejected</code>; rejected lists every problem — fix and re-run draft-done</li>
+<li>Labelling: staged file header "AI-generated … review the wording before launch", variant bar badge, <code>lic:"AI-generated"</code>, no THIRD_PARTY notice on keep</li>
+</ul>
+</section>
+
+<!-- ============================================================ 20 -->
+<section id="tune">
+<h2><span class="no">20</span>Tune &amp; Site theme</h2>
+<p class="sub">Adjust instead of replacing — deterministic, previewed exactly, reversible byte-exact.</p>
+
+<div class="grid2">
+<div class="card"><h4>Tune — one element</h4>
+<ul class="small">
+<li><b>Dials:</b> density, size, weight (−2..+2) · corners sharp/soft/as-is/round/pill · depth flat/subtle/as-is/raised · contrast soft/as-is/crisp · width −2..+2</li>
+<li><b>Presets:</b> quieter · bolder · airy · compact · clarity · softer · sharper</li>
+<li>Each knob = a Tailwind class-token transform (spacing ×0.6..1.5, text steps, weight ladder, rounded ladder, shadow ladder, max-w ladder) applied to className literals in the picked element's subtree</li>
+<li><b>Sessions:</b> original snapshotted to <code>tune/&lt;id&gt;.orig</code>; every set <b>recomputes from the original</b> (no cumulative drift); re-parses before write; refuses if file changed (FILE_CHANGED)</li>
+<li><b>Reset:</b> untouched → byte-exact restore; owner edited meanwhile → surgical (swap back only the class pairs the knobs changed)</li>
+<li><b>Chat path:</b> owner says "make the hero airier" → agent runs <code>tryon tune --preset airy …</code> → owner checks HMR → <code>--keep</code> / <code>--reset</code></li></ul></div>
+<div class="card"><h4>Site theme — whole look</h4>
+<ul class="small">
+<li><b>Knobs:</b> accent (10 curated swatches or any hex/oklch) · neutrals as-is/neutral/warm/cool · corners sharp/soft/round/pill → --radius · density compact..spacious → --spacing · headlines smaller..display → text scale · body/heading fonts (13-font curated list)</li>
+<li>Computed light+dark variable values are <b>exactly what apply writes</b> (overlay previews the same)</li>
+<li>Apply: strips previous <code>/* dh:theme */</code> block, appends new one at end of globals + <code>next/font</code> AST rewrite in root layout</li>
+<li><b>Undo:</b> snapshots into theme/history.json, <b>10 applies deep</b>, byte-exact restore</li>
+<li>Vite gets every knob except next/font</li></ul></div>
+</div>
+</section>
+
+<!-- ============================================================ 21 -->
+<section id="sitelinks">
+<h2><span class="no">21</span>Sitelinks — plan menus become real nav</h2>
+<p class="sub">How footer/navbars get the owner's actual links instead of demo ones.</p>
+<p class="small"><b>Source of truth order:</b> ① <code>copy.json</code> footer.columns / footer.social / navbar.links → ② plan <code>.deckhand/sitemap.json</code> nav.header / nav.footer (routes resolved to page titles; dynamic segments excluded) → ③ fallback single footer column titled with brief brand name. Social = copy.json else brief brand.social.</p>
+<p class="small"><b>fillLinks</b> (footer/navbar slots only, AST-exact): detects uniform {label, href} array shapes → replaces with owner's arrays (cycling template elements for flat menus); social rows keep only networks the owner actually has (host matched against owner URLs), keep design icons, drop the rest; footer columns replaced wholesale; <b>empty source → typed empty arrays</b> so no stranger's demo menu ever shows. All other properties preserved. Every owner menu word exported to linkTexts so the demo-copy ledger never flags it.</p>
+</section>
+
+<!-- ============================================================ 22 -->
+<section id="seo">
+<h2><span class="no">22</span>SEO subsystem</h2>
+<p class="sub">Split: Python = policy/plan/audit/PENDING; Node engine = deterministic source writes. Found on Google + in AI answers — but never a ranking promise.</p>
+
+<figure>
+<svg viewBox="0 0 680 330" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">SEO — commands → artifacts</text>
+
+  <rect x="30" y="40" width="140" height="56" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="100" y="63" text-anchor="middle" font-size="11.5" font-weight="600">dh seo audit</text>
+  <text x="100" y="81" text-anchor="middle" font-size="9.5" fill="#5F6570">score / 100 + blockers</text>
+
+  <rect x="200" y="40" width="140" height="56" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="270" y="63" text-anchor="middle" font-size="11.5" font-weight="600">Model writes words</text>
+  <text x="270" y="81" text-anchor="middle" font-size="9.5" fill="#5F6570">copy.json → seo.pages</text>
+
+  <rect x="370" y="40" width="140" height="56" rx="8" fill="#E6F3F1" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="440" y="63" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0F766E">dh seo apply</text>
+  <text x="440" y="81" text-anchor="middle" font-size="9.5" fill="#5F6570">plan from confirmed facts</text>
+
+  <rect x="540" y="40" width="116" height="56" rx="8" fill="#17191D"/>
+  <text x="598" y="63" text-anchor="middle" font-size="11.5" font-weight="600" fill="#fff">engine writes</text>
+  <text x="598" y="81" text-anchor="middle" font-size="9.5" fill="#C9C6BD">tryon seo apply</text>
+
+  <line x1="172" y1="68" x2="198" y2="68" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrS)"/>
+  <line x1="342" y1="68" x2="368" y2="68" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrS)"/>
+  <line x1="512" y1="68" x2="538" y2="68" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrS)"/>
+
+  <rect x="30" y="130" width="626" height="96" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="46" y="152" font-size="12" font-weight="600">Artifacts (all marked dh:seo, journal = pre-images → byte-exact undo)</text>
+  <text x="46" y="174" font-size="10.5" fill="#5F6570">Next App Router: lib/seo.ts (site facts, PAGES, JSON-LD) · components/seo/json-ld.tsx · app/robots.ts (AI-answer bots allowed; training block when search-only) · app/sitemap.ts (hreflang when multi-lang)</text>
+  <text x="46" y="192" font-size="10.5" fill="#5F6570">app/manifest.ts · app/opengraph-image.tsx (1200×630 brand colour) · app/not-found.tsx · root layout metadata (metadataBase, title template, OG, twitter, robots, verification — inherited root canonical removed; canonicals are per-page) · per-page canonicals (owner strings never replaced)</text>
+  <text x="46" y="210" font-size="10.5" fill="#5F6570">Vite/static: public/robots.txt + sitemap.xml + head tags · via dh seo apply: public/llms.txt + IndexNow key file</text>
+
+  <rect x="30" y="246" width="300" height="70" rx="8" fill="#FCF3E6" stroke="#B45309"/>
+  <text x="46" y="268" font-size="11.5" font-weight="600" fill="#B45309">PENDING integration</text>
+  <text x="46" y="286" font-size="10.5" fill="#5F6570">owner gaps (domain, GBP, Search Console,</text>
+  <text x="46" y="301" font-size="10.5" fill="#5F6570">reviews…) → P-SEO-* lines, first-ask date kept</text>
+
+  <rect x="356" y="246" width="300" height="70" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+  <text x="372" y="268" font-size="11.5" font-weight="600">Verify + ping</text>
+  <text x="372" y="286" font-size="10.5" fill="#5F6570">seo row BLOCKS G4 on launch-breakers</text>
+  <text x="372" y="301" font-size="10.5" fill="#5F6570">dh seo ping after deploy ship (IndexNow)</text>
+</svg>
+<figcaption>Fig 22.1 — Scripts write only from confirmed brief facts; never aggregateRating/review schema; audit keeps honest score.</figcaption>
+</figure>
+
+<p class="small"><b>Policy by path:</b> scratch/existing → apply by default; pool/mine → audit then DECISION NEEDED before launch. <b>Undo:</b> <code>dh seo undo</code> → engine journal, byte-exact, deletes created files. <b>audit output:</b> score, blockers, auto_fixable, owner_open, and the render writes SEO.md (Launch-breakers / To fix / Needed from owner / honesty line).</p>
+</section>
+
+<!-- ============================================================ 23 -->
+<section id="slop">
+<h2><span class="no">23</span>Slop — does this text read as AI?</h2>
+<p class="sub">Deterministic script, 11 language packs, same text → same verdict. No model call.</p>
+
+<h3>Pipeline</h3>
+<pre><code>(a) dh slop brief [--lang L]   # BEFORE writing → avoid-list + 5 rules
+(b) model writes the copy
+(c) dh slop check [PATH… | --text T | --url U]   # → clean | review | slop</code></pre>
+
+<p class="small"><b>Scoring:</b> weighted hits per 100 words (strong tell 3, buzz 1, phrase w, unnumbered superlative 2…) → thresholds clean &lt;4 · review ≥4 · slop ≥10; any single strong hit → at least review; kind:"leak" (chatbot voice pasted on a page) → always slop. Language-free signals (any language): em-dash/exclamation rates, decorative emoji, flat sentence rhythm. Transitions and triads only fire when a language pack defines them.</p>
+
+<p class="small"><b>Three overlay layers:</b> shipped packs (<code>data/slop/&lt;lang&gt;.json</code>) · personal overlay via <code>dh slop add</code> · project allowlist via <code>dh slop allow "brand word"</code> — brand words never slop on their own site; a line marked <code>dh:slop-ok</code> is never read.</p>
+
+<p class="small"><b>Where it gates:</b> <code>dh rebrand check</code> blocks on slop verdict (review → warn); <code>dh compose</code> runs it on copy.json before the owner sees words; <code>dh verify</code> runs copy-slop on rendered pages (advisory). Pack self-test: every pack's own slop examples must score slop and clean examples must score clean (<code>dh slop lint</code>).</p>
+</section>
+
+<!-- ============================================================ 24 -->
+<section id="workflow">
+<h2><span class="no">24</span>Workflows — proven paths</h2>
+<p class="sub">A pinned workflow turns <code>dh next</code> into step-by-step instructions with built-in proof.</p>
+
+<h3>Query → pick → pin</h3>
+<p class="small">At define, <code>dh workflow query</code> scores every workflow against the brief — a <b>pure function</b>: deliverable +40 · industry +30 (or same family +20) · shape +15 · features min(30, 10×hits) · proven on this harness +10 · this OS +10 · level trusted +15/proven +5/draft −15 · source mine +50 / community-unreviewed −10 → top 3 with reasons, proof, and what they miss. Owner picks one (or none) → <code>dh workflow use REF</code> pins <code>{id, version, source, sha, params, done[], skipped[], deviations[]}</code> into run.json. <b>Re-pinning the same id+sha keeps progress</b> (survives compaction).</p>
+
+<h3>Schema (deckhand.workflow/1)</h3>
+<ul class="small">
+<li><b>match</b> (deliverable/shape/industry/family/features/stack/path) · <b>proof.runs[]</b> (date, harness, os, complete, errors, minutes) · <b>params</b> (defaults + why) · <b>ask_upfront[]</b> (questions asked at define, learned from past runs)</li>
+<li><b>phases[] → steps[]</b> — each step exactly one kind: <code>do | ask | write | delegate | check | gate</code>; do/check/gate require <code>expect</code> (what the command must print = the step's proof)</li>
+<li><b>pitfalls[]</b> (sig + fix, matched when that step's commands fail) · <b>creative[]</b> (what the workflow does NOT decide — the model's creative room) · <b>changelog[]</b></li>
+</ul>
+
+<p class="small"><b>Proof levels are computed, never declared:</b> draft (no complete green run) → proven (≥1 complete run, 0 errors) → trusted (≥3 green runs on ≥2 distinct harnesses OR ≥2 distinct OSes + reviewed).</p>
+
+<h3>Step ticking</h3>
+<p class="small">Automatic: the observe hook (§9) ticks matching steps after each command; stateful commands no step named → <code>unplanned</code> deviation; <code>dh phase done</code> closes the rest. Manual: <code>dh workflow step ID done|skip --why</code> (skip needs why → deviations). Checklist: <code>dh workflow todo --format md</code> (harness-neutral). Status line embedded in every report: <code>WORKFLOW id@v (level) · phase-id done-in-phase/total-in-phase · done/total steps · n deviations · p proposals waiting</code> (proposals clause only when p&gt;0).</p>
+
+<h3>Creation &amp; improvement</h3>
+<p class="small"><code>dh workflow new --from-run</code> extracts this run's phases + successful stateful commands + learned questions (deterministic, owner facts never copied). <code>dh autopsy --workflow</code> → timeline / questions (LATE, DIRECTION-CHANGE, LOST) / deviations / errors / delegation / guidance / <b>proposals</b> → owner picks where they go: <code>dh workflow save --from-autopsy W --proposals P1,P3 [--public]</code> (my pool / community PR / nothing) — adds this run as proof, bumps version. Lint rejects private commands, absolute user paths, <code>curl|sh</code>, <code>rm -rf /</code>, secret-shaped values, unknown <code>dh</code> subcommands (hard for base/community; warnings for mine, <code>--accept</code> then needed). >120 steps is a "split it" warning. Pools resolve <b>mine → base → community</b> (community sha-verified, offline never errors).</p>
+</section>
+
+<!-- ============================================================ 25 -->
+<section id="research">
+<h2><span class="no">25</span>Research pipeline</h2>
+<p class="sub">Parallel-safe, quote-verified, efficiency-scored. Competitors, pricing, audience, conversion plays — with receipts.</p>
+
+<ol class="small">
+<li><b>Brief:</b> one <code>dh research brief --focus F --agent ID</code> per focus — carries budget, questions (TARGET · PRIMARY · DONE_WHEN · FRESH), pages already seen, vocabulary so far, claim-id prefix.</li>
+<li><b>Card loop</b> (research-card.md): before a search → <code>dh research seen URL</code>; open a page only when snippet is TARGET/PRIMARY; diagnose results → ONE change → re-query (never reword a failed query blindly).</li>
+<li><b>Add:</b> <code>dh research add URL --by ID --note "dense facts"</code> — thin-note guard (<code>NOTE_TOO_THIN</code>), per-agent dedupe, other agents' prior notes returned. Each agent writes ONLY its own <code>agents/ID.json</code>; sources append to shared <code>sources.jsonl</code> (no race).</li>
+<li><b>Merge:</b> single-writer fold into <code>research.json</code> (bad JSON → nothing merged; dup claim ids → error).</li>
+<li><b>Verify:</b> structural checks (labels, url+quote for VERIFIED/SECONDARY (quote ≤400 chars; the research card advises ≤300), vocabulary terms must contain themselves, INFERRED needs from[], NOT_FOUND needs tried) → re-fetch every URL (cache, PDF → unchecked, blocked statuses) → NFKC-normalized quote match → <b>ok = 0 mismatch, 0 invalid, 0 bad vocabulary</b>. Red → <code>RESEARCH_UNVERIFIED</code> blocks phase done. The phase check also needs at least 3 quotes and terms actually found on their pages (<code>min_found</code>): a run where every fetch was blocked is not done.</li>
+<li><b>Score:</b> parses the session log into searches/fetches/tokens → repeated queries, cross-agent repeats, zero-gain streaks, searches-per-proven-claim (with --baseline deltas).</li>
+</ol>
+<p class="small muted">Labels: VERIFIED · SECONDARY · INFERRED · NOT_FOUND. Vocabulary kinds: customer | trade | search (at least 3 terms, enforced at phase exit: <code>min_vocabulary</code> in <code>data/research.json</code>). Owner may skip: <code>dh phase skip research --reason</code>, only while the run is at research.</p>
+</section>
+
+<!-- ============================================================ 26 -->
+<section id="plan">
+<h2><span class="no">26</span>Plan &amp; lint</h2>
+<p class="sub">The sitemap is the model; lint is the proof; split is the delegation.</p>
+
+<h3>Sitemap model</h3>
+<p class="small">Pages (id, route, sections, modals, actions, features, auth, terminal/entry/chrome, states) · features[] (pages, api, entities, done) · forms[] · nav{}. Every action target is a typed edge: <code>route: · anchor: · modal: · api: · external: · state: · mailto: · tel: · download:</code>.</p>
+
+<h3>Lint rules E0–E11 (errors block; warnings don't)</h3>
+<table>
+<tr><th style="width:6%">Rule</th><th>Rejects</th></tr>
+<tr><td>E0</td><td>no <code>.deckhand/sitemap.json</code> (run <code>dh plan init</code>)</td></tr>
+<tr><td>E1</td><td>page without id/route, duplicate id or route</td></tr>
+<tr><td>E2</td><td>dead link — route: target resolves to no page; invalid/missing target kind; then: route: to a nonexistent page</td></tr>
+<tr><td>E3</td><td>orphan/unreachable — no <code>/</code> page, or BFS from / misses a page not marked entry</td></tr>
+<tr><td>E4</td><td>dead end — no outgoing edge and no navigation (unless terminal/chrome:false)</td></tr>
+<tr><td>E5</td><td>form/API missing then: AND error: (forms need submit + success + error)</td></tr>
+<tr><td>E6</td><td>un-owned API — called but not in any feature's api[]</td></tr>
+<tr><td>E7</td><td>feature references nonexistent pages / lives nowhere / page lists an undeclared feature (W4: no done: line)</td></tr>
+<tr><td>E8</td><td>protected pages without login, or login without landing</td></tr>
+<tr><td>E9/E10/E11</td><td>anchor → missing section · modal undeclared · action missing label</td></tr>
+</table>
+
+<p class="small"><code>dh plan render</code> → <code>.deckhand/PLAN.md</code> with a mermaid flowchart. <code>dh plan split --agents N</code> (requires lint-clean): one WP per feature + <b>WP-00 shell</b> (layout/nav/shared UI — orchestrator builds &amp; freezes first); folder-prefix ownership via union-find so <b>two agents never write the same directory</b>; cross-package links become consume contracts; outputs AGENT-i.md + CONVENTIONS.md + index.json.</p>
+</section>
+
+<!-- ============================================================ 27 -->
+<section id="pool">
+<h2><span class="no">27</span>Pool &amp; licence vetting</h2>
+<p class="sub">Permissive licences only. Refusal prints what WOULD be accepted.</p>
+
+<div class="grid2">
+<div class="card"><h4>Vet — 6 hard fails</h4><ol class="small">
+<li><b>licence</b> ∈ {MIT, Apache-2.0, BSD-2/3, ISC, 0BSD, Unlicense}</li>
+<li><b>consistent</b> — package.json license must not contradict (stricter wins)</li>
+<li><b>alive</b> — not archived, pushed ≤3 years</li>
+<li><b>runnable</b> — known framework + build script + dev/start script</li>
+<li><b>clean</b> — no committed secrets</li>
+<li><b>free</b> — no paid packages (Tailwind Plus, MUI X Pro…)</li></ol>
+<p class="small muted">Warnings (soft): stale 1–3y, try-on-incompatible framework (Astro/Svelte/Nuxt), git deps, paywall text in README, low traction, huge monorepo, rented vendors (swap burden), old Node engine.</p></div>
+<div class="card"><h4>Query scoring (pure function of brief + row)</h4><ul class="small">
+<li>shape +40 · features min(30, 10×hits) · i18n +6 · RTL +6 (both only if the brief needs them) · canonical stack +15 · ≥1000★ +5 · &lt;10★ −10</li>
+<li>vendor count −min(10, 2×n) · swap burden heavy/medium −10/−5 · stale push −20 · <b>mine +50</b></li>
+<li><b>Blockers</b> → separate list: bad licence, archived, wrong lane</li>
+<li>Top score ≤0 → <code>gap</code> → recommend path scratch</li></ul>
+<p class="small muted">Rows are <b>measured facts</b> (GitHub API + raw files, no clone, no execution).</p></div>
+</div>
+
+<p class="small">Sources: shipped <code>data/pool.json</code> + per-row details · personal <code>~/.deckhand/pool.json</code> ranked first. <code>dh pool add owner/repo</code> = measure → verdict → REFUSED with reasons, or accepted row written with vetted timestamp. <code>dh pool add ./folder --mine</code> measures on disk, never leaves the machine. <code>dh pool sync</code> pulls the owner's GitHub deckhand-library index.</p>
+</section>
+
+<!-- ============================================================ 28 -->
+<section id="build">
+<h2><span class="no">28</span>Build</h2>
+<p class="sub">Four ways in, then services, swaps, and the solo-vs-team execution.</p>
+
+<table>
+<tr><th style="width:20%">Path</th><th>Mechanics</th></tr>
+<tr><td><b>dh clone T --to</b></td><td>Pool row → licence re-check → <b>hold/unhold</b>: Deckhand's own files step aside to <code>.&lt;name&gt;.deckhand-hold</code>, base lands (shallow at measured commit, fresh history, NOTICE with upstream+commit+licence), files return with merge rules → install → record base. Other files present → DEST_NOT_EMPTY. Seeds LOCAL secrets only (copies .env.example, generates values for the auth/JWT/session key names it finds; .env gitignored).</td></tr>
+<tr><td><b>dh adopt src</b></td><td>Owner's project, git history kept, stack detected, base kind existing.</td></tr>
+<tr><td><b>dh scaffold --to</b></td><td>create-next-app (ts, tailwind, app dir) + canonical UI base (button, utils, tokens) + deps (clsx, tailwind-merge, class-variance-authority, radix-ui, lucide-react, tw-animate-css) + fresh git.</td></tr>
+<tr><td><b>dh base record</b></td><td>Project built another way declares its base openly.</td></tr>
+</table>
+<p class="small muted">Order is enforced on the commands too (2.3.1): <code>dh clone</code> and <code>dh scaffold</code> are refused before their phase, <code>dh rebrand apply</code> (not <code>--dry</code>) before G2 and <code>dh deploy ship</code> before G4, with <code>OUT_OF_ORDER</code> or <code>GATE_BLOCKED</code>. <code>dh adopt</code> stays allowed at define.</p>
+
+<p class="small"><b>Run carry:</b> cloning from a planning folder moves brief/sitemap/plan/gates/notes into the app folder (excluding logs/dev/tryon/vault) and sets <code>run.json.moved_to</code> → <code>dh next</code> says <code>cd &lt;dest&gt;</code>.</p>
+<p class="small"><b>Dev services:</b> <code>dh dev add NAME --cmd … --port N|--ready REGEX</code> → committed <code>services.json</code> (every session starts the same things) → <code>dh dev start</code> = services first (restart dead DB under live app), then app (pinned port, HOSTNAME=127.0.0.1, waits for HTTP &lt;500); failures print log tail + lesson hint. <code>dh dev port --from N</code> = bind-tested, skips Windows reserved ranges.</p>
+<p class="small"><b>Swap scan:</b> every vendor SDK mapped to a replacement target (Clerk→better-auth, Neon→postgres, Resend→SMTP, Sentry→logs…) — payments kept by default; <code>dh swap check</code> fails while any vendor import remains.</p>
+<p class="small"><b>Rebrand:</b> scan (template names, identity fields, logo assets) → apply (package name, display names, metadata, primary colour token, monogram — LICENSE/NOTICE/lockfiles NEVER) → check findings: template-name, demo-content (Acme/lorem/555…), placeholder images, try-on leftovers, third-party logos, previous-business-data (harvest manifest sha), demo-copy ledger, ai-slop.</p>
+<p class="small"><b>Compose:</b> <code>dh compose --page P --sections a,b,c --copy copy.json</code> → licensed blocks assembled by script; non-clean slop verdict returns a copy_check hint to rewrite copy.json and compose again (advisory, not a block).</p>
+</section>
+
+<!-- ============================================================ 29 -->
+<section id="verify">
+<h2><span class="no">29</span>Verify</h2>
+<p class="sub"><code>dh verify [--url] [--skip] [--allow]</code> → <code>.deckhand/verify.json</code> + <code>.deckhand/VERIFY.md</code>. ok = every <b>blocking</b> row green.</p>
+
+<table>
+<tr><th style="width:16%">Row</th><th style="width:12%">Blocking</th><th>Checks</th></tr>
+<tr><td>typecheck</td><td><span class="tag block">yes</span></td><td>tsc --noEmit</td></tr>
+<tr><td>build</td><td><span class="tag block">yes</span></td><td>production build</td></tr>
+<tr><td>prod-clean</td><td><span class="tag block">yes</span></td><td>no data-dh= stamps in .next/dist/build/out</td></tr>
+<tr><td>tryon-closed</td><td><span class="tag block">yes</span></td><td>no open sessions, no staged dh-tryon/ dirs</td></tr>
+<tr><td>secrets</td><td><span class="tag block">yes</span></td><td>secret regex in tracked files; committed .env</td></tr>
+<tr><td>env-ignored</td><td><span class="tag block">yes</span></td><td>.env in .gitignore</td></tr>
+<tr><td>logs-ignored</td><td><span class="tag block">yes</span></td><td>Deckhand runtime state gitignored (when .git exists)</td></tr>
+<tr><td>swaps</td><td><span class="tag block">yes*</span></td><td>vendor SDKs gone or kept-by-decision (*if rows exist)</td></tr>
+<tr><td>product-kit</td><td><span class="tag block">yes*</span></td><td>README, LICENSE, CUSTOMIZE, seed/reset scripts (product deliverables)</td></tr>
+<tr><td>honesty</td><td><span class="tag block">yes</span></td><td>rebrand check blocking findings = 0</td></tr>
+<tr><td>prod-serve</td><td><span class="tag block">yes*</span></td><td>production start answers (*emitted only when it fails)</td></tr>
+<tr><td>routes</td><td><span class="tag block">yes</span></td><td>static public sitemap routes + home links &lt;400 on the served build</td></tr>
+<tr><td>seo</td><td><span class="tag block">yes</span></td><td>launch-breakers only</td></tr>
+<tr><td>lint · a11y-basics · deps-audit · copy-slop</td><td><span class="tag ok">advisory</span></td><td>reported, never blocks G4</td></tr>
+</table>
+<p class="small muted">Report records git HEAD so <code>dh resume --check</code> can detect drift (verify commit ≠ HEAD → drift). With no URL/build, routes degrades to a non-blocking "not checked" row.</p>
+</section>
+
+<!-- ============================================================ 30 -->
+<section id="deploy">
+<h2><span class="no">30</span>Deploy &amp; operate</h2>
+<p class="sub">Ship with proof; operate with a pipeline, never ad-hoc edits.</p>
+
+<figure>
+<svg viewBox="0 0 680 220" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrDP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">Change loop (operate) + ship pipeline</text>
+  <g font-size="10.5">
+    <rect x="24" y="48" width="94" height="46" rx="8" fill="#FFFFFF" stroke="#1C1E21"/><text x="71" y="68" text-anchor="middle" font-size="11.5" font-weight="600">edit</text><text x="71" y="85" text-anchor="middle" fill="#5F6570">code/copy</text>
+    <rect x="142" y="48" width="94" height="46" rx="8" fill="#FFFFFF" stroke="#1C1E21"/><text x="189" y="68" text-anchor="middle" font-size="11.5" font-weight="600">dh verify</text><text x="189" y="85" text-anchor="middle" fill="#5F6570">all rows</text>
+    <rect x="260" y="48" width="94" height="46" rx="8" fill="#FFFFFF" stroke="#1C1E21"/><text x="307" y="68" text-anchor="middle" font-size="11.5" font-weight="600">commit</text><text x="307" y="85" text-anchor="middle" fill="#5F6570">conventional</text>
+    <rect x="378" y="48" width="120" height="46" rx="8" fill="#E6F3F1" stroke="#0F766E" stroke-width="1.4"/><text x="438" y="68" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0F766E">dh deploy ship</text><text x="438" y="85" text-anchor="middle" fill="#5F6570">push→Coolify→wait SHA</text>
+    <rect x="522" y="48" width="134" height="46" rx="8" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/><text x="589" y="68" text-anchor="middle" font-size="11.5" font-weight="600" fill="#B45309">smoke</text><text x="589" y="85" text-anchor="middle" fill="#5F6570">200 + brand name</text>
+    <line x1="118" y1="71" x2="140" y2="71" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrDP)"/>
+    <line x1="236" y1="71" x2="258" y2="71" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrDP)"/>
+    <line x1="354" y1="71" x2="376" y2="71" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrDP)"/>
+    <line x1="498" y1="71" x2="520" y2="71" stroke="#5F6570" stroke-width="1.3" marker-end="url(#arrDP)"/>
+    <path d="M589 94 L589 118 Q589 126 579 126 L80 126 Q71 126 71 118 L71 96" stroke="#B45309" stroke-width="1.2" fill="none" marker-end="url(#arrDP)"/>
+    <text x="330" y="141" text-anchor="middle" fill="#B45309">smoke fail → SMOKE_FAILED → rollback (path known BEFORE shipping)</text>
+    <rect x="24" y="158" width="632" height="46" rx="8" fill="#17191D"/>
+    <text x="340" y="177" text-anchor="middle" fill="#E8E6DF" font-size="11">success → IndexNow ping (non-preview) · record deploy.json · report with smoke evidence · never edit production directly</text>
+    <text x="340" y="195" text-anchor="middle" fill="#C9C6BD" font-size="10">new session first: dh resume (+ dh resume --check before shipping)</text>
+  </g>
+</svg>
+<figcaption>Fig 30.1 — Every release is the same pipeline; proof = command output, not assertion.</figcaption>
+</figure>
+
+<div class="grid2">
+<div class="card"><h4>Handoff &amp; ops docs</h4><ul class="small">
+<li><code>dh handoff</code> → HANDOFF.md: live URL + last release, <b>Access (where, not what)</b>, everyday commands, rollback ref, bots, verify rows, open PENDING, stack + licences</li>
+<li>Runbooks: references/ops/ — 00 checklist · 10 bootstrap-VPS / 11 oracle-free-tier / 12 price-sheet · 20 domain-DNS-SSL / 21 free-domain-cloudflare · 30 deploy-app · 40 change-pipeline · 50 monitoring · 55 offsite-backups · 56 app-object-storage · 60 migrate-to-paid · 70 auth-and-email · 80 MCP integrations</li></ul></div>
+<div class="card"><h4>Bots</h4><ul class="small">
+<li><code>dh ops suggest</code> filters bots by brief shape + features, sorts by installed/priority (deployed only drives a "deploy first" note)</li>
+<li><code>dh ops add BOT --runner github|cron|local</code> → copies real script or app-bot skeleton (agent completes against the app)</li>
+<li><b>verify_by_its_own_trigger</b>: a schedule goes live only after it has fired once through its own trigger</li></ul></div>
+</div>
+</section>
+
+<!-- ============================================================ 31 -->
+<section id="learn">
+<h2><span class="no">31</span>Learning loop</h2>
+<p class="sub">Failures are paid once. Deterministic autopsy — no model reads the logs.</p>
+
+<figure>
+<svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrLr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">Failure → lesson pipeline</text>
+  <g font-size="10.5">
+    <rect x="24" y="44" width="150" height="52" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+    <text x="99" y="65" text-anchor="middle" font-size="11.5" font-weight="600">dh run -- CMD</text>
+    <text x="99" y="83" text-anchor="middle" fill="#5F6570">log (redacted) → failure</text>
+    <rect x="204" y="44" width="160" height="52" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+    <text x="284" y="65" text-anchor="middle" font-size="11.5" font-weight="600">dh learn match</text>
+    <text x="284" y="83" text-anchor="middle" fill="#5F6570">known signature → fix now</text>
+    <rect x="394" y="44" width="130" height="52" rx="8" fill="#E6F3F1" stroke="#0F766E" stroke-width="1.4"/>
+    <text x="459" y="65" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0F766E">--fix</text>
+    <text x="459" y="83" text-anchor="middle" fill="#5F6570">replay safe recipe</text>
+    <rect x="554" y="44" width="102" height="52" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+    <text x="605" y="65" text-anchor="middle" font-size="11.5" font-weight="600">retry once</text>
+    <text x="605" y="83" text-anchor="middle" fill="#5F6570">fixed_by noted</text>
+    <line x1="174" y1="70" x2="202" y2="70" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrLr)"/>
+    <line x1="364" y1="70" x2="392" y2="70" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrLr)"/>
+    <line x1="524" y1="70" x2="552" y2="70" stroke="#0F766E" stroke-width="1.3" marker-end="url(#arrLr)"/>
+
+    <rect x="24" y="134" width="632" height="54" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+    <text x="40" y="155" font-size="11.5" font-weight="600">dh autopsy [--latest] [--apply]</text>
+    <text x="40" y="173" fill="#5F6570" font-size="10.5">events → failures (incl. masked exit-0 errors) → episodes (sig + retries until success) → recipe = state-changing commands between last fail and success → owner + rung</text>
+
+    <rect x="24" y="204" width="200" height="44" rx="8" fill="#E6F3F1" stroke="#0F766E"/>
+    <text x="124" y="222" text-anchor="middle" font-size="11" font-weight="600" fill="#0F766E">lessons.jsonl</text>
+    <text x="124" y="238" text-anchor="middle" font-size="9.5" fill="#5F6570">auto recipes · rungs rise</text>
+    <rect x="240" y="204" width="200" height="44" rx="8" fill="#FFFFFF" stroke="#1C1E21"/>
+    <text x="340" y="222" text-anchor="middle" font-size="11" font-weight="600">playbooks.jsonl</text>
+    <text x="340" y="238" text-anchor="middle" font-size="9.5" fill="#5F6570">seen ≥2 → worked_before in next</text>
+    <rect x="456" y="204" width="200" height="44" rx="8" fill="#FCF3E6" stroke="#B45309"/>
+    <text x="556" y="222" text-anchor="middle" font-size="11" font-weight="600" fill="#B45309">skill proposals</text>
+    <text x="556" y="238" text-anchor="middle" font-size="9.5" fill="#5F6570">proposals/ — skill NEVER auto-edited</text>
+    <line x1="174" y1="161" x2="124" y2="188" stroke="#0F766E" stroke-width="1.2" marker-end="url(#arrLr)"/>
+    <line x1="340" y1="188" x2="340" y2="202" stroke="#0F766E" stroke-width="1.2" marker-end="url(#arrLr)"/>
+    <line x1="500" y1="188" x2="540" y2="202" stroke="#0F766E" stroke-width="1.2" marker-end="url(#arrLr)"/>
+  </g>
+</svg>
+<figcaption>Fig 31.1 — Rungs (best→debt): eliminate &gt; preflight &gt; reorder &gt; gate &gt; pitfall. Seed lessons ship in the skill at <code>skills/deckhand/data/lessons.seed.jsonl</code> (26 lessons, S-001…S-026).</figcaption>
+</figure>
+
+<p class="small"><b>Sources auto-detected:</b> Hermes state.db (read-only), Hermes session export, Claude Code transcript, conversation JSONL, command logs, deckhand runs.jsonl — <code>--latest</code> picks by fixed priority (Hermes db → newest Claude transcript → runs.jsonl). Guard refusals (NEED_QUOTE, CHANGE_REQUEST…) are marked guards, never learned as failures.</p>
+</section>
+
+<!-- ============================================================ 32 -->
+<section id="team">
+<h2><span class="no">32</span>Team delegation</h2>
+<p class="sub">Only when the work splits into ≥2 independent parts AND the shared foundation is frozen.</p>
+
+<figure>
+<svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs><marker id="arrTM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5F6570"/></marker></defs>
+  <text x="340" y="18" text-anchor="middle" font-size="14" font-weight="600">Parallel build orchestration</text>
+
+  <rect x="200" y="40" width="280" height="62" rx="8" fill="#17191D"/>
+  <text x="340" y="63" text-anchor="middle" font-size="12" fill="#fff" font-weight="600">WP-00 first (orchestrator)</text>
+  <text x="340" y="81" text-anchor="middle" font-size="10" fill="#C9C6BD">schema · migrations · seed · auth · layout · nav · shared UI · lib → tsc clean</text>
+  <text x="340" y="95" text-anchor="middle" font-size="10" fill="#C9C6BD">→ FROZEN, listed in CONVENTIONS.md</text>
+
+  <rect x="24" y="140" width="190" height="70" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="119" y="161" text-anchor="middle" font-size="11.5" font-weight="600">Agent 1 — AGENT-1.md</text>
+  <text x="119" y="179" text-anchor="middle" font-size="9.5" fill="#5F6570">own routes only · own port</text>
+  <text x="119" y="194" text-anchor="middle" font-size="9.5" fill="#5F6570">dh bb post: progress/done/blocker</text>
+  <text x="119" y="207" text-anchor="middle" font-size="9.5" fill="#5F6570">TEST-A1-* rows cleaned up</text>
+
+  <rect x="245" y="140" width="190" height="70" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="340" y="161" text-anchor="middle" font-size="11.5" font-weight="600">Agent 2 — AGENT-2.md</text>
+  <text x="340" y="179" text-anchor="middle" font-size="9.5" fill="#5F6570">disjoint folders (union-find)</text>
+  <text x="340" y="194" text-anchor="middle" font-size="9.5" fill="#5F6570">no prod build · no dev server</text>
+  <text x="340" y="207" text-anchor="middle" font-size="9.5" fill="#5F6570">handoff: dh bb flag A2-done</text>
+
+  <rect x="466" y="140" width="190" height="70" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
+  <text x="561" y="161" text-anchor="middle" font-size="11.5" font-weight="600">Agent N …</text>
+  <text x="561" y="179" text-anchor="middle" font-size="9.5" fill="#5F6570">ONE batch dispatch</text>
+  <text x="561" y="194" text-anchor="middle" font-size="9.5" fill="#5F6570">children inherit NO context</text>
+  <text x="561" y="207" text-anchor="middle" font-size="9.5" fill="#5F6570">return {status,routes,evidence,left}</text>
+
+  <rect x="200" y="250" width="280" height="52" rx="8" fill="#FCF3E6" stroke="#B45309" stroke-width="1.4"/>
+  <text x="340" y="271" text-anchor="middle" font-size="11.5" font-weight="600" fill="#B45309">Orchestrator re-verifies</text>
+  <text x="340" y="289" text-anchor="middle" font-size="10" fill="#5F6570">tsc + route matrix per role + acceptance rows (self-reports NOT trusted)</text>
+
+  <line x1="250" y1="102" x2="140" y2="138" stroke="#5F6570" stroke-width="1.2" marker-end="url(#arrTM)"/>
+  <line x1="340" y1="102" x2="340" y2="138" stroke="#5F6570" stroke-width="1.2" marker-end="url(#arrTM)"/>
+  <line x1="430" y1="102" x2="540" y2="138" stroke="#5F6570" stroke-width="1.2" marker-end="url(#arrTM)"/>
+  <line x1="119" y1="212" x2="250" y2="256" stroke="#5F6570" stroke-width="1.1" marker-end="url(#arrTM)"/>
+  <line x1="340" y1="212" x2="340" y2="248" stroke="#5F6570" stroke-width="1.1" marker-end="url(#arrTM)"/>
+  <line x1="561" y1="212" x2="430" y2="256" stroke="#5F6570" stroke-width="1.1" marker-end="url(#arrTM)"/>
+</svg>
+<figcaption>Fig 32.1 — Blackboard (dh bb post/read/flag/wait) is the only channel between agents; <code>dh bb wait</code> defaults to 170 s (under Hermes' 180 s clamp); timeout → proceed + post note, never loop.</figcaption>
+</figure>
+
+<ul class="small">
+<li><b>Preflight rails:</b> <code>dh bb flag probe && dh bb wait probe --max 5</code> must succeed; <code>dh bb wait never --max 3</code> must TIMEOUT — else fix the board before dispatching anyone.</li>
+<li><b>Builders' rules:</b> never edit outside their routes; own server via <code>dh dev port --from 3100</code>; scratch in <code>.deckhand/work/tmp/&lt;agent&gt;/</code>; frictions logged <code>F-NN</code> and fixed AFTER the run, never mid-run.</li>
+<li><b>Trust but verify:</b> <code>git status --porcelain</code> writing outside routes = a finding; whole-batch death = infrastructure, not agents; killed child → dispatch replacement naming only missing artifacts.</li>
+<li><b>Windows/Hermes specifics:</b> board messages in single quotes (<code>$</code> expands in double); no <code>{x}</code>/<code>&lt;x&gt;</code> in delegate text; <code>D:/…</code> paths for native tools.</li>
+<li><b>Optional panels:</b> max 5 lenses + you, 3 rounds (solo → cross-disagree with file:line → vote).</li>
+</ul>
+</section>
+
+<!-- ============================================================ 33 -->
+<section id="paths">
+<h2><span class="no">33</span>User paths — what each road can do</h2>
+<p class="sub">The four journeys through the system, and which commands belong to each.</p>
+
+<h3>Path A — The owner (decision surface)</h3>
+<div class="pathline">
+<p class="small"><b class="pt">Starts:</b> answers one batched define message ("1a 3b" / "default") → <b class="pt">Gates:</b> four approvals, each one verbatim quote after seeing the artifact (PLAN.md → local URL+logins → design → VERIFY.md) → <b class="pt">Try-on:</b> opens the :3999 URL, clicks elements, ←/→ compares, Keep/Discard/Save, "Ask AI" when nothing fits, says things in chat ("warmer greys, rounder corners" → agent runs theme/tune) → <b class="pt">Pending:</b> receives labeled <code>DECISION NEEDED</code>/<code>ACTION NEEDED</code> lines with exact steps + WHERE → <b class="pt">Report endings:</b> Waiting on you → Next (NOW/SOON/LATER) → WORKFLOW line.</p>
+<p class="small muted">Owner-only facts they must supply (never invented): prices, reviews, addresses, hours, logos, testimonials, licences, domain, GBP/Console access → everything unknown parks in PENDING.md, some deferred with <code>--when</code> triggers.</p>
+</div>
+
+<h3>Path B — The agent (execution surface)</h3>
+<div class="pathline">
+<p class="small"><b class="pt">Cold start:</b> <code>dh resume</code> (or AGENTS.md block / SessionStart hook) → reads RESUME.md → <b class="pt">Loop:</b> <code>dh next</code> → load ONE reference → do steps → prove with <code>dh phase done</code> → <b class="pt">Recording:</b> <code>dh note decision</code> the moment anything is decided; <code>dh pending add</code> the moment a human task appears → <b class="pt">Risky commands:</b> always <code>dh run -- …</code> → <b class="pt">Build:</b> solo WP-by-WP or team protocol (§32) → <b class="pt">Design:</b> runs try-on headless only when needed (draft once per request; tune/theme from chat asks) → <b class="pt">Review:</b> <code>dh verify</code>, fix at root → <b class="pt">Before stopping:</b> <code>dh resume</code> must say SAFE TO START A FRESH SESSION.</p>
+</div>
+
+<h3>Path C — The try-on engine (design surface)</h3>
+<div class="pathline">
+<p class="small"><b class="pt">Setup path:</b> setup → restart dev → serve → owner clicks. <b class="pt">Per slot:</b> pick → guess slot → Show variants → [extract owner units → rank → materialize + wear tokens → bind copy → fit gates → ONE wrapper write → build verify (needs the dev URL; else <code>verified:false</code>)] → ←/→ (free) → More (pool batch) → Keep (bake + prune + notice) or Discard (byte-exact/surgical) → optional Save (library +60). <b class="pt">Escape hatches:</b> no fits → AI draft (gated) · imperfect fit → tune (dials/presets) · whole look → theme (10-deep undo) · broken variant → flag → report. <b class="pt">Exit:</b> sessions closed → <code>tryon clean</code> → restart the dev server → prod-clean verified.</p>
+</div>
+
+<h3>Path D — The business after launch (operate surface)</h3>
+<div class="pathline">
+<p class="small"><b class="pt">Change loop:</b> edit → <code>dh verify</code> → commit → <code>dh deploy ship</code> (push → Coolify → wait own SHA → smoke → IndexNow) → report with evidence → <b class="pt">Watching:</b> bots (watchdog, link-audit, backup-proof… live only after first self-trigger) → <b class="pt">Learning:</b> <code>dh run --fix</code> / <code>dh autopsy --apply</code> / <code>dh autopsy --workflow</code> → accepted proposals → <code>dh workflow save</code> (proof level rises draft→proven→trusted) → <b class="pt">Reuse:</b> <code>dh harvest --name BASE --push</code> (identity neutralised, secret-scanned) → private library → next project's <code>dh pool query</code> ranks it first.</p>
+</div>
+
+<h3>Command quick-index by intent</h3>
+<table>
+<tr><th style="width:24%">Intent</th><th>Command</th></tr>
+<tr><td>what now?</td><td><code>dh next</code> · <code>dh status</code> · <code>dh suggest [--all]</code> · <code>dh suggest dismiss ID</code></td></tr>
+<tr><td>start / brief</td><td><code>dh init …</code> · <code>dh brief set k=v</code></td></tr>
+<tr><td>proven paths</td><td><code>dh workflow query|use|status|todo|step|show|list|lint|sync|new|save|publish</code></td></tr>
+<tr><td>gates</td><td><code>dh gate pass Gx --quote "…"</code> · <code>dh reopen PHASE --reason</code></td></tr>
+<tr><td>owner's tasks</td><td><code>dh pending list|add|decide|done|wait|drop</code></td></tr>
+<tr><td>session continuity</td><td><code>dh resume [--check] [--hook] [--install-hook]</code> · <code>dh note decision|doing|next</code></td></tr>
+<tr><td>identity / secrets</td><td><code>dh profile show|set|doctor|where</code> · <code>dh vault set|list</code></td></tr>
+<tr><td>bases</td><td><code>dh pool query|show|vet|add|list|sync</code> · <code>dh clone|adopt|scaffold|base record</code></td></tr>
+<tr><td>research</td><td><code>dh research brief|add|seen|merge|verify|score</code></td></tr>
+<tr><td>plan</td><td><code>dh plan init|lint|render|split</code> · <code>dh bb post|read|flag|wait</code></td></tr>
+<tr><td>build</td><td><code>dh compose</code> · <code>dh swap scan|check</code> · <code>dh dev start|stop|status|add|remove|port</code> · <code>dh run --</code></td></tr>
+<tr><td>brand</td><td><code>dh rebrand scan|apply|check</code> · <code>dh slop brief|check|allow|…</code></td></tr>
+<tr><td>try-on</td><td><code>dh tryon …</code> → setup/serve/try/show/keep/discard/save/query/doctor/clean · drafts · tune · theme</td></tr>
+<tr><td>found on Google</td><td><code>dh seo audit|apply|undo|ping|facts</code></td></tr>
+<tr><td>review</td><td><code>dh verify [--url]</code></td></tr>
+<tr><td>deploy</td><td><code>dh deploy target|ship|smoke|raw</code> · <code>dh handoff</code></td></tr>
+<tr><td>operate</td><td><code>dh ops suggest|add|list</code></td></tr>
+<tr><td>learning</td><td><code>dh run [--fix] --</code> · <code>dh autopsy [..] [--apply] [--workflow]</code> · <code>dh learn match|add|preflight|promote|from-failure|list</code></td></tr>
+<tr><td>reuse</td><td><code>dh harvest --name BASE [--push]</code></td></tr>
+</table>
+</section>
+
+<!-- ============================================================ 34 -->
+<section id="filemap">
+<h2><span class="no">34</span>File map</h2>
+<p class="sub">Where every capability lives in the skill source.</p>
+
+<table>
+<tr><th style="width:30%">Path</th><th>Contents</th></tr>
+<tr><td><code>SKILL.md</code></td><td>The spec: charter, loop, state table, 12 invariants, command surface, try-on summary, delegation, comms protocol (20 KB — what you were given when this skill loaded)</td></tr>
+<tr><td><code>references/00–80-*.md</code></td><td>One playbook per phase (define, research, plan, build, brand, seo, tryon, review, deploy, operate) + team.md, harness.md, research-card.md</td></tr>
+<tr><td><code>references/ops/*</code></td><td>VPS bootstrap, domain/DNS/TLS, deploy-app, change pipeline, backups, object storage, email, auth, monitoring runbooks</td></tr>
+<tr><td><code>dhlib/cli.py</code></td><td>37 subcommands: parser + dispatch + observe/refresh hooks + runs.jsonl logging</td></tr>
+<tr><td><code>dhlib/state.py · checks.py</code></td><td>run.json transitions, gate quote classifier, per-phase exit checks</td></tr>
+<tr><td><code>dhlib/guide.py · resume.py · suggest.py · pending.py</code></td><td>dh next logic, RESUME generation/safety/check, 20 suggestion rules, two pending ledgers</td></tr>
+<tr><td><code>dhlib/profile.py</code></td><td>profile/vault/layout binding, PERSON facts, client-project rule, BINDING_BROKEN</td></tr>
+<tr><td><code>dhlib/workflow.py · wfautopsy.py</code></td><td>Query scoring, pin, step ticking, lint, create/save/publish; workflow autopsy sections + proposals</td></tr>
+<tr><td><code>dhlib/research.py · plan.py · pool.py · vet.py</code></td><td>Research brief/merge/verify/score; sitemap lint + split + blackboard; pool scoring + licence vetting</td></tr>
+<tr><td><code>dhlib/build.py · brand.py · swap.py · slop.py · seo.py · verify.py · deploy.py · ops.py · handoff.py · util.py · github.py</code></td><td>The phase machinery (§28–30)</td></tr>
+<tr><td><code>dhlib/learn.py · autopsy.py · harvest.py</code></td><td>Lesson ledger, failure→recipe autopsy, base harvesting</td></tr>
+<tr><td><code>tryon/cli.mjs · server.mjs · overlay.js</code></td><td>Engine CLI, proxy+API+token server, browser overlay (~70 KB)</td></tr>
+<tr><td><code>tryon/lib/engine.mjs · transplant.mjs · materialize.mjs</code></td><td>Swap engine (~95 KB), 3-pass copy transplant (~96 KB), fetch/write bundles</td></tr>
+<tr><td><code>tryon/lib/draft.mjs · tune.mjs · sitetheme.mjs · theme.mjs · sitelinks.mjs</code></td><td>AI draft protocol + gates; dial transforms; whole-site theme; token wearing; menu wiring</td></tr>
+<tr><td><code>tryon/lib/seo.mjs · fitcheck.mjs · vet.mjs · catalog.mjs · slots.mjs · library.mjs</code></td><td>SEO writes, offline fit checks, registry vetting, 1,247-item catalog + ranking, slot vocabulary, personal library</td></tr>
+<tr><td><code>data/*</code></td><td>components.index.json · checks/*.json (8 registries) · pool.json + pool/*.json · licenses.json · slop packs (11 langs) · seo.json rules · bots.json · harness.json · research.json · industries.json · lessons.seed.jsonl · registries.json · secrets.json (redaction policy)</td></tr>
+<tr><td><code>workflows/ · templates/ · ops/scripts/ · tests/</code></td><td>Base workflows · brief/PENDING/sitemap/scaffold/bots/ops templates · Coolify/Hostinger/backup API scripts · Python + try-on node test suites</td></tr>
+</table>
+</section>
+
+<section id="closing">
+<h2><span class="no">✦</span>One-page summary</h2>
+<div class="callout">
+<b>Deckhand = spec (SKILL.md) + Python control plane (dh) + Node try-on engine (tryon) + on-disk state (.deckhand/) + proven-path library (workflows).</b><br><br>
+Nine phases with scriptable exit checks; four hard gates that only the owner's verbatim words can open; an agent that never improvises the process because <code>dh next</code> names the exact steps and the one reference to load; a try-on loop where every click is deterministic Node code (1,247 vetted variants, copy injected from real owner data, byte-exact undo) and the model is called only once per gated AI draft; SEO/slop/verify/deploy that write only from confirmed facts and prove every claim; and a learning loop that turns each failure into a recipe paid once. The owner decides and supplies facts. The scripts check and write. The agent fills the gaps between them.
+</div>
+</section>
+
+</main>
+</body>
+</html>

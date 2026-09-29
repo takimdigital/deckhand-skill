@@ -12,7 +12,9 @@ import { createRequire } from 'node:module';
 import { tempSite, offline, read, locate } from './helpers.mjs';
 import * as engine from '../lib/engine.mjs';
 import { extractUnits, parameterize, bind, contentProp, contentCount } from '../lib/transplant.mjs';
-import { radixUmbrella, writeBundle } from '../lib/materialize.mjs';
+import { radixUmbrella, writeBundle, reactAttrs } from '../lib/materialize.mjs';
+import { fillLinks } from '../lib/sitelinks.mjs';
+import { rank, loadCatalog } from '../lib/catalog.mjs';
 import { detectProject } from '../lib/project.mjs';
 import { requestDraft } from '../lib/draft.mjs';
 
@@ -310,4 +312,89 @@ test('an unreachable dev server never blocks the swap: opened, marked unverified
   assert.equal(s.verified, false);
   assert.match(s.note, /did not answer/);
   engine.discard(dir, s.id);
+});
+
+// ---------------------------------------------------------------- the 2.3.0 real-browser test report (Next 16 labs)
+
+test('report 1: a footer whose demo columns were emptied still renders the owner\'s columns (was HTTP 500 on links.map)', () => {
+  const DESIGN = `const footerSections = [
+  { title: "Product", links: [{ title: "Overview", href: "#" }, { title: "Pricing", href: "#" }] },
+  { title: "Company", links: [{ title: "About us", href: "#" }, { title: "Careers", href: "#" }] },
+];
+export default function Footer() {
+  return (<footer>{footerSections.map(({ title, links }) => (<div key={title}><h6>{title}</h6><ul>{links.map(({ title, href }) => (<li key={title}><a href={href}>{title}</a></li>))}</ul></div>))}<span>© Acme</span></footer>);
+}`;
+  const OWNER = `const cols = [
+  { title: "Visit", links: [{ label: "Order", href: "/order" }] },
+  { title: "Bakery", links: [{ label: "Our story", href: "/story" }] },
+];
+export function F() { return (<footer>{cols.map((c) => (<div key={c.title}><h4>{c.title}</h4><ul>{c.links.map((l) => (<li key={l.label}><a href={l.href}>{l.label}</a></li>))}</ul></div>))}</footer>); }`;
+  const p = parameterize('f.jsx', DESIGN, { kind: 'default' }, { stripChrome: true });
+  const fl = fillLinks('f.jsx', p.code, { header: [], footerCols: [], social: [], known: false }, 'footer');
+  assert.equal(fl.filled[0].demoHidden, 2, 'no menu in the plan: the demo columns are emptied');
+  const b = bind(unitsAt(OWNER, '<footer'), p, {});
+  assert.ok(b.props.some(([k]) => k === 'list1'), 'the owner\'s columns go into the list');
+  // run the list expression the way React would: every column's `links` must be an array
+  const ast = parse('f.jsx', fl.code);
+  let expr = null;
+  require('../lib/ast.cjs').walk(ast, (n) => {
+    if (!expr && n.type === 'CallExpression' && n.callee.type === 'MemberExpression' && n.callee.object.type === 'ConditionalExpression') { expr = n.callee.object; return false; }
+    return true;
+  });
+  const list1 = [{ title: 'Visit' }, { title: 'Bakery' }];
+  const rows = new Function('content', 'footerSections', `return (${fl.code.slice(expr.start, expr.end)});`)({ list1 }, []);
+  assert.deepEqual(rows.map((r) => [r.title, r.links.map((l) => l.title)]), [['Visit', []], ['Bakery', []]]);
+});
+
+test('report 1: a try with no dev server known says the page was not checked', async () => {
+  const dir = tempSite();
+  const at = locate(read(dir, 'components/hero.tsx'), '<section');
+  const s = await engine.openVerified(dir, { file: 'components/hero.tsx', ...at, slot: 'hero', count: 1, registry: 'tailark-oss', install: false });
+  assert.equal(s.verified, false);
+  assert.match(s.note, /not checked.*--url/);
+  engine.discard(dir, s.id);
+});
+
+test('report 1: when every design that fits broke the page, the error says so (not "no candidates")', async () => {
+  const dir = tempSite();
+  const hero = fs.readFileSync(path.join(dir, 'components/hero.tsx'));
+  const at = locate(hero.toString(), '<section');
+  const one = rank(loadCatalog(), { slot: 'hero', prof: detectProject(dir), registry: 'tailark-oss' }).items[0].id;
+  const { server, url } = await fakeDev(dir, { breaks: () => true });
+  try {
+    await assert.rejects(engine.openVerified(dir, { file: 'components/hero.tsx', ...at, slot: 'hero', count: 1, only: one, install: false }, { url, page: '/', deadlineMs: 5000 }),
+      (e) => e.code === 'BUILD_BROKE' && e.restored === true && e.dropped.length === 1 && e.dropped[0].id === one && /broke the page/.test(e.message));
+    assert.equal(sha(fs.readFileSync(path.join(dir, 'components/hero.tsx'))), sha(hero));
+  } finally { server.close(); }
+});
+
+test('report 1: discard sweeps variant folders a try that died mid-way left behind (never an open session\'s)', async () => {
+  const dir = tempSite();
+  const at = locate(read(dir, 'components/hero.tsx'), '<section');
+  const s = await engine.open(dir, { file: 'components/hero.tsx', ...at, slot: 'hero', count: 1, registry: 'tailark-oss', install: false });
+  const stage = path.join(dir, 'components/dh-tryon');
+  fs.mkdirSync(path.join(stage, 'orphan-footer-3'), { recursive: true });
+  fs.writeFileSync(path.join(stage, 'orphan-footer-3', 'orphan-footer-3.tsx'), 'export default () => null\n');
+  const r = engine.discard(dir, s.id);
+  assert.deepEqual(r.swept, ['orphan-footer-3']);
+  assert.ok(!fs.existsSync(stage));
+});
+
+test('report 5: picking an element that is already in a try says so (the old coordinates name its wrapper now)', async () => {
+  const dir = tempSite();
+  const at = locate(read(dir, 'components/hero.tsx'), '<section');
+  const s = await engine.open(dir, { file: 'components/hero.tsx', ...at, slot: 'hero', count: 1, registry: 'tailark-oss', install: false });
+  await assert.rejects(engine.open(dir, { file: 'components/hero.tsx', ...at, slot: 'hero', count: 1, registry: 'tailark-oss', install: false }),
+    (e) => e.code === 'SESSION_OPEN' && e.id === s.id && /keep or discard/.test(e.message));
+  engine.discard(dir, s.id);
+});
+
+test('report 8: SVG attributes spelled for HTML are written the way React spells them (no "Invalid DOM property")', () => {
+  const out = reactAttrs('a.tsx', `export const X = () => <svg xmlns:xlink="x"><feFlood flood-opacity="0" color-interpolation-filters="sRGB" /><stop stop-color="red" data-k="1" aria-label="a" /><use xlink:href="#a" /><Icon some-prop="1" /><my-el foo-bar="1" /></svg>;`);
+  assert.match(out, /xmlnsXlink="x"/);
+  assert.match(out, /floodOpacity="0" colorInterpolationFilters="sRGB"/);
+  assert.match(out, /stopColor="red" data-k="1" aria-label="a"/);
+  assert.match(out, /xlinkHref="#a"/);
+  assert.match(out, /<Icon some-prop="1"/, 'a component\'s props are its own');
+  assert.match(out, /<my-el foo-bar="1"/, 'a custom element takes attributes as written');
 });

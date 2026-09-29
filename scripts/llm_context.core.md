@@ -262,7 +262,9 @@ F5 OPEN (swap) [[tryon/lib/engine.mjs#open]]
    the same element found again nearest the old line ([[tryon/lib/engine.mjs#relocate]]; one unambiguous match or
    nothing). The page is older than the file after a session added/removed import lines → otherwise
    [[!ELEMENT_NOT_FOUND]] with `reload:true` (the overlay reloads and re-enters picking; it also reloads before the
-   next pick after Keep/Discard). Tune uses the same lookup ([[tryon/lib/tune.mjs#tuneOpen]]).
+   next pick after Keep/Discard). Tune uses the same lookup ([[tryon/lib/tune.mjs#tuneOpen]]). Coordinates that name
+   an element already in an open try (the ones it was opened at, or inside its wrapper) → [[!SESSION_OPEN]] with
+   its `id`: keep or discard first (reloading would not help).
 2. [[tryon/lib/transplant.mjs#extractUnits]] gets the owner's content units: text, links, images, inputs, and
    unrolled .map lists — plus the words written beside a link (one run = a line of text, words on both sides = one
    sentence carried with the link inside), the owner's `<form>` elements (moved whole: action, handlers, fields) and
@@ -332,7 +334,10 @@ F5 OPEN (swap) [[tryon/lib/engine.mjs#open]]
    HTML holds THIS session's wrapper or a build error (a file watcher lags the write: the first answer can be the
    old page). An error → discard at once, [[tryon/lib/engine.mjs#culpritsOf]] (the variant folder in the trace,
    else the module it cannot load) → reopen without them (`dropped`, up to 3 tries) or [[!BUILD_BROKE]]
-   `restored:true`. Packages installed on the way stay and are reported (`installedKept`, on discard too).
+   `restored:true` — also when the designs left after dropping the culprits fit nothing (the message names the
+   dropped ones, never a bare "no candidates"). Packages installed on the way stay and are reported (`installedKept`,
+   on discard too). No dev URL known → opened with `verified:false` and a note: an `ok` never means the page was
+   loaded. The 2.3.0 browser test ran `try` without one and read the footer 500 as a failed safety net.
    Vite ([[tryon/lib/engine.mjs#probeVite]]): the page's HTML never shows a variant, so the edited module is polled
    until it carries the session, then each design's entry module is requested (Vite resolves its imports then: a
    500 "Failed to resolve import" names the file; the request also warms Vite's dependency optimizer).
@@ -344,7 +349,9 @@ F5 OPEN (swap) [[tryon/lib/engine.mjs#open]]
    the owner's list items whole; a footer column's nested `links` get the owner's column links; a list field the
    owner does not fill keeps the design's words dashed (`<span data-dh-demo>`, only where the field is only ever
    text) and reported, and bakes back to the design's plain value on Keep. No plan: a design's demo menus and
-   social rows are emptied ([[tryon/lib/sitelinks.mjs#fillLinks]]). Logos inside content cards are hidden one by
+   social rows are emptied ([[tryon/lib/sitelinks.mjs#fillLinks]]); the list merge then spreads the item's empty
+   arrays first ([[tryon/lib/transplant.mjs#skeleton]]), so an owner column over an emptied demo array renders
+   with `links: []` instead of crashing the page on `.map` (shadcnui-blocks footer-01..03 took Next down: HTTP 500). Logos inside content cards are hidden one by
    one, never the cards. From the component zoo (every common section kind, screenshotted): a figure (120+, 98%,
    24h, 7/7) is its own role `figure` and pairs with the design's figure; the owner's one short line becomes a
    headline the design would otherwise leave to demo copy; a card's title goes to the title and its longest text to
@@ -363,7 +370,8 @@ F6 KEEP / DISCARD
   - THIRD_PARTY_NOTICES entry ([[tryon/lib/engine.mjs#recordNotice]]; not for AI drafts);
   - leftover demo copy → demo-copy.json.
 - Keeping variant 0 is a discard.
-- [[tryon/lib/engine.mjs#discard]]: backup restore when sha matches, else a surgical unwrap.
+- [[tryon/lib/engine.mjs#discard]]: backup restore when sha matches, else a surgical unwrap. It also sweeps staging
+  folders no open session shows (`swept`: left by a try that died mid-way, e.g. a killed process).
 - `tryon save` → [[tryon/lib/library.mjs#saveToLibrary]]: refuses without a licence or when a credential-shaped string
   is found.
 

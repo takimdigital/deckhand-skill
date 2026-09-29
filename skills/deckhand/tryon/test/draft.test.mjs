@@ -97,6 +97,16 @@ test('a gated draft appears labelled AI-generated, carries every owner unit, and
   assert.deepEqual(ledger.map((e) => [e.text, e.ai]), [['Fresh every morning', true]]);
 });
 
+test('one rejection lists every problem: a link the owner never gave AND the words it dropped (was one round each)', async () => {
+  const dir = tempSite();
+  const r = heroRequest(dir);
+  writeDraft(dir, r, GOOD.replace('<Button asChild size="lg" variant="outline"><Link href="#menu">See the menu</Link></Button>', '<a href="/nope">x</a>'));
+  await assert.rejects(draft.completeDraft(dir, r.id), (e) => {
+    assert.deepEqual(e.problems.map((p) => p.code).sort(), ['DRAFT_DROPPED_CONTENT', 'DRAFT_LINK']);
+    return true;
+  });
+});
+
 test('the gates reject what an unsupervised model gets wrong — and the page is untouched', async () => {
   const dir = tempSite();
   const before = fs.readFileSync(path.join(dir, 'components/hero.tsx'));

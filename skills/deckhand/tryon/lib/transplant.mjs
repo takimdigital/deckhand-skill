@@ -177,6 +177,18 @@ export function litValue(node) {
   }
 }
 
+/** The arrays of a literal item's shape, empty (`{ links: [] }`), as source: what a `.map` needs. null when none. */
+export function skeleton(v) {
+  if (Array.isArray(v)) return '[]';
+  if (!v || typeof v !== 'object') return null;
+  const parts = [];
+  for (const [k, x] of Object.entries(v)) {
+    const s = skeleton(x);
+    if (s) parts.push(`${/^[A-Za-z_$][\w$]*$/.test(k) ? k : JSON.stringify(k)}: ${s}`);
+  }
+  return parts.length ? `{ ${parts.join(', ')} }` : null;
+}
+
 /** Literal arrays by name — module level AND inside component bodies (Tailark keeps FAQ data there). */
 function topArrays(ast) {
   const m = new Map();
@@ -1216,7 +1228,11 @@ export function parameterize(file, code, exp, opts = {}) {
       if (inCut(l.object) || !l.fields.some((f) => CONTENT_ROLES.includes(f.role))) continue;
       const k = key('list');
       const a = acc(k);
-      const merge = tsFile ? `${a}.map((o: any, i: number) => ({ ...${l.name}[i % ${l.name}.length], ...o }))` : `${a}.map((o, i) => ({ ...${l.name}[i % ${l.name}.length], ...o }))`;
+      // the shape of a demo item goes first: a footer whose demo columns were emptied (no menu in the plan) has no
+      // template left, and `links.map` on the owner's column would take the whole page down (HTTP 500)
+      const sk = skeleton((l.demoItems || [])[0]);
+      const base = (sk ? `...${sk}, ` : '') + `...${l.name}[i % ${l.name}.length]`;
+      const merge = tsFile ? `${a}.map((o: any, i: number) => ({ ${base}, ...o }))` : `${a}.map((o, i) => ({ ${base}, ...o }))`;
       edits.push({ start: l.object.start, end: l.object.end, text: tsFile ? `((${a} ? ${merge} : ${l.name}) as typeof ${l.name})` : `(${a} ? ${merge} : ${l.name})` });
       for (const k0 of l.consts || []) edits.push({ start: k0.start, end: k0.end, text: `{(${k0.param}${tsFile ? ' as any' : ''}).dhAction ?? <span data-dh-demo="">${k0.text}</span>}` });
       lists.push({ key: k, fields: l.fields, demoCount: l.demoCount, demoItems: l.demoItems || [], textOnly: l.textOnly || [], at: l.object.start });

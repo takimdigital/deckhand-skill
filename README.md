@@ -210,7 +210,7 @@ Run for real in this release:
   in code, each with a test: a gate passed on the agent's paraphrase of a change request, a base that could not land
   in the planning folder, a database kept alive by hand for hours, ports Windows reserves, 22 work packages for 4
   builders, and a Windows `HOSTNAME` trap.
-- CI on every push, Ubuntu and Windows: 137 try-on + 193 control-plane + 40 server-client + 18 repo tests.
+- CI on every push, Ubuntu and Windows: 147 try-on + 193 control-plane + 40 server-client + 18 repo tests.
 
 Not yet proven live: a full `dh deploy ship` against a real server (it uses the same Coolify client that
 was proven live in v1), the first real run of the $0 Oracle track, and the Claude Code session hook inside a
@@ -258,7 +258,9 @@ new session, with any AI, and say *"continue my site"*. →
 
 **Working on Deckhand with an AI?** Tell it to read [`LLM_CONTEXT.md`](LLM_CONTEXT.md) first. It's the whole repo
 in one file, written for a model and regenerated from the code on every change, so a brand-new session starts
-with full context.
+with full context. For the human-readable picture — the 9-phase state machine, the gate classifier, the try-on
+click loop, the AI-draft gates and every command, with diagrams — open the
+[architecture atlas](docs/architecture-atlas.html).
 
 **Does it work with Hermes, not only Claude Code?** Yes. `dh` detects the agent it runs in and prints that agent's
 own syntax (Hermes: background terminals, `process_manage`, `delegate_task`; Claude Code: background tasks, sub-agents,
