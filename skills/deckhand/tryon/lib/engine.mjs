@@ -1419,7 +1419,13 @@ export function unmarkDemo(code) {
   return code.replace(/<span data-dh-demo="" data-dh-wrap="">([^<{}]*)<\/span>/g, '$1').replace(/ data-dh-demo=""(?=[\s>/])/g, '');
 }
 
-export function demoTexts(root, dirRel, ownerTexts = []) {
+const PRICE = /(^|\s)[$€£¥]\s?\d|\d\s?[$€£¥](\s|\/|$)|\d\s?(EUR|USD|GBP)\b/;
+
+/**
+ * The design's words still on the page. `ledger: true` (compose/keep, feeding demo-copy.json) also records a price
+ * (`$19 / mo` has under three letters) and a dead `href="#"` link (F13); fit checks call it without, so counts do not move.
+ */
+export function demoTexts(root, dirRel, ownerTexts = [], { ledger = false } = {}) {
   const brand = brandName(root);   // the owner's own name is never demo copy
   const own = new Set(ownerTexts.concat(brand ? [brand, `© ${brand}`] : []).map((t) => String(t).replace(/\s+/g, ' ').trim().toLowerCase()));
   const out = [];
@@ -1430,20 +1436,25 @@ export function demoTexts(root, dirRel, ownerTexts = []) {
     const code = fs.readFileSync(path.join(dir, f), 'utf8');
     let ast;
     try { ast = parse(f, code); } catch { continue; }
-    const push = (t) => {
+    const push = (t, force = false) => {
       const x = String(t).replace(/\s+/g, ' ').trim();
-      if ((x.match(/\p{L}/gu) || []).length < 3 || own.has(x.toLowerCase())) return;
+      if (own.has(x.toLowerCase()) || (!force && (x.match(/\p{L}/gu) || []).length < 3)) return;
       if (x.split(/\s+/).every((t) => /^[a-z0-9:/[\]._%!*&>()-]+$/.test(t)) && /(^|\s)[a-z0-9:]+-[\w./-]+/.test(x)) return;   // a class list
       if (/^(https?:|\/|#|mailto:|tel:)/.test(x)) return;
       out.push({ file: path.posix.join(dirRel, f), text: x.slice(0, 120) });
     };
     walk(ast, (n, parent) => {
       if (n.type === 'LogicalExpression' && n.operator === '??') return false;          // a slot fallback
-      if (n.type === 'JSXAttribute') return false;
+      if (n.type === 'JSXAttribute') {
+        if (ledger && jsxName(n.name) === 'href' && n.value && n.value.type === 'StringLiteral' && /^#?$/.test(n.value.value.trim())) {
+          out.push({ file: path.posix.join(dirRel, f), text: `href="${n.value.value}"`, kind: 'dead-link' });
+        }
+        return false;
+      }
       if (n.type === 'ImportDeclaration' || n.type === 'TSTypeAnnotation') return false;
-      if (n.type === 'JSXText') push(n.value);
+      if (n.type === 'JSXText') push(n.value, ledger && PRICE.test(n.value));
       if (n.type === 'StringLiteral' && parent && (parent.type === 'ObjectProperty' && parent.value === n || parent.type === 'ArrayExpression')) {
-        if (/\s/.test(n.value) || /^[A-Z][a-z]+/.test(n.value)) push(n.value);
+        if (/\s/.test(n.value) || /^[A-Z][a-z]+/.test(n.value) || (ledger && PRICE.test(n.value))) push(n.value, ledger && PRICE.test(n.value));
       }
       return true;
     });
@@ -1535,7 +1546,7 @@ export function keep(rootIn, id, idx) {
   if (fs.existsSync(stageRoot) && !fs.readdirSync(stageRoot).length) fs.rmdirSync(stageRoot);
   v.finalDir = final;
   if (!v.generated) recordNotice(root, v);             // AI-written code is the owner's: provenance lives in its header
-  let leftovers = demoTexts(root, final, v.ownerTexts || []);
+  let leftovers = demoTexts(root, final, v.ownerTexts || [], { ledger: true });
   if (v.generated) {
     const own = (v.ownerTexts || []).map(flatText);
     leftovers = leftovers.filter((e) => !own.some((o) => o.includes(flatText(e.text)))).map((e) => ({ ...e, ai: true }));
