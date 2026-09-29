@@ -100,6 +100,14 @@ class Coherence(unittest.TestCase):
                         bad.append(f"{p}:{i} {rel}")
         self.assertEqual(bad, [])
 
+    def test_workflow_run_lines_are_valid_yaml(self):
+        # a plain `run: …` value holding ": " is a YAML mapping error: GitHub drops the whole workflow (release.yml
+        # lost its workflow_dispatch trigger this way on 2026-09-29); such a command goes in a `run: |` block
+        wf = Path(__file__).resolve().parents[1] / ".github" / "workflows"
+        bad = [f"{f.name}:{i}" for f in sorted(wf.glob("*.yml")) for i, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1)
+               if (m := re.match(r"^\s*(?:- )?run:\s+(?![|>'\"])(.*)$", line)) and ": " in m.group(1)]
+        self.assertEqual(bad, [])
+
     def test_readme_test_counts_are_true(self):
         count = lambda pattern, glob: sum(len(re.findall(pattern, t, re.M)) for p, t in self.files.items()  # noqa: E731
                                           if t is not None and Path(p).match(glob))
