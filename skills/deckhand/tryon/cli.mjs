@@ -28,7 +28,7 @@
  *   node tryon/cli.mjs tune  --id T --keep | --reset          (an open tune: --id T with new dials re-applies)
  *   node tryon/cli.mjs theme                                  current knobs, choices, fonts
  *   node tryon/cli.mjs theme --accent teal --neutrals warm --corners soft --density airy --headlines larger --body Inter --heading Fraunces
- *   node tryon/cli.mjs theme --undo                           byte-exact restore of the last apply
+ *   node tryon/cli.mjs theme --undo [--force]                 byte-exact restore of the last apply (refused if edited since)
  *
  * SEO (driven by `dh seo`, which builds the plan from the brief's confirmed facts):
  *   node tryon/cli.mjs seo inspect | seo apply --plan plan.json | seo undo
@@ -223,7 +223,7 @@ async function main() {
       return out({ ok: true, ...r, file: t.file, next: `look at it (HMR); then \`tune --id ${t.id} --keep\` or \`--reset\` (byte-exact)` });
     }
     case 'theme': {
-      if (flags.undo) return out({ ok: true, ...themeUndo(project) });
+      if (flags.undo) return out({ ok: true, ...themeUndo(project, { force: !!flags.force }) });
       const knobs = Object.fromEntries(['accent', 'neutrals', 'corners', 'density', 'headlines', 'body', 'heading']
         .filter((k) => typeof flags[k] === 'string').map((k) => [k, flags[k]]));
       if (!Object.keys(knobs).length) return out({ ok: true, ...themeState(project) });
@@ -232,7 +232,7 @@ async function main() {
     case 'seo': {
       const act = words[0];
       if (act === 'inspect') return out({ ok: true, ...seoInspect(project) });
-      if (act === 'undo') return out({ ok: true, ...seoUndo(project) });
+      if (act === 'undo') return out({ ok: true, ...seoUndo(project, { force: !!flags.force }) });
       if (act === 'apply') { need('plan'); return out({ ok: true, ...seoApply(project, JSON.parse(fs.readFileSync(path.resolve(String(flags.plan)), 'utf8'))) }); }
       return out({ ok: false, code: 'USAGE', usage: 'seo inspect | seo apply --plan plan.json | seo undo (usually through `dh seo`)' }, 2);
     }

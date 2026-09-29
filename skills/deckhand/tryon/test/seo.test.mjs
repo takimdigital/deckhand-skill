@@ -122,3 +122,13 @@ test('static / Vite sites get head tags and static robots, sitemap and llms.txt'
   assert.match(read(dir, 'public/robots.txt'), /Sitemap: https:\/\/maisonpain.fr\/sitemap.xml/);
   assert.match(read(dir, 'public/sitemap.xml'), /<loc>https:\/\/maisonpain.fr\/about<\/loc>/);
 });
+
+test('undo refuses to throw away an edit made after the apply, unless forced (final audit Y6)', () => {
+  const dir = nextApp();
+  const r = seoApply(dir, PLAN);
+  const f = r.written[0];
+  fs.appendFileSync(path.join(dir, f), '\n// owner edit\n');
+  assert.throws(() => seoUndo(dir), (e) => e.code === 'FILE_CHANGED' && e.files.includes(f));
+  assert.match(read(dir, f), /owner edit/);
+  seoUndo(dir, { force: true });
+});

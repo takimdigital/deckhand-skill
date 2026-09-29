@@ -10,7 +10,7 @@
                            pages + the model's words (.deckhand/copy.json → seo.pages: title, description per
                            route) and lets the engine add or improve robots, sitemap, metadata, canonicals,
                            Open Graph, JSON-LD, 404, llms.txt, IndexNow — never overwriting the owner's words.
-  dh seo undo              byte-exact restore of the last apply.
+  dh seo undo [--force]    byte-exact restore of the last apply (refused if a file was edited since).
   dh seo ping              IndexNow: tells Bing (the index behind ChatGPT search and Copilot), Yandex, Seznam
                            and Naver that the site's URLs changed (`dh deploy ship` does it on production).
 Policy by path (data/seo.json policy_by_path): scratch + existing = applied by default; pool + mine =
@@ -304,8 +304,8 @@ def apply(root: Path) -> dict:
             "next": "write any missing per-page titles/descriptions in .deckhand/copy.json → seo.pages, apply again; the owner's part is in PENDING.md"}
 
 
-def undo(root: Path) -> dict:
-    return _node(Path(root), "undo")
+def undo(root: Path, force: bool = False) -> dict:
+    return _node(Path(root), "undo", *(["--force"] if force else []))
 
 
 # ------------------------------------------------------------------ rendered HTML

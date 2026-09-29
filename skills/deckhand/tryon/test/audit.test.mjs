@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { tempSite, offline } from './helpers.mjs';
 import * as engine from '../lib/engine.mjs';
 import { startServer, localHost } from '../server.mjs';
+import { themeApply, themeUndo } from '../lib/sitetheme.mjs';
 
 offline();
 const COMPOSE = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'compose.mjs');
@@ -69,4 +70,32 @@ test('Y1: a compose that places nothing leaves the page and its first backup alo
   assert.equal(out.ok, false);
   assert.match(fs.readFileSync(page, 'utf8'), /OWNER/);
   assert.equal(fs.readFileSync(page + '.before-compose', 'utf8'), 'ORIGINAL\n');
+});
+
+test('Y2: a second compose never clears a section folder another page (or the owner) uses', () => {
+  const dir = tempSite();
+  const run = (page) => spawnSync(process.execPath, [COMPOSE, '--project', dir, '--sections', 'hero', '--page', page, '--install', 'no', '--tries', '2'], { encoding: 'utf8', env: process.env });
+  const first = JSON.parse(run('app/page.tsx').stdout.trim().split('\n').pop());
+  assert.equal(first.ok, true, JSON.stringify(first));
+  const entry = path.join(dir, first.sections[0].component);
+  fs.appendFileSync(entry, '\n// OWNER EDIT\n');
+  const second = JSON.parse(run('app/y/page.tsx').stdout.trim().split('\n').pop());
+  assert.equal(second.ok, true);
+  assert.notEqual(second.sections[0].component, first.sections[0].component);
+  assert.match(fs.readFileSync(entry, 'utf8'), /OWNER EDIT/);
+  assert.ok(fs.existsSync(path.join(dir, second.sections[0].component)));
+  assert.deepEqual(fs.readdirSync(path.join(dir, 'components', 'sections')).filter((f) => f.startsWith('.dh-stage')), []);
+});
+
+test('Y6: theme --undo refuses to throw away an edit made after the apply, unless forced', () => {
+  const dir = tempSite();
+  const css = path.join(dir, fs.existsSync(path.join(dir, 'app', 'globals.css')) ? 'app/globals.css' : 'styles/globals.css');
+  themeApply(dir, { accent: 'teal' });
+  fs.appendFileSync(css, '\n.owner-rule { color: red }\n');
+  assert.throws(() => themeUndo(dir), (e) => e.code === 'FILE_CHANGED');
+  assert.match(fs.readFileSync(css, 'utf8'), /owner-rule/);
+  themeUndo(dir, { force: true });
+  assert.doesNotMatch(fs.readFileSync(css, 'utf8'), /owner-rule/);
+  themeApply(dir, { accent: 'teal' });
+  assert.equal(themeUndo(dir).mode, 'byte-exact');             // untouched since: undoes as before
 });

@@ -272,6 +272,7 @@ def build_parser():
     p.add_argument("--baseline"); p.add_argument("--research"); p.add_argument("--baseline-research")
     p = sub.add_parser("seo", help="be found on Google and in AI answers: audit · apply (add/improve, never overwrite) · undo · ping · facts")
     p.add_argument("action", choices=["audit", "apply", "undo", "ping", "facts"]); p.add_argument("--url")
+    p.add_argument("--force", action="store_true", help="undo: even over files edited since the apply")
     sub.add_parser("handoff")
     p = sub.add_parser("tryon", help="passthrough to the try-on engine (node)"); p.add_argument("rest", nargs=argparse.REMAINDER)
     return ap
@@ -579,7 +580,7 @@ def dispatch(a):
         if a.action == "apply":
             return SEO.apply(root)
         if a.action == "undo":
-            return SEO.undo(root)
+            return SEO.undo(root, force=a.force)
         if a.action == "ping":
             return SEO.ping(root)
         if a.action == "facts":

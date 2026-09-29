@@ -427,9 +427,9 @@ export function radixUmbrella(prof) {
 /**
  * Write a bundle into <componentsDir>/dh-tryon/<slug>/. Returns the stage record.
  */
-export function writeBundle(prof, item, bundle, { baseDir } = {}) {
+export function writeBundle(prof, item, bundle, { baseDir, dirName } = {}) {
   const slug = slugOf(item);
-  const relDir = path.posix.join(baseDir || path.posix.join(prof.componentsDir, 'dh-tryon'), slug);
+  const relDir = path.posix.join(baseDir || path.posix.join(prof.componentsDir, 'dh-tryon'), dirName || slug);
   const absDir = path.join(prof.root, relDir);
   fs.rmSync(absDir, { recursive: true, force: true });
   fs.mkdirSync(absDir, { recursive: true });

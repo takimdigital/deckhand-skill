@@ -17,6 +17,7 @@
  * Next.js App Router: full support. Next.js Pages Router, Vite and static sites: index.html head tags plus
  * static robots.txt / sitemap.xml / llms.txt.
  */
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -184,6 +185,8 @@ export function seoInspect(rootIn) {
 
 /* ------------------------------------------------------------------ apply */
 
+const shaOf = (abs) => (exists(abs) ? crypto.createHash('sha256').update(fs.readFileSync(abs)).digest('hex') : null);
+
 function journal(root) {
   const files = {};
   return {
@@ -200,7 +203,8 @@ function journal(root) {
       if (!changed.length) return [];
       const d = path.join(root, '.deckhand', 'tryon', 'seo');
       fs.mkdirSync(d, { recursive: true });
-      fs.writeFileSync(path.join(d, 'last.json'), JSON.stringify({ at: new Date().toISOString(), files: Object.fromEntries(changed) }));
+      fs.writeFileSync(path.join(d, 'last.json'), JSON.stringify({ at: new Date().toISOString(), files: Object.fromEntries(changed),
+        after: Object.fromEntries(changed.map(([p]) => [p, shaOf(path.join(root, p))])) }));
       return changed.map(([p]) => p);
     },
   };
@@ -670,11 +674,16 @@ export function seoApply(rootIn, plan) {
   return { router: insp.router, written, changes, undo: written.length ? 'dh seo undo (byte-exact)' : null };
 }
 
-export function seoUndo(rootIn) {
+export function seoUndo(rootIn, { force = false } = {}) {
   const root = detectProject(rootIn).root;
   const p = path.join(root, '.deckhand', 'tryon', 'seo', 'last.json');
   if (!exists(p)) throw Object.assign(new Error('nothing to undo'), { code: 'NO_UNDO' });
   const last = JSON.parse(read(p));
+  // byte-exact means back to before the apply: a file edited since would lose that edit, so it is the owner's call
+  const edited = Object.keys(last.after || {}).filter((f) => shaOf(path.join(root, f)) !== last.after[f]);
+  if (edited.length && !force) {
+    throw Object.assign(new Error(`edited since the SEO apply: ${edited.join(', ')} — undo would lose those edits (seo undo --force to undo anyway)`), { code: 'FILE_CHANGED', files: edited });
+  }
   for (const [f, before] of Object.entries(last.files)) {
     const abs = path.join(root, f);
     if (before === null) fs.rmSync(abs, { force: true });
