@@ -7,10 +7,12 @@ A schedule is verified only by its own trigger — the output says exactly how.
 """
 from __future__ import annotations
 
+import os
+import re
 import shutil
 from pathlib import Path
 
-from .util import DATA, TEMPLATES, DhError, read_json
+from .util import DATA, SKILL, TEMPLATES, DhError, read_json
 
 
 def catalog() -> list:
@@ -46,8 +48,10 @@ def add(root: Path, bot_id: str, runner: str = "github") -> dict:
     b = next((x for x in catalog() if x["id"] == bot_id), None)
     if not b:
         raise DhError("NO_SUCH_BOT", bot_id)
-    if runner not in ("github", "cron", "local"):
-        raise DhError("BAD_RUNNER", "runner: github | cron | local")
+    if runner not in ("github", "cron", "local", "hermes"):
+        raise DhError("BAD_RUNNER", "runner: github | cron | local | hermes")
+    if runner == "hermes" and not os.environ.get("HERMES_HOME"):
+        raise DhError("NOT_HERMES", "HERMES_HOME is not set: --runner hermes is for a Hermes session (use --runner github or cron elsewhere)")
     bots = root / "ops" / "bots"
     bots.mkdir(parents=True, exist_ok=True)
     written = []
@@ -76,6 +80,7 @@ def add(root: Path, bot_id: str, runner: str = "github") -> dict:
     if bot_id == "watchdog":
         env_names += ["COOLIFY_URL", "COOLIFY_TOKEN", "VPS_SSH"]
     verify = ""
+    hermes_cron = None
     if runner == "github":
         wf = root / ".github" / "workflows" / f"deckhand-{bot_id}.yml"
         wf.parent.mkdir(parents=True, exist_ok=True)
@@ -90,6 +95,21 @@ def add(root: Path, bot_id: str, runner: str = "github") -> dict:
         written.append(str(wf.relative_to(root)))
         verify = f"git push; gh variable set SITE_URLS --body https://…; gh secret set TELEGRAM_BOT_TOKEN …; gh workflow run deckhand-{bot_id}.yml; gh run list -w deckhand-{bot_id}.yml -L 1"
         note = "alert state persists through actions/cache (.bot-state), so only changes are reported"
+    elif runner == "hermes":
+        slug = re.sub(r"[^a-z0-9]+", "-", root.name.lower()).strip("-") or "site"
+        wrapper = Path(os.environ["HERMES_HOME"]) / "scripts" / f"deckhand-{slug}-{bot_id}.py"
+        wrapper.parent.mkdir(parents=True, exist_ok=True)
+        text = (TEMPLATES / "bots" / "hermes_cron.py").read_text(encoding="utf-8")
+        for k, v in (("__SKILL__", str(SKILL)), ("__PROJECT__", str(root.resolve())), ("__BOT__", str(script.resolve()) if script else ""),
+                     ("__NAMES__", env_names)):
+            text = text.replace(k, repr(v))
+        wrapper.write_text(text, encoding="utf-8")
+        written.append(str(wrapper))
+        hermes_cron = {"action": "create", "name": f"deckhand {root.name} {bot_id}", "schedule": b["schedule"],
+                       "script": wrapper.name, "no_agent": True}
+        from . import guide
+        row = guide.harness_row("hermes")            # the wording of Hermes' tools lives in data/harness.json, not here
+        verify, note = row.get("cron_verify", ""), row.get("cron_note", "")
     else:
         line = f"{b['schedule']} cd /opt/deckhand-bots && set -a && . ./bots.env && set +a && python3 {script.name if script else ''} >> bot.log 2>&1"
         verify = (f"scp -r ops/bots root@$VPS_IP:/opt/deckhand-bots && ssh root@$VPS_IP '(crontab -l; echo \"{line}\") | crontab -' "
@@ -97,4 +117,5 @@ def add(root: Path, bot_id: str, runner: str = "github") -> dict:
         note = "create /opt/deckhand-bots/bots.env on the server (chmod 600) with: " + ", ".join(env_names)
     return {"bot": bot_id, "kind": b["kind"], "written": written, "schedule": b["schedule"], "runner": runner,
             "env": env_names, "verify_by_its_own_trigger": verify, "note": note,
+            **({"hermes_cron": hermes_cron} if hermes_cron else {}),
             "todo": "implement the SPEC in the skeleton, run once by hand, then verify the schedule" if b["kind"] == "app" else None}

@@ -13,7 +13,12 @@ function Remove-Install($p) {
 foreach ($t in @(@("py","Python 3.9+ (the py launcher)"), @("node","Node 18+ (try-on, compose)"), @("git","git"))) {
   if (-not (Get-Command $t[0] -ErrorAction SilentlyContinue)) { Write-Host "missing: $($t[0]) - $($t[1])" }
 }
-$targets = @(
+$hermesExtra = @()
+if ($env:HERMES_HOME) { $hermesExtra += ,@("hermes", "$env:HERMES_HOME\skills") }
+foreach ($base in @("$env:LOCALAPPDATA\hermes\profiles", "$HOME\.hermes\profiles")) {
+  Get-ChildItem -Path $base -Directory -ErrorAction SilentlyContinue | ForEach-Object { $hermesExtra += ,@("hermes", (Join-Path $_.FullName "skills")) }
+}
+$targets = $hermesExtra + @(
   @("claude",  "$HOME\.claude\skills"),
   @("codex",   "$HOME\.codex\skills"),
   @("agents",  "$HOME\.agents\skills"),

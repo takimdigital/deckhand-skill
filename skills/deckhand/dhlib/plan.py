@@ -207,6 +207,12 @@ def lint(root: Path, sm: dict | None = None) -> dict:
             "stats": {"pages": len(pages), "features": len(features), "edges": sum(len(v) for v in edges.values())}}
 
 
+def _browser_line() -> str:
+    """How pages are checked in the detected harness (data/harness.json, `browser`): some browsers refuse localhost."""
+    from . import guide
+    return guide.harness_row().get("browser", "check pages with `curl -s`.")
+
+
 def render(root: Path) -> dict:
     sm = read_json(sitemap_path(root))
     if not sm:
@@ -408,8 +414,7 @@ def _conventions(agents: list, shell_wp: dict, pages: dict) -> str:
           "- Scratch files (probes, cookies, screenshots): `.deckhand/work/tmp/[your agent id]/` only — never a shared temp path.",
           "- Test data: every row you create is named `TEST-[your agent id]-…` and deleted before you post `done`.",
           "- Owner facts (prices, addresses, reviews) are never invented: missing → `dh bb post --kind question`.",
-          "- Check pages with `curl` (signed in when needed: cookie jar in your scratch folder). Some harness browsers",
-          "  refuse localhost (Hermes `browser_navigate`): curl + the HTML is the evidence, not a screenshot.",
+          "- Pages: " + _browser_line(),
           "- On Windows run native tools with `D:/…` paths (forward slashes); `/d/…` works only inside bash.",
           "- Waiting on another builder: `dh bb wait [flag] --max 170` (exit 1 = timeout: proceed and post a note).", "",
           "## Report protocol", "",

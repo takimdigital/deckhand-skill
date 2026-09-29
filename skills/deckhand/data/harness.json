@@ -4,44 +4,69 @@
     "background": "terminal(command=…, background=true, notify=[\"Ready in\"]) → session_id; process_manage(action=\"wait\", session_id=…, timeout ≤ 180). Never `nohup … &`. `dh dev start` detaches by itself.",
     "limits": "terminal: 180 s default, 600 s foreground max (longer is auto-promoted to background — do not re-run it). execute_code: state is lost on timeout/interrupt/30 min idle; inside it `from hermes_tools import terminal`.",
     "delegate": "delegate_task(tasks=[{goal, context, output_schema}], ≤ 10) — one task per .deckhand/work/AGENT-n.md, all in ONE call; no {x} or <x> in any task text (the whole batch is refused); steer early with action=\"steer\".",
-    "todo": "no todo tool: keep `dh workflow todo --format md` as the checklist, tick with `dh workflow step ID done`.",
+    "todo": "todo_list(todos=[one item per step: id, content, status], merge=true) from `dh workflow todo` (each item already carries id, content, status); tick with `dh workflow step ID done`. One item in_progress at a time.",
     "browser": "browser_navigate refuses localhost: check pages with curl; visual QA = a screenshot file + vision_analyze(image_url=path, question=…).",
-    "transcript": "dh autopsy --latest reads this session from state.db (read-only)."
+    "transcript": "dh autopsy --latest reads this session from state.db (read-only).",
+    "cron": "`dh ops add [bot] --runner hermes` writes the bot into $HERMES_HOME/scripts and returns the exact cronjob(action=\"create\", no_agent=true, script=...) call to show the owner, then make: zero model tokens per tick, the script's stdout is the alert. Verify with cronjob(action=\"run\", job_id=...).",
+    "context": "Hermes loads ONE project file, first match wins: .hermes.md → AGENTS.md → CLAUDE.md. `dh init` writes its resume block into AGENTS.md, and into .hermes.md when the owner has one.",
+    "install": "the skill lives in $HERMES_HOME/skills/[category]/deckhand (each profile has its own; install.ps1 / install.sh update every one); the session store is $HERMES_HOME/state.db.",
+    "cron_verify": "cronjob(action=\"run\", job_id=[the id create returns])   # fires once now; its stdout is the alert",
+    "cron_note": "show the owner this cronjob call, then make it: a no-agent job costs no model tokens per tick, and the bot's secrets are read from the Deckhand vault by name (dh vault set NAME)"
   },
   "claude-code": {
     "background": "Bash with run_in_background; wait with Monitor (never sleep loops). `dh dev start` detaches by itself.",
     "delegate": "Agent tool, one agent per .deckhand/work/AGENT-n.md, launched in one message.",
     "todo": "TodoWrite ← `dh workflow todo` (content/status/activeForm).",
-    "transcript": "dh autopsy --latest reads ~/.claude/projects/<project>/*.jsonl; `dh resume --install-hook claude` starts every session from RESUME."
+    "transcript": "dh autopsy --latest reads ~/.claude/projects/<project>/*.jsonl; `dh resume --install-hook claude` starts every session from RESUME.",
+    "context": "CLAUDE.md (a new one imports AGENTS.md); `dh resume --install-hook claude` starts every session from RESUME.",
+    "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found."
   },
   "codex": {
     "background": "a background terminal; `dh dev start` detaches by itself.",
     "delegate": "no sub-agents: build the AGENT-n.md packages one after the other, or one Codex session per package.",
     "todo": "`dh workflow todo --format md` as the plan.",
-    "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read."
+    "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read.",
+    "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found.",
+    "context": "AGENTS.md (read by most agents; CLAUDE.md can import it): `dh init` writes the resume block there."
   },
   "cursor": {
     "background": "a background terminal; `dh dev start` detaches by itself.",
     "delegate": "background agents: one per AGENT-n.md, or sequential.",
     "todo": "`dh workflow todo --format md` as the plan.",
-    "transcript": "the run log .deckhand/runs.jsonl (run risky commands through `dh run --`)."
+    "transcript": "the run log .deckhand/runs.jsonl (run risky commands through `dh run --`).",
+    "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found.",
+    "context": "AGENTS.md (read by most agents; CLAUDE.md can import it): `dh init` writes the resume block there."
   },
   "gemini-cli": {
     "background": "run_shell_command with is_background=true (or a second terminal); `dh dev start` detaches by itself.",
     "delegate": "no sub-agents you can count on: build the AGENT-n.md packages one after the other, or one Gemini CLI session per package.",
     "todo": "`dh workflow todo --format md` as the plan.",
-    "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read."
+    "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read.",
+    "context": "GEMINI.md, or AGENTS.md when configured as the context file: `dh init` writes the resume block into AGENTS.md.",
+    "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found."
   },
   "opencode": {
     "background": "a second terminal or a background shell; `dh dev start` detaches by itself.",
     "delegate": "the task tool (sub-agents): one per .deckhand/work/AGENT-n.md, or sequential.",
     "todo": "the todo tool ← `dh workflow todo` (or `dh workflow todo --format md` as the plan).",
-    "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read."
+    "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read.",
+    "context": "AGENTS.md: `dh init` writes the resume block there.",
+    "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found."
   },
   "unknown": {
     "background": "a second terminal, or the harness's background mode; `dh dev start` detaches by itself.",
     "delegate": "parallel sessions, one per AGENT-n.md — or sequential in this one.",
     "todo": "`dh workflow todo --format md` as the plan.",
-    "transcript": "the run log .deckhand/runs.jsonl (run risky commands through `dh run --`)."
+    "transcript": "the run log .deckhand/runs.jsonl (run risky commands through `dh run --`).",
+    "limits": "the harness's command timeout: long work goes through `dh dev start` or a background terminal, never one long foreground call.",
+    "browser": "check pages with `curl -s` (a cookie jar in your scratch folder); visual QA = a screenshot file.",
+    "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
+    "context": "AGENTS.md (read by most agents; CLAUDE.md can import it): `dh init` writes the resume block there.",
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found."
   }
 }

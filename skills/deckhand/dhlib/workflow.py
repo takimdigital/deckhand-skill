@@ -393,6 +393,12 @@ def harness() -> str:
     return "unknown"
 
 
+def todo_how() -> str:
+    """How THIS harness loads the checklist into its own todo list (data/harness.json, `todo`); the markdown form is the fallback."""
+    from . import guide
+    return guide.harness_row().get("todo", "") + " The markdown form is `dh workflow todo --format md`."
+
+
 def os_name() -> str:
     return {"nt": "windows"}.get(os.name) or ("macos" if os.uname().sysname == "Darwin" else "linux")
 
@@ -565,8 +571,7 @@ def todo(root: Path, fmt: str = "json", phase: str | None = None) -> dict:
     out = {"workflow": f"{pin['id']}@{pin['version']}", "count": len(items), "open": len([i for i in items if i["status"] != "completed"])}
     if fmt == "md":
         return {**out, "markdown": md}
-    return {**out, "todo": items, "how": "load `todo` into your harness's todo list (Claude Code TodoWrite: content/status/activeForm; "
-                                         "Hermes or others without one: the markdown form, `--format md`); tick with `dh workflow step ID done`"}
+    return {**out, "todo": items, "how": todo_how()}
 
 
 def step(root: Path, sid: str, action: str, why: str = "") -> dict:
