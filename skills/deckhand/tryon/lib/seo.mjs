@@ -509,7 +509,14 @@ function improveLayout(prof, plan, code, file, siteSpec, jsonLdSpec, changes, mu
     if (n.type === 'JSXElement' && jsxName(n.openingElement.name) === 'body') bodyEl = n;
     return true;
   });
-  if (htmlEl && !attr(htmlEl.openingElement, 'lang')) {
+  const wantLang = (plan.site.languages || ['en'])[0];
+  const langAttr = htmlEl ? attr(htmlEl.openingElement, 'lang') : null;
+  // a wrong LITERAL lang is corrected (F17); an expression (`lang={locale}`) is the owner's i18n and stays
+  if (langAttr && langAttr.value && langAttr.value.type === 'StringLiteral' && langAttr.value.value !== wantLang) {
+    edits.push({ start: langAttr.value.start, end: langAttr.value.end, text: J(wantLang) });
+    changes.push({ file, improved: `<html lang="${wantLang}">` });
+  }
+  if (htmlEl && !langAttr) {
     const nameEnd = htmlEl.openingElement.name.end;
     edits.push({ start: nameEnd, end: nameEnd, text: ` lang=${J((plan.site.languages || ['en'])[0])}` });
     changes.push({ file, added: `<html lang="${(plan.site.languages || ['en'])[0]}">` });
@@ -614,6 +621,7 @@ function indexHtml(root, plan, J_, changes) {
   if (!h.includes('application/ld+json')) tags.push(`<script type="application/ld+json">${JSON.stringify(plan.jsonld).replace(/</g, '\\u003c')}</script>`);
   if (tags.length) h = h.replace(/\n?[ \t]*<\/head>/i, `\n    ${tags.join('\n    ')}\n  </head>`);
   if (!/<html[^>]*\blang=/i.test(h)) h = h.replace(/<html\b/i, `<html lang="${(s.languages || ['en'])[0]}"`);
+  else h = h.replace(/(<html\b[^>]*\blang=)(["'])([^"']*)\2/i, (m, a, q, v) => (v === (s.languages || ['en'])[0] ? m : `${a}${q}${(s.languages || ['en'])[0]}${q}`));   // a wrong lang is corrected (F17)
   if (J_.write(index, h)) changes.push({ file: index, added: 'head tags (title, description, canonical, Open Graph, twitter, JSON-LD, lang)' });
 }
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
