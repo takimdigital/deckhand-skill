@@ -1,183 +1,567 @@
 {
  "version": 1,
  "registry": "smoothui",
- "deckhand": "2.3.0",
+ "deckhand": "2.3.2",
  "verdicts": {
   "smoothui/agent-avatar@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
+  },
+  "smoothui/ai-context-meter@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "smoothui/ai-input@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve ../morph-surface"
+  },
+  "smoothui/ai-prompt-input@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve ../ai-core"
   },
   "smoothui/animated-avatar-group@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
+  },
+  "smoothui/animated-input@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ]
+  },
+  "smoothui/animated-number-input@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/animated-o-t-p-input@any": {
+   "v": "fits",
+   "needs": [
+    "input-otp",
+    "motion"
+   ]
   },
   "smoothui/animated-progress-bar@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "smoothui/animated-tabs@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tabs\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "smoothui/animated-toggle@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "smoothui/animated-tooltip@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"tooltip\""
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/aurora-curtain@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "smoothui/basic-accordion@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"accordion\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/7"
   },
   "smoothui/basic-dropdown@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
   },
   "smoothui/basic-modal@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "motion",
+    "usehooks-ts"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "smoothui/basic-toast@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"toast\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "smoothui/border-beam@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
+  },
+  "smoothui/bottom-up-letters@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/breadcrumb@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"breadcrumb\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/breadcrumb@any — https://smoothui.dev/r/breadcrumb.json: UNRESOLVED_REGISTRY_DEP @/components/smoothui/lib/animation"
+  },
+  "smoothui/button-copy@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "smoothui/card-swipe-deck@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/2"
   },
   "smoothui/checkbox@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"checkbox\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/checkbox@any — https://smoothui.dev/r/checkbox.json: UNRESOLVED_REGISTRY_DEP @/components/smoothui/lib/animation"
+  },
+  "smoothui/clip-corners-button@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/context-menu@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/context-menu@any — https://smoothui.dev/r/context-menu.json: UNRESOLVED_REGISTRY_DEP @/components/smoothui/lib/animation"
   },
   "smoothui/country-dialog@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
   },
   "smoothui/coverflow-carousel@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/cta-1@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/cta-2@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/cta-2@any — https://smoothui.dev/r/cta-2.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/cta-3@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
   },
   "smoothui/cursor-follow@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"cursor\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "smoothui/cursor-image-trail@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"cursor\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
+  },
+  "smoothui/depth-parallax-words@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/dialog@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "motion"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "smoothui/dither-chart@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"chart\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/2"
+  },
+  "smoothui/dot-morph-button@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
   },
   "smoothui/drawer@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sheet\""
+   "v": "fits",
+   "needs": [
+    "cn",
+    "motion",
+    "vaul"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "smoothui/drawing-cursor@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"cursor\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "smoothui/dropdown-menu@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/dropdown-menu@any — https://smoothui.dev/r/dropdown-menu.json: UNRESOLVED_REGISTRY_DEP @/components/smoothui/lib/animation"
+  },
+  "smoothui/expandable-navbar@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "smoothui/exposure-slider@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "smoothui/faq-1@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/7"
+  },
+  "smoothui/faq-2@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/7"
+  },
+  "smoothui/faq-3@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/7"
+  },
+  "smoothui/faq-4@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/7"
+  },
+  "smoothui/features-1@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 8,
+   "of": 8
+  },
+  "smoothui/features-2@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 8,
+   "of": 8
+  },
+  "smoothui/features-3@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/features-3@any — https://smoothui.dev/r/features-3.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/floating-navbar@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "smoothui/footer-1@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/6"
+  },
+  "smoothui/footer-2@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/footer-3@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/footer-4@any": {
+   "v": "partial",
+   "needs": [
+    "motion"
+   ],
+   "carried": 4,
+   "of": 6
+  },
+  "smoothui/glass-card@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 2,
+   "of": 2
   },
   "smoothui/glow-hover-card@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/2"
   },
   "smoothui/gooey-popover@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "fits",
+   "needs": [
+    "gsap"
+   ],
+   "carried": 2,
+   "of": 2
+  },
+  "smoothui/gravity-letters@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "smoothui/grid-loader@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
+  },
+  "smoothui/header-1@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: hero-header.tsx: cannot resolve @/components/smoothui/smooth-button; index.ts: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/header-2@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/header-2@any — https://smoothui.dev/r/header-2.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/header-3@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/header-3@any — https://smoothui.dev/r/header-3.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/header-4@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: hero-header.tsx: cannot resolve @/components/smoothui/smooth-button; index.ts: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/header-5@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/header-6@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/5"
   },
   "smoothui/infinite-slider@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"slider\""
+   "v": "fits",
+   "needs": [
+    "motion",
+    "react-use-measure"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "smoothui/inline-testimonials@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "smoothui/logo-cloud-1@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: hero-header.tsx: cannot resolve @/components/smoothui/smooth-button; index.ts: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/logo-cloud-2@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: hero-header.tsx: cannot resolve @/components/smoothui/smooth-button; index.ts: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/logo-cloud-3@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: hero-header.tsx: cannot resolve @/components/smoothui/smooth-button; index.ts: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/logo-cloud-4@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: hero-header.tsx: cannot resolve @/components/smoothui/smooth-button; index.ts: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/magnetic-button@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/music-toggle@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "smoothui/notification-badge@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/pagination@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"pagination\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/pagination@any — https://smoothui.dev/r/pagination.json: UNRESOLVED_REGISTRY_DEP @/components/smoothui/lib/animation"
+  },
+  "smoothui/per-word-crossfade@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "smoothui/perspective-text-3d@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "smoothui/pricing-1@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/pricing-2@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/pricing-3@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/product-card@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
   },
   "smoothui/progressive-blur@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "smoothui/reveal-text@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/reviews-carousel@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"carousel\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
   },
   "smoothui/rich-popover@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/2"
+  },
+  "smoothui/rolling-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "smoothui/scroll-progress@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"progress\""
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "smoothui/scrollable-card-stack@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/2"
   },
   "smoothui/searchable-dropdown@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dropdown-menu\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "smoothui/select@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"select\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/select@any — https://smoothui.dev/r/select.json: UNRESOLVED_REGISTRY_DEP @/components/smoothui/lib/animation"
   },
   "smoothui/shader-reveal-noise-transition@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve ../shader-reveal-transition"
+  },
+  "smoothui/shine-text@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/skeleton-loader@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"skeleton\""
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "smoothui/smooth-button@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/social-hover-card@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"popover\""
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/stats-1@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
+  },
+  "smoothui/stats-2@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/8"
+  },
+  "smoothui/switchboard-card@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/2"
+  },
+  "smoothui/team-1@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/team-1@any — https://smoothui.dev/r/team-1.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/team-2@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/team-2@any — https://smoothui.dev/r/team-2.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/testimonials-1@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/testimonials-1@any — https://smoothui.dev/r/testimonials-1.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/testimonials-2@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/testimonials-2@any — https://smoothui.dev/r/testimonials-2.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/testimonials-3@any": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED smoothui/testimonials-3@any — https://smoothui.dev/r/testimonials-3.json: UNRESOLVED_REGISTRY_DEP @/lib/smoothui-data"
+  },
+  "smoothui/text-morph@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "smoothui/theme-toggle@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"switch\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "smoothui/tilt-card@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 2,
+   "of": 2
+  },
+  "smoothui/top-down-letters@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "smoothui/tweet-card@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"embed\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "smoothui/typewriter-text@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
   },
   "smoothui/user-account-avatar@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"avatar\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/10"
   },
   "smoothui/video-modal@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
+  },
+  "smoothui/wallet-card@any": {
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve @/components/smoothui/smooth-button"
   },
   "smoothui/warped-circle-transition@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "broken",
+   "why": "UNRESOLVED_IMPORT: index.tsx: cannot resolve ../sdf-blob-transition"
+  },
+  "smoothui/wave-text@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
   }
  }
 }

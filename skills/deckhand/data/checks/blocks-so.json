@@ -1,110 +1,153 @@
 {
  "version": 1,
  "registry": "blocks-so",
- "deckhand": "2.3.0",
+ "deckhand": "2.3.2",
  "verdicts": {
   "blocks-so/command-menu-01@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"command\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "blocks-so/command-menu-02@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"command\""
+   "v": "fits",
+   "needs": [
+    "@tabler/icons-react",
+    "cmdk",
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "blocks-so/command-menu-03@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"command\""
+   "v": "fits",
+   "needs": [
+    "@tabler/icons-react",
+    "cmdk",
+    "cn"
+   ],
+   "carried": 1,
+   "of": 1
   },
   "blocks-so/command-menu-04@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"command\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
   },
   "blocks-so/dashboard-01@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dashboard\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED blocks-so/dashboard-01@any — https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/dashboard-01.json: UNRESOLVED_REGISTRY_DEP @/components/dashboard-01/customers-table"
   },
   "blocks-so/dialog-01@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
   },
   "blocks-so/dialog-02@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
   },
   "blocks-so/dialog-03@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "blocks-so/dialog-04@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "blocks-so/dialog-05@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
   },
   "blocks-so/dialog-06@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
   },
   "blocks-so/dialog-07@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
   },
   "blocks-so/dialog-08@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
   },
   "blocks-so/dialog-09@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "blocks-so/dialog-10@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "blocks-so/dialog-11@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
   },
   "blocks-so/dialog-12@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"dialog\""
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 3,
+   "of": 3
   },
   "blocks-so/grid-list-01@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/4"
   },
   "blocks-so/grid-list-02@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "blocks-so/grid-list-03@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"background\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
   },
   "blocks-so/login-01@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 7
   },
   "blocks-so/login-02@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 7
   },
   "blocks-so/login-03@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 7
   },
   "blocks-so/login-04@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 6,
    "of": 7
   },
   "blocks-so/login-05@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 7
   },
@@ -125,51 +168,66 @@
    "why": "POOR_FIT: has no place for your form"
   },
   "blocks-so/sidebar-01@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED blocks-so/sidebar-01@any — https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/sidebar-01.json: UNRESOLVED_REGISTRY_DEP @/components/sidebar-01/app-sidebar"
   },
   "blocks-so/sidebar-02@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED blocks-so/sidebar-02@any — https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/sidebar-02.json: UNRESOLVED_REGISTRY_DEP @/components/sidebar-02/app-sidebar"
   },
   "blocks-so/sidebar-03@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED blocks-so/sidebar-03@any — https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/sidebar-03.json: UNRESOLVED_REGISTRY_DEP @/components/sidebar-03/app-sidebar"
   },
   "blocks-so/sidebar-04@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED blocks-so/sidebar-04@any — https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/sidebar-04.json: UNRESOLVED_REGISTRY_DEP @/components/sidebar-04/app-sidebar"
   },
   "blocks-so/sidebar-05@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED blocks-so/sidebar-05@any — https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/sidebar-05.json: UNRESOLVED_REGISTRY_DEP @/components/sidebar-05/app-sidebar"
   },
   "blocks-so/sidebar-06@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"sidebar\""
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED blocks-so/sidebar-06@any — https://raw.githubusercontent.com/ephraimduncan/blocks/main/public/r/sidebar-06.json: UNRESOLVED_REGISTRY_DEP @/components/sidebar-06/app-sidebar"
   },
   "blocks-so/stats-01@any": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 8,
    "of": 8
   },
   "blocks-so/stats-02@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 8
   },
   "blocks-so/stats-03@any": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 8,
    "of": 8
   },
   "blocks-so/stats-04@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 8
   },
   "blocks-so/stats-05@any": {
    "v": "fits",
+   "needs": [
+    "cn"
+   ],
    "carried": 8,
    "of": 8
   },
@@ -181,7 +239,9 @@
   "blocks-so/stats-07@any": {
    "v": "partial",
    "needs": [
-    "recharts"
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
    ],
    "carried": 7,
    "of": 8
@@ -189,20 +249,27 @@
   "blocks-so/stats-08@any": {
    "v": "partial",
    "needs": [
-    "recharts"
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
    ],
    "carried": 7,
    "of": 8
   },
   "blocks-so/stats-09@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 5,
    "of": 8
   },
   "blocks-so/stats-10@any": {
    "v": "partial",
    "needs": [
-    "recharts"
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
    ],
    "carried": 5,
    "of": 8
@@ -214,18 +281,26 @@
   "blocks-so/stats-12@any": {
    "v": "partial",
    "needs": [
-    "recharts"
+    "cn",
+    "recharts",
+    "recharts@3.8.0"
    ],
    "carried": 7,
    "of": 8
   },
   "blocks-so/stats-13@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 8
   },
   "blocks-so/stats-14@any": {
    "v": "partial",
+   "needs": [
+    "cn"
+   ],
    "carried": 4,
    "of": 8
   },
@@ -235,24 +310,24 @@
    "of": 8
   },
   "blocks-so/table-01@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "blocks-so/table-02@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "blocks-so/table-03@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/6"
   },
   "blocks-so/table-04@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/6"
   },
   "blocks-so/table-05@any": {
-   "v": "unchecked",
-   "why": "no owner section of kind \"table\""
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/6"
   }
  }
 }

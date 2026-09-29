@@ -1,7 +1,7 @@
 {
  "version": 1,
  "registry": "tailark-oss",
- "deckhand": "2.3.0",
+ "deckhand": "2.3.2",
  "verdicts": {
   "tailark-oss/dusk-call-to-action-1@base-ui": {
    "v": "partial",
@@ -349,6 +349,14 @@
    "carried": 4,
    "of": 4
   },
+  "tailark-oss/dusk-hero-section-7-header@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED tailark-oss/dusk-hero-section-7-header@base-ui — gh: UNRESOLVED_IMPORTS registry/bases/base/dusk/blocks/hero-section/seven/header.tsx | https://oss-tailark.com/r/dusk-hero-section-7-heade"
+  },
+  "tailark-oss/dusk-hero-section-7-header@radix": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED tailark-oss/dusk-hero-section-7-header@radix — gh: UNRESOLVED_IMPORTS registry/bases/radix/dusk/blocks/hero-section/seven/header.tsx | https://oss-tailark.com/r/radix/dusk-hero-section-7-"
+  },
   "tailark-oss/dusk-hero-section-7@base-ui": {
    "v": "fits",
    "needs": [
@@ -366,6 +374,14 @@
    ],
    "carried": 4,
    "of": 4
+  },
+  "tailark-oss/dusk-hero-section-8-header@base-ui": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED tailark-oss/dusk-hero-section-8-header@base-ui — gh: UNRESOLVED_IMPORTS registry/bases/base/dusk/blocks/hero-section/header.tsx | https://oss-tailark.com/r/dusk-hero-section-8-header: fet"
+  },
+  "tailark-oss/dusk-hero-section-8-header@radix": {
+   "v": "broken",
+   "why": "FETCH_FAILED: FETCH_FAILED tailark-oss/dusk-hero-section-8-header@radix — gh: UNRESOLVED_IMPORTS registry/bases/radix/dusk/blocks/hero-section/header.tsx | https://oss-tailark.com/r/radix/dusk-hero-section-8-header"
   },
   "tailark-oss/dusk-hero-section-8@base-ui": {
    "v": "refused",
