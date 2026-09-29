@@ -75,7 +75,7 @@ class Scaffold(Base):
         reach(self.root, "plan")
 
     def leftovers(self):
-        return sorted(p.name for p in self.root.parent.iterdir() if p.name.startswith(".") and "deckhand-" in p.name)
+        return sorted(p.name for p in self.root.parent.iterdir() if "deckhand-" in p.name or p.name.startswith("dh-scaffold-"))
 
     def test_F8_scaffold_into_the_shells_own_folder_keeps_the_folder(self):
         # `dh next` prints `dh scaffold --to .`: the folder was emptied, then rmdir'd (POSIX) or crashed (Windows)
