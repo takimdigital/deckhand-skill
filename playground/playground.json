@@ -1,0 +1,13 @@
+{
+  "what": "Deckhand try-on playground: scaffold + default compose (source only)",
+  "deckhand": "2.3.2",
+  "sections": [
+    "magicui-bento-grid",
+    "magicui-hero-video-dialog",
+    "tailark-oss-dusk-call-to-action-1",
+    "tailark-oss-dusk-faqs-1",
+    "tailark-oss-dusk-hero-section-1-header",
+    "tailark-oss-mist-footer-1",
+    "tailark-oss-mist-pricing-1"
+  ]
+}

@@ -105,7 +105,7 @@ class Coherence(unittest.TestCase):
         # lost its workflow_dispatch trigger this way on 2026-09-29); such a command goes in a `run: |` block
         wf = Path(__file__).resolve().parents[1] / ".github" / "workflows"
         bad = [f"{f.name}:{i}" for f in sorted(wf.glob("*.yml")) for i, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1)
-               if (m := re.match(r"^\s*(?:- )?run:\s+(?![|>'\"])(.*)$", line)) and ": " in m.group(1)]
+               if (m := re.match(r"^\s*(?:- )?(?:run|name):\s+(?![|>'\"])(.*)$", line)) and ": " in m.group(1)]
         self.assertEqual(bad, [])
 
     def test_readme_test_counts_are_true(self):

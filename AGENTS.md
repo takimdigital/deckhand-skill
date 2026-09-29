@@ -13,7 +13,9 @@ This repository is an agent skill. If your harness does not load `SKILL.md` fold
 
 Working ON this repository (not with it):
 - Tests: `python3 -m unittest discover -s skills/deckhand/tests` · `python3 -m pytest skills/deckhand/ops/tests -q`
-  · `node --test skills/deckhand/tryon/test/*.test.mjs` (offline; registry responses are fixtures).
+  · `node --test skills/deckhand/tryon/test/*.test.mjs` (offline; registry responses are fixtures)
+  · `node --test playground/playground.test.mjs`. `playground/` is a saved, source-only try-on test site (see its README):
+    `node playground/playground.mjs restore` then `start` instead of building a site from scratch.
 - Stdlib-only Python, zero-dependency Node (the only vendored code is `tryon/vendor/babel-parser.cjs`, MIT).
 - Every behaviour change ships with a test; a fix that lives only in prose is not a fix.
 - `python3 scripts/version_check.py` before tagging; `python3 scripts/leak_sweep.py` before publishing.
