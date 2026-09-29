@@ -15,7 +15,7 @@ BASE = os.environ.get("COOLIFY_URL", "http://127.0.0.1:8000")   # tunnel it: ssh
 
 def load(path):
     env = {}
-    for line in open(path):
+    for line in open(path, encoding="utf-8"):
         m = re.match(r"export (\w+)=['\"]?(.*?)['\"]?$", line.rstrip())
         if m:
             env[m.group(1)] = m.group(2)

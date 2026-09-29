@@ -25,11 +25,14 @@ def sitemap_path(root: Path) -> Path:
 
 def init(root: Path, force: bool = False) -> dict:
     root = Path(root)
+    from . import state as STATE
+    s = STATE.load(root, required=False) or {}
+    skipped = (s.get("phases", {}).get("research") or {}).get("status") == "skipped"
     made = []
     for name in ("sitemap.json", "research.json", "brief.json"):
         dst = root / ".deckhand" / name
-        if dst.exists() and not force:
-            continue
+        if dst.exists() and not force or name == "research.json" and skipped:
+            continue                                     # an empty research template reads as research that was done
         src = SKILL / "templates" / name
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")

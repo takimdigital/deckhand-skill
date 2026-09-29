@@ -413,12 +413,13 @@ def dispatch(a):
         if c != "adopt":                                 # adopt is a read-only analysis, allowed at define
             STATE.require(root, "build")                 # no clone before G1
         who = PR.scope()                                 # the planning folder's: for me, or for a client
+        to = (root / a.to) if a.to else None             # a relative --to is the project's, never the shell's cwd
         if c == "clone":
-            out = B.clone(a.template, Path(a.to), do_install=not a.no_install)
+            out = B.clone(a.template, to, do_install=not a.no_install)
         elif c == "adopt":
-            out = B.adopt(a.source, Path(a.to) if a.to else None, do_install=a.install)
+            out = B.adopt(a.source, to, do_install=a.install)
         else:
-            out = B.scaffold(Path(a.to), a.pm)
+            out = B.scaffold(to, a.pm)
         if not B.planning_folder(root):                  # run from inside another business: nothing of it comes along
             return out
         if who == "client":                              # the app folder keeps the client's own layer too

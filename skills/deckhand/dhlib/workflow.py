@@ -350,10 +350,11 @@ def score(row: dict, f: dict) -> tuple:
 def query(brief: dict, opts: dict, top: int = 3, refresh: bool = False) -> dict:
     f = _facet(brief, opts)
     minlv = opts.get("min_level") or "draft"
-    out = []
+    out, seen = [], 0
     for r in rows(refresh):
         if LEVELS.index(r.get("level", "draft")) < LEVELS.index(minlv):
             continue
+        seen += 1
         s, why, miss = score(r, f)
         if s <= 0:
             continue
@@ -362,7 +363,7 @@ def query(brief: dict, opts: dict, top: int = 3, refresh: bool = False) -> dict:
                              + (f", on {', '.join(r['harnesses'])}" if r.get("harnesses") else ""),
                     "reasons": why, "missing": miss, "steps": r["steps"]})
     out.sort(key=lambda x: (-x["score"], x["ref"]))
-    return {"for": f, "top": out[:top], "considered": len(out),
+    return {"for": f, "top": out[:top], "considered": seen, "matched": len(out),
             "say": ("show the owner these paths (title, proof, what is missing) and let them pick one — or none: "
                     "we start fresh and draft a new workflow as we go") if out else
                    "no workflow fits: follow `dh next`; at the end `dh workflow new --from-run` turns this run into one",

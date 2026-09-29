@@ -16,7 +16,7 @@ OUT = os.path.expanduser("~/.vps-ops/secrets/b2-scoped.env.sh")
 
 def load(path):
     env = {}
-    for line in open(path):
+    for line in open(path, encoding="utf-8"):
         m = re.match(r"export (\w+)=['\"]?(.*?)['\"]?$", line.rstrip())
         if m:
             env[m.group(1)] = m.group(2)
@@ -82,7 +82,7 @@ def main():
     if "applicationKeyId" not in k:
         print("KEY FAILED:", json.dumps(k)[:300]); sys.exit(1)
 
-    with open(OUT, "w", newline="\n") as f:   # LF only — CRLF env files break restic/S3 tooling
+    with open(OUT, "w", newline="\n", encoding="utf-8") as f:   # LF only — CRLF env files break restic/S3 tooling
         f.write("# B2 scoped app key — vault copy. NEVER commit, NEVER echo.\n")
         f.write(f"export B2_APP_KEY_ID='{k['applicationKeyId']}'\n")
         f.write(f"export B2_APP_KEY='{k['applicationKey']}'\n")

@@ -52,7 +52,7 @@ class Base(unittest.TestCase):
         return code, json.loads(buf.getvalue().strip().splitlines()[-1])
 
     def git(self, *args, root=None):
-        return subprocess.run(["git", *args], cwd=root or self.root, capture_output=True, text=True, check=True).stdout
+        return subprocess.run(["git", *args], cwd=root or self.root, capture_output=True, text=True, check=True, encoding="utf-8").stdout
 
     def repo(self):
         self.git("init", "-q", "-b", "main")

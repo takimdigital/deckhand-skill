@@ -27,7 +27,7 @@ class ResolveTests(unittest.TestCase):
     def test_env_beats_config__config_fills__missing_is_loud(self):
         with tempfile.TemporaryDirectory() as td:
             cfg = Path(td) / "config.json"
-            cfg.write_text(json.dumps({"coolify_url": "http://cfg:8000", "coolify_token": "cfg-tok"}))
+            cfg.write_text(json.dumps({"coolify_url": "http://cfg:8000", "coolify_token": "cfg-tok"}), encoding="utf-8")
             # env wins over config
             url, tok = ca.resolve(env={"COOLIFY_URL": "http://env:8000", "COOLIFY_TOKEN": "env-tok"}, home=td)
             self.assertEqual((url, tok), ("http://env:8000", "env-tok"))
@@ -44,7 +44,7 @@ class ResolveTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             sec = Path(td) / "secrets"
             sec.mkdir()
-            (sec / "env.sh").write_text('export COOLIFY_TOKEN="tok-from-file"\n')
+            (sec / "env.sh").write_text('export COOLIFY_TOKEN="tok-from-file"\n', encoding="utf-8")
             url, tok = ca.resolve(url_override="http://x:8000", env={}, home=td)
             self.assertEqual(tok, "tok-from-file")
 

@@ -90,11 +90,11 @@ class Library(unittest.TestCase):
         self.site = self.tmp / "levain"
         self.site.mkdir()
         subprocess.run(["git", "init", "-q"], cwd=self.site)
-        (self.site / "package.json").write_text('{"name": "maison-levain", "scripts": {"dev": "next dev", "build": "next build"}, "dependencies": {"next": "16"}}')
+        (self.site / "package.json").write_text('{"name": "maison-levain", "scripts": {"dev": "next dev", "build": "next build"}, "dependencies": {"next": "16"}}', encoding="utf-8")
         (self.site / "app").mkdir()
-        (self.site / "app" / "page.tsx").write_text("export default () => <h1>Maison Levain — sourdough in Lyon</h1>\n")
-        (self.site / ".gitignore").write_text(".env\n")
-        (self.site / ".env").write_text("SECRET=1\n")
+        (self.site / "app" / "page.tsx").write_text("export default () => <h1>Maison Levain — sourdough in Lyon</h1>\n", encoding="utf-8")
+        (self.site / ".gitignore").write_text(".env\n", encoding="utf-8")
+        (self.site / ".env").write_text("SECRET=1\n", encoding="utf-8")
         write_json(self.site / ".deckhand" / "brief.json", {"shape": "catalogue", "features": ["ordering"], "brand": {"name": "Maison Levain"}})
         write_json(self.site / ".deckhand" / "sitemap.json", {"pages": [{"route": "/"}, {"route": "/menu"}]})
         write_json(self.site / ".deckhand" / "verify.json", {"ok": True, "at": "2026-09-25", "rows": [{"check": "build", "ok": True}]})
@@ -110,21 +110,21 @@ class Library(unittest.TestCase):
 
     def test_secrets_block_the_push_then_a_clean_base_lands_private_indexed_syncable_clonable(self):
         (self.site / "lib").mkdir()
-        (self.site / "lib" / "pay.ts").write_text('export const key = "sk_live_' + "a1B2c3D4e5F6g7H8i9J0" + '"\n')
+        (self.site / "lib" / "pay.ts").write_text('export const key = "sk_live_' + "a1B2c3D4e5F6g7H8i9J0" + '"\n', encoding="utf-8")
         subprocess.run(["git", "add", "-A"], cwd=self.site)
         with self.assertRaises(DhError) as e:
             harvest.harvest(self.site, "bakery-base", push=True)
         self.assertEqual(e.exception.code, "SECRETS_IN_BASE")
         self.assertEqual(e.exception.extra["files"], ["lib/pay.ts:1"])
         self.assertEqual(MockGitHub.repos, {})                                  # nothing left the machine
-        (self.site / "lib" / "pay.ts").write_text("export const key = process.env.STRIPE_KEY\n")
+        (self.site / "lib" / "pay.ts").write_text("export const key = process.env.STRIPE_KEY\n", encoding="utf-8")
         subprocess.run(["git", "add", "-A"], cwd=self.site)
 
         r = harvest.harvest(self.site, "bakery-base", push=True)
         self.assertEqual(r["pushed"]["repo"], "maison/deckhand-base-bakery-base")
         self.assertTrue(MockGitHub.repos["maison/deckhand-base-bakery-base"]["private"])
         self.assertTrue(r["proven"]["verify"] and r["proven"]["live"])
-        log = subprocess.run(["git", "--git-dir", str(self.tmp / "gh" / "maison/deckhand-base-bakery-base.git"), "log", "--oneline", "main"], capture_output=True, text=True).stdout
+        log = subprocess.run(["git", "--git-dir", str(self.tmp / "gh" / "maison/deckhand-base-bakery-base.git"), "log", "--oneline", "main"], capture_output=True, text=True, encoding="utf-8").stdout
         self.assertIn("base: bakery-base", log)
         lib = json.loads(MockGitHub.files[("maison/deckhand-library", "library.json")][0])
         self.assertEqual([b["name"] for b in lib["bases"]], ["bakery-base"])
@@ -139,7 +139,7 @@ class Library(unittest.TestCase):
         top = pool.query({"shape": "catalogue", "features": ["ordering"]}, 1)["top"][0]
         self.assertEqual((top["name"], top["source"]), ("bakery-base", "mine"))
         c = build.clone("bakery-base", self.tmp / "new-site", do_install=False)
-        page = (self.tmp / "new-site" / "app" / "page.tsx").read_text()
+        page = (self.tmp / "new-site" / "app" / "page.tsx").read_text(encoding="utf-8")
         self.assertIn("Bakery Base", page)
         self.assertNotIn("Maison Levain", page)
         self.assertFalse((self.tmp / "new-site" / ".env").exists())

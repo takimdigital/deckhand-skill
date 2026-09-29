@@ -125,7 +125,7 @@ class FirstUse(Base):
         code, out = self.dh(self.a, "vault", "list")
         self.assertNotIn("machine-value-333", out["shell"])
         if shutil.which("bash") and os.name != "nt":
-            r = subprocess.run(["bash", "-c", out["shell"] + '; printf %s "$RESEND_API_KEY"'], capture_output=True, text=True)
+            r = subprocess.run(["bash", "-c", out["shell"] + '; printf %s "$RESEND_API_KEY"'], capture_output=True, text=True, encoding="utf-8")
             self.assertEqual(r.stdout, "re_shop_a_value_111")
 
 

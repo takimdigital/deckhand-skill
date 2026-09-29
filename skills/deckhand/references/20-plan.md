@@ -8,7 +8,7 @@ thing and exactly where it leads, every form's success AND failure, every featur
 - `pages[]`: `id, route, title, auth (public|user|admin), purpose, sections[], actions[], modals[],
   features[], data (bool), states[] (empty|loading|error for data pages), terminal (bool), entry (bool),
   chrome (false = no global nav)`.
-- `sections[]`: `id, slot (hero|features|pricing|faq|cta|testimonials|logo-cloud|stats|team|contact|footer|…),
+- `sections[]`: `id, slot (navbar|hero|features|pricing|faq|cta|testimonials|logo-cloud|stats|team|contact|footer|…),
   actions[]` — the slot vocabulary is shared with try-on and compose.
 - `actions[]`: `id, label, to` + for calls `then` (what the user sees on success) and `error` (on failure).
   Target grammar: `route:/path` · `anchor:#section` · `modal:<id>` · `api:METHOD /path` · `external:https://…`
@@ -47,3 +47,8 @@ company's address or insurance.
 Write `.deckhand/copy.json` now if `path=scratch` (it feeds `dh compose`): per section slot
 `{heading, text[], actions[{label, href}], items[{title, text, price, bullets[], action}]}`, owner's
 language(s), claims only from the brief/research — anything unconfirmed goes to PENDING.
+The consumers also read `eyebrow`, `navbar.links[{label, href}]`, `footer.columns[{title, links[]}]`,
+`footer.social[]` and `form: true` (`tryon/compose.mjs`, `tryon/lib/sitelinks.mjs`) — include them where the
+section needs them. Key the map by slot, so two pages that would share a slot need distinct keys (e.g. `terms`,
+`privacy`) instead of colliding on one block. `state:<page>.<state>` targets are not lint-checked: declare the
+page's `states[]` yourself so the target cannot point nowhere.

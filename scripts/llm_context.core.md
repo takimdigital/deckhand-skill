@@ -174,8 +174,8 @@ registries (https, cached in ~/.deckhand/cache/tryon) ─▶ materialize ─▶ 
    (dh-managed files excluded: [[dhlib/resume.py#MANAGED]]) or a failure newer than the last note has no known fix.
 16. Gates pass on the owner's words. Phased `dh gate pass` needs `--quote` ([[!NEED_QUOTE]]); a quote that reads as a
    change request is refused ([[dhlib/state.py#classify_quote]], [[!CHANGE_REQUEST]]) and points at `dh reopen`. A go the
-   owner holds back ("don't ship it", "wait, do not proceed", "this is not good": [[dhlib/state.py#HOLD_RX]]) is a change
-   request; a go with a change passes only when the go is explicit ("G1 ok, but…", "approved, but…":
+   owner holds back ("don't ship it", "wait, do not proceed", "this is not good": [[dhlib/state.py#HOLD_RX]]) is not a go
+   either: with no change words it is refused as [[!HOLD]] ([[dhlib/state.py#is_hold]]: wait and ask, never reopen); a go with a change passes only when the go is explicit ("G1 ok, but…", "approved, but…":
    [[dhlib/state.py#STRONG_RX]]) — a bare "ok but add a blog page" is a change. In doubt, the gate asks again.
 17. Workflows are data an AI runs: [[dhlib/workflow.py#lint]] refuses private calls, user paths, secrets, unknown dh
    commands (checked against the real parser) and, for base/community, anything off the allow-list; `use` shows every
@@ -214,7 +214,8 @@ F2 BUILD PATHS (run.json.path)
   - NOTICE written; .env seeded with LOCAL secrets only ([[dhlib/build.py#seed_env]]);
   - base recorded.
 - existing: `dh adopt PATH|URL` ([[dhlib/build.py#adopt]]); history kept.
-- scratch: `dh scaffold` ([[dhlib/build.py#scaffold]]: create-next-app + [[templates/scaffold]] tokens/cn/Button) →
+- scratch: `dh scaffold` ([[dhlib/build.py#scaffold]]: create-next-app in a sibling, moved in so `--to .` never removes
+  the shell's folder; a relative `--to` is the project's; + [[templates/scaffold]] tokens/cn/Button) →
   `dh compose` (F3).
 - `--to` another folder than the planning one: the app folder continues the SAME run ([[dhlib/build.py#carry_run]]:
   brief, sitemap, plan, gates, notes; logs and the settings layer stay, [[dhlib/profile.py#carry]] moves that); the

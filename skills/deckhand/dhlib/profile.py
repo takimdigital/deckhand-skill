@@ -554,7 +554,13 @@ def doctor(online: bool = True) -> dict:
     missing_fields = [k for k in ("owner.name", "defaults.mode", "defaults.hosting") if _get(prof, k) is None]
     asks = []
     if not caps["coolify"]["ok"]:
-        asks.append("Coolify: dashboard → Keys & Tokens → API tokens → create (root) → `dh vault set COOLIFY_TOKEN`")
+        if not ct:
+            asks.append("Coolify: dashboard → Keys & Tokens → API tokens → create (root) → `dh vault set COOLIFY_TOKEN`")
+        if not cu:
+            asks.append("Coolify: the dashboard's address → `dh profile set coolify.url=https://…`")
+        if cu and ct and online:
+            asks.append(f"Coolify: {cu} did not accept COOLIFY_TOKEN ({caps['coolify']['evidence']}) → check the address, "
+                        "or create a new root token")
     if not caps["cloudflare"]["ok"]:
         asks.append("Cloudflare: My Profile → API Tokens → Create (Zone.DNS:Edit + Email Routing) → `dh vault set CLOUDFLARE_API_TOKEN`")
     pp = project_profile_path()

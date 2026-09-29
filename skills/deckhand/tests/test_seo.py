@@ -80,12 +80,12 @@ class Base(unittest.TestCase):
         return b
 
     def next_app(self):
-        (self.root / "package.json").write_text(json.dumps({"name": "shop", "dependencies": {"next": "16.3.6", "react": "19"}}))
-        (self.root / "tsconfig.json").write_text(json.dumps({"compilerOptions": {"paths": {"@/*": ["./*"]}}}))
+        (self.root / "package.json").write_text(json.dumps({"name": "shop", "dependencies": {"next": "16.3.6", "react": "19"}}), encoding="utf-8")
+        (self.root / "tsconfig.json").write_text(json.dumps({"compilerOptions": {"paths": {"@/*": ["./*"]}}}), encoding="utf-8")
         (self.root / "app" / "about").mkdir(parents=True)
-        (self.root / "app" / "layout.tsx").write_text(LAYOUT)
-        (self.root / "app" / "page.tsx").write_text("export default function Home() { return <main><h1>Maison Pain</h1></main>; }\n")
-        (self.root / "app" / "about" / "page.tsx").write_text('import type { Metadata } from "next";\n\nexport const metadata: Metadata = {\n  title: "Our bakers",\n};\n\nexport default function About() { return <h1>About</h1>; }\n')
+        (self.root / "app" / "layout.tsx").write_text(LAYOUT, encoding="utf-8")
+        (self.root / "app" / "page.tsx").write_text("export default function Home() { return <main><h1>Maison Pain</h1></main>; }\n", encoding="utf-8")
+        (self.root / "app" / "about" / "page.tsx").write_text('import type { Metadata } from "next";\n\nexport const metadata: Metadata = {\n  title: "Our bakers",\n};\n\nexport default function About() { return <h1>About</h1>; }\n', encoding="utf-8")
         write_json(self.root / ".deckhand" / "sitemap.json", {"pages": [{"route": "/", "title": "Home"}, {"route": "/about", "title": "About us"},
                                                                          {"route": "/account", "title": "Account", "auth": "user"}]})
 
@@ -95,7 +95,7 @@ class OwnerFacts(Base):
         state.init(self.root, "Maison Pain", path="scratch")
         self.brief()
         rep = SEO.audit(self.root, write=True)
-        pending = (self.root / "PENDING.md").read_text()
+        pending = (self.root / "PENDING.md").read_text(encoding="utf-8")
         self.assertIn("## Detected by `dh seo`", pending)
         self.assertIn("P-SEO-domain · ACTION NEEDED", pending)
         self.assertIn("P-SEO-seo.local.hours · ACTION NEEDED", pending)
@@ -106,10 +106,10 @@ class OwnerFacts(Base):
         self.assertIn("SEO readiness not measured yet", pending)
         # the owner answers two facts; the first-asked date of the others survives the refresh
         lines = [(l[:-10] + "2026-01-02") if l.startswith("- [ ] P-SEO-seo.local.email ") else l for l in pending.splitlines()]
-        (self.root / "PENDING.md").write_text("\n".join(lines) + "\n")
+        (self.root / "PENDING.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
         self.brief(domain="maisonpain.fr", seo__local__hours=["Mo-Sa 07:00-19:00"])
         SEO.audit(self.root, write=True)
-        pending = (self.root / "PENDING.md").read_text()
+        pending = (self.root / "PENDING.md").read_text(encoding="utf-8")
         self.assertNotIn("P-SEO-domain", pending)
         self.assertNotIn("P-SEO-seo.local.hours", pending)
         self.assertIn("P-SEO-search_console · ACTION NEEDED", pending)            # domain known → verify it in Search Console
@@ -245,17 +245,17 @@ class ApplyAndPaths(Base):
         code, out = self.dh("seo", "apply")
         self.assertEqual(code, 0, out)
         self.assertGreater(out["score"], a["score"])
-        layout = (self.root / "app/layout.tsx").read_text()
+        layout = (self.root / "app/layout.tsx").read_text(encoding="utf-8")
         self.assertIn("template: `%s — ${SITE.name}`", layout)
         self.assertNotIn('canonical: "/"', layout)                                  # the inherited canonical is gone
         self.assertIn('<html lang="en">', layout)
         self.assertIn("<JsonLd data={JSON_LD} />", layout)
-        about = (self.root / "app/about/page.tsx").read_text()
+        about = (self.root / "app/about/page.tsx").read_text(encoding="utf-8")
         self.assertIn('title: "Our bakers"', about)                                 # the owner's words stay
         self.assertIn('alternates: { canonical: "/about" }', about)
-        robots = (self.root / "app/robots.ts").read_text()
+        robots = (self.root / "app/robots.ts").read_text(encoding="utf-8")
         self.assertIn('"/account"', robots)                                        # signed-in pages are not crawled
-        site = (self.root / "lib/seo.ts").read_text()
+        site = (self.root / "lib/seo.ts").read_text(encoding="utf-8")
         self.assertIn('"https://maisonpain.fr"', site)
         self.assertIn('"Bakery"', site)
         key = read_json(self.root / ".deckhand" / "brief.json")["seo"]["indexnow_key"]

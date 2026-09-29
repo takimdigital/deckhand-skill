@@ -171,11 +171,11 @@ class Brand(Base):
         super().setUp()
         subprocess.run(["git", "init", "-q"], cwd=self.root)
         (self.root / "app").mkdir()
-        (self.root / "package.json").write_text('{"name": "next-saas-starter", "version": "1.0.0"}\n')
-        (self.root / "app" / "layout.tsx").write_text('export const metadata = { title: "Next SaaS Starter", description: "The best starter" };\nexport default function L({children}){return <html lang="en"><body>{children}</body></html>}\n')
-        (self.root / "app" / "globals.css").write_text(":root {\n  --primary: oklch(0.2 0 0);\n}\n")
-        (self.root / "app" / "page.tsx").write_text('export default function P(){return <main><h1>Next SaaS Starter</h1><p>Lorem ipsum dolor sit amet</p></main>}\n')
-        (self.root / "LICENSE").write_text("MIT License — Next SaaS Starter authors\n")
+        (self.root / "package.json").write_text('{"name": "next-saas-starter", "version": "1.0.0"}\n', encoding="utf-8")
+        (self.root / "app" / "layout.tsx").write_text('export const metadata = { title: "Next SaaS Starter", description: "The best starter" };\nexport default function L({children}){return <html lang="en"><body>{children}</body></html>}\n', encoding="utf-8")
+        (self.root / "app" / "globals.css").write_text(":root {\n  --primary: oklch(0.2 0 0);\n}\n", encoding="utf-8")
+        (self.root / "app" / "page.tsx").write_text('export default function P(){return <main><h1>Next SaaS Starter</h1><p>Lorem ipsum dolor sit amet</p></main>}\n', encoding="utf-8")
+        (self.root / "LICENSE").write_text("MIT License — Next SaaS Starter authors\n", encoding="utf-8")
         state.init(self.root, "Bakery", "auto", "pool")
         s = state.load(self.root)
         s["base"] = {"kind": "template", "name": "next-saas-starter", "repo": "someone/next-saas-starter"}
@@ -190,17 +190,17 @@ class Brand(Base):
         self.assertTrue({"template-name", "demo-content"} <= kinds)
         brand.apply(self.root)
         self.assertEqual(read_json(self.root / "package.json")["name"], "maison-levain")
-        lay = (self.root / "app" / "layout.tsx").read_text()
+        lay = (self.root / "app" / "layout.tsx").read_text(encoding="utf-8")
         self.assertIn('title: "Maison Levain"', lay)
         self.assertIn('description: "Sourdough in Lyon"', lay)
-        self.assertIn("--primary: #b45309;", (self.root / "app" / "globals.css").read_text())
+        self.assertIn("--primary: #b45309;", (self.root / "app" / "globals.css").read_text(encoding="utf-8"))
         self.assertTrue((self.root / "app" / "icon.svg").exists())
-        self.assertIn("Next SaaS Starter", (self.root / "LICENSE").read_text())          # the licence is never rewritten
+        self.assertIn("Next SaaS Starter", (self.root / "LICENSE").read_text(encoding="utf-8"))          # the licence is never rewritten
         left = {f["kind"] for f in brand.check(self.root)["findings"] if f["severity"] == "block"}
         self.assertEqual(left, {"demo-content", "lorem"})                                 # lorem ipsum is content work, not a rename
 
     def test_demo_copy_blocks_but_ai_written_copy_the_owner_saw_labelled_only_warns(self):
-        (self.root / "app" / "page.tsx").write_text("export default function P(){return <main><h1>Maison Levain</h1><p>Talk to Sales</p><p>Fresh every morning</p></main>}\n")
+        (self.root / "app" / "page.tsx").write_text("export default function P(){return <main><h1>Maison Levain</h1><p>Talk to Sales</p><p>Fresh every morning</p></main>}\n", encoding="utf-8")
         write_json(self.root / ".deckhand" / "demo-copy.json", {"entries": [
             {"file": "app/page.tsx", "text": "Talk to Sales"}, {"file": "app/page.tsx", "text": "Fresh every morning", "ai": True}]})
         f = {x["kind"]: x["severity"] for x in brand.check(self.root, allow=("template-name",))["findings"] if x["file"] == "app/page.tsx"}
@@ -215,7 +215,7 @@ class Learn(Base):
         r = learn.run_cmd(self.root, [sys.executable, "-c", "import sys; print('Module not found: Can\\'t resolve \\'./logo.tsx.tsx\\''); sys.exit(1)"])
         self.assertFalse(r["ok"])
         self.assertTrue(any("as:" in k["fix"] or "`as`" in k["fix"] for k in r["known_fixes"]))
-        fails = (self.root / ".deckhand" / "failures.jsonl").read_text()
+        fails = (self.root / ".deckhand" / "failures.jsonl").read_text(encoding="utf-8")
         self.assertIn("tsx.tsx", fails)
 
     def test_from_failure_then_preflight_then_promote(self):
@@ -229,7 +229,7 @@ class Learn(Base):
         self.assertTrue(any("ZZ_WIDGET" in l for l in learn.preflight(self.root, "build")))
         props = learn.promote(self.root)["proposals"]
         self.assertEqual(len(props), 1)
-        self.assertIn("references/30-build.md", Path(props[0]["proposal"]).read_text())
+        self.assertIn("references/30-build.md", Path(props[0]["proposal"]).read_text(encoding="utf-8"))
 
 
 class Ops(Base):
@@ -240,13 +240,13 @@ class Ops(Base):
         self.assertNotIn("low-stock", ids)
         r = ops.add(self.root, "watchdog", "github")
         self.assertTrue((self.root / "ops" / "bots" / "watchdog.py").exists())
-        wf = (self.root / ".github" / "workflows" / "deckhand-watchdog.yml").read_text()
+        wf = (self.root / ".github" / "workflows" / "deckhand-watchdog.yml").read_text(encoding="utf-8")
         self.assertIn("*/15 * * * *", wf)
         self.assertIn("actions/cache@v4", wf)
         self.assertIn("secrets.COOLIFY_TOKEN", wf)
         self.assertIn("gh workflow run deckhand-watchdog.yml", r["verify_by_its_own_trigger"])
         app = ops.add(self.root, "booking-reminder", "cron")
-        self.assertIn("NotImplementedError", (self.root / "ops" / "bots" / "booking_reminder.py").read_text())
+        self.assertIn("NotImplementedError", (self.root / "ops" / "bots" / "booking_reminder.py").read_text(encoding="utf-8"))
         self.assertIn("crontab", app["verify_by_its_own_trigger"])
 
     def test_watchdog_runs_and_reports_down(self):
@@ -255,7 +255,7 @@ class Ops(Base):
         env = {**os.environ, "SITE_URLS": "http://127.0.0.1:9/", "BOT_STATE_DIR": str(self.tmp / "state")}
         for k in ("TELEGRAM_BOT_TOKEN", "DISCORD_WEBHOOK_URL", "NOTIFY_WEBHOOK_URL", "SMTP_URL", "COOLIFY_URL", "VPS_SSH"):
             env.pop(k, None)
-        p = subprocess.run([sys.executable, str(self.root / "ops" / "bots" / "watchdog.py")], env=env, capture_output=True, text=True, timeout=60)
+        p = subprocess.run([sys.executable, str(self.root / "ops" / "bots" / "watchdog.py")], env=env, capture_output=True, text=True, timeout=60, encoding="utf-8")
         self.assertEqual(p.returncode, 1)
         self.assertIn("DOWN", p.stdout)
 
@@ -297,12 +297,12 @@ class Verify(Base):
     def test_routes_are_proved_on_the_production_build_which_is_stopped_after(self):
         from dhlib import verify
         (self.root / "package.json").write_text(json.dumps({"name": "shop", "private": True, "scripts": {
-            "build": "node -e \"require('fs').writeFileSync('built.txt','ok')\"", "start": "node server.js"}}))
+            "build": "node -e \"require('fs').writeFileSync('built.txt','ok')\"", "start": "node server.js"}}), encoding="utf-8")
         (self.root / "server.js").write_text(
             "require('http').createServer((q, s) => { const ok = q.url === '/' || q.url === '/menu';"
             " s.writeHead(ok ? 200 : 404, {'content-type': 'text/html'}); s.end(ok ? '<a href=\"/menu\">Menu</a>' : 'no'); })"
-            ".listen(Number(process.env.PORT));")
-        (self.root / ".gitignore").write_text(".env\n")
+            ".listen(Number(process.env.PORT));", encoding="utf-8")
+        (self.root / ".gitignore").write_text(".env\n", encoding="utf-8")
         write_json(self.root / ".deckhand" / "sitemap.json", {"pages": [{"route": "/"}, {"route": "/menu"}, {"route": "/order"}]})
         rep = verify.run_verify(self.root, skip=("audit",))
         routes = next(r for r in rep["rows"] if r["check"] == "routes")
@@ -337,15 +337,15 @@ class Profile(Base):
 class Harvest(Base):
     def test_project_becomes_a_private_base_with_brand_neutralised(self):
         subprocess.run(["git", "init", "-q"], cwd=self.root)
-        (self.root / "package.json").write_text('{"name": "maison-levain", "dependencies": {"next": "16"}}')
-        (self.root / "page.tsx").write_text("export default () => <h1>Maison Levain bakes daily</h1>")
-        (self.root / ".env").write_text("SECRET=1")
-        (self.root / ".gitignore").write_text(".env\n")
+        (self.root / "package.json").write_text('{"name": "maison-levain", "dependencies": {"next": "16"}}', encoding="utf-8")
+        (self.root / "page.tsx").write_text("export default () => <h1>Maison Levain bakes daily</h1>", encoding="utf-8")
+        (self.root / ".env").write_text("SECRET=1", encoding="utf-8")
+        (self.root / ".gitignore").write_text(".env\n", encoding="utf-8")
         write_json(self.root / ".deckhand" / "brief.json", {"shape": "catalogue", "features": ["accounts"], "brand": {"name": "Maison Levain"}})
         r = harvest.harvest(self.root, "bakery-base", to=self.tmp / "bases" / "bakery-base")
         dest = Path(r["path"])
         self.assertFalse((dest / ".env").exists())
-        self.assertIn("Bakery Base bakes daily", (dest / "page.tsx").read_text())
+        self.assertIn("Bakery Base bakes daily", (dest / "page.tsx").read_text(encoding="utf-8"))
         man = read_json(dest / "deckhand.template.json")
         self.assertEqual(man["template_names"][0], "Bakery Base")
         self.assertEqual(pool.query({"shape": "catalogue", "features": ["accounts"]}, 1)["top"][0]["name"], "bakery-base")
@@ -353,28 +353,28 @@ class Harvest(Base):
     def test_nothing_of_the_previous_business_reaches_the_next_one_and_its_data_blocks_until_replaced(self):
         # the simulation: client B's site showed client A's phone and owner name, and every check stayed green
         subprocess.run(["git", "init", "-q"], cwd=self.root)
-        (self.root / "package.json").write_text('{"name": "sunny-bakery", "dependencies": {"next": "16"}}')
+        (self.root / "package.json").write_text('{"name": "sunny-bakery", "dependencies": {"next": "16"}}', encoding="utf-8")
         (self.root / "app").mkdir()
         (self.root / "app" / "page.tsx").write_text(
             'export default () => <main className="SunnyBakery"><h1>Sunny Bakery</h1><p>Warm bread before breakfast</p>'
             '<p>Call 06.12.34.56.78 or <a href="tel:+33612345678">+33 6 12 34 56 78</a>, write to orders@sunnybakery.fr or hi@gmail.com</p>'
             '<p>12 rue des Lilas, 69001 Lyon · founded by Amina Haddad</p><a href="https://instagram.com/sunnybakery">Instagram</a>'
-            '<a href="https://www.sunnybakery.fr/menu">Menu</a></main>')
+            '<a href="https://www.sunnybakery.fr/menu">Menu</a></main>', encoding="utf-8")
         (self.root / "data").mkdir()
-        (self.root / "data" / "customers.json").write_text('[{"name": "Claire Martin", "orders": 12}]')
-        (self.root / ".env.example").write_text("RESEND_API_KEY=\n")
+        (self.root / "data" / "customers.json").write_text('[{"name": "Claire Martin", "orders": 12}]', encoding="utf-8")
+        (self.root / ".env.example").write_text("RESEND_API_KEY=\n", encoding="utf-8")
         write_json(self.root / ".deckhand" / "brief.json", {"brand": {"name": "Sunny Bakery", "tagline": "Warm bread before breakfast",
                    "social": ["https://instagram.com/sunnybakery"]}, "domain": "sunnybakery.fr", "owner": {"name": "Amina Haddad"},
                    "seo": {"local": {"phone": "+33 6 12 34 56 78", "email": "orders@sunnybakery.fr",
                                      "address": {"street": "12 rue des Lilas", "postal": "69001", "city": "Lyon"}}}})
         r = harvest.harvest(self.root, "bakery-base", to=self.tmp / "bases" / "bakery-base")
         dest = Path(r["path"])
-        page = (dest / "app" / "page.tsx").read_text()
+        page = (dest / "app" / "page.tsx").read_text(encoding="utf-8")
         for old in ("Sunny", "sunny", "06.12", "612345678", "6 12 34", "orders@", "hi@gmail", "rue des Lilas", "69001", "Amina", "Haddad",
                     "instagram.com/sunnybakery", "sunnybakery.fr", "Warm bread"):
             self.assertNotIn(old, page, old)
         self.assertIn("BakeryBase", page, "the CamelCase spelling becomes the base's")
-        self.assertIn("bakery-base", (dest / "package.json").read_text())
+        self.assertIn("bakery-base", (dest / "package.json").read_text(encoding="utf-8"))
         self.assertTrue((dest / ".env.example").exists(), "an env template with no values is part of a base")
         man = read_json(dest / "deckhand.template.json")
         self.assertEqual([d["path"] for d in man["owner_data"]], ["/".join(("data", "customers.json"))])
@@ -382,7 +382,7 @@ class Harvest(Base):
         kinds = {f["kind"] for f in chk["findings"] if f["severity"] == "block"}
         self.assertFalse(chk["ok"])
         self.assertTrue({"previous-business-data", "demo-content"} <= kinds, kinds)
-        (dest / "data" / "customers.json").write_text("[]")
+        (dest / "data" / "customers.json").write_text("[]", encoding="utf-8")
         self.assertNotIn("previous-business-data", {f["kind"] for f in brand.check(dest)["findings"]})
 
 

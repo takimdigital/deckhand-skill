@@ -267,17 +267,28 @@ def adopt(src: str, to: Path | None = None, do_install: bool = False) -> dict:
 
 
 def scaffold(to: Path, pm: str = "npm") -> dict:
+    """create-next-app wants a folder it creates itself. It builds in a sibling and moves in: `to` is never removed,
+    because it may be the shell's cwd (`--to .`: Windows refuses to rmdir it, POSIX leaves the shell in a deleted
+    folder, and the held Deckhand files were stranded either way)."""
     to = Path(to).resolve()
     held = _hold(to)
-    to.parent.mkdir(parents=True, exist_ok=True)
-    if to.exists() and not any(to.iterdir()):
-        to.rmdir()                                         # create-next-app wants to create it
-    r = run(["npx", "--yes", "create-next-app@latest", str(to), "--ts", "--tailwind", "--app", "--no-eslint", "--no-src-dir",
-             "--import-alias", "@/*", f"--use-{pm}", "--yes", "--disable-git"], timeout=1800)
-    if r["code"] != 0:
-        to.mkdir(parents=True, exist_ok=True)
+    to.mkdir(parents=True, exist_ok=True)
+    fresh = to.parent / f".{to.name}.deckhand-scaffold"
+    rmtree(fresh)
+    try:
+        r = run(["npx", "--yes", "create-next-app@latest", str(fresh), "--ts", "--tailwind", "--app", "--no-eslint", "--no-src-dir",
+                 "--import-alias", "@/*", f"--use-{pm}", "--yes", "--disable-git"], timeout=1800)
+        if r["code"] != 0 or not fresh.is_dir():
+            raise DhError("SCAFFOLD_FAILED", (r["err"] or r["out"] or "create-next-app wrote nothing")[-600:])
+        for p in list(fresh.iterdir()):
+            shutil.move(str(p), str(to / p.name))
+    except Exception:
+        for p in list(to.iterdir()):                       # back to how it was: the held files only
+            rmtree(p) if p.is_dir() else p.unlink()
         _unhold(held, to)
-        raise DhError("SCAFFOLD_FAILED", (r["err"] or r["out"])[-600:])
+        raise
+    finally:
+        rmtree(fresh)
     base = TEMPLATES / "scaffold"
     for rel in ("components/ui/button.tsx", "lib/utils.ts"):
         (to / rel).parent.mkdir(parents=True, exist_ok=True)
@@ -342,7 +353,7 @@ def pinned_port(root: Path, script: str) -> int | None:
 
 def _spawn(argv: list, cwd: Path, log: Path, env: dict):
     log.parent.mkdir(parents=True, exist_ok=True)
-    out = open(log, "w")
+    out = open(log, "w", encoding="utf-8")
     kw = {"cwd": str(cwd), "stdout": out, "stderr": subprocess.STDOUT, "env": env}
     if os.name == "nt":
         kw["creationflags"] = 0x00000008 | 0x00000200          # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
@@ -466,7 +477,7 @@ def _alive(pid) -> bool:
     if not pid:
         return False
     if os.name == "nt":
-        r = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, text=True)
+        r = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, text=True, encoding="utf-8", errors="replace")
         return str(pid) in r.stdout
     try:
         os.kill(pid, 0)
