@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.3.2] — 2026-09-29 — a real field test and a full audit, fixed
 
 ### From the 2026-09-29 field test (docs/field-tests/2026-09-29-report.md)
 - 12 of its 23 findings fixed, each with a test (tests/test_fieldtest_0929.py): `scaffold --to` relative/`.`, a second
