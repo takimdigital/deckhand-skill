@@ -392,13 +392,38 @@ def dh_commands(files: dict, mods: dict) -> tuple:
     cmds: dict = {}
     order: list = []
     cur = None
+    # A flag declared in a loop — `for f in ("--why", ...): p.add_argument(f)` — is part of the surface
+    # too. Without this the extractor dropped every one of them, so LLM_CONTEXT.md under-documented the
+    # surface and the coherence test rejected docs that named a flag that really exists. Kept by line
+    # range, not by variable name: two loops can both say `for f in (...)`.
+    loop_loops: list = []
+    for n in ast.walk(fns["build_parser"]):
+        if isinstance(n, ast.For) and isinstance(n.target, ast.Name) and isinstance(n.iter, (ast.Tuple, ast.List)):
+            vals = [e.value for e in n.iter.elts if isinstance(e, ast.Constant) and isinstance(e.value, str)]
+            if vals:
+                loop_loops.append((n.lineno, getattr(n, "end_lineno", n.lineno), n.target.id, vals))
+    loop_loops.sort()
+
+    def loop_values(lineno, var):
+        """The literal flags of the innermost `for var in (...)` containing this line (else [])."""
+        out: list = []
+        for lo, hi, name, vals in loop_loops:
+            if lo <= lineno <= hi and name == var:
+                out = vals
+        return out
 
     def lit(n):
         return n.value if isinstance(n, ast.Constant) else None
 
-    for st in ast.walk(fns["build_parser"]):
-        call = st.value if isinstance(st, (ast.Assign, ast.Expr)) and isinstance(getattr(st, "value", None), ast.Call) else None
-        if not call or not isinstance(call.func, ast.Attribute):
+    # statements in source order, not ast.walk's BFS order: a nested `for f in (...): p.add_argument(f)`
+    # belongs to the command declared above it, and BFS visits it after every top-level parser — which
+    # put those flags on the wrong command (the last one) instead of their own.
+    stmts = [s for s in ast.walk(fns["build_parser"])
+             if isinstance(s, (ast.Assign, ast.Expr)) and isinstance(getattr(s, "value", None), ast.Call)]
+    stmts.sort(key=lambda s: s.lineno)
+    for st in stmts:
+        call = st.value
+        if not isinstance(call.func, ast.Attribute):
             continue
         if call.func.attr == "add_parser" and call.args and isinstance(lit(call.args[0]), str):
             cur = lit(call.args[0])
@@ -408,8 +433,10 @@ def dh_commands(files: dict, mods: dict) -> tuple:
                 cur = None
         elif call.func.attr == "add_argument" and cur and isinstance(call.func.value, ast.Name) and call.func.value.id == "p":
             name = lit(call.args[0]) if call.args else None
+            names = [name] if name else loop_values(getattr(st, "lineno", -1),
+                                               getattr(call.args[0], "id", "") if call.args else "")
             kw = {k.arg: k.value for k in call.keywords}
-            if name is None or kw.get("default") is not None and isinstance(kw["default"], ast.Attribute):
+            if not names or kw.get("default") is not None and isinstance(kw["default"], ast.Attribute):
                 continue
             choices = [lit(e) for e in getattr(kw.get("choices"), "elts", [])] if isinstance(kw.get("choices"), (ast.List, ast.Tuple)) else None
             if isinstance(kw.get("choices"), ast.Attribute):
@@ -420,14 +447,15 @@ def dh_commands(files: dict, mods: dict) -> tuple:
             action = lit(kw["action"]) if "action" in kw else None
             req = lit(kw["required"]) if "required" in kw else False
             hlp = lit(kw["help"]) if "help" in kw else None
-            if name.startswith("--"):
-                meta = "|".join(map(str, choices)) if choices else name[2:].upper().replace("-", "_")
-                s = name if action == "store_true" else f"{name} {meta}" + (f"={dflt}" if dflt not in (None, "") else "")
-                s = s if req else f"[{s}]"
-            else:
-                meta = "{" + "|".join(map(str, choices)) + "}" if choices else name.upper()
-                s = {"?": f"[{meta}]", "*": f"[{meta}…]", "...": f"[-- {name}…]"}.get(nargs, meta)
-            cmds[cur]["args"].append(s + (f"  # {hlp}" if hlp and hlp != "==SUPPRESS==" else ""))
+            for name in names:
+                if name.startswith("--"):
+                    meta = "|".join(map(str, choices)) if choices else name[2:].upper().replace("-", "_")
+                    s = name if action == "store_true" else f"{name} {meta}" + (f"={dflt}" if dflt not in (None, "") else "")
+                    s = s if req else f"[{s}]"
+                else:
+                    meta = "{" + "|".join(map(str, choices)) + "}" if choices else name.upper()
+                    s = {"?": f"[{meta}]", "*": f"[{meta}…]", "...": f"[-- {name}…]"}.get(nargs, meta)
+                cmds[cur]["args"].append(s + (f"  # {hlp}" if hlp and hlp != "==SUPPRESS==" else ""))
     # dispatch: which module functions each command reaches
     alias = {}
     for n in t.body:

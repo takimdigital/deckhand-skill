@@ -91,6 +91,19 @@ class LlmContext(unittest.TestCase):
         crlf = {p: (L.decode(p, t.replace("\n", "\r\n").encode("utf-8")) if t is not None else None) for p, t in self.files.items()}
         self.assertEqual(L.build(crlf)[0], self.text)
 
+    def test_a_flag_declared_in_a_loop_is_part_of_the_surface(self):
+        """`for f in ("--why", ...): p.add_argument(f)` declares real flags: they must appear in the map —
+        and on their OWN command, not on whichever parser the extraction walked to last."""
+        dh, _ = L.dh_commands(self.files, L.analyze(self.files))
+        args = {c: " ".join(spec["args"]) for c, spec in dh}
+        for f in ("--why", "--how", "--where", "--when", "--rec", "--reason"):
+            self.assertIn(f, args["pending"], f)
+        for f in ("--deliverable", "--industry", "--shape", "--features", "--harness", "--os", "--id",
+                  "--title", "--phase"):
+            self.assertIn(f, args["workflow"], f)
+        for f in ("--why", "--how", "--deliverable", "--industry", "--id"):
+            self.assertNotIn(f, args["tryon"], f)
+
     def test_check_fails_when_stale_and_passes_after_regenerating(self):
         import contextlib
         import io
