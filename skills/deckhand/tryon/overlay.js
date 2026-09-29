@@ -380,6 +380,7 @@
         }
         closePanel();
         startSession(r, 1);
+        if (r.warning) moreNote(r.warning.message);
       }).catch(function (e) { busy = false; go.disabled = false; msg.className = 'err'; msg.textContent = String(e); });
     });
   }

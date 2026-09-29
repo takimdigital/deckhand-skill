@@ -314,6 +314,7 @@ export async function open(rootIn, opts) {
   const orig = extractUnits(code, el, ast);
   const origShape = shapeOf(orig);
   const origCount = contentCount(orig);
+  const warning = emptyUsage(el, orig);
   const catalog = loadCatalog();
   // opts.candidates: an explicit list (an AI draft, alone or beside the registry variants it joins)
   const exclude = opts.exclude || [];
@@ -429,6 +430,7 @@ export async function open(rootIn, opts) {
     id, createdAt: now(), state: 'open', file: rel, line: Number(opts.line), col: Number(opts.col), slot, kind,
     shaBefore: sha(before), shaAfter: sha(Buffer.from(next)), backup: path.relative(root, path.join(bdir, path.basename(rel) + '.orig')).split(path.sep).join('/'),
     shown: 1, origShape, variants, skipped, installed, hidden: ranked.hidden, registry: opts.registry || null,
+    ...(warning ? { warning } : {}),
     // every design this element has been offered or refused (a More continues after them, never repeats them)
     tried: [...new Set((opts.tried || []).concat(exclude, variants.map((v) => v.id), skipped.filter((k) => FINAL_SKIPS.has(k.why)).map((k) => k.id)))],
   };
@@ -924,6 +926,7 @@ export function publicSession(s) {
       idx: v.idx, id: v.id, t: v.t, r: v.r, lic: v.lic, fit: v.fit, deps: v.deps, source: v.sourceUrl, removedChrome: v.removedChrome, generated: !!v.generated,
     }))),
     skipped: s.skipped, installed: s.installed,
+    ...(s.warning ? { warning: s.warning } : {}),
     pool: s.pool || null, max: MAX_VARIANTS,
     // the owner's own words (the overlay's auto-check looks for them on the page when a variant is flagged)
     owner: ((s.variants[0] && s.variants[0].ownerTexts) || []).slice(0, 80).map((t) => String(t).slice(0, 200)),
@@ -959,6 +962,13 @@ export function carryPlanLinks(b, links, orig) {
   }
   b.dropped = keep;
   return b;
+}
+
+/** A usage with nothing inside it (`<Pricing />`): the designs have no words to carry — say where the words are (F21). */
+export function emptyUsage(el, orig) {
+  if (contentCount(orig) > 0 || (orig.inputs && orig.inputs.length) || (el.children && el.children.length)) return null;
+  const tag = jsxName(el.openingElement.name);
+  return { code: 'EMPTY_USAGE', message: `<${tag} /> has no content here — its words live in its own file, so no design can carry them. Open ${tag}'s file and try its outer element instead.` };
 }
 
 export function fitGate(kind, origCount, b) {
@@ -1632,6 +1642,7 @@ export function inspect(rootIn, { file, line, col, slot }) {
     file: rel, line: Number(line), col: Number(col), endLine: lc.line, tag: jsxName(el.openingElement.name),
     content: u.units.map((x) => ({ role: x.role, text: x.text.slice(0, 80), list: x.list })), images: u.images.length, lists: u.lists.length, dynamicLists: u.dynamicLists,
     project: { framework: prof.framework, base: prof.base, tailwind: prof.tailwind, tokens: prof.tokens.primary },
+    ...(emptyUsage(el, u) ? { warning: emptyUsage(el, u) } : {}),
     candidates: r.items.length, hidden: r.hidden, top: r.items.slice(0, 8).map((x) => ({ id: x.id, t: x.t, missing: x.missing })),
   };
 }
