@@ -98,6 +98,8 @@ class ControlPlane(Base):
         self.assertFalse(r["ok"])
         write_json(self.root / ".deckhand" / "verify.json", {"ok": True, "commit": git(self.root, "rev-parse", "HEAD"), "rows": []})
         self.assertTrue(checks.review(self.root, state.load(self.root))["ok"])
+        git(self.root, "add", "-A"); git(self.root, "commit", "-qm", "commit the verify report")       # changes no code
+        self.assertTrue(checks.review(self.root, state.load(self.root))["ok"])
 
     def test_c5_review_cannot_be_forced(self):
         self.dh("init", "--name", "x", "--mode", "auto")
@@ -236,6 +238,97 @@ class TryonAndDocs(Base):
                            env={**os.environ, "HOME": str(self.tmp)})
         self.assertEqual(r.returncode, 2)
         self.assertIn("unknown option", r.stderr)
+
+
+class Round2(Base):
+    """The ten findings the first round left open (fixed 2026-09-29 on Hakim's "fix and push")."""
+
+    def _ship_repo(self):
+        self.dh("init", "--name", "x")
+        git(self.root, "init", "-q")
+        (self.root / "a.txt").write_text("1", encoding="utf-8")
+        git(self.root, "add", "-A"); git(self.root, "commit", "-qm", "one")
+        write_json(self.root / ".deckhand" / "deploy.json", {"app_uuid": "app1", "url": "https://x.example"})
+        write_json(self.root / ".deckhand" / "verify.json", {"ok": True, "commit": git(self.root, "rev-parse", "HEAD"), "rows": []})
+        git(self.root, "add", "-A"); git(self.root, "commit", "-qm", "deckhand files")   # the real flow: verify, then commit it
+
+    def _ship(self, api=(201, {}), rc=0, push=0, smoke_ok=True):
+        from dhlib import deploy
+        real = deploy.run
+        calls = {}
+
+        def run(argv, cwd=None, timeout=900, env=None, check=False):
+            if argv[:2] == ["git", "push"]:
+                return {"cmd": "git push", "code": push, "out": "", "err": "rejected" if push else "", "ms": 0}
+            return real(argv, cwd=cwd, timeout=timeout, env=env, check=check)
+
+        def wait(url, tok, uuid, timeout=900, log=None, expect_commit=None):
+            calls["expect"] = expect_commit
+            return rc
+        with mock.patch.object(deploy, "run", side_effect=run), \
+             mock.patch.object(deploy, "_creds", return_value=("http://c", "t")), \
+             mock.patch.object(deploy.CA, "api", return_value=api), \
+             mock.patch.object(deploy.CA, "wait_for_deploy", side_effect=wait), \
+             mock.patch.object(deploy, "smoke", return_value={"ok": smoke_ok, "evidence": "x"}), \
+             mock.patch("dhlib.seo.ping", return_value={}):
+            try:
+                return deploy.ship(self.root), calls
+            except DhError as e:
+                return e.code, calls
+
+    def test_o3_ship_proves_each_step(self):
+        self._ship_repo()
+        head = git(self.root, "rev-parse", "HEAD")
+        out, calls = self._ship()
+        self.assertTrue(out["ok"], out)
+        self.assertEqual((out["commit"], calls["expect"]), (head, head[:7]))
+        self.assertEqual(read_json(self.root / ".deckhand" / "deploy.json")["last"]["result"], "finished")
+        self.assertEqual(self._ship(push=1)[0], "PUSH_FAILED")
+        self.assertEqual(self._ship(api=(422, {"message": "no"}))[0], "DEPLOY_REJECTED")
+        self.assertEqual(self._ship(rc=3)[0], "DEPLOY_FAILED")
+        self.assertEqual(self._ship(smoke_ok=False)[0], "SMOKE_FAILED")
+        git(self.root, "add", "-A"); git(self.root, "commit", "-qm", "deploy record")    # .deckhand only: still proven
+        (self.root / "a.txt").write_text("dirty", encoding="utf-8")
+        self.assertEqual(self._ship()[0], "DIRTY_TREE")
+        git(self.root, "commit", "-qam", "later")
+        self.assertEqual(self._ship()[0], "VERIFY_STALE")
+
+    def test_o7_envset_reads_secrets_from_a_file_and_never_prints_them(self):
+        env = self.tmp / ".env.production"
+        env.write_text("# comment\nexport DATABASE_URL='postgres://u:p@h/d'\nSTRIPE_SECRET_KEY=sk_live_abc\n\n", encoding="utf-8")
+        self.assertEqual(coolify_api.env_pairs([], env), [{"key": "DATABASE_URL", "value": "postgres://u:p@h/d"},
+                                                          {"key": "STRIPE_SECRET_KEY", "value": "sk_live_abc"}])
+        buf = io.StringIO()
+        a = mock.Mock(uuid="app1", pairs=[], file=str(env))
+        with redirect_stdout(buf), mock.patch.object(coolify_api, "api", return_value=(201, {"echo": "sk_live_abc"})):
+            self.assertEqual(coolify_api.cmd_envset(a, "http://c", "t"), 0)
+        self.assertNotIn("sk_live_abc", buf.getvalue())
+        doc = (SKILL / "references" / "ops" / "30-deploy-app.md").read_text(encoding="utf-8")
+        self.assertNotRegex(doc, r'-d \'\{"data"')
+
+    def test_c7_a_go_put_off_is_no_go_yet(self):
+        for q in ("I'll look at it later, ok?", "fine, let me think about it", "yes I got your message, checking tonight", "ok je regarde ce soir"):
+            self.assertEqual(state.classify_quote(q), "change_request", q)
+            self.assertTrue(state.is_hold(q), q)
+        for q in ("ok", "looks good, go ahead", "oui c'est bon", "perfect, ship it"):
+            self.assertEqual(state.classify_quote(q), "approve", q)
+
+    def test_a5_ordinary_words_are_not_slop(self):
+        for lang, text in (("en", "We place children with foster families and support foster care."),
+                           ("en", "Locked out? We unlock cars and homes within the hour, and draft a last will and testament."),
+                           ("pt", "A alavanca do travão de mão ficou presa: trocamos a peça na hora."),
+                           ("fr", "Livraison au Havre et dans toute la Seine-Maritime."),
+                           ("es", "Potencia: 9 kW. Instalamos la bomba de calor en un día.")):
+            self.assertEqual(slop.analyze(text, slop.load(lang))["verdict"], "clean", (lang, text))
+        self.assertNotEqual(slop.analyze("Our bakery is a testament to tradition. We foster a culture of innovation and "
+                                         "unlock your full potential.", slop.load("en"))["verdict"], "clean")
+
+    def test_a8_bases_deckhand_cannot_run_never_rank(self):
+        for r in pool.rows():
+            fw = (r.get("stack") or {}).get("framework")
+            if (r.get("lane") or "web") == "web" and fw not in vet.WEB_FRAMEWORKS:
+                self.assertTrue(any("framework" in b for b in pool.score(r, {})[2]), r["name"])
+        self.assertNotIn("bagisto", [r["name"] for r in pool.query({"shape": "catalogue"}, top=5)["top"]])
 
 
 if __name__ == "__main__":

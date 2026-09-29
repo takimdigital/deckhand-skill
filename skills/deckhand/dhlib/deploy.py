@@ -74,7 +74,8 @@ def ship(root: Path, force: bool = False, timeout: int = 900) -> dict:
     d = read_json(deploy_path(root), {}) or {}
     if not d.get("app_uuid"):
         raise DhError("NO_TARGET", "first deploy is the runbook (references/ops/30-deploy-app.md), then `dh deploy target --app <uuid> --url <url>`")
-    dirty = run(["git", "status", "--porcelain"], cwd=root)["out"].strip()
+    # deckhand's own records (.deckhand/deploy.json, verify.json…) are not what Coolify builds: they never block a ship
+    dirty = run(["git", "status", "--porcelain", "--", ".", ":(exclude).deckhand"], cwd=root)["out"].strip()
     if dirty:
         raise DhError("DIRTY_TREE", "commit first — Coolify builds what is pushed, not what is on disk", files=dirty.splitlines()[:10])
     head = run(["git", "rev-parse", "HEAD"], cwd=root)["out"].strip()

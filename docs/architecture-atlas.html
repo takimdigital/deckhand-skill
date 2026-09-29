@@ -1216,7 +1216,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td>seo</td><td><span class="tag block">yes</span></td><td>launch-breakers only</td></tr>
 <tr><td>lint · a11y-basics · deps-audit · copy-slop</td><td><span class="tag ok">advisory</span></td><td>reported, never blocks G4</td></tr>
 </table>
-<p class="small muted">Report records git HEAD so <code>dh resume --check</code> can detect drift (verify commit ≠ HEAD → drift). With no URL/build, routes degrades to a non-blocking "not checked" row.</p>
+<p class="small muted">Report records git HEAD so <code>dh resume --check</code> can detect drift (code changed since the verified commit → drift; commits of .deckhand/ alone do not count). With no URL/build, routes degrades to a non-blocking "not checked" row.</p>
 </section>
 
 <!-- ============================================================ 30 -->

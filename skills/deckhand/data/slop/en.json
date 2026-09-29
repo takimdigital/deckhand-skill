@@ -56,11 +56,9 @@
     "strong": [
       "delve",
       "tapestry",
-      "testament",
       "realm",
       "embark",
       "unleash",
-      "unlock",
       "elevate",
       "empower",
       "leverage",
@@ -105,12 +103,12 @@
       "intricate|intricacies",
       "commendable",
       "underscore",
-      "foster",
       "reimagine",
       "unmatched",
       "second-to-none"
     ],
     "buzz": [
+      "unlock",
       "robust",
       "innovative",
       "innovation",
@@ -309,6 +307,22 @@
       "fix": "say the result"
     },
     {
+      "id": "testament-to",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(a|is a|stands as a|serves as a) (true |living )?testament to",
+      "example": "our bakery is a testament to the timeless art of bread",
+      "fix": "proof: say what shows it"
+    },
+    {
+      "id": "foster-abstract",
+      "kind": "filler",
+      "w": 3,
+      "rx": "foster(s|ing)? (a |an )?(sense of|culture of|community|collaboration|growth|innovation|connection|engagement|creativity)",
+      "example": "we foster a culture of innovation",
+      "fix": "say what you do: weekly meetups, shared tools"
+    },
+    {
       "id": "power-of",
       "kind": "filler",
       "w": 3,
@@ -502,6 +516,8 @@
       "Certainly! Here is a hero section for your bakery: Fresh bread, baked daily."
     ],
     "clean": [
+      "We place children with foster families across the county and support foster care for as long as it lasts.",
+      "Locked out? We unlock cars and homes within the hour. We also draft a last will and testament for a fixed fee.",
       "Sourdough, baguettes and croissants, baked every morning from 5 am in Lyon 2e. Order before 8 pm and collect the next day.",
       "We fix leaking taps, blocked drains and broken boilers in Leeds. A call-out costs £60, and most jobs take under an hour.",
       "Book a table online or call 04 72 00 00 00. We are closed on Mondays.",

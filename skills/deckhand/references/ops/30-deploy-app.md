@@ -118,15 +118,17 @@ coolify app env sync <APP_UUID> --file .env.production     # upsert; existing ke
 py ops/scripts/coolify_api.py envs <APP_UUID>                  # verify: prints the key names present
 ```
 
-REST fallback (exact schema — `{"data":[{key,value,(optional) is_preview|is_literal|is_multiline|is_shown_once}]}`):
+Without the coolify CLI: `py ops/scripts/coolify_api.py envset <APP_UUID> --file .env.production` (it prints the key
+names, never the values). REST fallback (exact schema — `{"data":[{key,value,(optional) is_preview|is_literal|is_multiline|is_shown_once}]}`),
+with the body in a file so no secret reaches the command line or shell history:
 
 ```bash
+# envs.json: {"data":[{"key":"DATABASE_URL","value":"…"},{"key":"STRIPE_SECRET_KEY","value":"…"}]}  (gitignored, deleted after)
 curl -sS -X PATCH "$COOLIFY_URL/api/v1/applications/<APP_UUID>/envs/bulk" \
-  -H "Authorization: Bearer $COOLIFY_TOKEN" -H "Content-Type: application/json" \
-  -d '{"data":[{"key":"DATABASE_URL","value":"<url>"},{"key":"STRIPE_SECRET_KEY","value":"<key>"}]}'
+  -H "Authorization: Bearer $COOLIFY_TOKEN" -H "Content-Type: application/json" -d @envs.json
 ```
 
-For one-off **non-secret** values, `py ops/scripts/coolify_api.py envset <APP_UUID> KEY=VALUE` is fine — but never put a secret value on a command line (shell history); secrets go through `--file` or the API only. *(Live-verified: the bulk PATCH answers **201**, not 200 — accept any 2xx; changes apply on the next deploy.)*
+For one-off **non-secret** values, `py ops/scripts/coolify_api.py envset <APP_UUID> KEY=VALUE` is fine — but never put a secret value on a command line (shell history); secrets go through `--file` only. *(Live-verified: the bulk PATCH answers **201**, not 200 — accept any 2xx; changes apply on the next deploy.)*
 
 ## 4. Postgres (skip if the app brings its own DB)
 

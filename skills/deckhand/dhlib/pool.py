@@ -58,6 +58,9 @@ def score(row: dict, brief: dict) -> tuple:
         blockers.append(f"licence {row.get('license')} (permissive licences only: {', '.join(sorted(OK_LICENSES))})")
     if row.get("archived"):
         blockers.append("archived upstream")
+    fw = (row.get("stack") or {}).get("framework")               # measured; a row without a stack is not judged here
+    if fw and (row.get("lane") or "web") == "web" and row.get("source") != "mine" and fw not in VET.WEB_FRAMEWORKS:
+        blockers.append(f"framework {fw}: Deckhand builds, tries on and verifies {', '.join(sorted(VET.WEB_FRAMEWORKS))} apps")
     bad = sorted(SECURITY_RISKS & set(row.get("risks") or []))
     if bad:
         blockers.append(f"security: {', '.join(bad)} (see data/pool/{row.get('name')}.json)")

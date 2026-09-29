@@ -144,7 +144,7 @@ class Resume(Base):
         code, out = self.dh("resume", "--check")
         self.assertEqual((code, out["code"]), (1, "DRIFT"))
         bad = {c["claim"]: c["detail"] for c in out["claims"] if not c["ok"]}
-        self.assertIn("1 commit(s) since the last `dh verify`", bad["verify still describes the code"])
+        self.assertIn("1 file(s) changed since the verify", bad["verify still describes the code"])
         self.assertIn("brief.json", bad["the approved plan is the current plan"])
 
     def test_verify_records_the_commit_it_proved(self):

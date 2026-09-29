@@ -99,3 +99,14 @@ test('Y6: theme --undo refuses to throw away an edit made after the apply, unles
   themeApply(dir, { accent: 'teal' });
   assert.equal(themeUndo(dir).mode, 'byte-exact');             // untouched since: undoes as before
 });
+
+test('A7: a refused registry is refused by name from a mirror too, and the repo must be the one serving the index', async () => {
+  const { refusedFor, repoInUrl } = await import('../lib/vet.mjs');
+  assert.equal(refusedFor('https://raw.githubusercontent.com/someone/shadcn-studio/main/public/r/registry.json', 'shadcn-ui/ui').id, 'shadcn-studio');
+  assert.equal(refusedFor('https://mirror.example/r/registry.json', 'someone/animate-ui').id, 'animate-ui');
+  assert.equal(refusedFor('https://shadcnstudio.com/r/registry.json').id, 'shadcn-studio');
+  assert.equal(refusedFor('https://raw.githubusercontent.com/tailark/tailark-oss/main/r/registry.json', 'tailark/tailark-oss'), undefined);
+  assert.equal(repoInUrl('https://raw.githubusercontent.com/a/b/main/registry.json'), 'a/b');
+  assert.equal(repoInUrl('https://cdn.jsdelivr.net/gh/a/b@main/registry.json'), 'a/b');
+  assert.equal(repoInUrl('https://ui.example/registry.json'), null);
+});

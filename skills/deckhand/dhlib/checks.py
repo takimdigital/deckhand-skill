@@ -105,11 +105,18 @@ def tryon(root: Path, s: dict) -> dict:
 
 
 def verify_stale(root: Path, r: dict) -> str:
-    """A green verify proves one commit; a later commit (a reopened phase, a quick fix) is unproven."""
+    """A green verify proves one commit; code committed after it (a reopened phase, a quick fix) is unproven.
+    Committing deckhand's own files (.deckhand/: run.json, verify.json, VERIFY.md) changes no code."""
     from .util import run
     vc = (r or {}).get("commit")
     head = run(["git", "rev-parse", "HEAD"], cwd=root)["out"].strip() if vc else ""
-    return f"verify proved {vc[:7]}, the code is now at {head[:7]}" if vc and head and vc != head else ""
+    if not vc or not head or vc == head:
+        return ""
+    d = run(["git", "diff", "--name-only", vc, "HEAD", "--", ".", ":(exclude).deckhand"], cwd=root)
+    if d["code"] != 0:
+        return f"verify proved {vc[:7]}, which this repository no longer has"
+    files = d["out"].split()
+    return f"{len(files)} file(s) changed since the verify of {vc[:7]} ({', '.join(files[:4])})" if files else ""
 
 
 def review(root: Path, s: dict) -> dict:

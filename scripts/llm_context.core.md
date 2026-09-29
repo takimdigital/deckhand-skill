@@ -714,7 +714,7 @@ F19 RESEARCH EVIDENCE
 - Registry HTTP comes from [[skills/deckhand/tryon/test/fixtures/registry]] (DH_FIXTURES; re-record with DH_RECORD).
   GitHub is a local mock API plus file:// remotes (DH_GITHUB_API/DH_GITHUB_GIT).
   The fixture site is [[skills/deckhand/tryon/test/fixtures/site]].
-- CI: [[.github/workflows/ci.yml]] runs every suite on Ubuntu and Windows (Windows non-blocking), plus the version
+- CI: [[.github/workflows/ci.yml]] runs every suite on Ubuntu and Windows (both blocking), plus the version
   check, plus `llm_context.py --check` off main.
   [[.github/workflows/llm-context.yml]] regenerates this file on main when it drifts.
 - Hooks: `git config core.hooksPath .githooks` once per clone. [[.githooks/pre-commit]] then regenerates this file

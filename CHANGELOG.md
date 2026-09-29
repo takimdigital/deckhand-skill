@@ -29,6 +29,18 @@
 - `dh verify` row `tryon-unwired`: next/vite config that still loads try-on from `.deckhand/` (a deploy from git fails).
 - install.ps1 is ASCII (Windows PowerShell 5.1 misread it) and removes a `-Link` junction without emptying the clone;
   install.sh refuses unknown options. 30-build.md: `dh learn preflight --phase build`.
+- Compose stages candidates apart and moves the winner to a new folder: it never clears a section folder another page,
+  a kept try-on or the owner's edits live in. `theme --undo`, `tryon seo undo` and `dh seo undo` refuse (`FILE_CHANGED`)
+  when a file was edited after the apply; `--force` undoes anyway.
+- A go put off is no go yet: "ok, I'll look later", "let me think about it", "je regarde ce soir" hold the gate.
+- `dh deploy ship` has tests for every step; commits of `.deckhand/` files alone (verify.json, deploy.json) neither
+  dirty the tree nor make the verify stale. `coolify_api.py envset --file` takes secrets from a dotenv file and prints
+  key names only; the runbook's REST example reads its body from a file.
+- Releases publish only from a commit on main with CI green on Ubuntu and Windows; Windows CI now blocks.
+- A refused registry is refused by name from a mirror or CDN too, and a vetted registry's repo must be the one
+  serving its index. Pool bases Deckhand cannot build or try on (Laravel, FastAPI, Wasp) no longer rank.
+- Slop packs: "foster care", "unlock cars", "last will and testament", "alavanca", "Le Havre", "Potencia: 9 kW" and
+  打造 are ordinary words again ("a testament to", "foster a culture of" stay caught as phrases).
 
 ## [2.3.1] — 2026-09-29 — the pipeline does what its docs say
 

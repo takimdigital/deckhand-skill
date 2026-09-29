@@ -416,9 +416,10 @@ def check(root: Path, online: bool = False) -> dict:
     v = read_json(dk / "verify.json", None)
     if v and s["phases"]["review"]["status"] == "done":
         vc = v.get("commit")
-        if vc and head and vc != head:
-            n = _git(root, "rev-list", "--count", f"{vc}..HEAD") or "?"
-            claim("verify still describes the code", False, f"{n} commit(s) since the last `dh verify` — run it again before shipping")
+        from .checks import verify_stale
+        stale = verify_stale(root, v) if vc and head and vc != head else ""
+        if stale:
+            claim("verify still describes the code", False, f"{stale} — run `dh verify` again before shipping")
         else:
             later = [f for f in st["dirty"] if (root / f).exists() and (root / f).stat().st_mtime > _ts(v.get("at")) + 1]
             claim("verify still describes the code", bool(v.get("ok")) and not later,

@@ -201,6 +201,10 @@ CHANGE_RX = re.compile(r"(?i)\b(change|make it|instead|but|however|add|remove|re
 
 # a go the owner holds back is no go: "don't ship it", "wait, do not proceed", "this is not good"
 HOLD_RX = re.compile(r"(?i)(\b(don'?t|do not|does not|doesn'?t|not|never|no|nope|wait|hold|stop|non|pas|attends?|arr[êe]te)\b|n't\b)")
+# …and a go put off is no go yet: "ok, I'll look later", "fine, let me think about it", "yes got it, checking tonight"
+DELAY_RX = re.compile(r"(?i)\b(later|tonight|tomorrow|this (evening|weekend)|next week|(let me|i'?ll|i will|need to) (think|check|look|see|review|read)|"
+                      r"think(ing)? (about|it over)|checking|get back to you|haven'?t (looked|read|seen|checked)|(will|to) (look|check)|"
+                      r"plus tard|ce soir|demain|je (vais )?regarde|je v[ée]rifie|m[áa]s tarde|ma[ñn]ana|luego|sp[äa]ter|morgen)\b")
 # …except the negations that are themselves a go: "no changes", "no problem", "pas de souci"
 NO_PROBLEM_RX = re.compile(r"(?i)\b(no (problem|worries|changes?|issues?|notes?)|nothing (to (change|add)|else)|pas de (souci|probl[eè]me|changement))\b")
 # a go explicit enough to carry a change with it ("G1 ok, but add a pricing page"); a bare "ok but add…" is a change
@@ -212,7 +216,7 @@ def classify_quote(quote: str) -> str:
     is a change request: a gate asks again rather than passing on a "no"."""
     q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
     ok, change = bool(APPROVE_RX.search(q)), bool(CHANGE_RX.search(q))
-    if not ok or HOLD_RX.search(q):
+    if not ok or HOLD_RX.search(q) or DELAY_RX.search(q):
         return "change_request"
     if not change:
         return "approve"
@@ -223,7 +227,7 @@ def is_hold(quote: str) -> bool:
     """The owner holds it back ("wait", "don't ship it yet", "hold on, give me a day") without asking for a change:
     the answer is to wait, never to reopen and redo a phase they did not question (SKILL invariant 7)."""
     q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
-    return bool(HOLD_RX.search(q)) and not CHANGE_RX.search(re.sub(r"(?i)\b(not|pas) (yet|encore)\b", " ", q))
+    return bool(HOLD_RX.search(q) or DELAY_RX.search(q)) and not CHANGE_RX.search(re.sub(r"(?i)\b(not|pas) (yet|encore)\b", " ", q))
 
 
 def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -> dict:
