@@ -1,7 +1,9 @@
 # 30 — BUILD (four ways in, one running app)
 
 **Objective:** a project folder with its own history that runs locally and implements the plan.
-**Output:** `dh dev start` answers; `dh phase done build` green. **Gate G2:** the owner opens the URL and says go.
+**Output:** `dh dev start` answers; `dh phase done build` green. It probes the app's root and every public static
+page of the plan (each must answer under 400) and looks for the `<form>` of every planned form (pages drawn by
+JavaScript are left to `dh verify`). **Gate G2:** the owner opens the URL and says go.
 
 ## Entry by path
 | path | command | notes |
