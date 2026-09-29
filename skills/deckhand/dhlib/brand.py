@@ -186,7 +186,10 @@ def check(root: Path, allow: tuple = ()) -> dict:
             cache[e["file"]] = norm(fp.read_text(encoding="utf-8", errors="ignore"))
         if norm(e["text"]) in cache[e["file"]]:
             if e.get("kind") == "dead-link":
-                add(e["file"], 1, "dead-link", f"a link from the design goes nowhere ({e['text']}) — point it at a real page or remove it")
+                # one finding per link still on the page, at its own line: fixing one clears one (a footer holds six)
+                for n, line in enumerate(fp.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+                    if norm(e["text"]) in norm(line):
+                        add(e["file"], n, "dead-link", f"a link from the design goes nowhere ({e['text']}) — point it at a real page or remove it")
                 continue
             if e.get("ai"):
                 # an AI draft the owner saw labelled and kept: its own words are flagged for review, not blocked
