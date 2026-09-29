@@ -141,8 +141,11 @@ def resolve_dh(argv: list, root: Path | None) -> list:
     if argv and argv[0] in ("dh", "dh.py"):
         return [sys.executable, me, *argv[1:]]
     if len(argv) > 1 and Path(argv[0]).name.lower() in ("py", "py.exe", "python", "python.exe", "python3", "python3.exe") \
-            and Path(argv[1]).name == "dh.py" and not (Path(root or ".") / argv[1]).exists() and not Path(argv[1]).is_file():
-        return [argv[0], me, *argv[2:]]
+            and Path(argv[1]).name == "dh.py":
+        a1 = Path(argv[1])
+        local = a1 if a1.is_absolute() else Path(root or ".") / a1       # relative to the PROJECT, never the process cwd
+        if not local.is_file():
+            return [argv[0], me, *argv[2:]]
     return argv
 
 

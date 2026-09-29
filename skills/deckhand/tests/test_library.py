@@ -85,7 +85,7 @@ class Library(unittest.TestCase):
         self.srv = http.server.HTTPServer(("127.0.0.1", 0), MockGitHub)
         threading.Thread(target=self.srv.serve_forever, daemon=True).start()
         os.environ["DH_GITHUB_API"] = f"http://127.0.0.1:{self.srv.server_port}"
-        os.environ["DH_GITHUB_GIT"] = (self.tmp / "gh").as_uri()
+        os.environ["DH_GITHUB_GIT"] = (self.tmp / "gh").as_posix()
         profile.vault_set("GITHUB_TOKEN", "tok-123")
         self.site = self.tmp / "levain"
         self.site.mkdir()
