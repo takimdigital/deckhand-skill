@@ -180,7 +180,7 @@ def build_parser():
     p.add_argument("kind", choices=RESUME.KINDS); p.add_argument("text", nargs="+")
     p = sub.add_parser("brief"); p.add_argument("action", choices=["show", "set"]); p.add_argument("pairs", nargs="*")
     p = sub.add_parser("phase"); p.add_argument("action", choices=["done", "skip"]); p.add_argument("phase", choices=STATE.PHASE_IDS)
-    p.add_argument("--reason"); p.add_argument("--force", help="record done despite a red check (the reason is kept and shown)")
+    p.add_argument("--reason"); p.add_argument("--force", nargs="?", const="", help="record done despite a red check; needs a reason (--force \"why\" or --reason), kept and shown")
     p = sub.add_parser("gate"); p.add_argument("action", choices=["pass"]); p.add_argument("gate"); p.add_argument("--note", default="")
     p.add_argument("--quote", help="the owner's own words, verbatim (required in phased mode; a change request re-opens instead)")
     p = sub.add_parser("reopen"); p.add_argument("phase", choices=STATE.PHASE_IDS); p.add_argument("--reason", required=True)
@@ -220,7 +220,7 @@ def build_parser():
     p.add_argument("--env-file", help="add: KEY=VALUE file loaded into the service's environment (e.g. .env)")
     p = sub.add_parser("suggest", help="what the owner could do next, by importance (optional) · dismiss ID [--days N]")
     p.add_argument("action", nargs="?", choices=["list", "dismiss"], default="list"); p.add_argument("id", nargs="?")
-    p.add_argument("--all", action="store_true", help="every suggestion, dismissed ones included"); p.add_argument("--days", type=int, default=7)
+    p.add_argument("--all", action="store_true", help="every suggestion, dismissed ones included"); p.add_argument("--days", type=int, default=7, help="dismiss for 1..365 days")
     p = sub.add_parser("workflow", help="proven paths: query (top 3) · use · next steps · todo · step · show · list · lint · new --from-run · save · publish · sync")
     p.add_argument("action", choices=["query", "use", "show", "todo", "step", "list", "lint", "new", "save", "publish", "sync", "status"])
     p.add_argument("target", nargs="?", help="a workflow ref (id, id@v, mine:|base:|community:id, or a .json file) · a step id for `step`")
@@ -245,7 +245,7 @@ def build_parser():
     p.add_argument("--buzz", action="store_true", help="add: a weaker word (use sparingly), not a strong tell")
     p.add_argument("--phrase", action="store_true"); p.add_argument("--fix", default="", help="add: the plainer word to use instead")
     p = sub.add_parser("swap"); p.add_argument("action", choices=["scan", "check"])
-    p = sub.add_parser("verify"); p.add_argument("--url"); p.add_argument("--skip", default=""); p.add_argument("--allow", default="")
+    p = sub.add_parser("verify"); p.add_argument("--url"); p.add_argument("--skip", default=""); p.add_argument("--allow", default=""); p.add_argument("--reason", default="", help="why rows are skipped (recorded; without it a skipped blocking row keeps the report red)")
 
     p = sub.add_parser("deploy"); p.add_argument("action", choices=["target", "ship", "smoke", "raw"]); p.add_argument("rest", nargs=argparse.REMAINDER)
     p.add_argument("--app"); p.add_argument("--url"); p.add_argument("--force", action="store_true")
@@ -309,7 +309,7 @@ def dispatch(a):
     if c == "phase":
         if a.action == "skip":
             return STATE.phase_skip(root, a.phase, a.reason or "")
-        r = STATE.phase_done(root, a.phase, force_reason=a.force)
+        r = STATE.phase_done(root, a.phase, force_reason=None if a.force is None else (a.force.strip() or (a.reason or "").strip()))
         if not r["ok"]:
             raise DhError("CHECK_FAILED", f"phase {a.phase} is not done yet", check=r["check"])
         return r
@@ -490,7 +490,7 @@ def dispatch(a):
         return r
     if c == "verify":
         from . import verify as V
-        r = V.run_verify(root, a.url, skip=tuple(x for x in a.skip.split(",") if x), allow=tuple(x for x in a.allow.split(",") if x))
+        r = V.run_verify(root, a.url, skip=tuple(x for x in a.skip.split(",") if x), allow=tuple(x for x in a.allow.split(",") if x), skip_reason=a.reason)
         if not r["ok"]:
             raise DhError("VERIFY_FAILED", "blocking rows are red (see .deckhand/VERIFY.md)", **r)
         return r

@@ -171,6 +171,11 @@ def next_step(root: Path) -> dict:
     """`dh next`. Placeholders are written `[x]`, never `<x>`: some harnesses refuse a task that carries `<x>` or `{x}`
     (Hermes `delegate_task`), and these lines are pasted into tasks and RESUME as they are (findings 18, 22)."""
     out = _next_step(root)
+    s = STATE.load(root, required=False)
+    if s and not s.get("moved_to"):
+        drift = STATE.plan_drift(root, s)
+        if drift:
+            out["drift"] = f"the approved plan changed after G1: {', '.join(drift)} — show the owner what changed (`dh resume --check`)"
     if isinstance(out.get("do"), list):
         out["do"] = [ANGLE_RX.sub(r"[\1]", x) for x in out["do"]]
     return out

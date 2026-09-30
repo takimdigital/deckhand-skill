@@ -113,6 +113,11 @@ def add(root: Path | None, what: str, why: str = "", how: str = "", where: str =
                       "store it with `dh vault set NAME` and write the name")
     p = path_for(root, machine)
     text = _read(p)
+    body0 = (f"decide: {what.strip()}" + (f" (rec: {rec})" if rec else "")) if decide else what.strip()
+    same = next((it for it in items(p) if it["open"] and " ".join(it["what"].lower().split()) == " ".join(body0.lower().split())
+                 and (it["project"] or "") == (project or "")), None)
+    if same:                                            # the same ask twice is one ask
+        return {"added": None, "duplicate": same["id"], "file": str(p), "say": f"already open as {same['id']}: {same['what']} — not added again"}
     pid = _next_id(text)
     body = (f"decide: {what.strip()}" + (f" (rec: {rec})" if rec else "")) if decide else what.strip()
     parts = [f"- [ ] {pid} · {body}"] + [f"{k}: {v.strip()}" for k, v in (("WHY", why), ("HOW", how), ("WHERE", where)) if v and v.strip()]
@@ -149,11 +154,12 @@ def close(root: Path | None, pid: str, machine: bool = False, drop_reason: str |
                       "then `dh seo audit` — a hand-closed SEO line would come back at the next audit")
     p = path_for(root, machine)
     text = _read(p)
-    hit = next((it for it in items(p) if it["id"] == pid), None)
+    pid = pid.strip().upper() if pid.strip().lower().startswith("p-") else pid
+    hit = next((it for it in items(p) if it["id"].upper() == pid.upper()), None)
     if not hit:
         raise DhError("NO_SUCH_ITEM", f"{pid} is not in {p}")
     if not hit["open"]:
-        return {"already": "closed", "id": pid}
+        return {"already": "closed", "id": hit["id"]}
     lines = text.splitlines()
     done = hit["raw"].replace("- [ ]", "- [x]", 1).replace("status: open", "status: done").replace("status: waiting-confirm", "status: done")
     done += f" · dropped {today()} · {drop_reason}" if drop_reason else f" · done {today()}"
@@ -164,14 +170,15 @@ def close(root: Path | None, pid: str, machine: bool = False, drop_reason: str |
     else:
         text = text.rstrip("\n") + "\n\n## Done\n" + done + "\n"
     p.write_text(text, encoding="utf-8")
-    return {"closed": pid, "as": "dropped" if drop_reason else "done", "file": str(p)}
+    return {"closed": hit["id"], "as": "dropped" if drop_reason else "done", "file": str(p)}
 
 
 def set_status(root: Path | None, pid: str, status: str, machine: bool = False) -> dict:
     if status not in ("open", "waiting-confirm"):
         raise DhError("BAD_STATUS", "status: open | waiting-confirm")
     p = path_for(root, machine)
-    hit = next((it for it in items(p) if it["id"] == pid and it["open"]), None)
+    pid = pid.strip().upper() if pid.strip().lower().startswith("p-") else pid
+    hit = next((it for it in items(p) if it["id"].upper() == pid.upper() and it["open"]), None)
     if not hit:
         raise DhError("NO_SUCH_ITEM", f"{pid} is not open in {p}")
     lines = _read(p).splitlines()
@@ -179,7 +186,7 @@ def set_status(root: Path | None, pid: str, status: str, machine: bool = False) 
     new = re.sub(r"status:\s*[\w-]+", f"status: {status}", raw) if "status:" in raw else raw + f" · status: {status}"
     lines[hit["line"]] = new
     p.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return {"id": pid, "status": status}
+    return {"id": hit["id"], "status": status}
 
 
 # ------------------------------------------------------------------ the owner's free-form profile notes

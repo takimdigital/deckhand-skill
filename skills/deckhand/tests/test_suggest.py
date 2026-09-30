@@ -112,6 +112,9 @@ class Suggestions(Base):
         state.gate_pass(self.root, "G1", quote="ok go")
         time.sleep(0.01)
         os.utime(self.root / ".deckhand" / "sitemap.json", (time.time() + 60, time.time() + 60))
+        self.assertNotIn("plan-drift", self.ids(limit=0))                              # a touch alone is no change (content hash recorded at the gate)
+        sm["pages"][0]["title"] = "Bakery home, edited"
+        write_json(self.root / ".deckhand" / "sitemap.json", sm)
         self.assertIn("plan-drift", self.ids(limit=0))                                 # the approved plan changed afterwards
 
     def test_pending_reminders_and_deferred_items_that_come_due(self):

@@ -69,7 +69,11 @@ def tryon_hooked(root: Path) -> list:
     return out
 
 
-def run_verify(root: Path, url: str | None = None, skip: tuple = (), allow: tuple = ()) -> dict:
+SKIPPABLE_ROWS = ("typecheck", "lint", "build", "routes", "seo", "slop", "audit", "product-kit")     # names `--skip` understands
+BLOCKING_SKIPPABLE = ("typecheck", "build", "routes", "seo", "product-kit")                          # skipping one is never silent
+
+
+def run_verify(root: Path, url: str | None = None, skip: tuple = (), allow: tuple = (), skip_reason: str = "") -> dict:
     root = Path(root)
     rows = []
 
@@ -194,7 +198,7 @@ def run_verify(root: Path, url: str | None = None, skip: tuple = (), allow: tupl
                     f"{sr['by_verdict']['review']} to review, {sr['by_verdict']['clean']} clean (dh slop check --url)", blocking=False,
                     evidence="\n".join(f"{u['where']} {u['verdict']} {u['score']}/100: " + ", ".join(h["match"] for h in u["hits"][:5]) for u in sr["worst"][:8]) or None)
         else:
-            row("routes", False, "not checked: no build to serve and no running URL (dh dev start, or --url)", blocking=False)
+            row("routes", False, "not checked: no build to serve and no running URL (dh dev start, or --url)", blocking=True)
     finally:
         if prod:
             try:
@@ -217,12 +221,21 @@ def run_verify(root: Path, url: str | None = None, skip: tuple = (), allow: tupl
         m = re.search(r'"high"\s*:\s*(\d+).*?"critical"\s*:\s*(\d+)', r["out"], re.S)
         hi = (int(m.group(1)) + int(m.group(2))) if m else 0
         row("deps-audit", hi == 0, f"{hi} high/critical advisories" if hi else "no high/critical advisories", blocking=False)
+    reason = (skip_reason or "").strip()
+    skipped = []
+    for name in BLOCKING_SKIPPABLE:                      # a blocking row that was skipped is a row nobody proved: shown, never silently green
+        if name not in skip:
+            continue
+        skipped.append(name)
+        rows[:] = [r for r in rows if r["check"] != name]
+        rows.append({"check": name, "ok": bool(reason), "blocking": True, "skipped": True,
+                     "detail": f"skipped by --skip (reason: {reason})" if reason else "skipped by --skip without --reason: not proved, the report stays red"})
     ok = all(r["ok"] for r in rows if r["blocking"])
     head = run(["git", "rev-parse", "HEAD"], cwd=root)["out"].strip() if (root / ".git").exists() else ""
-    report = {"ok": ok, "at": now(), **({"commit": head} if head else {}), "rows": rows}   # `dh resume --check`: still this code?
+    report = {"ok": ok, "at": now(), **({"commit": head} if head else {}), **({"skipped": skipped, "skip_reason": reason} if skipped and reason else {"skipped": skipped} if skipped else {}), "rows": rows}   # `dh resume --check`: still this code?
     write_json(root / ".deckhand" / "verify.json", report)
     md = ["# Verify report", "", f"{'PASS' if ok else 'FAIL'} — {now()}", "", "| check | result | detail |", "|---|---|---|"]
     for r in rows:
-        md.append(f"| {r['check']} | {'ok' if r['ok'] else ('FAIL' if r['blocking'] else 'warn')} | {r['detail']} |")
+        md.append(f"| {r['check']} | {'skipped' if r.get('skipped') else 'ok' if r['ok'] else ('FAIL' if r['blocking'] else 'warn')} | {r['detail']} |")
     (root / ".deckhand" / "VERIFY.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     return report

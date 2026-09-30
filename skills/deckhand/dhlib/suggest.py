@@ -52,9 +52,14 @@ def _dismissed(root: Path) -> dict:
 def dismiss(root: Path, sid: str, days: int = 7) -> dict:
     if not re.match(r"^[a-z0-9][a-z0-9:._-]{1,80}$", sid or ""):
         raise DhError("BAD_ID", "dh suggest dismiss <id from `dh suggest`>")
+    if not isinstance(days, int) or isinstance(days, bool) or not 1 <= days <= 365:
+        raise DhError("BAD_DAYS", "--days must be a whole number of days, 1 to 365")
+    known = {it["id"] for it in compute(root, limit=0, include_dismissed=True).get("items", [])}
+    if sid not in known:
+        raise DhError("BAD_ID", f"no suggestion '{sid}' right now: ids are the ones `dh suggest --all` lists", known=sorted(known)[:20])
     p = Path(root) / ".deckhand" / "suggest.json"
     doc = read_json(p, {}) or {}
-    until = time.strftime("%Y-%m-%d", time.gmtime(time.time() + max(1, days) * 86400))
+    until = time.strftime("%Y-%m-%d", time.gmtime(time.time() + days * 86400))
     doc.setdefault("dismissed", {})[sid] = until
     write_json(p, doc)
     return {"dismissed": sid, "until": until}
@@ -265,9 +270,7 @@ def r_plan_drift(f):
     g1 = (f["s"].get("gates") or {}).get("G1", {})
     if g1.get("status") != "passed":
         return []
-    t = _ts(g1.get("at"))
-    dk = f["root"] / ".deckhand"
-    changed = [n for n in ("sitemap.json", "brief.json") if _mtime(dk / n) > t + 5]
+    changed = STATE.plan_drift(f["root"], f["s"])
     if not changed:
         return []
     return [_item("plan-drift", 68, "The approved plan changed afterwards: re-check what still holds",

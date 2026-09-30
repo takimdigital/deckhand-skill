@@ -402,8 +402,7 @@ def check(root: Path, online: bool = False) -> dict:
                 claim(f"{p} done", False, f"check failed to run: {e}")
     g1 = s["gates"].get("G1", {})
     if g1.get("status") == "passed":
-        t = _ts(g1.get("at"))
-        edited = [f for f in ("brief.json", "sitemap.json") if (dk / f).exists() and (dk / f).stat().st_mtime > t + 1]
+        edited = STATE.plan_drift(root, s)
         claim("the approved plan is the current plan", not edited, f"edited after G1 was passed: {', '.join(edited)} — show the owner" if edited else "")
     if s["phases"]["build"]["status"] == "done":
         url = (read_json(dk / "dev.json", {}) or {}).get("url")
