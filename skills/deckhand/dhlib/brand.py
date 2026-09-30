@@ -13,13 +13,19 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from .util import DhError, git_files, is_text, read_json, slugify
+from .util import DATA, DhError, git_files, is_text, read_json, slugify
 from . import state as STATE
 
+# files deckhand itself writes (they quote the owner's pending questions and gaps): not the site's content
+MANAGED_DOCS = re.compile(r"^(PENDING|HANDOFF|RESUME|AGENTS|CLAUDE)\.md$")
 NEVER = re.compile(r"(^|/)(LICENSE|LICENCE|NOTICE|THIRD_PARTY_NOTICES)(\.[a-z]+)?$|(^|/)(package-lock\.json|pnpm-lock\.yaml|yarn\.lock|bun\.lockb?)$|(^|/)\.deckhand/", re.I)
 DEMO_NAMES = [r"\bAcme( Inc\.?| Corp\.?)?\b", r"\blorem ipsum\b", r"\bdolor sit amet\b", r"\bJohn Doe\b", r"\bJane Doe\b",
               r"\byour company\b", r"\bCompany Name\b", r"\bYour Brand\b", r"\bexample@example\.com\b", r"\bhello@example\.com\b",
               r"(?<![\w+])\+1 ?\(?555\)?", r"\b123 Main St", r"your-domain\.example", r"example\.com/your-profile", r"\bYour tagline\b"]
+# generic labels that are ONLY demo content in TitleCase ("Company Name" as a fill-in); the real label "Company name" is the owner's
+CASE_SENSITIVE = {r"\bCompany Name\b", r"\bYour Brand\b", r"\bYour tagline\b"}
+# a line the owner's own "to be completed" marker sits on is an honest gap, not demo content
+OWNER_GAP = re.compile(r"\[(to be completed|à compléter|a completer)[^\]]*\]", re.I)
 BRAND_LOGO_FILES = re.compile(r"(^|/)(vercel|spotify|supabase|hulu|bolt|beacon|firebase|claude(-ai)?|openai|gemini|slack|figma|linear|twilio|clerk|nvidia|netflix|cisco|stripe|github|lemon-squeezy|laravel|lilly|nike|column|replit|trustpilot|g2|google)\.(tsx|jsx|svg)$", re.I)
 
 
@@ -41,7 +47,7 @@ def _template_names(root: Path) -> list:
 def _iter_text(root: Path):
     for p in git_files(root):
         rel = str(p.relative_to(root)).replace("\\", "/")
-        if NEVER.search(rel) or not p.is_file() or not is_text(p):
+        if NEVER.search(rel) or MANAGED_DOCS.match(rel) or not p.is_file() or not is_text(p):
             continue
         try:
             yield rel, p, p.read_text(encoding="utf-8")
@@ -132,6 +138,65 @@ def apply(root: Path, brand: dict | None = None, dry: bool = False) -> dict:
 DEMO_PATHS = r"(^|/)(db/seed|seeds?/|seed\.|demo/|demo-data|fixtures/|sample-data)"
 
 
+def _vendor_words() -> set:
+    reg = read_json(DATA / "registries.json", {}) or {}
+    out = set()
+    for r in reg.get("registries", []):
+        for k in ("id", "name"):
+            for w in re.split(r"[^A-Za-z0-9]+", str(r.get(k) or "")):
+                if len(w) >= 5 and w.lower() not in ("oss", "shadcn"):
+                    out.add(w.lower())
+    return out
+
+
+def _vendor_logo(text: str, brief: dict, rel: str, root: Path) -> str | None:
+    """A staged section's logo.* still drawing the design vendor's mark: an <svg> (paths) that does not carry the owner's name."""
+    if "<svg" not in text.lower():
+        return None
+    brand = ((brief.get("brand") or {}).get("name") or brief.get("name") or "").strip()
+    if brand and brand.lower() in text.lower():
+        return None
+    if re.search(r"<(Image|img)\b", text):
+        return None
+    hit = next((w for w in sorted(_vendor_words()) if w in text.lower()), None)
+    who = f"the design vendor's ({hit}) " if hit else "the design kit's "
+    return (f"{who}logo is still in this section: replace logo.tsx with the owner's logo (public/ file + <Image>) "
+            "or a text wordmark of the owner's name")
+
+
+def _live_files(root: Path) -> set:
+    """Files reachable from app/ through relative or @/ imports: what a route can render."""
+    root = Path(root)
+    app = next((d for d in ("app", "src/app") if (root / d).is_dir()), None)
+    if not app:
+        return set()
+    base = "src/" if app.startswith("src") else ""
+    exts = ("", ".tsx", ".ts", ".jsx", ".js", "/index.tsx", "/index.ts")
+    seen, todo = set(), [str(p.relative_to(root)).replace("\\", "/") for p in (root / app).rglob("*") if p.is_file() and p.suffix in (".tsx", ".jsx", ".ts", ".js")]
+    while todo:
+        rel = todo.pop()
+        if rel in seen:
+            continue
+        seen.add(rel)
+        try:
+            src = (root / rel).read_text(encoding="utf-8")
+        except Exception:
+            continue
+        for m in re.finditer(r"""from\s+['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]""", src):
+            spec = m.group(1) or m.group(2)
+            if spec.startswith("@/"):
+                cand = base + spec[2:]
+            elif spec.startswith("."):
+                cand = __import__("posixpath").normpath(__import__("posixpath").join(rel.rsplit("/", 1)[0], spec))
+            else:
+                continue
+            for e in exts:
+                if (root / (cand + e)).is_file():
+                    todo.append(cand + e)
+                    break
+    return seen
+
+
 def check(root: Path, allow: tuple = ()) -> dict:
     """Findings with severity: block (fails the gate) | warn."""
     root = Path(root)
@@ -155,16 +220,27 @@ def check(root: Path, allow: tuple = ()) -> dict:
                     add(rel, i, "template-name", line, "warn" if is_doc else "block")
                     break
             for rx in DEMO_NAMES:
-                if re.search(rx, line, re.I) and not rel.endswith((".env.example",)):
+                if OWNER_GAP.search(line) and rx in CASE_SENSITIVE | {r"\byour company\b"}:
+                    continue
+                if re.search(rx, line, 0 if rx in CASE_SENSITIVE else re.I) and not rel.endswith((".env.example",)):
                     add(rel, i, "demo-content", line, "warn" if is_doc else "block")
                     break
-            if "deckhand-placeholder.svg" in line:
-                add(rel, i, "placeholder-image", line, "warn")
+            if "deckhand-placeholder.svg" in line and not is_doc:
+                live = _live_files(root)
+                if rel in live or not live:
+                    add(rel, i, "placeholder-image", line + "  -> put the owner's photo in public/ and point src at it "
+                        "(copy.json hero.image then `dh compose`), or remove this <Image>; never ship the stand-in")
+                else:
+                    add(rel, i, "placeholder-image", line, "warn")
             if "data-dh-demo" in line or "dh-tryon" in line and not rel.startswith(".deckhand"):
                 add(rel, i, "tryon-leftover", line)
         lorem = len(re.findall(r"\b(lorem|ipsum|dolor|amet|consectetur|adipiscing|mollitia|rerum|quisquam|voluptate|dolore|cumque|illo|esse|aliquam|tempor|incididunt)\b", text, re.I))
         if lorem >= 3 and not is_doc:
             add(rel, 1, "lorem", f"{lorem} lorem-ipsum words in this file (placeholder Latin shipped as content)")
+        if re.search(r"(^|/)components/([\w-]+/)*sections/[^/]+/logo\.(tsx|jsx|svg)$", rel):
+            v = _vendor_logo(text, brief, rel, root)
+            if v:
+                add(rel, 1, "vendor-logo", v)
         if BRAND_LOGO_FILES.search(rel) and re.search(r"components/(sections|ui-kit)/", rel):
             add(rel, 1, "third-party-logo", "a registry demo logo shipped as social proof — replace with real clients or remove", "block")
     # a harvested base's previous business: its data files (catalogue, customers, photos) until each is replaced

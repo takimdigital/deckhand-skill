@@ -314,6 +314,20 @@ def adopt(src: str, to: Path | None = None, do_install: bool = False) -> dict:
     return {"project": str(dest), "stack": stack, "install": inst, "next": "dh dev start"}
 
 
+def plain_layout(to: Path) -> bool:
+    """Next 16's `LayoutProps<"/">` is a global that only exists after `next dev/build` generated route types, so a fresh
+    `tsc --noEmit` fails TS2304. A plain children type typechecks from the first minute."""
+    for d in ("app", "src/app"):
+        f = Path(to) / d / "layout.tsx"
+        if f.is_file():
+            s = f.read_text(encoding="utf-8")
+            n = re.sub(r"\}\s*:\s*(Readonly<)?\s*LayoutProps<[^>]*>\s*>?", "}: Readonly<{ children: React.ReactNode }>", s)
+            if n != s:
+                f.write_text(n, encoding="utf-8")
+                return True
+    return False
+
+
 def scaffold(to: Path, pm: str = "npm") -> dict:
     """create-next-app wants a folder it creates itself. It builds in a sibling and moves in: `to` is never removed,
     because it may be the shell's cwd (`--to .`: Windows refuses to rmdir it, POSIX leaves the shell in a deleted
@@ -343,6 +357,7 @@ def scaffold(to: Path, pm: str = "npm") -> dict:
     for rel in ("components/ui/button.tsx", "lib/utils.ts"):
         (to / rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(base / rel, to / rel)
+    plain_layout(to)
     css = to / "app" / "globals.css"
     css.write_text((base / "app" / "globals.css").read_text(encoding="utf-8"), encoding="utf-8")
     deps = ["clsx", "tailwind-merge", "class-variance-authority", "radix-ui", "lucide-react", "tw-animate-css"]
@@ -586,7 +601,11 @@ def dev_start(root: Path, port: int | None = None, wait: int = 180) -> dict:
     script = "dev" if "dev" in (pkg.get("scripts") or {}) else "start"
     log = root / ".deckhand" / "dev.log"
     proc, url, status = serve(root, script, port or pinned_port(root, script) or _free_port(), log, wait)
-    info = {"url": url, "pid": proc.pid, "cmd": proc.cmd, "started": now(), "status": status, **({"services": svc_state} if svc_state else {})}
+    from .util import listener_pid
+    port_ = int(url.rsplit(":", 1)[1])
+    real = listener_pid(port_) if status else None       # `npm run dev` is a wrapper: stop the process that listens
+    info = {"url": url, "pid": real or proc.pid, "wrapper_pid": proc.pid, "cmd": proc.cmd, "started": now(), "status": status,
+            **({"services": svc_state} if svc_state else {})}
     write_json(root / ".deckhand" / "dev.json", info)
     tail = log.read_text(encoding="utf-8", errors="replace")[-1500:]
     if not status or status >= 500:
@@ -597,6 +616,7 @@ def dev_start(root: Path, port: int | None = None, wait: int = 180) -> dict:
 def dev_stop(root: Path) -> dict:
     info = read_json(Path(root) / ".deckhand" / "dev.json", {}) or {}
     stopped, errors = [], []
+    wrapper = info.get("wrapper_pid")
     for name, pid in [("app", info.get("pid"))] + [(n, (v or {}).get("pid")) for n, v in reversed(list((info.get("services") or {}).items()))]:
         if not pid:
             continue
@@ -605,6 +625,11 @@ def dev_stop(root: Path) -> dict:
             stopped.append(name)
         except Exception as e:  # noqa: BLE001
             errors.append(f"{name}: {e}")
+    if wrapper and wrapper != info.get("pid") and stopped:
+        try:
+            kill_tree(wrapper)                           # the npm/cmd wrapper usually ends with its child; if not, it goes too
+        except Exception:  # noqa: BLE001
+            pass
     if not stopped and not errors:
         return {"stopped": False, "reason": "not started by dh"}
     return {"stopped": bool(stopped), "what": stopped, **({"errors": errors} if errors else {}), "pid": info.get("pid")}

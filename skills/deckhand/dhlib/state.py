@@ -8,10 +8,12 @@ the agent never needs to re-read the whole skill to know what to do.
 """
 from __future__ import annotations
 
+import os
 import re
+import time
 from pathlib import Path
 
-from .util import DhError, now, read_json, write_json, append_jsonl, ensure_gitignore, SKILL
+from .util import DhError, now, read_json, write_json, append_jsonl, ensure_gitignore, locked, SKILL
 
 PHASES = [
     {"id": "define", "title": "Define the business and the path", "ref": "references/00-define.md"},
@@ -39,12 +41,30 @@ def state_path(root: Path) -> Path:
 
 def load(root: Path, required: bool = True) -> dict:
     s = read_json(state_path(root))
-    if s is None and state_path(root).exists():         # unreadable is not "no run": gates would stop being enforced
-        raise DhError("RUN_CORRUPT", f"{state_path(root)} is not valid JSON (a merge conflict or a half edit?) — "
-                      "restore it (`git checkout .deckhand/run.json`, or rebuild from .deckhand/history.jsonl); never `dh init` over it")
+    if state_path(root).exists() and not _shaped(s):   # unreadable is not "no run": gates would stop being enforced
+        raise DhError("RUN_CORRUPT", f"{state_path(root)} is not a valid run (bad JSON, a merge conflict or a half edit?) — "
+                      "restore it (`git checkout .deckhand/run.json`, or rebuild from .deckhand/history.jsonl), "
+                      "or `dh init --name …` starts a fresh run and keeps the broken file as run.json.corrupt-<time>")
     if s is None and required:
         raise DhError("NO_RUN", f"no .deckhand/run.json in {root} — start with `dh init`")
     return s
+
+
+def _shaped(s) -> bool:
+    """A run is an object with `phases` and `gates` objects (missing ids are filled in: an older or hand-trimmed file still works)."""
+    if not isinstance(s, dict) or not isinstance(s.get("phases"), dict) or not isinstance(s.get("gates"), dict):
+        return False
+    for k in ("phases", "gates"):
+        if not all(isinstance(v, dict) for v in s[k].values()):
+            return False
+    for p in PHASE_IDS:
+        s["phases"].setdefault(p, {"status": "pending"})
+    for g in GATES:
+        s["gates"].setdefault(g, {"status": "pending"})
+    s.setdefault("name", "?")
+    s.setdefault("mode", "phased")
+    s.setdefault("path", "pool")
+    return True
 
 
 def save(root: Path, s: dict) -> None:
@@ -63,7 +83,14 @@ def init(root: Path, name: str, mode: str = "phased", path: str = "pool", for_: 
     if path not in PATHS:
         raise DhError("BAD_PATH", f"path must be one of {PATHS}")
     root = Path(root)
-    existing = load(root, required=False)
+    try:
+        existing = load(root, required=False)
+    except DhError as e:
+        if e.code != "RUN_CORRUPT":
+            raise
+        existing = None                                 # init is the repair: a fresh run, the broken file kept beside it
+        keep = state_path(root).with_name(f"run.json.corrupt-{time.strftime('%Y%m%dT%H%M%S')}")
+        os.replace(state_path(root), keep)             # kept whole beside the new run
     root.mkdir(parents=True, exist_ok=True)
     ensure_gitignore(root)                              # run logs, RESUME, notes, project vault: never in git
     from . import profile as PROFILE, resume as RESUME
@@ -86,7 +113,10 @@ def init(root: Path, name: str, mode: str = "phased", path: str = "pool", for_: 
     s = {"version": 2, "name": name, "mode": mode, "path": path, "created": now(),
          "phases": {p["id"]: {"status": "pending"} for p in PHASES},
          "gates": {g: {"status": "pending"} for g in GATES}}
-    save(root, s)
+    with locked(root):
+        if load(root, required=False):                  # a parallel init won the race: keep its run
+            return {"created": False, **summary(root, load(root)), "agents": entry["written"]}
+        save(root, s)
     pending = root / "PENDING.md"
     if not pending.exists():
         pending.write_text((SKILL / "templates" / "PENDING.md").read_text(encoding="utf-8").replace("{{NAME}}", name), encoding="utf-8")
@@ -152,6 +182,8 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
         raise DhError("MOVED", f"this project continues in {s['moved_to']} (its app folder): run `dh next` there", to=s["moved_to"])
     if phase not in PHASE_IDS:
         raise DhError("BAD_PHASE", f"phase must be one of {PHASE_IDS}")
+    if force_reason is not None and not str(force_reason).strip():
+        raise DhError("NEED_REASON", "--force records a phase done despite a red check: say why with --reason \"…\" (it is shown to the owner)")
     if force_reason and phase in NOT_SKIPPABLE:
         raise DhError("NOT_FORCEABLE", f"phase {phase} cannot be forced: {NOT_SKIPPABLE[phase]}")
     idx = PHASE_IDS.index(phase)
@@ -159,13 +191,15 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
     result = checks.run(phase, Path(root), s)
     if not result["ok"] and not force_reason:
         return {"ok": False, "phase": phase, "check": result}
-    s["phases"][phase] = {"status": "done", "at": now(), "check": result, **({"forced": force_reason} if not result["ok"] else {}),
-                          **({"evidence": evidence} if evidence else {})}
-    p = PHASES[idx]
-    if p.get("gate") and s["mode"] == "auto":
-        s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "auto"}
-    save(root, s)
-    log(root, {"event": "phase_done", "phase": phase, "ok": result["ok"], "forced": force_reason})
+    with locked(root):                                  # the check ran unlocked (it can build); the write re-reads the newest run
+        s = load(root)
+        s["phases"][phase] = {"status": "done", "at": now(), "check": result, **({"forced": force_reason} if not result["ok"] else {}),
+                              **({"evidence": evidence} if evidence else {})}
+        p = PHASES[idx]
+        if p.get("gate") and s["mode"] == "auto":
+            s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "auto"}
+        save(root, s)
+        log(root, {"event": "phase_done", "phase": phase, "ok": result["ok"], "forced": force_reason})
     summ = summary(root, s)                             # "phase" = the one just done; "now" = where the run stands
     return {"ok": True, **summ, "phase": phase, "now": summ["phase"], "check": result}
 
@@ -181,20 +215,38 @@ def phase_skip(root: Path, phase: str, reason: str) -> dict:
         raise DhError("BAD_PHASE", f"phase must be one of {PHASE_IDS}")
     if phase in NOT_SKIPPABLE:
         raise DhError("NOT_SKIPPABLE", f"phase {phase} cannot be skipped: {NOT_SKIPPABLE[phase]}")
+    if s["phases"][phase]["status"] == "done":
+        raise DhError("ALREADY_DONE", f"phase {phase} is already done (its gate and evidence stay): to redo it use `dh reopen {phase} --reason \"…\"`", phase=phase)
     reached(s, phase)                                   # only the phase the run is at: no skipping ahead
-    s["phases"][phase] = {"status": "skipped", "at": now(), "reason": reason}
-    p = PHASES[PHASE_IDS.index(phase)]
-    if p.get("gate") and s["mode"] == "auto":           # phased: the owner still gives the go (G3 = the brand, try-on or not)
-        s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "skip"}
-    save(root, s)
-    log(root, {"event": "phase_skip", "phase": phase, "reason": reason})
+    with locked(root):
+        s = load(root)
+        s["phases"][phase] = {"status": "skipped", "at": now(), "reason": reason}
+        p = PHASES[PHASE_IDS.index(phase)]
+        if p.get("gate") and s["mode"] == "auto":       # phased: the owner still gives the go (G3 = the brand, try-on or not)
+            s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "skip"}
+        save(root, s)
+        log(root, {"event": "phase_skip", "phase": phase, "reason": reason})
     return summary(root, s)
 
 
-# the owner's own words decide a gate: a go passes it, a change request re-opens the work instead
-APPROVE_RX = re.compile(r"(?i)(^|\b)(go|go ahead|ok|okay|oki|yes|yep|yeah|yup|approved?|approve it|looks (good|great|right|fine)|lgtm|ship( it)?|proceed|continue|"
-                        r"fine|good|great|perfect|agreed|validated?|confirm(ed)?|do it|let'?s go|g[1-4] ok|go live|"
-                        r"oui|d'accord|vas-?y|valid[ée]|parfait|c'est bon|نعم|موافق|s[ií]|vale|adelante|genehmigt|passt)(\b|$)|👍|✅")
+# the owner's own words decide a gate: a go passes it, a change request re-opens the work instead.
+# A quote passes only when, after the polite filler is removed, NOTHING but approval phrases is left: a request after
+# "ok" ("ok, make the hero bigger") is a change request, and anything the classifier does not recognise is one too.
+_APPROVALS = (
+    r"go ahead|go live|go|let'?s go|lets go|ok(?:ay)?|oki|okey|k|kk|yes+|yep|yeah|yup|ya|sure|approved?|approve it|lgtm|ship it|ship|proceed|continue|"
+    r"looks? (?:good|great|right|fine|perfect|nice)|sounds? (?:good|great|perfect|fine)|works? for me|good to go|all good|all set|"
+    r"fine|good|great|perfect|nice|awesome|excellent|amazing|agreed?|validated?|confirm(?:ed)?|do it|love it|loved it|like it|i like it|well done|great job|"
+    r"g[1-4] ok|g[1-4]|"
+    r"oui|ouais|d'accord|dac|vas y|allez|allons y|on y va|valid[ée]e?|parfait|c'est bon|bon|bien|tr[èe]s bien|super|nickel|top|g[ée]nial|impeccable|j'adore|[çc]a marche|"
+    r"s[ií]|vale|adelante|genehmigt|passt|"
+    r"نعم|موافق|تمام|ممتاز|اوكي|أوكي|حسنا|حسناً|ماشي|جميل|رائع|"
+    r"naam|na3am|aywa|ayoua|aiwa|iwa|wakha|mwafiq|mouafik|muwafiq|tamam|tmam|yalla|yallah|mashi|machi|mzyan|mzian|zwin|bahi|behi|mumtaz|momtaz|mashallah|sah|sahit|"
+    r"👍|✅|👌|🙌|🚀|❤|🔥|💯")
+_FILLER = frozenset(("please pls plz thanks thank you thx merci beaucoup shukran choukran for me to the plan design site "
+                     "i i'm im we really very so then now just pour moi c'est je mon ma my our "
+                     "also too bro sir team everyone guys hey hi hello salut bonjour").split())
+_PURE_RX = re.compile(r"(?:%s)(?: (?:%s))*" % (_APPROVALS, _APPROVALS))
+APPROVE_RX = re.compile(r"(?i)(^|\b)(%s)(\b|$)" % _APPROVALS)                     # kept for callers: "an approval word is in there"
 CHANGE_RX = re.compile(r"(?i)\b(change|make it|instead|but|however|add|remove|replace|rename|move|fix|not (yet|good|ok|right)|no\b|"
                        r"should|must|needs? to|wrong|redo|rather|prefer|modif|chang|ajout|enl[eè]v|pas encore|plut[oô]t|mais)\b")
 
@@ -207,20 +259,37 @@ DELAY_RX = re.compile(r"(?i)\b(later|tonight|tomorrow|this (evening|weekend)|nex
                       r"plus tard|ce soir|demain|je (vais )?regarde|je v[ée]rifie|m[áa]s tarde|ma[ñn]ana|luego|sp[äa]ter|morgen)\b")
 # …except the negations that are themselves a go: "no changes", "no problem", "pas de souci"
 NO_PROBLEM_RX = re.compile(r"(?i)\b(no (problem|worries|changes?|issues?|notes?)|nothing (to (change|add)|else)|pas de (souci|probl[eè]me|changement))\b")
-# a go explicit enough to carry a change with it ("G1 ok, but add a pricing page"); a bare "ok but add…" is a change
+# a go explicit enough to carry a named change ("G1 ok, but add a pricing page"); a bare "ok but add…" is a change
 STRONG_RX = re.compile(r"(?i)(\b(g[1-4] ok|approved?|approve it|go ahead|ship it|lgtm|validated?|go live|let'?s go|genehmigt)\b|valid[ée])")
+_BUT_RX = re.compile(r"(?i)\b(but|mais|except|sauf|however|although)\b")
+
+
+def _tokens(q: str) -> str:
+    q = (q or "").lower().replace("’", "'").replace("\ufe0f", "")
+    q = re.sub(r"[👍✅👌🙌🚀❤🔥💯]", lambda m: f" {m.group(0)} ", q)
+    q = re.sub(r"[-_/]", " ", q)
+    q = re.sub(r"[^\w' 👍✅👌🙌🚀❤🔥💯]", " ", q)
+    return " ".join(w for w in q.split() if w not in _FILLER)
+
+
+def _pure_approval(q: str) -> bool:
+    t = _tokens(q)
+    return bool(t) and bool(_PURE_RX.fullmatch(t))
 
 
 def classify_quote(quote: str) -> str:
-    """approve | approve_with_changes | change_request — deterministic, from the owner's own words. When in doubt it
-    is a change request: a gate asks again rather than passing on a "no"."""
+    """approve | approve_with_changes | change_request — deterministic, from the owner's own words. Only a bare approval
+    is a go; a request after the approval word is a change request; when in doubt it is one (a gate asks again rather
+    than passing on a "no" or a "make it bigger")."""
     q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
-    ok, change = bool(APPROVE_RX.search(q)), bool(CHANGE_RX.search(q))
-    if not ok or HOLD_RX.search(q) or DELAY_RX.search(q):
+    if not q.strip() or HOLD_RX.search(q) or DELAY_RX.search(q):
         return "change_request"
-    if not change:
+    if _pure_approval(q):
         return "approve"
-    return "approve_with_changes" if STRONG_RX.search(q) else "change_request"
+    m = _BUT_RX.search(q)
+    if m and q[m.end():].strip(" .,;:!?") and _pure_approval(q[:m.start()]) and STRONG_RX.search(q[:m.start()]):
+        return "approve_with_changes"
+    return "change_request"
 
 
 def is_hold(quote: str) -> bool:
@@ -228,6 +297,38 @@ def is_hold(quote: str) -> bool:
     the answer is to wait, never to reopen and redo a phase they did not question (SKILL invariant 7)."""
     q = NO_PROBLEM_RX.sub(" ", (quote or "").strip())
     return bool(HOLD_RX.search(q) or DELAY_RX.search(q)) and not CHANGE_RX.search(re.sub(r"(?i)\b(not|pas) (yet|encore)\b", " ", q))
+
+
+PLAN_FILES = ("brief.json", "sitemap.json")
+
+
+def _plan_hashes(root: Path) -> dict:
+    import hashlib
+    out = {}
+    for f in PLAN_FILES:
+        p = Path(root) / ".deckhand" / f
+        if p.exists():
+            out[f] = hashlib.sha256(p.read_bytes()).hexdigest()[:16]
+    return out
+
+
+def plan_drift(root: Path, s: dict) -> list:
+    """Plan files that changed after G1 passed. The gate records their content hashes, so a touched file or a fresh clone
+    (new mtimes) is no drift; a gate without hashes (older runs, hand-set) falls back to mtimes."""
+    g1 = (s.get("gates") or {}).get("G1", {})
+    if g1.get("status") != "passed":
+        return []
+    root = Path(root)
+    now_h = _plan_hashes(root)
+    if isinstance(g1.get("plan_hashes"), dict):
+        was = g1["plan_hashes"]
+        return [f for f in PLAN_FILES if was.get(f) != now_h.get(f)]
+    import datetime as _dt
+    try:
+        t = _dt.datetime.strptime(str(g1.get("at"))[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=_dt.timezone.utc).timestamp()
+    except ValueError:
+        return []
+    return [f for f in PLAN_FILES if (root / ".deckhand" / f).exists() and (root / ".deckhand" / f).stat().st_mtime > t + 1]
 
 
 def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -> dict:
@@ -250,10 +351,12 @@ def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -
         raise DhError("CHANGE_REQUEST", f"the owner's words read as a change request, not a go: {quote!r}",
                       gate=gate, do=[f"dh reopen {phase} --reason \"{(quote or '')[:80]}\"", "make the change, show it again, ask for the go",
                                      "the owner did say go? quote the words that say it (\"ok go\", \"approved\", \"G1 ok\")"])
-    s["gates"][gate] = {"status": "passed", "at": now(), "by": "owner", "note": note,
-                        **({"quote": quote, "verdict": verdict} if quote is not None else {})}
-    save(root, s)
-    log(root, {"event": "gate", "gate": gate, "note": note, **({"quote": quote, "verdict": verdict} if quote is not None else {})})
+    with locked(root):
+        s = load(root)
+        s["gates"][gate] = {"status": "passed", "at": now(), "by": "owner", "note": note, **({"plan_hashes": _plan_hashes(root)} if gate == "G1" else {}),
+                            **({"quote": quote, "verdict": verdict} if quote is not None else {})}
+        save(root, s)
+        log(root, {"event": "gate", "gate": gate, "note": note, **({"quote": quote, "verdict": verdict} if quote is not None else {})})
     out = summary(root, s)
     if verdict == "approve_with_changes":
         out["changes_asked"] = f"the go came with a change: record it now — dh note decision \"{quote[:100]}\" — and do it in the next phase"
@@ -262,13 +365,16 @@ def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -
 
 def reopen(root: Path, phase: str, reason: str) -> dict:
     """Owner wants changes: reopen a phase (and everything after it)."""
-    s = load(root)
     idx = PHASE_IDS.index(phase)
-    for pid in PHASE_IDS[idx:]:
-        s["phases"][pid] = {"status": "pending", "reopened": reason}
-    for p in PHASES[idx:]:
-        if p.get("gate"):
-            s["gates"][p["gate"]] = {"status": "pending"}
-    save(root, s)
-    log(root, {"event": "reopen", "phase": phase, "reason": reason})
+    with locked(root):
+        s = load(root)
+        if idx > PHASE_IDS.index(current(s)["id"]):
+            raise DhError("NOT_REACHED", f"phase {phase} was never reached (the run is at '{current(s)['id']}'): nothing to reopen", phase=phase, at=current(s)["id"])
+        for pid in PHASE_IDS[idx:]:
+            s["phases"][pid] = {"status": "pending", "reopened": reason}
+        for p in PHASES[idx:]:
+            if p.get("gate"):
+                s["gates"][p["gate"]] = {"status": "pending"}
+        save(root, s)
+        log(root, {"event": "reopen", "phase": phase, "reason": reason})
     return summary(root, s)

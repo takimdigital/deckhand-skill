@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .util import DhError, SKILL, TRYON, emit, project_root, read_json, write_json
+from .util import DH, SKIPPED, DhError, SKILL, TRYON, emit, locked, project_root, read_json, runnable_obj, write_json
 from . import state as STATE
 from . import resume as RESUME
 
@@ -39,11 +39,30 @@ LIST_KEYS = ("languages", "demo.paths", "features", "assumed", "template_names",
 def cmd_brief(a):
     root = _root(a)
     path = root / ".deckhand" / "brief.json"
-    b = read_json(path, None) or json.loads((SKILL / "templates" / "brief.json").read_text(encoding="utf-8"))
+    if a.action == "set":
+        with locked(root):                               # parallel `brief set` calls: each one merges into the latest file
+            return _brief_set(a, path)
+    return _brief_load(path)
+
+
+def _brief_load(path: Path) -> dict:
+    if path.exists():
+        b = read_json(path, None, expect=dict)
+        if b is None:                                    # never write a fresh brief over a file we could not read
+            raise DhError("BRIEF_CORRUPT", f"{path} is empty, truncated or not a JSON object — restore it (`git checkout .deckhand/brief.json`) "
+                          "or move it aside, then `dh brief set …` starts a new one; nothing was overwritten")
+        return b or json.loads((SKILL / "templates" / "brief.json").read_text(encoding="utf-8"))
+    return json.loads((SKILL / "templates" / "brief.json").read_text(encoding="utf-8"))
+
+
+def _brief_set(a, path: Path) -> dict:
+    b = _brief_load(path)
     if a.action == "set":
         for k, v in _kv(a.pairs).items():
             if k in BRIEF_CHOICES and v not in BRIEF_CHOICES[k]:
                 raise DhError("BAD_VALUE", f"{k} must be one of {', '.join(BRIEF_CHOICES[k])}")
+            from .redact import scrub_text
+            v = scrub_text(v)
             val = [x.strip() for x in v.split(",") if x.strip()] if k in LIST_KEYS else v
             cur = b
             parts = k.split(".")
@@ -75,7 +94,7 @@ def cmd_workflow(a, root: Path):
             raise DhError("USAGE", "dh workflow use <ref> [--set name=value] [--accept]")
         return WF.use(root, a.target, accept=a.accept, sets=_kv(a.set))
     if act == "status":
-        return WF.progress(root) or {"pinned": None, "next": "dh workflow query"}
+        return WF.progress(root) or {"pinned": None, "next": f"{DH} workflow query"}
     if act == "todo":
         return WF.todo(root, a.format, a.phase)
     if act == "step":
@@ -160,10 +179,37 @@ def tryon_argv(rest: list, root) -> list:
     return rest if "--project" in rest else rest + ["--project", str(root)]
 
 
+class _Usage(Exception):
+    def __init__(self, message: str, usage: str):
+        super().__init__(message)
+        self.message, self.usage = message, usage
+
+
+class _Help(Exception):
+    def __init__(self, text: str):
+        super().__init__(text)
+        self.text = text
+
+
+class DhParser(argparse.ArgumentParser):
+    """argparse that never prints or exits: a usage error and --help come back as exceptions main() turns into JSON."""
+
+    def error(self, message):
+        raise _Usage(message, self.format_usage().strip())
+
+    def print_help(self, file=None):
+        raise _Help(self.format_help())
+
+    def exit(self, status=0, message=None):
+        if status:
+            raise _Usage((message or "").strip() or "usage error", self.format_usage().strip())
+        raise _Help(self.format_help())
+
+
 def build_parser():
-    ap = argparse.ArgumentParser(prog="dh", description="Deckhand control plane — `dh next` tells you what to do.")
+    ap = DhParser(prog="dh", description="Deckhand control plane — `dh next` tells you what to do.")
     ap.add_argument("--project", help="project folder (default: nearest with .deckhand/ or package.json)")
-    common = argparse.ArgumentParser(add_help=False)
+    common = DhParser(add_help=False)
     common.add_argument("--project", default=argparse.SUPPRESS, help=argparse.SUPPRESS)   # accepted after the subcommand too
     sub = ap.add_subparsers(dest="cmd", required=True)
     _add = sub.add_parser
@@ -180,12 +226,12 @@ def build_parser():
     p.add_argument("kind", choices=RESUME.KINDS); p.add_argument("text", nargs="+")
     p = sub.add_parser("brief"); p.add_argument("action", choices=["show", "set"]); p.add_argument("pairs", nargs="*")
     p = sub.add_parser("phase"); p.add_argument("action", choices=["done", "skip"]); p.add_argument("phase", choices=STATE.PHASE_IDS)
-    p.add_argument("--reason"); p.add_argument("--force", help="record done despite a red check (the reason is kept and shown)")
+    p.add_argument("--reason"); p.add_argument("--force", nargs="?", const="", help="record done despite a red check; needs a reason (--force \"why\" or --reason), kept and shown")
     p = sub.add_parser("gate"); p.add_argument("action", choices=["pass"]); p.add_argument("gate"); p.add_argument("--note", default="")
     p.add_argument("--quote", help="the owner's own words, verbatim (required in phased mode; a change request re-opens instead)")
     p = sub.add_parser("reopen"); p.add_argument("phase", choices=STATE.PHASE_IDS); p.add_argument("--reason", required=True)
 
-    where = argparse.ArgumentParser(add_help=False)
+    where = DhParser(add_help=False)
     w = where.add_mutually_exclusive_group()
     w.add_argument("--here", dest="where", action="store_const", const="project", help="this project's own layer (.deckhand/, gitignored)")
     w.add_argument("--machine", dest="where", action="store_const", const="machine", help="~/.deckhand (every project)")
@@ -220,7 +266,7 @@ def build_parser():
     p.add_argument("--env-file", help="add: KEY=VALUE file loaded into the service's environment (e.g. .env)")
     p = sub.add_parser("suggest", help="what the owner could do next, by importance (optional) · dismiss ID [--days N]")
     p.add_argument("action", nargs="?", choices=["list", "dismiss"], default="list"); p.add_argument("id", nargs="?")
-    p.add_argument("--all", action="store_true", help="every suggestion, dismissed ones included"); p.add_argument("--days", type=int, default=7)
+    p.add_argument("--all", action="store_true", help="every suggestion, dismissed ones included"); p.add_argument("--days", type=int, default=7, help="dismiss for 1..365 days")
     p = sub.add_parser("workflow", help="proven paths: query (top 3) · use · next steps · todo · step · show · list · lint · new --from-run · save · publish · sync")
     p.add_argument("action", choices=["query", "use", "show", "todo", "step", "list", "lint", "new", "save", "publish", "sync", "status"])
     p.add_argument("target", nargs="?", help="a workflow ref (id, id@v, mine:|base:|community:id, or a .json file) · a step id for `step`")
@@ -245,7 +291,7 @@ def build_parser():
     p.add_argument("--buzz", action="store_true", help="add: a weaker word (use sparingly), not a strong tell")
     p.add_argument("--phrase", action="store_true"); p.add_argument("--fix", default="", help="add: the plainer word to use instead")
     p = sub.add_parser("swap"); p.add_argument("action", choices=["scan", "check"])
-    p = sub.add_parser("verify"); p.add_argument("--url"); p.add_argument("--skip", default=""); p.add_argument("--allow", default="")
+    p = sub.add_parser("verify"); p.add_argument("--url"); p.add_argument("--skip", default=""); p.add_argument("--allow", default=""); p.add_argument("--reason", default="", help="why rows are skipped (recorded; without it a skipped blocking row keeps the report red)")
 
     p = sub.add_parser("deploy"); p.add_argument("action", choices=["target", "ship", "smoke", "raw"]); p.add_argument("rest", nargs=argparse.REMAINDER)
     p.add_argument("--app"); p.add_argument("--url"); p.add_argument("--force", action="store_true")
@@ -282,6 +328,62 @@ def build_parser():
     return ap
 
 
+def _deploy_opts(a) -> None:
+    """`deploy target --app X --url U --project D`: the REMAINDER swallowed everything after the action; take the options
+    back (--project too, so both orders work). Runs before the root is resolved."""
+    if a.cmd != "deploy" or a.action == "raw" or not a.rest or getattr(a, "_deploy_done", False):
+        return
+    dp = DhParser(prog=f"dh deploy {a.action}", add_help=False)
+    dp.add_argument("--app"); dp.add_argument("--url"); dp.add_argument("--force", action="store_true"); dp.add_argument("--project")
+    try:
+        more, left = dp.parse_known_args(a.rest)
+    except _Usage as e:
+        raise DhError("USAGE", f"dh deploy {a.action}: {e.message}")
+    if left:
+        raise DhError("USAGE", f"dh deploy {a.action}: unexpected {' '.join(left)}")
+    a.app, a.url, a.force = more.app or a.app, more.url or a.url, more.force or a.force
+    if more.project:
+        a.project = more.project
+    a._deploy_done = True
+
+
+# commands that create their own folder (`--to`) or the project itself; every other command needs an existing folder
+CREATES_FOLDER = ("init",)
+
+
+def _check_root(a) -> Path:
+    """One validation of --project for every command: a file is BAD_PROJECT, a folder that does not exist is BAD_PROJECT
+    (a typo must not become a stray project) except for `init`, which creates it."""
+    given = getattr(a, "project", None)
+    root = _root(a)
+    if given:
+        if root.exists() and not root.is_dir():
+            raise DhError("BAD_PROJECT", f"--project {given} is a file, not a folder")
+        if not root.exists() and a.cmd not in CREATES_FOLDER:
+            raise DhError("BAD_PROJECT", f"--project {given} does not exist (a typo would create a stray project) — "
+                          f"to start a project there: {DH} init --name \"<business>\" --project \"{root}\"", init=f"{DH} init --name \"<business>\" --project \"{root}\"")
+    return root
+
+
+def _needs_run(a) -> bool:
+    """The commands that change a project's state or files only make sense inside one (a .deckhand/run.json). Everything
+    else is read-only, global (profile, vault, learn, pool, clean, workflow list/query/lint…) or creates a project
+    itself (init, scaffold, clone, adopt, harvest)."""
+    c, act = a.cmd, getattr(a, "action", None)
+    if c in ("phase", "gate", "reopen", "note", "plan", "compose", "verify", "handoff", "rebrand", "swap", "seo", "research"):
+        return True
+    return ((c == "brief" and act == "set") or (c == "pending" and act != "list" and not a.machine) or (c == "bb" and act != "read")
+            or (c == "dev" and act in ("start", "stop", "add", "remove")) or (c == "deploy" and act in ("target", "ship", "smoke"))
+            or (c == "ops" and act == "add") or (c == "slop" and act == "allow") or (c == "base" and act == "record")
+            or (c == "workflow" and act in ("use", "step", "new")) or (c == "suggest" and act == "dismiss"))
+
+
+def _need_run(root: Path) -> None:
+    if not STATE.load(root, required=False):          # RUN_CORRUPT raises from load
+        line = f'{DH} init --name "<business>" --project "{root}"'
+        raise DhError("NO_RUN", f"no project in {root} (no .deckhand/run.json): nothing was written — start one with `{line}`", init=line)
+
+
 def dispatch(a):
     root = _root(a)
     c = a.cmd
@@ -309,7 +411,7 @@ def dispatch(a):
     if c == "phase":
         if a.action == "skip":
             return STATE.phase_skip(root, a.phase, a.reason or "")
-        r = STATE.phase_done(root, a.phase, force_reason=a.force)
+        r = STATE.phase_done(root, a.phase, force_reason=None if a.force is None else (a.force.strip() or (a.reason or "").strip()))
         if not r["ok"]:
             raise DhError("CHECK_FAILED", f"phase {a.phase} is not done yet", check=r["check"])
         return r
@@ -490,19 +592,14 @@ def dispatch(a):
         return r
     if c == "verify":
         from . import verify as V
-        r = V.run_verify(root, a.url, skip=tuple(x for x in a.skip.split(",") if x), allow=tuple(x for x in a.allow.split(",") if x))
+        r = V.run_verify(root, a.url, skip=tuple(x for x in a.skip.split(",") if x), allow=tuple(x for x in a.allow.split(",") if x), skip_reason=a.reason)
         if not r["ok"]:
             raise DhError("VERIFY_FAILED", "blocking rows are red (see .deckhand/VERIFY.md)", **r)
         return r
     if c == "deploy":
         from . import deploy as D
         if a.action != "raw" and a.rest:                # REMAINDER swallowed the options written after the action
-            dp = argparse.ArgumentParser(prog=f"dh deploy {a.action}", add_help=False)
-            dp.add_argument("--app"); dp.add_argument("--url"); dp.add_argument("--force", action="store_true")
-            more, left = dp.parse_known_args(a.rest)
-            if left:
-                raise DhError("USAGE", f"dh deploy {a.action}: unexpected {' '.join(left)}")
-            a.app, a.url, a.force = more.app or a.app, more.url or a.url, more.force or a.force
+            _deploy_opts(a)
         if a.action == "target":
             return D.target(root, a.app, a.url)
         if a.action == "ship":
@@ -631,26 +728,38 @@ def main(argv=None) -> int:
     except Exception:
         pass
     ap = build_parser()
-    a = ap.parse_args(argv)
+    try:
+        a = ap.parse_args(argv)
+    except _Usage as e:
+        return emit({"ok": False, "code": "USAGE", "message": e.message, "usage": e.usage}, 2)
+    except _Help as h:
+        return emit({"ok": True, "help": h.text})
     if a.cmd == "resume" and a.hook:                     # the one non-JSON output: a harness injects it as context
         sys.stdout.write(RESUME.hook(RESUME.stdin_if_piped(), start=Path(a.project) if getattr(a, "project", None) else None))
         return 0
     shown = "dh " + " ".join(argv if argv is not None else sys.argv[1:])
-    root = _root(a)
-    from . import profile as PROFILE
-    PROFILE.use_project(root)                            # the project's own profile/vault layer applies to this command
+    root = None
     out = None
     try:
+        _deploy_opts(a)
+        root = _check_root(a)
+        from . import profile as PROFILE
+        PROFILE.use_project(root)                        # the project's own profile/vault layer applies to this command
+        if _needs_run(a):
+            _need_run(root)
         out = dispatch(a)
         if a.cmd == "tryon":
             _log(a, shown, out.get("exit", 0))
             return out.get("exit", 0)
         _log(a, shown, 0)
         _observe(a, root, shown)
-        return emit({"ok": True, **out} if isinstance(out, dict) else {"ok": True, "result": out})
+        res = {"ok": True, **out} if isinstance(out, dict) else {"ok": True, "result": out}
+        if SKIPPED["lines"]:                             # a corrupt log line was skipped, not fatal: say how many
+            res["skipped_lines"] = SKIPPED["lines"]
+        return emit(runnable_obj(res))
     except DhError as e:
         _log(a, shown, 1, f"{e.code}: {e.message}")
-        return emit({**e.extra, "ok": False, "code": e.code, "message": e.message}, 1)   # extra never overrides the verdict
+        return emit(runnable_obj({**e.extra, "ok": False, "code": e.code, "message": e.message}), 1)   # extra never overrides the verdict
     except KeyboardInterrupt:
         return emit({"ok": False, "code": "INTERRUPTED"}, 130)
     except Exception as e:                              # a hand-edited file of the wrong shape: JSON, never a traceback
@@ -658,7 +767,8 @@ def main(argv=None) -> int:
         return emit({"ok": False, "code": "INTERNAL", "message": f"{type(e).__name__}: {e}",
                      "hint": "a .deckhand/*.json file may have the wrong shape; `dh resume --check`, then fix or restore it"}, 1)
     finally:
-        _refresh(a, root, out)
+        if root is not None:
+            _refresh(a, root, out)
 
 
 def _observe(a, root: Path, shown: str) -> None:

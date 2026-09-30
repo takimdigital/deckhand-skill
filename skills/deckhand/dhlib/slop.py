@@ -70,7 +70,7 @@ def _empty(lang: str) -> dict:
 
 def raw_pack(lang: str) -> dict:
     p = shipped().get(lang)
-    return read_json(p, None) if p else _empty(lang)
+    return read_json(p, None, expect=dict) if p else _empty(lang)
 
 
 def _merge(pack: dict, extra: dict) -> dict:
@@ -152,7 +152,7 @@ class Pack:
 def load(lang: str, root=None, allow=()) -> Pack:
     """The shipped pack + the owner's overlay (~/.deckhand/slop/<lang>.json) + the project's allow list and brand words."""
     data = raw_pack(lang)
-    ov = read_json(overlay_path(lang), None)
+    ov = read_json(overlay_path(lang), None, expect=dict)
     if ov:
         data = _merge(data, ov)
     conf = project_conf(root)
@@ -520,7 +520,7 @@ def file_units(root, rel: str, text: str, lang=None, cands=(), packs=None) -> li
 
 def copy_units(root, path: Path, lang=None, cands=(), packs=None) -> list:
     """copy.json: one unit per section (hero, pricing…) — the words the model wrote for this site."""
-    data = read_json(path, None)
+    data = read_json(path, None, expect=dict)
     if not isinstance(data, dict):
         return []
     rel = str(path.relative_to(root)).replace("\\", "/") if root and str(path).startswith(str(root)) else str(path)
@@ -727,7 +727,7 @@ def langs() -> dict:
     out = []
     for lang, p in shipped().items():
         d = read_json(p, {}) or {}
-        ov = read_json(overlay_path(lang), None)
+        ov = read_json(overlay_path(lang), None, expect=dict)
         out.append({"lang": lang, "name": d.get("name"), "maturity": d.get("maturity", "seed"), "script": d.get("script", "latin"),
                     "strong": len((d.get("words") or {}).get("strong", [])), "buzz": len((d.get("words") or {}).get("buzz", [])),
                     "phrases": len(d.get("phrases", [])), **({"yours": str(overlay_path(lang))} if ov else {})})
@@ -740,7 +740,7 @@ def add(term: str, lang: str, phrase: bool = False, buzz: bool = False, fix: str
     if not term:
         raise DhError("USAGE", "dh slop add \"word or phrase\" --lang fr [--buzz] [--fix \"plainer word\"]")
     p = overlay_path(lang)
-    ov = read_json(p, None) or {"schema": SCHEMA, "lang": lang, "words": {"strong": [], "buzz": []}, "phrases": [], "fixes": {}, "allow": []}
+    ov = read_json(p, None, expect=dict) or {"schema": SCHEMA, "lang": lang, "words": {"strong": [], "buzz": []}, "phrases": [], "fixes": {}, "allow": []}
     if phrase or " " in term:
         pid = re.sub(r"[^a-z0-9]+", "-", term.lower()).strip("-")[:40] or "phrase"
         rx = re.sub(r"(\\ )+", r"\\s+", re.escape(term.lower()))
@@ -758,7 +758,7 @@ def add(term: str, lang: str, phrase: bool = False, buzz: bool = False, fix: str
 
 def allow(root, term: str) -> dict:
     p = Path(root) / ".deckhand" / "slop.json"
-    conf = read_json(p, None)
+    conf = read_json(p, None, expect=dict)
     conf = conf if isinstance(conf, dict) else {"allow": [], "ignore": []}
     if not isinstance(conf.get("allow"), list):
         conf["allow"] = []
@@ -769,7 +769,7 @@ def allow(root, term: str) -> dict:
 
 
 def export(lang: str) -> dict:
-    ov = read_json(overlay_path(lang), None)
+    ov = read_json(overlay_path(lang), None, expect=dict)
     if not ov:
         raise DhError("NOTHING_TO_EXPORT", f"no finds of yours for {lang} yet (dh slop add \"…\" --lang {lang})")
     merged = _merge(raw_pack(lang), ov)

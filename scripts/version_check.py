@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """version_check.py — every human-readable version claim must match: README badge ==
-skills/deckhand/SKILL.md `version:` == the top CHANGELOG.md entry (== --tag vX.Y.Z when given).
+skills/deckhand/SKILL.md `version:` == the top CHANGELOG.md entry == the architecture atlas header == the first line of docs/releases/v<version>.md
+(== --tag vX.Y.Z when given).
 Exit 0 = consistent · 1 = mismatch · 2 = usage/IO error. Stdlib only."""
 import argparse
 import re
@@ -18,6 +19,7 @@ def main(argv=None) -> int:
         readme = (root / "README.md").read_text(encoding="utf-8")
         skill = (root / "skills" / "deckhand" / "SKILL.md").read_text(encoding="utf-8")
         log = (root / "CHANGELOG.md").read_text(encoding="utf-8")
+        atlas = (root / "docs" / "architecture-atlas.html").read_text(encoding="utf-8")
     except OSError as e:
         print(f"version_check: {e}", file=sys.stderr)
         return 2
@@ -26,6 +28,13 @@ def main(argv=None) -> int:
         "SKILL.md": (re.search(r"^version:\s*([^\s]+)", skill, re.M) or [None, None])[1],
         "CHANGELOG top": (re.search(r"^## \[?v?([0-9][^\]\s]*)", log, re.M) or [None, None])[1],
     }
+    v = found["SKILL.md"]
+    try:
+        first = (root / "docs" / "releases" / f"v{v}.md").read_text(encoding="utf-8").splitlines()[0]
+    except (OSError, IndexError, TypeError):
+        first = ""
+    found["atlas header"] = (re.search(r"system map · v([0-9][^\s<]*)", atlas) or [None, None])[1]
+    found["release notes"] = v if re.search(rf"(?<![\d.])v?{re.escape(v or '?')}(?![\d.])", first) else None
     if a.tag:
         found["tag"] = a.tag.lstrip("v")
     vals = set(found.values())

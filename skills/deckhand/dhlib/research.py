@@ -28,6 +28,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 from .util import DATA, REFS, DhError, append_jsonl, now, read_json, read_jsonl, write_json
+from .redact import scrub_text
 
 POLICY = json.loads((DATA / "research.json").read_text(encoding="utf-8"))
 LABELS = tuple(POLICY["labels"])
@@ -115,7 +116,8 @@ def add_source(root, url: str, by: str, kind: str = "", note: str = "") -> dict:
         raise DhError("BAD_URL", f"not an http(s) URL: {url!r}")
     if not AGENT_RX.match(by or ""):
         raise DhError("BAD_ID", "--by: the agent id (letters, digits, - or _)")
-    note = (note or "").strip()
+    url, kind = scrub_text((url or "").strip()), scrub_text(kind or "")
+    note = scrub_text((note or "").strip())
     if THIN_NOTE.match(note) or (len(note) < 12 and not re.search(r"\d", note)):
         raise DhError("NOTE_TOO_THIN", f"--note {note!r} tells the next agent nothing: write the dense facts found on the page "
                       "(\"€25/h standard, €35/h deep, min 2 h\"), or \"nothing usable: <why>\"")
@@ -155,14 +157,14 @@ def _all_vocab(root) -> list:
 
 def merge(root) -> dict:
     files = _agent_files(root)
-    r = read_json(_rj(root), None)
+    r = read_json(_rj(root), None, expect=dict)
     if r is None:
         r = json.loads((Path(__file__).resolve().parent.parent / "templates" / "research.json").read_text(encoding="utf-8"))
     if not files:
         return {"merged": 0, "claims": len(r.get("claims") or []), "vocabulary": len(r.get("vocabulary") or [])}
     agents, claims, vocab, bad = set(), [], [], []
     for f in files:
-        data = read_json(f, None)
+        data = read_json(f, None, expect=dict)
         if not isinstance(data, dict):
             bad.append(f.name)
             continue
@@ -324,7 +326,7 @@ def _problems(item: dict, kind: str, ids: set) -> list:
 def verify(root, refresh: bool = False, offline: bool = False) -> dict:
     root = Path(root)
     m = merge(root)
-    r = read_json(_rj(root), None)
+    r = read_json(_rj(root), None, expect=dict)
     if r is None:
         raise DhError("NO_RESEARCH", "no .deckhand/research.json (and no agent files to merge) — research first")
     claims, vocab = r.get("claims") or [], r.get("vocabulary") or []
@@ -370,7 +372,7 @@ def verify(root, refresh: bool = False, offline: bool = False) -> dict:
 
 def verified_now(root) -> dict | None:
     """The last verify, only if research.json has not changed since (else None)."""
-    v = read_json(_dir(root) / "verify.json", None)
+    v = read_json(_dir(root) / "verify.json", None, expect=dict)
     p = _rj(root)
     if not v or not p.exists() or v.get("research_sha") != hashlib.sha1(p.read_bytes()).hexdigest():
         return None
@@ -500,11 +502,11 @@ def metrics(trace: dict) -> dict:
 
 
 def outcome(research_file) -> dict:
-    r = read_json(research_file, None) if research_file else None
+    r = read_json(research_file, None, expect=dict) if research_file else None
     if not r:
         return {}
     claims = r.get("claims") or []
-    v = read_json(Path(research_file).parent / "research" / "verify.json", None) or {}
+    v = read_json(Path(research_file).parent / "research" / "verify.json", None, expect=dict) or {}
     s = v.get("summary") or {}
     return {"claims": len(claims), "verified": sum(1 for c in claims if c.get("label") == "VERIFIED"),
             "quotes_found": s.get("found"), "quote_mismatches": s.get("mismatch"), "vocabulary": len(r.get("vocabulary") or []),

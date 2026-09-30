@@ -81,10 +81,14 @@ class ControlPlane(Base):
     def test_c3_a_corrupt_run_is_refused_not_treated_as_no_run(self):
         self.dh("init", "--name", "x")
         (self.root / ".deckhand" / "run.json").write_text('{"version": 2,', encoding="utf-8")
-        for args in (("next",), ("init", "--name", "other", "--mode", "auto"), ("deploy", "ship")):
+        for args in (("next",), ("deploy", "ship")):
             code, out = self.dh(*args)
             self.assertEqual((code, out["code"]), (1, "RUN_CORRUPT"), args)
         self.assertEqual((self.root / ".deckhand" / "run.json").read_text(encoding="utf-8"), '{"version": 2,')
+        # B5 changed this on purpose: `dh init` is the repair (a fresh run, the broken file kept as run.json.corrupt-<time>)
+        code, out = self.dh("init", "--name", "other", "--mode", "auto")
+        self.assertEqual((code, out["ok"]), (0, True))
+        self.assertEqual(len(list((self.root / ".deckhand").glob("run.json.corrupt-*"))), 1)
 
     def test_c4_review_refuses_a_green_verify_of_an_older_commit(self):
         self.dh("init", "--name", "x")
@@ -116,8 +120,8 @@ class ControlPlane(Base):
             code, out = self.dh("brief", "set", pair)
             self.assertEqual((code, out["code"]), (1, "BAD_KEY"), pair)
         write_json(self.root / ".deckhand" / "brief.json", ["x"])
-        code, out = self.dh("phase", "done", "define")
-        self.assertEqual((code, out["code"]), (1, "INTERNAL"))
+        code, out = self.dh("phase", "done", "define")          # B5: a wrong-typed brief is "no data" (the default), never a crash
+        self.assertEqual((code, out["code"]), (1, "CHECK_FAILED"))
 
     def test_c8_c9_phase_done_names_the_phase_done_and_the_gate_hint_carries_quote(self):
         self.dh("init", "--name", "x")

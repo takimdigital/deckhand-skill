@@ -61,9 +61,9 @@ def note(root: Path, kind: str, text: str) -> dict:
         raise DhError("USAGE", f"dh note {kind} \"what\" — one line")
     if not STATE.load(root, required=False):
         raise DhError("NO_RUN", "no project here — `dh init` first (or --project)")
-    from .learn import secret_values
+    from .redact import scrub_text
     s = STATE.load(root)
-    row = {"at": now(), "ts": round(time.time(), 3), "kind": kind, "text": redact(text, secret_values())[:400],
+    row = {"at": now(), "ts": round(time.time(), 3), "kind": kind, "text": scrub_text(text)[:400],
            "phase": STATE.current(s)["id"]}
     append_jsonl(_dk(root) / "notes.jsonl", row)
     write(root)
@@ -71,7 +71,7 @@ def note(root: Path, kind: str, text: str) -> dict:
 
 
 def notes(root: Path) -> list:
-    return read_jsonl(_dk(root) / "notes.jsonl")
+    return [n for n in read_jsonl(_dk(root) / "notes.jsonl") if isinstance(n.get("kind"), str) and "text" in n]
 
 
 # ------------------------------------------------------------------ facts
@@ -187,7 +187,7 @@ def gather(root: Path) -> dict | None:
     hist = read_jsonl(dk / "history.jsonl")
     events = [(h.get("at", ""), _event(h)) for h in hist] + [(n["at"], f"note {n['kind']}: {_short(n['text'], 70)}") for n in ns]
     events.sort(key=lambda e: e[0])
-    seo = read_json(dk / "seo.json", None)
+    seo = read_json(dk / "seo.json", None, expect=dict)
     from . import pending as PEND
     pend = PEND.summary(root)
     return {
@@ -312,7 +312,8 @@ def render(st: dict) -> str:
     L += ["", "## Where to look (only if the step needs it)",
           "- " + " · ".join(f".deckhand/{f}" if not f.endswith(".md") or f in ("PLAN.md", "SEO.md", "VERIFY.md") else f for f in st["files"]),
           "- how the skill works: SKILL.md in the skill folder · full history: .deckhand/history.jsonl · commands run: .deckhand/runs.jsonl"]
-    text = "\n".join(L) + "\n"
+    from .redact import scrub_text
+    text = scrub_text("\n".join(L) + "\n")            # defence in depth: stored notes / pending text from before the scrubber existed
     if len(text) > BUDGET:                      # stay cheap: trim the oldest detail first, never the verdict or the next step
         text = text[: BUDGET - 80].rsplit("\n", 1)[0] + "\n- … (trimmed to stay under the cold-start budget; `dh resume` for the rest)\n"
     return text
@@ -351,6 +352,7 @@ def write(root: Path) -> Path | None:
 
 def resume(root: Path) -> dict:
     root = Path(root)
+    STATE.load(root, required=False)                    # a corrupt run says RUN_CORRUPT, not "no project here"
     st = gather(root)
     if not st:
         return {"state": "no project here", "do": [f"{_dh()} init --name <business> … (or --project <dir> for an existing one)"]}
@@ -380,6 +382,7 @@ def session_hint(root: Path) -> dict | None:
 
 def check(root: Path, online: bool = False) -> dict:
     root = Path(root)
+    STATE.load(root, required=False)
     st = gather(root)
     if not st:
         raise DhError("NO_RUN", "no project here")
@@ -402,8 +405,7 @@ def check(root: Path, online: bool = False) -> dict:
                 claim(f"{p} done", False, f"check failed to run: {e}")
     g1 = s["gates"].get("G1", {})
     if g1.get("status") == "passed":
-        t = _ts(g1.get("at"))
-        edited = [f for f in ("brief.json", "sitemap.json") if (dk / f).exists() and (dk / f).stat().st_mtime > t + 1]
+        edited = STATE.plan_drift(root, s)
         claim("the approved plan is the current plan", not edited, f"edited after G1 was passed: {', '.join(edited)} — show the owner" if edited else "")
     if s["phases"]["build"]["status"] == "done":
         url = (read_json(dk / "dev.json", {}) or {}).get("url")
@@ -413,7 +415,7 @@ def check(root: Path, online: bool = False) -> dict:
             up = _answers(url)
         claim("the app runs locally", up, f"{url or 'no dev URL'} does not answer — `dh dev start`", level="info")
     head = _git(root, "rev-parse", "HEAD")
-    v = read_json(dk / "verify.json", None)
+    v = read_json(dk / "verify.json", None, expect=dict)
     if v and s["phases"]["review"]["status"] == "done":
         vc = v.get("commit")
         from .checks import verify_stale
@@ -425,7 +427,7 @@ def check(root: Path, online: bool = False) -> dict:
             claim("verify still describes the code", bool(v.get("ok")) and not later,
                   f"{len(later)} file(s) edited since the last `dh verify` ({', '.join(later[:4])}) — run it again before shipping" if later
                   else "" if v.get("ok") else "the last verify was red")
-    d = read_json(dk / "deploy.json", None)
+    d = read_json(dk / "deploy.json", None, expect=dict)
     if d and (d.get("last") or {}).get("commit"):
         dc = d["last"]["commit"]
         claim("what is live is the current code", not head or dc == head,
@@ -505,7 +507,7 @@ def hook(stdin_text: str = "", start: Path | None = None) -> str:
 def install_hook(settings: Path | None = None) -> dict:
     """Add the SessionStart hook to Claude Code's user settings (merged, idempotent, other hooks kept)."""
     settings = Path(settings) if settings else Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "settings.json"
-    data = read_json(settings, None) if settings.exists() else {}
+    data = read_json(settings, None, expect=dict) if settings.exists() else {}
     if not isinstance(data, dict) or not isinstance(data.get("hooks", {}), dict) or not isinstance(data.get("hooks", {}).get("SessionStart", []), list):
         raise DhError("BAD_SETTINGS", f"{settings} is not valid Claude Code settings JSON — fix it first, nothing was changed")
     cmd = f"{_dh()} resume --hook"

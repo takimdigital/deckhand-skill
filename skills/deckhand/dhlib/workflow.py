@@ -88,10 +88,10 @@ def sync(offline: bool = False) -> dict:
 
 def _community_rows(refresh: bool = False) -> list:
     target = _cache() / "community-index.json"
-    cur = read_json(target, None)
+    cur = read_json(target, None, expect=dict)
     if not os.environ.get("DECKHAND_OFFLINE") and (refresh or cur is None or str(cur.get("fetched", ""))[:10] != today()):
         sync()                                          # once a day at most; unreachable = the cached copy
-        cur = read_json(target, None)
+        cur = read_json(target, None, expect=dict)
     return [{**r, "source": "community"} for r in (cur or {}).get("workflows", []) if _row_ok(r)]
 
 
@@ -126,9 +126,9 @@ def row_of(wf: dict, source: str, path: str | None = None) -> dict:
 def rows(refresh: bool = False, sources=("mine", "base", "community")) -> list:
     out = []
     if "mine" in sources:
-        out += [row_of(wf, "mine", str(p)) for p in _files(mine_dir()) if (wf := read_json(p, None)) and wf.get("id")]
+        out += [row_of(wf, "mine", str(p)) for p in _files(mine_dir()) if (wf := read_json(p, None, expect=dict)) and wf.get("id")]
     if "base" in sources:
-        out += [row_of(wf, "base", str(p)) for p in _files(BASE_DIR) if (wf := read_json(p, None)) and wf.get("id")]
+        out += [row_of(wf, "base", str(p)) for p in _files(BASE_DIR) if (wf := read_json(p, None, expect=dict)) and wf.get("id")]
     if "community" in sources:
         out += _community_rows(refresh)
     return out
@@ -151,7 +151,7 @@ def load(ref: str, refresh: bool = False) -> tuple[dict, str]:
                         f.write_bytes(_fetch(_community_base() + hit.get("file", f"{wid}.json")))
                     except Exception as e:  # noqa: BLE001
                         raise DhError("UNREACHABLE", f"community workflow {wid}: {e}")
-                wf = read_json(f, None)
+                wf = read_json(f, None, expect=dict)
                 if not isinstance(wf, dict) or _sha(wf) != hit["sha"]:
                     f.unlink()
                     raise DhError("SHA_MISMATCH", f"community workflow {wid}: the file does not match its index entry — refused")
@@ -159,7 +159,7 @@ def load(ref: str, refresh: bool = False) -> tuple[dict, str]:
             continue
         d = mine_dir() if s == "mine" else BASE_DIR
         for p in _files(d):
-            wf = read_json(p, None)
+            wf = read_json(p, None, expect=dict)
             if wf and wf.get("id") == wid and (not ver or str(wf.get("version")) == ver):
                 return wf, s
     raise DhError("NO_SUCH_WORKFLOW", f"{ref}: not in your workflows, the base set or the community index (`dh workflow list`)")
@@ -478,7 +478,7 @@ def _pinned_wf(root: Path) -> tuple[dict, dict]:
     pin = pinned(root)
     if not pin:
         raise DhError("NO_WORKFLOW", "no workflow pinned — `dh workflow query`, then `dh workflow use <ref>`")
-    wf = read_json(Path(root) / ".deckhand" / "workflow.json", None)
+    wf = read_json(Path(root) / ".deckhand" / "workflow.json", None, expect=dict)
     if not wf or _sha(wf) != pin.get("sha"):
         raise DhError("WORKFLOW_CHANGED", ".deckhand/workflow.json no longer matches the pinned version — `dh workflow use` it again")
     return wf, pin
@@ -615,7 +615,7 @@ def observe(root: Path, shown: str, code: int) -> None:
         s = STATE.load(root, required=False)
         if not s or not s.get("workflow") or code != 0:
             return
-        wf = read_json(Path(root) / ".deckhand" / "workflow.json", None)
+        wf = read_json(Path(root) / ".deckhand" / "workflow.json", None, expect=dict)
         if not wf:
             return
         w = s["workflow"]
@@ -693,8 +693,11 @@ def new_from_run(root: Path, wid: str | None = None, title: str | None = None) -
         m = re.match(r"^dh phase (done|skip) (\w+)", cmd)
         if not (STATEFUL.match(cmd) or ALLOWED.match(cmd)) or cmd.startswith("dh workflow"):
             continue
-        if re.match(r"^dh (gate pass|note)", cmd):
-            continue                                      # quotes and notes are the owner's words, not the path
+        if re.match(r"^dh (gate pass|note|pending|learn|bb|vault|profile set|research add)", cmd):
+            continue                                      # quotes, notes, pending items and keys are the owner's words, not the path
+        cmd = re.sub(r"^(dh init --name)\s+(?:\"[^\"]*\"|'[^']*'|\S+)", r'\1 "{{name}}"', cmd)
+        if "{{name}}" in cmd:
+            params.setdefault("name", {"default": "", "why": "the project's name (asked at define)"})
         bm = re.match(r"^dh brief set\s+(.*)$", cmd)
         if bm:                                            # F12: the step stays (define needs the brief); its VALUES become the next owner's
             keys = list(dict.fromkeys(re.findall(r"(?:^|\s)([a-z][\w.]*)=", bm.group(1))))
@@ -713,10 +716,10 @@ def new_from_run(root: Path, wid: str | None = None, title: str | None = None) -
     for n in RESUME.notes(root):
         if n.get("kind") == "decision":
             asked.append({"id": f"Q-learned-{len(asked) + 1}", "q": f"(learned) settle up front: {n['text'][:140]}", "ask_at": "define",
-                          "learned_from": f"{s.get('name')} {str(n.get('at', ''))[:10]} — decided mid-run"})
+                          "learned_from": f"a run {str(n.get('at', ''))[:10]} — decided mid-run"})
     ind, fam = normalize_industry(str(b.get("category") or b.get("business") or ""))
     wf = {"schema": SCHEMA, "id": wid, "version": 1, "title": title or f"{(b.get('deliverable') or 'own').title()} {b.get('shape') or 'app'}" + (f" for {ind}" if ind else ""),
-          "summary": f"Extracted from the run of {s.get('name')} ({today()}). A draft until a complete run follows it without errors.",
+          "summary": f"Extracted from a run ({today()}). A draft until a complete run follows it without errors.",
           "match": {"deliverable": [b.get("deliverable") or "own"], **({"shape": [b["shape"]]} if b.get("shape") else {}),
                     **({"industry": [ind], "family": fam} if ind else {}), "features": b.get("features") or []},
           "proof": {"runs": [{"date": today(), "harness": harness(), "os": os_name(), "errors": errors,
@@ -724,15 +727,54 @@ def new_from_run(root: Path, wid: str | None = None, title: str | None = None) -
           "ask_upfront": asked, "params": params,
           "phases": [{"id": pid, "steps": st, "exit": f"dh phase done {pid}"} for pid, st in phases.items() if st],
           "pitfalls": [], "creative": ["the copy on every page", "the design direction", "features beyond the plan", "the business around it"],
-          "changelog": [{"version": 1, "date": today(), "change": "extracted from a run", "why": "a path that worked once", "evidence": f"runs.jsonl of {s.get('name')}"}]}
+          "changelog": [{"version": 1, "date": today(), "change": "extracted from a run", "why": "a path that worked once", "evidence": "runs.jsonl of the extracted run"}]}
     for ph in wf["phases"]:
         for st in ph["steps"]:
-            st["do"] = re.sub(r"(--to|--project)\s+\S+", r"\1 {{dir}}", st["do"])
+            st["do"] = re.sub(r"(--to|--project)\s+(?:\"[^\"]*\"|'[^']*'|\S+)", r"\1 {{dir}}", st["do"])
+    wf = _anonymise(wf, private_names(root))
     path = mine_dir() / f"{wid}.json"
     lt = lint(wf, strict=False)
     write_json(path, wf)
     return {"saved": str(path), "id": wid, "level": level(wf), "steps": lt["steps"], "lint": {k: lt[k] for k in ("ok", "errors", "warnings")},
             "next": f"read it (dh workflow show mine:{wid}), tighten the steps (expect lines), then use it on the next similar project"}
+
+
+def private_names(root: Path | None = None) -> list:
+    """The project's own name, the owner's name and domains: what must never ride in a workflow that can be published."""
+    from . import profile as PROFILE
+    root = Path(root) if root else PROFILE._PROJECT
+    names = []
+    if root:
+        b = read_json(Path(root) / ".deckhand" / "brief.json", {}) or {}
+        r = read_json(Path(root) / ".deckhand" / "run.json", {}) or {}
+        dep = read_json(Path(root) / ".deckhand" / "deploy.json", {}) or {}
+        br = b.get("brand") if isinstance(b.get("brand"), dict) else {}
+        names += [r.get("name"), b.get("name"), br.get("name"), br.get("domain"), b.get("domain"), b.get("business")]
+        host = re.sub(r"^\w+://", "", str(dep.get("url") or "")).split("/")[0]
+        names.append(host if "." in host and not re.match(r"^[\d.:]+$", host) else None)
+    try:
+        prof = PROFILE.load()
+    except Exception:
+        prof = {}
+    names += [(prof.get("owner") or {}).get("name"), (prof.get("domain") or {}).get("default"), (prof.get("github") or {}).get("user")]
+    out = []
+    for n in names:
+        n = str(n or "").strip()
+        if len(n) >= 4 and n.lower() not in ("none", "own", "app") and n.lower() not in [x.lower() for x in out]:
+            out.append(n)
+    return out
+
+
+def _anonymise(obj, names: list):
+    if isinstance(obj, str):
+        for n in sorted(names, key=len, reverse=True):
+            obj = re.sub(re.escape(n), "{{name}}" if " " in n or "." not in n else "{{domain}}", obj, flags=re.I)
+        return obj
+    if isinstance(obj, list):
+        return [_anonymise(x, names) for x in obj]
+    if isinstance(obj, dict):
+        return {k: (v if k in ("id", "schema") else _anonymise(v, names)) for k, v in obj.items()}
+    return obj
 
 
 def save(wf: dict, where: str = "mine") -> dict:
@@ -748,13 +790,18 @@ def save(wf: dict, where: str = "mine") -> dict:
 
 
 def publish_bundle(wf: dict) -> dict:
-    from .util import redact
+    from .redact import scrub_text
     lt = lint(wf, strict=True)
     if not lt["ok"]:
         raise DhError("WORKFLOW_INVALID", "community workflows are strict: fix these first", errors=lt["errors"][:12])
     text = json.dumps(wf, indent=2, ensure_ascii=False)
-    if redact(text) != text:
+    if scrub_text(text) != text:
         raise DhError("SECRETS", "a credential-shaped value is in the workflow — remove it")
+    low = text.lower()
+    hit = [n for n in private_names() if n.lower() in low]
+    if hit:                                   # a published workflow is public: the client, the owner and their domain stay out (C9)
+        raise DhError("PRIVATE_NAME_IN_BUNDLE", f"the workflow names {len(hit)} private name(s) from this project/profile "
+                      f"({', '.join(hit)}): replace each with {{{{name}}}} or {{{{domain}}}} before publishing")
     out = mine_dir() / "outbox" / f"{wf['id']}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(text + "\n", encoding="utf-8")

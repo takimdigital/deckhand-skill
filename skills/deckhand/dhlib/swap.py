@@ -78,7 +78,7 @@ def scan(root: Path) -> dict:
 
 def check(root: Path) -> dict:
     root = Path(root)
-    doc = read_json(root / ".deckhand" / "swap-map.json", None)
+    doc = read_json(root / ".deckhand" / "swap-map.json", None, expect=dict)
     if doc is None:
         return {"ok": True, "rows": [], "note": "no swap map (dh swap scan) — nothing to prove"}
     deps = _deps(root)

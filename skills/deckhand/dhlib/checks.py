@@ -9,6 +9,7 @@ from pathlib import Path
 from .util import read_json
 
 REQUIRED_BRIEF = ("business", "shape", "languages", "audience")
+SHAPES = ("saas", "marketplace", "booking", "catalogue", "leadgen", "internal")      # references/00-define.md Q3
 
 
 def _res(ok: bool, why=None, hint: str = "", **extra) -> dict:
@@ -18,11 +19,15 @@ def _res(ok: bool, why=None, hint: str = "", **extra) -> dict:
 def define(root: Path, s: dict) -> dict:
     b = read_json(root / ".deckhand" / "brief.json", {}) or {}
     miss = [k for k in REQUIRED_BRIEF if not b.get(k)]
-    return _res(not miss, [f"brief.{k} missing" for k in miss], "dh brief set business=\"…\" shape=saas languages=en,fr audience=\"…\"")
+    why = [f"brief.{k} missing" for k in miss]
+    shape = str(b.get("shape") or "").strip().lower()
+    if shape and shape not in SHAPES:
+        why.append(f"brief.shape '{b.get('shape')}' is not one of {', '.join(SHAPES)}")
+    return _res(not why, why, "dh brief set business=\"…\" shape=saas languages=en,fr audience=\"…\"")
 
 
 def research(root: Path, s: dict) -> dict:
-    r = read_json(root / ".deckhand" / "research.json")
+    r = read_json(root / ".deckhand" / "research.json", None, expect=dict)
     if not r:
         return _res(False, ["no .deckhand/research.json"], "fill templates/research.json (web research, URLs only) then re-run")
     why = []
@@ -147,13 +152,49 @@ def verify_stale(root: Path, r: dict) -> str:
     return f"{len(files)} file(s) changed since the verify of {vc[:7]} ({', '.join(files[:4])})" if files else ""
 
 
+def _ts(v) -> float:
+    import datetime as _dt
+    try:
+        return _dt.datetime.strptime(str(v)[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=_dt.timezone.utc).timestamp()
+    except ValueError:
+        return 0.0
+
+
+def edited_after_verify(root: Path, r: dict) -> str:
+    """Files edited (committed or not) after the verify ran, when git cannot say: no repository, or uncommitted edits."""
+    from .resume import _dirty
+    from .util import git_files
+    at = _ts((r or {}).get("at"))
+    if not at:                                          # no time to compare: a recorded commit that is still HEAD is the proof
+        return "" if (r or {}).get("commit") and (Path(root) / ".git").exists() else "the verify report has no time: run `dh verify` again"
+    root = Path(root)
+    if (root / ".git").exists():
+        files = _dirty(root)
+    else:
+        files = [str(p.relative_to(root)).replace("\\", "/") for p in git_files(root)]
+        files = [f for f in files if not f.startswith(".deckhand/") and not f.startswith("node_modules/") and f not in ("PENDING.md", "HANDOFF.md", "AGENTS.md", "CLAUDE.md", "RESUME.md")]
+    later = []
+    for f in files:
+        try:
+            if (root / f).stat().st_mtime > at + 1:
+                later.append(f)
+        except OSError:
+            continue
+    return f"{len(later)} file(s) edited since the last `dh verify` ({', '.join(later[:4])})" if later else ""
+
+
 def review(root: Path, s: dict) -> dict:
-    r = read_json(root / ".deckhand" / "verify.json")
+    r = read_json(root / ".deckhand" / "verify.json", None, expect=dict)
     if not r:
         return _res(False, ["no verify report"], "dh verify")
-    stale = verify_stale(root, r)
+    stale = verify_stale(root, r) or edited_after_verify(root, r)
     if stale:
         return _res(False, [stale], "dh verify (again: the code changed since)")
+    reason = str(r.get("skip_reason") or "").strip()
+    skipped = [x["check"] for x in r.get("rows", []) if x.get("skipped") and x.get("blocking", True) and not reason] \
+        + ([] if reason else list(r.get("skipped") or []))
+    if skipped:
+        return _res(False, [f"verify skipped blocking row(s): {', '.join(dict.fromkeys(skipped))} — run `dh verify` without --skip (or with --reason)"], "dh verify")
     return _res(bool(r.get("ok")), [f"{x['check']}: {x['detail']}" for x in r.get("rows", []) if not x.get("ok") and x.get("blocking", True)], "dh verify (fix every red row)")
 
 
@@ -162,15 +203,20 @@ def deploy(root: Path, s: dict) -> dict:
     why = []
     if not d.get("url"):
         why.append("no live URL recorded")
-    if not (d.get("smoke") or {}).get("ok"):
+    sm = d.get("smoke") or {}
+    if not sm.get("ok"):
         why.append("no passing smoke check against the live URL")
+    elif (d.get("last") or {}).get("at") and _ts(sm.get("at")) < _ts(d["last"]["at"]):
+        why.append(f"the smoke check ({sm.get('at')}) is older than the last deploy ({d['last']['at']}): run `dh deploy smoke`")
     if not (root / "HANDOFF.md").exists():
         why.append("HANDOFF.md not written (dh handoff)")
     return _res(not why, why, "dh deploy … then dh handoff")
 
 
 def operate(root: Path, s: dict) -> dict:
-    return _res(True)
+    """Minimal and honest: what operate needs is a deployed target to operate on (the changes themselves are the owner's)."""
+    d = read_json(root / ".deckhand" / "deploy.json", {}) or {}
+    return _res(bool(d.get("url")), [] if d.get("url") else ["no deployed target recorded (.deckhand/deploy.json url)"], "dh deploy target --url …")
 
 
 def run(phase: str, root: Path, s: dict) -> dict:

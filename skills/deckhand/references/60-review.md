@@ -13,18 +13,20 @@ green on every blocking row; `.deckhand/VERIFY.md`. **Gate G4:** the owner says 
 | tryon-closed | yes | a session is still open |
 | tryon-unwired | yes | next/vite config still loads try-on from `.deckhand/` (run `tryon clean`) |
 | secrets | yes | a credential-shaped value (policy: `data/secrets.json`) or a committed `.env` is in the repo — `.deckhand/` included |
-| env-ignored | yes | `.env` is not gitignored |
+| env-ignored | yes | `.env` is not gitignored (the row appears only when it fails: no row = fine) |
 | logs-ignored | yes | deckhand's run logs and local state (`.deckhand/runs.jsonl`, `failures.jsonl`, `*.log`, `autopsy/`, `tryon/`, `RESUME.md`, `notes.jsonl`, `profile.json`, `vault.env`, `profile.md`, `layout.json`) are not gitignored — any `dh` command adds the block; commit `.gitignore` |
 | swaps | yes | a vendor SDK marked for replacement is still installed/imported |
 | honesty | yes | template names, demo companies/people, lorem ipsum, fake logos, try-on leftovers (a product's fictional demo company in its seed is a warning, not a blocker) |
 | product-kit | yes (products) | `brief.deliverable=product` and the buyer's kit is incomplete: README, LICENSE, CUSTOMIZE.md, a seed script and a reset/wipe script |
-| routes | yes | a planned public route or a home-page link answers ≥ 400 — checked on the production build (served on a free port and stopped after; `--url` checks a live site instead) |
+| prod-serve | yes | the production build did not start (`start` script); appears only when it fails, and then `routes` and `seo` cannot run |
+| routes | yes | a planned public route or a home-page link answers ≥ 400, or the check could not run (no build to serve, no URL) — checked on the production build (served on a free port and stopped after; `--url` checks a live site instead) |
+| copy-slop | no | the rendered pages of the production build read as AI slop (verdict `slop`; `dh slop check --url`); runs with the route check, so it is absent when `routes` could not run or with `--skip copy-slop` |
 | a11y-basics | no | `<img>` without alt, `<html>` without lang |
 | deps-audit | no | high/critical npm advisories |
 | seo | yes (launch-breakers only) | the site blocks crawlers, a public page is noindex, a page has no real title, a preview is indexable, live canonicals point elsewhere — the rest is scored in `.deckhand/SEO.md` (`references/45-seo.md`) |
 
 ## Procedure
-`dh tryon clean` (try-on) → `dh verify` (it builds, then serves the build itself for the route check) → fix every red blocking row at its root
+`--skip` hides a blocking row from the run, never from the report: a skipped blocking row shows as `skipped`, keeps the report red, and `dh phase done review` refuses it, unless `--reason "…"` is recorded. `dh tryon clean` (try-on) → `dh verify` (it builds, then serves the build itself for the route check) → fix every red blocking row at its root
 (never by weakening the check) → re-run → `dh phase done review` → show VERIFY.md → G4
 (`dh gate pass G4 --quote "<their words>"`; for a product, G4 means "package it").
 Security floor before G4: auth routes rate-limited or provider-protected; admin routes server-checked;

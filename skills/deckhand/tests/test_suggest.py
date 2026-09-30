@@ -80,10 +80,10 @@ class Suggestions(Base):
             self.run_log("npm run build", 1)
         items = {i["id"]: i for i in suggest.compute(self.root, limit=0)["items"]}
         self.assertEqual(items["stuck"]["level"], "now")
-        self.assertEqual(items["autopsy"]["cmd"], "dh autopsy --apply")               # unknown harness: the run log
+        self.assertTrue(items["autopsy"]["cmd"].endswith(" autopsy --apply") and "dh.py" in items["autopsy"]["cmd"])              # unknown harness: the run log
         os.environ["HERMES_AGENT"] = "1"
         items = {i["id"]: i for i in suggest.compute(self.root, limit=0)["items"]}
-        self.assertEqual(items["autopsy"]["cmd"], "dh autopsy --latest --apply")      # inside Hermes: this very session
+        self.assertTrue(items["autopsy"]["cmd"].endswith(" autopsy --latest --apply"))      # inside Hermes: this very session
         self.run_log("npm run build", 0)
         self.assertNotIn("stuck", self.ids())                                        # it succeeded since: not stuck anymore
 
@@ -112,6 +112,9 @@ class Suggestions(Base):
         state.gate_pass(self.root, "G1", quote="ok go")
         time.sleep(0.01)
         os.utime(self.root / ".deckhand" / "sitemap.json", (time.time() + 60, time.time() + 60))
+        self.assertNotIn("plan-drift", self.ids(limit=0))                              # a touch alone is no change (content hash recorded at the gate)
+        sm["pages"][0]["title"] = "Bakery home, edited"
+        write_json(self.root / ".deckhand" / "sitemap.json", sm)
         self.assertIn("plan-drift", self.ids(limit=0))                                 # the approved plan changed afterwards
 
     def test_pending_reminders_and_deferred_items_that_come_due(self):
@@ -180,7 +183,8 @@ class Suggestions(Base):
         self.dh("status")
         text = (self.root / ".deckhand" / "RESUME.md").read_text(encoding="utf-8")
         self.assertLess(text.index("## Waiting on the owner"), text.index("## Next (optional"))
-        self.assertIn("→ `dh autopsy --apply`", text)
+        launcher = "py" if os.name == "nt" else "python3"                               # the prefix util.DH picks per platform
+        self.assertRegex(text, r"→ `" + launcher + r" \"[^`]*dh\.py\" autopsy --apply`")          # B9: runnable form
         self.assertNotIn("→ `dh profile doctor`", text)                             # already the first `do` step
 
     def test_a_refused_gate_is_a_decision_not_a_failure(self):

@@ -81,7 +81,7 @@
 <body>
 
 <nav id="toc">
-  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.4.0</span></div>
+  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.4.2</span></div>
   <div class="grp">Big picture</div>
   <a href="#overview">1 · What Deckhand is</a>
   <a href="#layers">2 · System layers</a>
@@ -90,7 +90,7 @@
   <a href="#modes">4 · Modes &amp; paths</a>
   <a href="#gates">5 · Gates G1–G4</a>
   <a href="#phasedetail">6 · Phase-by-phase detail</a>
-  <a href="#invariants">7 · The 12 invariants</a>
+  <a href="#invariants">7 · The 13 invariants</a>
   <a href="#comms">8 · Owner communication</a>
   <div class="grp">Control plane</div>
   <a href="#nextloop">9 · The dh next loop</a>
@@ -131,7 +131,7 @@
   <div class="kicker">Complete system reference</div>
   <h1>Deckhand Architecture Atlas</h1>
   <p>Every layer, every command path, every diagram — how the methodology, control plane, try-on engine,
-  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then fact-checked claim by claim against the 2.4.0 code (about 230 claims; the 2.3.1 ordering rules and the fixes from the real-browser test are folded in).</p>
+  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then fact-checked claim by claim against the 2.4.1 code (about 230 claims; the 2.3.1 ordering rules and the fixes from the real-browser test are folded in).</p>
 </header>
 
 <!-- ============================================================ 1 -->
@@ -180,11 +180,11 @@ The owner only ever interacts at gates, pending asks, and the try-on browser UI.
   <!-- L1 -->
   <rect x="40" y="36" width="600" height="58" rx="8" fill="#FFFFFF" stroke="#1C1E21" stroke-width="1.4"/>
   <text x="56" y="58" font-size="13" font-weight="600">① Spec layer — SKILL.md + references/*.md</text>
-  <text x="56" y="78" font-size="11.5" fill="#5F6570">The methodology as text: 9 phases · 12 invariants · per-phase playbooks · harness notes</text>
+  <text x="56" y="78" font-size="11.5" fill="#5F6570">The methodology as text: 9 phases · 13 invariants · per-phase playbooks · harness notes</text>
 
   <!-- L2 -->
   <rect x="40" y="112" width="600" height="66" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
-  <text x="56" y="134" font-size="13" font-weight="600">② Control plane — dh.py → dhlib/*.py (37 subcommands)</text>
+  <text x="56" y="134" font-size="13" font-weight="600">② Control plane — dh.py → dhlib/*.py (38 subcommands)</text>
   <text x="56" y="154" font-size="11.5" fill="#5F6570">state · guide(next) · checks · resume · pending · profile/vault · workflow · plan · research</text>
   <text x="56" y="170" font-size="11.5" fill="#5F6570">pool · build · brand · slop · seo · verify · deploy · ops · learn/autopsy · suggest</text>
 
@@ -417,7 +417,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 
 <!-- ============================================================ 7 -->
 <section id="invariants">
-<h2><span class="no">7</span>The 12 invariants</h2>
+<h2><span class="no">7</span>The 13 invariants</h2>
 <p class="sub">Rules that hold in every phase, every session, every harness. Violating one is a defect.</p>
 <table>
 <tr><th style="width:4%">#</th><th style="width:26%">Invariant</th><th>Operational meaning</th></tr>
@@ -433,6 +433,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><td>10</td><td>Production changes follow the pipeline</td><td>edit → verify → commit → <code>dh deploy ship</code> (proof) → report. Rollback path known before shipping.</td></tr>
 <tr><td>11</td><td>Nothing lives only in the chat</td><td>Decisions recorded the moment they're made (<code>dh note decision</code>). Before stopping: <code>dh resume</code> must say SAFE TO START A FRESH SESSION.</td></tr>
 <tr><td>12</td><td>Proven paths, measured</td><td>A pinned workflow is followed step by step; steps tick from dh commands; leaving the path is recorded, not hidden. Every report ends with open PENDING items + the WORKFLOW line.</td></tr>
+<tr><td>13</td><td>Leave no trace</td><td>Scratch folders, site copies and browser profiles do not stay in the OS temp dir. <code>dh clean</code> is the safety net: dry run by default (lists what it would remove, with sizes), <code>--apply</code> removes; never anything younger than 2 h, never a project, <code>~/.deckhand</code> or an agent's own folders; patterns in <code>data/clean.json</code>; <code>--caches</code> also verifies the npm cache.</td></tr>
 </table>
 </section>
 
@@ -514,7 +515,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <!-- ============================================================ 10 -->
 <section id="commands">
 <h2><span class="no">10</span>Full command map</h2>
-<p class="sub">All 37 <code>dh</code> subcommands by intent, plus the try-on engine's own CLI. One JSON object per command; exit 0 ok / 1 check failed / 2 usage.</p>
+<p class="sub">All 38 <code>dh</code> subcommands by intent, plus the try-on engine's own CLI. One JSON object per command; exit 0 ok / 1 check failed / 2 usage.</p>
 
 <h3>State machine &amp; control</h3>
 <table>
@@ -585,6 +586,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><td><code>dh autopsy [transcript|state.db|--latest] [--apply] [--session]</code></td><td>Failures → episodes → recipes → lessons/playbooks/skill-proposals (never edits the skill)</td></tr>
 <tr><td><code>dh autopsy --workflow [--part P]</code></td><td>Timeline / questions (LATE, DIRECTION-CHANGE, LOST) / deviations / costs / proposals</td></tr>
 <tr><td><code>dh harvest --name BASE [--push] [--repo owner/name] · dh pool sync</code></td><td>Freeze run as private base (identity neutralised, secret-scanned) → GitHub library</td></tr>
+<tr><td><code>dh clean [--apply] [--older-than HOURS] [--caches]</code></td><td>Invariant 13: lists (dry run by default) or removes Deckhand's own leftovers in the OS temp dir; never anything younger than 2 h, never a project or <code>~/.deckhand</code></td></tr>
 </table>
 
 <h3>Try-on engine CLI (node)</h3>
@@ -804,7 +806,7 @@ node tryon/cli.mjs keep --id S --idx 2  |  discard --id S
 node tryon/cli.mjs save --id S --name n              # → personal library
 node tryon/cli.mjs status | clean</code></pre>
 <h3>Playground — a saved test site</h3>
-<p class="small"><code>playground/</code> holds a real Next.js site as <b>source only</b> (Deckhand's scaffold + the default compose for a fictional bakery; no node_modules, .next, .git, run or try-on state), so a try-on test starts from it instead of a multi-minute scaffold. <code>node playground/playground.mjs restore</code> copies it (default <code>~/deckhand-playground/tryon-site</code>), installs once and commits; <code>start</code> runs try-on setup + dev server + proxy and prints the URL; <code>reset</code> throws away every try-on change; <code>kitchen</code> and <code>snapshot</code> manage the <code>/kitchen-sink</code> page and refresh the snapshot. <code>/kitchen-sink</code> holds one owner element for each of about 45 slot kinds, written from the fit-check's own reference sections. CI runs <code>playground/playground.test.mjs</code> (structure: every import in the snapshot resolves; a real dev-server run only with <code>DH_PLAYGROUND=1</code>).</p>
+<p class="small"><code>playground/</code> holds a real Next.js site as <b>source only</b> (Deckhand's scaffold + the default compose for a fictional bakery; no node_modules, .next, .git, run or try-on state), so a try-on test starts from it instead of a multi-minute scaffold. <code>node playground/playground.mjs restore</code> copies it (default <code>~/deckhand-playground/tryon-site</code>), installs once and commits; <code>start</code> runs try-on setup + dev server + proxy and prints the URL; <code>reset</code> throws away every try-on change; <code>kitchen</code> and <code>snapshot</code> manage the <code>/kitchen-sink</code> page and refresh the snapshot. <code>/kitchen-sink</code> shows 45 owner elements, written from the fit-check's own reference sections (several slot kinds share one reference); the catalog (<code>data/components.index.json</code>) knows 58 slot kinds. CI runs <code>playground/playground.test.mjs</code> (structure: every import in the snapshot resolves; a real dev-server run only with <code>DH_PLAYGROUND=1</code>).</p>
 </section>
 
 <!-- ============================================================ 15 -->
@@ -1429,10 +1431,10 @@ node tryon/cli.mjs status | clean</code></pre>
 
 <table>
 <tr><th style="width:30%">Path</th><th>Contents</th></tr>
-<tr><td><code>SKILL.md</code></td><td>The spec: charter, loop, state table, 12 invariants, command surface, try-on summary, delegation, comms protocol (20 KB — what you were given when this skill loaded)</td></tr>
+<tr><td><code>SKILL.md</code></td><td>The spec: charter, loop, state table, 13 invariants, command surface, try-on summary, delegation, comms protocol (20 KB — what you were given when this skill loaded)</td></tr>
 <tr><td><code>references/00–80-*.md</code></td><td>One playbook per phase (define, research, plan, build, brand, seo, tryon, review, deploy, operate) + team.md, harness.md, research-card.md</td></tr>
 <tr><td><code>references/ops/*</code></td><td>VPS bootstrap, domain/DNS/TLS, deploy-app, change pipeline, backups, object storage, email, auth, monitoring runbooks</td></tr>
-<tr><td><code>dhlib/cli.py</code></td><td>37 subcommands: parser + dispatch + observe/refresh hooks + runs.jsonl logging</td></tr>
+<tr><td><code>dhlib/cli.py</code></td><td>38 subcommands: parser + dispatch + observe/refresh hooks + runs.jsonl logging</td></tr>
 <tr><td><code>dhlib/state.py · checks.py</code></td><td>run.json transitions, gate quote classifier, per-phase exit checks</td></tr>
 <tr><td><code>dhlib/guide.py · resume.py · suggest.py · pending.py</code></td><td>dh next logic, RESUME generation/safety/check, 20 suggestion rules, two pending ledgers</td></tr>
 <tr><td><code>dhlib/profile.py</code></td><td>profile/vault/layout binding, PERSON facts, client-project rule, BINDING_BROKEN</td></tr>

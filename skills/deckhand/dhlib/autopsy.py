@@ -32,7 +32,8 @@ import re
 import shlex
 from pathlib import Path
 
-from .util import DhError, append_jsonl, is_guard, home, now, read_jsonl, redact_obj, write_json
+from .util import DhError, append_jsonl, is_guard, home, now, read_jsonl, write_json
+from . import redact as RD
 
 RUNG_ORDER = ("pitfall", "gate", "reorder", "preflight", "eliminate")
 READ_ONLY = {"cd", "echo", "ls", "cat", "head", "tail", "grep", "rg", "egrep", "fgrep", "sed", "awk", "wc", "sort", "uniq", "cut",
@@ -847,7 +848,7 @@ def autopsy(root: Path | None, source: str | None = None, latest: bool = False, 
     events, meta = load(path, kind, session, root)
     meta["dev"] = bool(meta.get("cwd") and (Path(meta["cwd"]) / "skills" / "deckhand" / "SKILL.md").exists())
     from . import learn as LE
-    rep = redact_obj(analyze(events, meta, LE.all_lessons(root)), LE.secret_values())
+    rep = RD.scrub_obj(analyze(events, meta, LE.all_lessons(root)))
     rep["kind"] = kind
     rid = "A-" + hashlib.sha1(path.read_bytes() + (meta.get("session") or "").encode()).hexdigest()[:10]
     out = root / ".deckhand" / "autopsy"
@@ -871,12 +872,19 @@ def apply_report(root: Path, rep: dict, rid: str) -> dict:
     s = STATE.load(root, required=False) if root else None
     phase = STATE.current(s)["id"] if s else "build"
     lessons, proposals = [], []
+    done = _applied_keys()
+    fresh = set()
     for e in rep["episodes"]:
         if e["owner"] == "skill":
             proposals.append(_proposal(e, rid))
             continue
         if not e["resolved"] or not e["recipe"]:
             continue
+        ekey = _sid(rid + "\n" + e["signature"] + "\n" + json.dumps(e["recipe"]))        # the evidence, not the clock (C10)
+        if ekey in done:
+            lessons.append({"episode": e["id"], "skipped": "already applied from this session"})
+            continue
+        fresh.add(ekey)
         runs = [v for k, v in e["recipe"] if k == "run"]
         auto = bool(runs) and not any(k == "edit" for k, _ in e["recipe"]) and all(SAFE_RX.match(r) and "***" not in r for r in runs)
         fix = " → ".join(f"{k} {v}" for k, v in e["recipe"])
@@ -887,6 +895,11 @@ def apply_report(root: Path, rep: dict, rid: str) -> dict:
     books = []
     for p in rep["playbooks"]:
         key = _sid(p["phase"] + "\n" + "\n".join(p["steps"]))
+        ekey = _sid(rid + "\n" + key)
+        if ekey in done:
+            books.append({"phase": p["phase"], "key": key, "skipped": "already applied from this session"})
+            continue
+        fresh.add(ekey)
         target = home() / "playbooks.jsonl"
         rows = read_jsonl(target)
         hit = next((x for x in rows if x.get("key") == key), None)
@@ -897,19 +910,26 @@ def apply_report(root: Path, rep: dict, rid: str) -> dict:
         else:
             append_jsonl(target, {"key": key, "phase": p["phase"], "steps": p["steps"], "seen": 1, "source": rid, "last_seen": now()})
         books.append({"phase": p["phase"], "key": key})
+    for k in sorted(fresh):
+        append_jsonl(home() / "autopsy" / "applied.jsonl", {"key": k, "at": now()})
     return {"lessons": lessons, "proposals": proposals, "playbooks": books}
+
+
+def _applied_keys() -> set:
+    return {r.get("key") for r in read_jsonl(home() / "autopsy" / "applied.jsonl")}
 
 
 def _proposal(e: dict, rid: str) -> str:
     d = home() / "autopsy" / "proposals"
     d.mkdir(parents=True, exist_ok=True)
     p = d / f"{e['id']}.md"
+    cl = RD.clean_text                                                    # a proposal may travel: no personal paths, no secrets (C11)
     body = [f"# Skill fix proposal {e['id']} (from {rid})", "",
-            f"**Rung:** {e['rung']} — {e['why']}", "",
-            "## Repro", "", "```", (e["first_cmd"] or "")[:400], "```", "",
-            f"exit {e['exit']}" + (" (hidden behind a pipe)" if e["masked"] else ""), "", "```", e["tail"][-600:], "```", "",
+            f"**Rung:** {e['rung']} — {cl(e['why'])}", "",
+            "## Repro", "", "```", cl((e["first_cmd"] or "")[:400]), "```", "",
+            f"exit {e['exit']}" + (" (hidden behind a pipe)" if e["masked"] else ""), "", "```", cl(e["tail"][-600:]), "```", "",
             "## What fixed it in the session", ""]
-    body += [f"- {k}: `{v}`" for k, v in e["recipe"]] or ["- (not resolved in the session)"]
+    body += [f"- {k}: `{cl(v)}`" for k, v in e["recipe"]] or ["- (not resolved in the session)"]
     body += ["", "## Done means", "",
              "- the fix lives in the skill's code/templates (not in prose)",
              "- a regression test fails on the old code and passes on the new: " + ("present in the fix ✓" if e["test_in_fix"] else "**missing — write it**"),

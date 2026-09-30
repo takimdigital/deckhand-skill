@@ -17,7 +17,7 @@ import datetime as _dt
 import re
 from pathlib import Path
 
-from .util import DhError, SKILL, home, today
+from .util import DhError, SKILL, home, locked, today
 
 ITEM = re.compile(r"^- \[( |x|X)\] (P-(?:SEO-[\w.]+|\d{3,}))\b(.*)$")
 TEMPLATE = "# PENDING — {name}\n\nThings only the owner can do. Agents add a line the moment one appears; nothing lives only in chat.\n" \
@@ -32,6 +32,11 @@ def path_for(root: Path | None, machine: bool) -> Path:
     if machine or not root or not (Path(root) / ".deckhand").is_dir():
         return machine_path()
     return Path(root) / "PENDING.md"
+
+
+def _lock(root, machine: bool):
+    """The lock for one ledger: the project's .deckhand/.lock, or the machine's (every read-modify-write of a PENDING.md)."""
+    return locked(root if (not machine and root and (Path(root) / ".deckhand").is_dir()) else home())
 
 
 def _read(p: Path) -> str:
@@ -108,11 +113,22 @@ def add(root: Path | None, what: str, why: str = "", how: str = "", where: str =
                       "the owner has no idea where to look; that is the point of the field")
     from .util import SECRET_RX, mask_tokens
     blob = " ".join(x or "" for x in (what, why, how, where, when, project, rec))
-    if SECRET_RX.search(blob) or mask_tokens(blob) != blob:
+    from .redact import scrub_text
+    if SECRET_RX.search(blob) or mask_tokens(blob) != blob or scrub_text(blob) != blob:
         raise DhError("SECRET_IN_TEXT", "a pending item names WHERE a secret goes, never the secret itself — "
                       "store it with `dh vault set NAME` and write the name")
+    with _lock(root, machine):
+        return _add_locked(root, what, why, how, where, machine, when, project, decide, rec)
+
+
+def _add_locked(root, what, why, how, where, machine, when, project, decide, rec) -> dict:
     p = path_for(root, machine)
     text = _read(p)
+    body0 = (f"decide: {what.strip()}" + (f" (rec: {rec})" if rec else "")) if decide else what.strip()
+    same = next((it for it in items(p) if it["open"] and " ".join(it["what"].lower().split()) == " ".join(body0.lower().split())
+                 and (it["project"] or "") == (project or "")), None)
+    if same:                                            # the same ask twice is one ask
+        return {"added": None, "duplicate": same["id"], "file": str(p), "say": f"already open as {same['id']}: {same['what']} — not added again"}
     pid = _next_id(text)
     body = (f"decide: {what.strip()}" + (f" (rec: {rec})" if rec else "")) if decide else what.strip()
     parts = [f"- [ ] {pid} · {body}"] + [f"{k}: {v.strip()}" for k, v in (("WHY", why), ("HOW", how), ("WHERE", where)) if v and v.strip()]
@@ -144,16 +160,22 @@ def _insert_open(text: str, line: str) -> str:
 
 
 def close(root: Path | None, pid: str, machine: bool = False, drop_reason: str | None = None) -> dict:
+    with _lock(root, machine):
+        return _close_locked(root, pid, machine, drop_reason)
+
+
+def _close_locked(root, pid: str, machine: bool, drop_reason) -> dict:
     if pid.startswith("P-SEO-"):
         raise DhError("SEO_ITEM", f"{pid} closes itself: put the fact in the brief (`dh brief set seo.…=…`) or record the action, "
                       "then `dh seo audit` — a hand-closed SEO line would come back at the next audit")
     p = path_for(root, machine)
     text = _read(p)
-    hit = next((it for it in items(p) if it["id"] == pid), None)
+    pid = pid.strip().upper() if pid.strip().lower().startswith("p-") else pid
+    hit = next((it for it in items(p) if it["id"].upper() == pid.upper()), None)
     if not hit:
         raise DhError("NO_SUCH_ITEM", f"{pid} is not in {p}")
     if not hit["open"]:
-        return {"already": "closed", "id": pid}
+        return {"already": "closed", "id": hit["id"]}
     lines = text.splitlines()
     done = hit["raw"].replace("- [ ]", "- [x]", 1).replace("status: open", "status: done").replace("status: waiting-confirm", "status: done")
     done += f" · dropped {today()} · {drop_reason}" if drop_reason else f" · done {today()}"
@@ -164,14 +186,15 @@ def close(root: Path | None, pid: str, machine: bool = False, drop_reason: str |
     else:
         text = text.rstrip("\n") + "\n\n## Done\n" + done + "\n"
     p.write_text(text, encoding="utf-8")
-    return {"closed": pid, "as": "dropped" if drop_reason else "done", "file": str(p)}
+    return {"closed": hit["id"], "as": "dropped" if drop_reason else "done", "file": str(p)}
 
 
 def set_status(root: Path | None, pid: str, status: str, machine: bool = False) -> dict:
     if status not in ("open", "waiting-confirm"):
         raise DhError("BAD_STATUS", "status: open | waiting-confirm")
     p = path_for(root, machine)
-    hit = next((it for it in items(p) if it["id"] == pid and it["open"]), None)
+    pid = pid.strip().upper() if pid.strip().lower().startswith("p-") else pid
+    hit = next((it for it in items(p) if it["id"].upper() == pid.upper() and it["open"]), None)
     if not hit:
         raise DhError("NO_SUCH_ITEM", f"{pid} is not open in {p}")
     lines = _read(p).splitlines()
@@ -179,7 +202,7 @@ def set_status(root: Path | None, pid: str, status: str, machine: bool = False) 
     new = re.sub(r"status:\s*[\w-]+", f"status: {status}", raw) if "status:" in raw else raw + f" · status: {status}"
     lines[hit["line"]] = new
     p.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return {"id": pid, "status": status}
+    return {"id": hit["id"], "status": status}
 
 
 # ------------------------------------------------------------------ the owner's free-form profile notes

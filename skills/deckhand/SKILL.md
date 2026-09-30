@@ -1,7 +1,7 @@
 ---
 name: deckhand
 description: "Idea → live, owned web business on a $5 VPS (or $0), or a boilerplate product to sell: define, research, plan the page/feature graph, build from a vetted MIT base or scratch with parallel sub-agents, rebrand, live-swap sections for licensed designs (try-on), verify, deploy to Coolify, operate with bots; follow proven workflows (query the best 3, step by step) and improve them from each run's autopsy; resume any project from any fresh session or AI (Claude Code, Hermes, Codex…). Use for building, launching, redesigning, deploying or maintaining a website/SaaS/booking/catalogue/lead-gen business, for component try-on/swap, for ops bots/crons, or to turn a project into a reusable base or workflow."
-version: 2.4.1
+version: 2.4.2
 license: MIT
 compatibility: "Any agent harness that can run shell commands (Claude Code, Codex, Cursor, Hermes, OpenCode, Gemini CLI …). Needs Python 3.9+ (stdlib) and Node 18+ for try-on/compose. Windows: `py` instead of `python3`."
 metadata:
@@ -22,6 +22,7 @@ not ask for. One recommendation per decision, with the reason in one line.
 
 `dh` = `python3 <this-skill>/dh.py` (`py` on Windows). Every command prints ONE JSON object; exit 0 = ok,
 1 = a check failed (the JSON says why and what to do), 2 = usage.
+Commands that change a project answer `NO_RUN` (and write nothing) in a folder without `.deckhand/run.json`; only init, scaffold, clone, adopt, harvest, profile, vault, workflow list/show/query, learn, suggest, clean and pool work there, and only `init` creates a missing `--project` folder.
 
 **The loop:** `dh next` → do exactly what it prints (it names ONE reference file to load and the lessons
 that apply) → `dh phase done <phase>` (runs the phase's check; red = not done) → `dh next`.
@@ -36,6 +37,8 @@ workflow's next exact step (command + what it must print). The thinking goes to 
 next command, what is done (with proof), what is in progress, the owner's decisions and what waits on the owner.
 `dh resume --check` re-proves those claims against reality. `dh resume --hook` (Claude Code SessionStart hook) is
 the one command that prints plain text instead of JSON.
+
+Every flag of every command, with its meaning: `references/cli-flags.md` (generated from the parser; `dh <cmd> --help` for the actions).
 
 Token discipline (MUST): load at most the one reference `dh next` names (+ one on demand); query data
 (`dh pool query`, `tryon query`) instead of reading data files; never paste file bodies back to the
@@ -130,7 +133,7 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 | what now? | `dh next` · `dh status` · `dh suggest [--all]` (what the owner could do next, by importance) · `dh suggest dismiss ID [--days N]` |
 | start / brief | `dh init --name N --mode phased\|auto --path pool\|mine\|existing\|scratch --for me\|client --project DIR` · `dh brief set k=v …` (`deliverable=own\|client\|product`, `category="3–5 words"`) |
 | proven paths | `dh workflow query [--industry --deliverable --features --min-level]` (top 3) · `dh workflow use REF [--set k=v] [--accept]` · `dh workflow status\|todo [--format md]\|step ID done\|skip --why` · `dh workflow show\|list\|lint\|sync` · `dh workflow new --from-run` · `dh workflow save --from-autopsy ID --proposals P1,P3 [--public]` · `dh workflow publish REF` |
-| phases + gates | `dh phase done PHASE` (runs its check) · `dh phase skip PHASE --reason "…"` (the current phase only; never review) · `dh gate pass Gx --quote "the owner's words"` (once its phase is done) · `dh reopen PHASE --reason "…"` |
+| phases + gates | `dh phase done PHASE` (runs its check) · `dh phase skip PHASE --reason "…"` (the current phase only, never a done one; never review) · `dh phase done PHASE --force --reason "…"` (a reason is required) · `dh gate pass Gx --quote "the owner's words"` (once its phase is done) · `dh reopen PHASE --reason "…"` (a phase the run has reached) |
 | owner's tasks | `dh pending list [--all]` · `dh pending add "what" --why --how --where [--machine] [--when T]` · `dh pending decide "question" --rec X` · `dh pending done\|wait\|drop P-0NN [--reason]` |
 | resume a session | `dh resume [--check [--online]]` · `dh note decision\|doing\|next "…"` · `dh resume --install-hook claude` (adds `dh resume --hook` as a SessionStart hook) |
 | owner profile / secrets | `dh profile show\|doctor\|set k=v [--here\|--machine]` · `dh profile where [--set here\|machine\|FOLDER]` · `dh vault set NAME [--here\|--machine]` (value via stdin) · `dh vault list` (names + `shell` line) |

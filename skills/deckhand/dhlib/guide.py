@@ -16,7 +16,7 @@ TRYON = f'node "{SKILL / "tryon" / "cli.mjs"}"'
 STEPS = {
     "define": ["{dh} profile doctor            # what access exists (never ask for what a token already covers)",
                "{dh} workflow query            # the 3 proven paths that fit: show them, the owner picks one (dh workflow use REF) or none",
-               "{dh} brief set business=\"…\" shape=saas|booking|catalogue|marketplace|leadgen|internal languages=en,… audience=\"…\" brand.name=\"…\" deliverable=own|client|product category=\"3–5 words\"",
+               "{dh} brief set business=\"…\" shape=[saas|booking|catalogue|marketplace|leadgen|internal] languages=en,… audience=\"…\" brand.name=\"…\" deliverable=[own|client|product] category=\"3–5 words\"",
                "ask ONLY what the brief + profile cannot answer — one batched message, defaults proposed",
                "{dh} phase done define"],
     "research": ["{dh} research brief --focus competitors --agent A1   # one brief per focus (competitors, pricing, audience, conversion, discovery, local-rules, vocabulary); read the card it names",
@@ -57,7 +57,7 @@ STEPS = {
                "{dh} handoff                        # HANDOFF.md: access locations, commands, pending",
                "{dh} phase done deploy"],
     "operate": ["change requests: edit → {dh} verify → commit → {dh} deploy ship (references/80-operate.md)",
-                "{dh} ops suggest → {dh} ops add <bot> --runner github|cron   (verify each schedule by its own trigger)",
+                "{dh} ops suggest → {dh} ops add [bot] --runner [github|cron]   (verify each schedule by its own trigger)",
                 "monthly: {dh} seo audit --url https://<domain>   · new page or content → words in copy.json seo.pages → {dh} seo apply → ship",
                 "a failure fixed? {dh} learn from-failure --fix \"…\" --cause \"…\"    ·   liked the result? {dh} harvest --name <base>"],
 }
@@ -171,6 +171,11 @@ def next_step(root: Path) -> dict:
     """`dh next`. Placeholders are written `[x]`, never `<x>`: some harnesses refuse a task that carries `<x>` or `{x}`
     (Hermes `delegate_task`), and these lines are pasted into tasks and RESUME as they are (findings 18, 22)."""
     out = _next_step(root)
+    s = STATE.load(root, required=False)
+    if s and not s.get("moved_to"):
+        drift = STATE.plan_drift(root, s)
+        if drift:
+            out["drift"] = f"the approved plan changed after G1: {', '.join(drift)} — show the owner what changed (`dh resume --check`)"
     if isinstance(out.get("do"), list):
         out["do"] = [ANGLE_RX.sub(r"[\1]", x) for x in out["do"]]
     return out
@@ -180,7 +185,7 @@ def _next_step(root: Path) -> dict:
     root = Path(root)
     s = STATE.load(root, required=False)
     if not s:
-        return {"state": "no run", "do": [f"{DH} init --name <business> --mode phased|auto --path pool|mine|existing|scratch --for me|client --project <dir>"],
+        return {"state": "no run", "do": [f"{DH} init --name \"[business]\" --mode [phased|auto] --path [pool|mine|existing|scratch] --for [me|client] --project \"[dir]\""],
                 "read": str(SKILL / "references" / "00-define.md"), "dh": DH}
     if s.get("moved_to"):
         return {"state": "moved", "to": s["moved_to"], "do": [f"cd {s['moved_to']}", f"{DH} next"],
@@ -196,7 +201,7 @@ def _next_step(root: Path) -> dict:
         if wfp:
             out["workflow"] = wfp
         out["suggest"] = _suggest(root, out["do"])
-        seo = read_json(root / ".deckhand" / "seo.json", None)
+        seo = read_json(root / ".deckhand" / "seo.json", None, expect=dict)
         if gate == "G4" and seo:
             out["seo"] = {"score": seo.get("score"), "launch_breakers": len(seo.get("blockers", [])), "agent_fixable": seo.get("auto_fixable", [])}
             if seo.get("auto_fixable") and seo.get("policy") == "suggest":
