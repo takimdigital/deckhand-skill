@@ -38,7 +38,7 @@
 - Found by a follow-up real-browser run: a file with no default export binds to the export named like the file (compose gave
   HTTP 500 on the bento grid); Keep no longer corrupts a design array read in two places (3 of 4 navbars failed to keep);
   the registry alias `cn` is the project's utils, never an npm package (Discard left `cn` in `package.json`).
-- `playground/`: a saved source-only try-on test site, a `/kitchen-sink` page with 45 slot kinds, `playground.mjs`
+- `playground/`: a saved source-only try-on test site, a `/kitchen-sink` page with 45 owner elements, `playground.mjs`
   (restore, reset, start, kitchen, snapshot) and a structural CI test.
 
 - A design that spreads props onto a void element (`<input {...props} />`) is not a wrapper, so trying an input or textarea can no

@@ -37,6 +37,8 @@ next command, what is done (with proof), what is in progress, the owner's decisi
 `dh resume --check` re-proves those claims against reality. `dh resume --hook` (Claude Code SessionStart hook) is
 the one command that prints plain text instead of JSON.
 
+Every flag of every command, with its meaning: `references/cli-flags.md` (generated from the parser; `dh <cmd> --help` for the actions).
+
 Token discipline (MUST): load at most the one reference `dh next` names (+ one on demand); query data
 (`dh pool query`, `tryon query`) instead of reading data files; never paste file bodies back to the
 owner; never re-derive what a script computes.
