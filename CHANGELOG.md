@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.4.3] — 2026-09-30 — a verify is not made stale by the files it writes itself
+
+Found by a real deploy of the first-owner sandbox site: `dh verify` adds the SEO owner items to `PENDING.md`, and committing that made `dh deploy ship` refuse with `VERIFY_STALE` — a green verify that could never be shipped. `PENDING.md`, `HANDOFF.md` and `RESUME.md` (written by deckhand) are now treated like `.deckhand/`; a real code change still makes the verify stale, and a message naming both lists only the code.
+
 ## [2.4.2] — 2026-09-30 — the audit findings closed: gates that mean it, CLI that never crashes, no secrets on disk
 
 Four agents audited the docs, every command, the state machine and a first-owner journey; every reproduced finding is fixed, each with a test that failed first.

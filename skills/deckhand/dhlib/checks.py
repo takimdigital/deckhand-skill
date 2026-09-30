@@ -139,13 +139,15 @@ def tryon(root: Path, s: dict) -> dict:
 
 def verify_stale(root: Path, r: dict) -> str:
     """A green verify proves one commit; code committed after it (a reopened phase, a quick fix) is unproven.
-    Committing deckhand's own files (.deckhand/: run.json, verify.json, VERIFY.md) changes no code."""
+    Committing deckhand's own files (.deckhand/: run.json, verify.json, VERIFY.md; and PENDING.md, HANDOFF.md, RESUME.md,
+    which `dh verify` and `dh handoff` write themselves) changes no code."""
     from .util import run
     vc = (r or {}).get("commit")
     head = run(["git", "rev-parse", "HEAD"], cwd=root)["out"].strip() if vc else ""
     if not vc or not head or vc == head:
         return ""
-    d = run(["git", "diff", "--name-only", vc, "HEAD", "--", ".", ":(exclude).deckhand"], cwd=root)
+    d = run(["git", "diff", "--name-only", vc, "HEAD", "--", ".", ":(exclude).deckhand", ":(exclude)PENDING.md",
+             ":(exclude)HANDOFF.md", ":(exclude)RESUME.md"], cwd=root)
     if d["code"] != 0:
         return f"verify proved {vc[:7]}, which this repository no longer has"
     files = d["out"].split()
