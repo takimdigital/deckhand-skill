@@ -463,7 +463,8 @@ BB_KINDS = ("decision", "contract", "blocker", "question", "done", "note", "prog
 def bb_post(root: Path, wp: str, kind: str, msg: str, refs=None) -> dict:
     if kind not in BB_KINDS:
         raise DhError("BAD_KIND", f"kind must be one of {BB_KINDS}")
-    entry = {"at": now(), "wp": wp, "kind": kind, "msg": msg, **({"refs": refs} if refs else {})}
+    from .redact import scrub_text, scrub_obj
+    entry = {"at": now(), "wp": wp, "kind": kind, "msg": scrub_text(msg), **({"refs": scrub_obj(refs)} if refs else {})}
     append_jsonl(Path(root) / ".deckhand" / "blackboard.jsonl", entry)
     return entry
 

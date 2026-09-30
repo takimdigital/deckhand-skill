@@ -61,6 +61,8 @@ def _brief_set(a, path: Path) -> dict:
         for k, v in _kv(a.pairs).items():
             if k in BRIEF_CHOICES and v not in BRIEF_CHOICES[k]:
                 raise DhError("BAD_VALUE", f"{k} must be one of {', '.join(BRIEF_CHOICES[k])}")
+            from .redact import scrub_text
+            v = scrub_text(v)
             val = [x.strip() for x in v.split(",") if x.strip()] if k in LIST_KEYS else v
             cur = b
             parts = k.split(".")

@@ -113,7 +113,8 @@ def add(root: Path | None, what: str, why: str = "", how: str = "", where: str =
                       "the owner has no idea where to look; that is the point of the field")
     from .util import SECRET_RX, mask_tokens
     blob = " ".join(x or "" for x in (what, why, how, where, when, project, rec))
-    if SECRET_RX.search(blob) or mask_tokens(blob) != blob:
+    from .redact import scrub_text
+    if SECRET_RX.search(blob) or mask_tokens(blob) != blob or scrub_text(blob) != blob:
         raise DhError("SECRET_IN_TEXT", "a pending item names WHERE a secret goes, never the secret itself — "
                       "store it with `dh vault set NAME` and write the name")
     with _lock(root, machine):

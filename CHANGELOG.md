@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.4.2] — 2026-09-30 — the audit findings closed: gates that mean it, CLI that never crashes, no secrets on disk
+
+Four agents audited the docs, every command, the state machine and a first-owner journey; every reproduced finding is fixed, each with a test that failed first.
+
+- **Gates mean the owner's go.** A change request phrased with an approval word ("ok, make the hero bigger") no longer passes a gate; a quote passes only when it is an approval with nothing asked. `phase skip` refuses a finished phase, `reopen` refuses a phase the run never reached, `--force` needs a reason, `suggest dismiss` validates its days, `pending` ignores exact duplicates and is case-insensitive. `dh next` now shows drift (brief or sitemap edited after a passed gate).
+- **Verify cannot be skipped green.** `verify --skip` of a blocking row shows `skipped`, keeps the report red and `phase done review` refuses it unless a reason is recorded; a stale verify (older commit) and a stale smoke are refused; `routes` is blocking when it could not run; `define` checks `shape`.
+- **The CLI always answers in JSON.** Usage errors and `--help` are one JSON object; `--project` on a file or a missing folder is a clear error; commands outside a project answer `NO_RUN` instead of creating `.deckhand/`; corrupt or invalid-UTF-8 state no longer crashes recovery commands; `init` repairs a corrupt run and `brief set` refuses to overwrite a corrupt brief; `resume` and `handoff` say `RUN_CORRUPT`; `deploy target` takes `--project` in either order; every hint runs verbatim.
+- **Parallel runs are safe.** A cross-process lock makes ten parallel `brief set` calls keep all ten keys; `dh dev start` stores the listening server's pid so `dev stop` stops the real process.
+- **Secrets and personal data stay off disk.** One scrubber (every vault value, common credential shapes, private keys, URL credentials) covers notes, `bb post`, `brief set`, `pending add`, `research add`, `learn add`, RESUME and HANDOFF. Lessons keep no personal paths, get unique ids, and `autopsy --apply` is idempotent. A workflow extracted from a run no longer carries the client name.
+- **Sites come out right.** `compose` keeps the owner's hero text or says it could not; the design vendor's logo and placeholder images on live routes block review; "Company name" no longer trips the demo-copy check; `seo apply` handles `/en`-prefixed languages (hreflang, `lang`) and `dh next` stops suggesting a fix that cannot be applied; `plan split` never leaves an empty package; the scaffold passes `tsc`.
+- **Docs tell the truth.** 13 invariants and 38 commands everywhere, `references/cli-flags.md` generated from the CLI and checked by a test, the atlas version checked like the others.
+
 ## [2.4.1] — 2026-09-30 — try-on drops only the design that broke the page
 
 - When a try broke the page, the engine blamed every design the error page listed, so a working design was dropped with the
