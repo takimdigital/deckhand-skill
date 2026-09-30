@@ -94,7 +94,7 @@ async function checkRegistries(id, { sample = 0, md = false, ship = false } = {}
 
 async function main() {
   switch (cmd) {
-    case 'setup': return out(setup(project));
+    case 'setup': { const r = setup(project); return out(r, r && r.ok === false ? 1 : 0); }
     case 'serve': {
       const target = flags.target || await detectTarget(project);
       if (!target) out({ ok: false, code: 'NO_DEV_SERVER', hint: 'start the dev server first (npm run dev), or pass --target http://127.0.0.1:<port>' }, 1);

@@ -71,7 +71,7 @@ def note(root: Path, kind: str, text: str) -> dict:
 
 
 def notes(root: Path) -> list:
-    return read_jsonl(_dk(root) / "notes.jsonl")
+    return [n for n in read_jsonl(_dk(root) / "notes.jsonl") if isinstance(n.get("kind"), str) and "text" in n]
 
 
 # ------------------------------------------------------------------ facts
@@ -187,7 +187,7 @@ def gather(root: Path) -> dict | None:
     hist = read_jsonl(dk / "history.jsonl")
     events = [(h.get("at", ""), _event(h)) for h in hist] + [(n["at"], f"note {n['kind']}: {_short(n['text'], 70)}") for n in ns]
     events.sort(key=lambda e: e[0])
-    seo = read_json(dk / "seo.json", None)
+    seo = read_json(dk / "seo.json", None, expect=dict)
     from . import pending as PEND
     pend = PEND.summary(root)
     return {
@@ -351,6 +351,7 @@ def write(root: Path) -> Path | None:
 
 def resume(root: Path) -> dict:
     root = Path(root)
+    STATE.load(root, required=False)                    # a corrupt run says RUN_CORRUPT, not "no project here"
     st = gather(root)
     if not st:
         return {"state": "no project here", "do": [f"{_dh()} init --name <business> … (or --project <dir> for an existing one)"]}
@@ -380,6 +381,7 @@ def session_hint(root: Path) -> dict | None:
 
 def check(root: Path, online: bool = False) -> dict:
     root = Path(root)
+    STATE.load(root, required=False)
     st = gather(root)
     if not st:
         raise DhError("NO_RUN", "no project here")
@@ -413,7 +415,7 @@ def check(root: Path, online: bool = False) -> dict:
             up = _answers(url)
         claim("the app runs locally", up, f"{url or 'no dev URL'} does not answer — `dh dev start`", level="info")
     head = _git(root, "rev-parse", "HEAD")
-    v = read_json(dk / "verify.json", None)
+    v = read_json(dk / "verify.json", None, expect=dict)
     if v and s["phases"]["review"]["status"] == "done":
         vc = v.get("commit")
         from .checks import verify_stale
@@ -425,7 +427,7 @@ def check(root: Path, online: bool = False) -> dict:
             claim("verify still describes the code", bool(v.get("ok")) and not later,
                   f"{len(later)} file(s) edited since the last `dh verify` ({', '.join(later[:4])}) — run it again before shipping" if later
                   else "" if v.get("ok") else "the last verify was red")
-    d = read_json(dk / "deploy.json", None)
+    d = read_json(dk / "deploy.json", None, expect=dict)
     if d and (d.get("last") or {}).get("commit"):
         dc = d["last"]["commit"]
         claim("what is live is the current code", not head or dc == head,
@@ -505,7 +507,7 @@ def hook(stdin_text: str = "", start: Path | None = None) -> str:
 def install_hook(settings: Path | None = None) -> dict:
     """Add the SessionStart hook to Claude Code's user settings (merged, idempotent, other hooks kept)."""
     settings = Path(settings) if settings else Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / "settings.json"
-    data = read_json(settings, None) if settings.exists() else {}
+    data = read_json(settings, None, expect=dict) if settings.exists() else {}
     if not isinstance(data, dict) or not isinstance(data.get("hooks", {}), dict) or not isinstance(data.get("hooks", {}).get("SessionStart", []), list):
         raise DhError("BAD_SETTINGS", f"{settings} is not valid Claude Code settings JSON — fix it first, nothing was changed")
     cmd = f"{_dh()} resume --hook"

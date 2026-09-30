@@ -64,7 +64,8 @@ def autopsy_cmd(workflow: bool = True) -> str:
     """The exact autopsy command for the harness in use (inside Hermes and Claude Code, --latest is this session)."""
     from . import workflow as WF
     h = WF.harness()
-    base = "dh autopsy --workflow" if workflow else "dh autopsy"
+    from .util import DH
+    base = f"{DH} autopsy --workflow" if workflow else f"{DH} autopsy"
     return base + (" --latest" if h in ("hermes", "claude-code") else "")
 
 
@@ -98,7 +99,7 @@ def facts(root: Path) -> dict | None:
         "w_latest": read_json(aut / "workflow-latest.json", {}) or {},
         "w_maintainer": (aut / f"{(read_json(aut / 'workflow-latest.json', {}) or {}).get('id', '')}.maintainer.md"),
         "workflow": s.get("workflow"), "brief": read_json(dk / "brief.json", {}) or {},
-        "verify": read_json(dk / "verify.json", None), "seo": read_json(dk / "seo.json", None), "deploy": read_json(dk / "deploy.json", {}) or {},
+        "verify": read_json(dk / "verify.json", None, expect=dict), "seo": read_json(dk / "seo.json", None, expect=dict), "deploy": read_json(dk / "deploy.json", {}) or {},
         "head": RESUME._git(root, "rev-parse", "HEAD"),
     }
 

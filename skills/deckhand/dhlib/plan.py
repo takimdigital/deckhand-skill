@@ -63,7 +63,7 @@ def _actions(page: dict):
 
 
 def lint(root: Path, sm: dict | None = None) -> dict:
-    sm = sm if sm is not None else read_json(sitemap_path(root))
+    sm = sm if sm is not None else read_json(sitemap_path(root), None, expect=dict)
     errors, warnings = [], []
     E = lambda code, msg, **k: errors.append({"code": code, "msg": msg, **k})  # noqa: E731
     W = lambda code, msg, **k: warnings.append({"code": code, "msg": msg, **k})  # noqa: E731
@@ -214,7 +214,7 @@ def _browser_line() -> str:
 
 
 def render(root: Path) -> dict:
-    sm = read_json(sitemap_path(root))
+    sm = read_json(sitemap_path(root), None, expect=dict)
     if not sm:
         raise DhError("NO_SITEMAP", "no .deckhand/sitemap.json")
     brief = read_json(Path(root) / ".deckhand" / "brief.json", {}) or {}
@@ -255,7 +255,7 @@ def render(root: Path) -> dict:
 
 def split(root: Path, agents: int = 3) -> dict:
     """Work packages: one per feature (its pages, APIs, entities) + a shell (layout, nav, marketing)."""
-    sm = read_json(sitemap_path(root))
+    sm = read_json(sitemap_path(root), None, expect=dict)
     lint_r = lint(root, sm)
     if not lint_r["ok"]:
         raise DhError("PLAN_NOT_CLEAN", "fix the plan first (dh plan lint)", errors=lint_r["errors"][:10])

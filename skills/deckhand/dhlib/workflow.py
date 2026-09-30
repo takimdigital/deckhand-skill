@@ -88,10 +88,10 @@ def sync(offline: bool = False) -> dict:
 
 def _community_rows(refresh: bool = False) -> list:
     target = _cache() / "community-index.json"
-    cur = read_json(target, None)
+    cur = read_json(target, None, expect=dict)
     if not os.environ.get("DECKHAND_OFFLINE") and (refresh or cur is None or str(cur.get("fetched", ""))[:10] != today()):
         sync()                                          # once a day at most; unreachable = the cached copy
-        cur = read_json(target, None)
+        cur = read_json(target, None, expect=dict)
     return [{**r, "source": "community"} for r in (cur or {}).get("workflows", []) if _row_ok(r)]
 
 
@@ -126,9 +126,9 @@ def row_of(wf: dict, source: str, path: str | None = None) -> dict:
 def rows(refresh: bool = False, sources=("mine", "base", "community")) -> list:
     out = []
     if "mine" in sources:
-        out += [row_of(wf, "mine", str(p)) for p in _files(mine_dir()) if (wf := read_json(p, None)) and wf.get("id")]
+        out += [row_of(wf, "mine", str(p)) for p in _files(mine_dir()) if (wf := read_json(p, None, expect=dict)) and wf.get("id")]
     if "base" in sources:
-        out += [row_of(wf, "base", str(p)) for p in _files(BASE_DIR) if (wf := read_json(p, None)) and wf.get("id")]
+        out += [row_of(wf, "base", str(p)) for p in _files(BASE_DIR) if (wf := read_json(p, None, expect=dict)) and wf.get("id")]
     if "community" in sources:
         out += _community_rows(refresh)
     return out
@@ -151,7 +151,7 @@ def load(ref: str, refresh: bool = False) -> tuple[dict, str]:
                         f.write_bytes(_fetch(_community_base() + hit.get("file", f"{wid}.json")))
                     except Exception as e:  # noqa: BLE001
                         raise DhError("UNREACHABLE", f"community workflow {wid}: {e}")
-                wf = read_json(f, None)
+                wf = read_json(f, None, expect=dict)
                 if not isinstance(wf, dict) or _sha(wf) != hit["sha"]:
                     f.unlink()
                     raise DhError("SHA_MISMATCH", f"community workflow {wid}: the file does not match its index entry — refused")
@@ -159,7 +159,7 @@ def load(ref: str, refresh: bool = False) -> tuple[dict, str]:
             continue
         d = mine_dir() if s == "mine" else BASE_DIR
         for p in _files(d):
-            wf = read_json(p, None)
+            wf = read_json(p, None, expect=dict)
             if wf and wf.get("id") == wid and (not ver or str(wf.get("version")) == ver):
                 return wf, s
     raise DhError("NO_SUCH_WORKFLOW", f"{ref}: not in your workflows, the base set or the community index (`dh workflow list`)")
@@ -478,7 +478,7 @@ def _pinned_wf(root: Path) -> tuple[dict, dict]:
     pin = pinned(root)
     if not pin:
         raise DhError("NO_WORKFLOW", "no workflow pinned — `dh workflow query`, then `dh workflow use <ref>`")
-    wf = read_json(Path(root) / ".deckhand" / "workflow.json", None)
+    wf = read_json(Path(root) / ".deckhand" / "workflow.json", None, expect=dict)
     if not wf or _sha(wf) != pin.get("sha"):
         raise DhError("WORKFLOW_CHANGED", ".deckhand/workflow.json no longer matches the pinned version — `dh workflow use` it again")
     return wf, pin
@@ -615,7 +615,7 @@ def observe(root: Path, shown: str, code: int) -> None:
         s = STATE.load(root, required=False)
         if not s or not s.get("workflow") or code != 0:
             return
-        wf = read_json(Path(root) / ".deckhand" / "workflow.json", None)
+        wf = read_json(Path(root) / ".deckhand" / "workflow.json", None, expect=dict)
         if not wf:
             return
         w = s["workflow"]

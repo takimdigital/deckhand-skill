@@ -8,10 +8,12 @@ the agent never needs to re-read the whole skill to know what to do.
 """
 from __future__ import annotations
 
+import os
 import re
+import time
 from pathlib import Path
 
-from .util import DhError, now, read_json, write_json, append_jsonl, ensure_gitignore, SKILL
+from .util import DhError, now, read_json, write_json, append_jsonl, ensure_gitignore, locked, SKILL
 
 PHASES = [
     {"id": "define", "title": "Define the business and the path", "ref": "references/00-define.md"},
@@ -39,12 +41,30 @@ def state_path(root: Path) -> Path:
 
 def load(root: Path, required: bool = True) -> dict:
     s = read_json(state_path(root))
-    if s is None and state_path(root).exists():         # unreadable is not "no run": gates would stop being enforced
-        raise DhError("RUN_CORRUPT", f"{state_path(root)} is not valid JSON (a merge conflict or a half edit?) — "
-                      "restore it (`git checkout .deckhand/run.json`, or rebuild from .deckhand/history.jsonl); never `dh init` over it")
+    if state_path(root).exists() and not _shaped(s):   # unreadable is not "no run": gates would stop being enforced
+        raise DhError("RUN_CORRUPT", f"{state_path(root)} is not a valid run (bad JSON, a merge conflict or a half edit?) — "
+                      "restore it (`git checkout .deckhand/run.json`, or rebuild from .deckhand/history.jsonl), "
+                      "or `dh init --name …` starts a fresh run and keeps the broken file as run.json.corrupt-<time>")
     if s is None and required:
         raise DhError("NO_RUN", f"no .deckhand/run.json in {root} — start with `dh init`")
     return s
+
+
+def _shaped(s) -> bool:
+    """A run is an object with `phases` and `gates` objects (missing ids are filled in: an older or hand-trimmed file still works)."""
+    if not isinstance(s, dict) or not isinstance(s.get("phases"), dict) or not isinstance(s.get("gates"), dict):
+        return False
+    for k in ("phases", "gates"):
+        if not all(isinstance(v, dict) for v in s[k].values()):
+            return False
+    for p in PHASE_IDS:
+        s["phases"].setdefault(p, {"status": "pending"})
+    for g in GATES:
+        s["gates"].setdefault(g, {"status": "pending"})
+    s.setdefault("name", "?")
+    s.setdefault("mode", "phased")
+    s.setdefault("path", "pool")
+    return True
 
 
 def save(root: Path, s: dict) -> None:
@@ -63,7 +83,14 @@ def init(root: Path, name: str, mode: str = "phased", path: str = "pool", for_: 
     if path not in PATHS:
         raise DhError("BAD_PATH", f"path must be one of {PATHS}")
     root = Path(root)
-    existing = load(root, required=False)
+    try:
+        existing = load(root, required=False)
+    except DhError as e:
+        if e.code != "RUN_CORRUPT":
+            raise
+        existing = None                                 # init is the repair: a fresh run, the broken file kept beside it
+        keep = state_path(root).with_name(f"run.json.corrupt-{time.strftime('%Y%m%dT%H%M%S')}")
+        os.replace(state_path(root), keep)             # kept whole beside the new run
     root.mkdir(parents=True, exist_ok=True)
     ensure_gitignore(root)                              # run logs, RESUME, notes, project vault: never in git
     from . import profile as PROFILE, resume as RESUME
@@ -86,7 +113,10 @@ def init(root: Path, name: str, mode: str = "phased", path: str = "pool", for_: 
     s = {"version": 2, "name": name, "mode": mode, "path": path, "created": now(),
          "phases": {p["id"]: {"status": "pending"} for p in PHASES},
          "gates": {g: {"status": "pending"} for g in GATES}}
-    save(root, s)
+    with locked(root):
+        if load(root, required=False):                  # a parallel init won the race: keep its run
+            return {"created": False, **summary(root, load(root)), "agents": entry["written"]}
+        save(root, s)
     pending = root / "PENDING.md"
     if not pending.exists():
         pending.write_text((SKILL / "templates" / "PENDING.md").read_text(encoding="utf-8").replace("{{NAME}}", name), encoding="utf-8")
@@ -159,13 +189,15 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
     result = checks.run(phase, Path(root), s)
     if not result["ok"] and not force_reason:
         return {"ok": False, "phase": phase, "check": result}
-    s["phases"][phase] = {"status": "done", "at": now(), "check": result, **({"forced": force_reason} if not result["ok"] else {}),
-                          **({"evidence": evidence} if evidence else {})}
-    p = PHASES[idx]
-    if p.get("gate") and s["mode"] == "auto":
-        s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "auto"}
-    save(root, s)
-    log(root, {"event": "phase_done", "phase": phase, "ok": result["ok"], "forced": force_reason})
+    with locked(root):                                  # the check ran unlocked (it can build); the write re-reads the newest run
+        s = load(root)
+        s["phases"][phase] = {"status": "done", "at": now(), "check": result, **({"forced": force_reason} if not result["ok"] else {}),
+                              **({"evidence": evidence} if evidence else {})}
+        p = PHASES[idx]
+        if p.get("gate") and s["mode"] == "auto":
+            s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "auto"}
+        save(root, s)
+        log(root, {"event": "phase_done", "phase": phase, "ok": result["ok"], "forced": force_reason})
     summ = summary(root, s)                             # "phase" = the one just done; "now" = where the run stands
     return {"ok": True, **summ, "phase": phase, "now": summ["phase"], "check": result}
 
@@ -182,12 +214,14 @@ def phase_skip(root: Path, phase: str, reason: str) -> dict:
     if phase in NOT_SKIPPABLE:
         raise DhError("NOT_SKIPPABLE", f"phase {phase} cannot be skipped: {NOT_SKIPPABLE[phase]}")
     reached(s, phase)                                   # only the phase the run is at: no skipping ahead
-    s["phases"][phase] = {"status": "skipped", "at": now(), "reason": reason}
-    p = PHASES[PHASE_IDS.index(phase)]
-    if p.get("gate") and s["mode"] == "auto":           # phased: the owner still gives the go (G3 = the brand, try-on or not)
-        s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "skip"}
-    save(root, s)
-    log(root, {"event": "phase_skip", "phase": phase, "reason": reason})
+    with locked(root):
+        s = load(root)
+        s["phases"][phase] = {"status": "skipped", "at": now(), "reason": reason}
+        p = PHASES[PHASE_IDS.index(phase)]
+        if p.get("gate") and s["mode"] == "auto":       # phased: the owner still gives the go (G3 = the brand, try-on or not)
+            s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "skip"}
+        save(root, s)
+        log(root, {"event": "phase_skip", "phase": phase, "reason": reason})
     return summary(root, s)
 
 
@@ -250,10 +284,12 @@ def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -
         raise DhError("CHANGE_REQUEST", f"the owner's words read as a change request, not a go: {quote!r}",
                       gate=gate, do=[f"dh reopen {phase} --reason \"{(quote or '')[:80]}\"", "make the change, show it again, ask for the go",
                                      "the owner did say go? quote the words that say it (\"ok go\", \"approved\", \"G1 ok\")"])
-    s["gates"][gate] = {"status": "passed", "at": now(), "by": "owner", "note": note,
-                        **({"quote": quote, "verdict": verdict} if quote is not None else {})}
-    save(root, s)
-    log(root, {"event": "gate", "gate": gate, "note": note, **({"quote": quote, "verdict": verdict} if quote is not None else {})})
+    with locked(root):
+        s = load(root)
+        s["gates"][gate] = {"status": "passed", "at": now(), "by": "owner", "note": note,
+                            **({"quote": quote, "verdict": verdict} if quote is not None else {})}
+        save(root, s)
+        log(root, {"event": "gate", "gate": gate, "note": note, **({"quote": quote, "verdict": verdict} if quote is not None else {})})
     out = summary(root, s)
     if verdict == "approve_with_changes":
         out["changes_asked"] = f"the go came with a change: record it now — dh note decision \"{quote[:100]}\" — and do it in the next phase"
@@ -262,13 +298,14 @@ def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -
 
 def reopen(root: Path, phase: str, reason: str) -> dict:
     """Owner wants changes: reopen a phase (and everything after it)."""
-    s = load(root)
     idx = PHASE_IDS.index(phase)
-    for pid in PHASE_IDS[idx:]:
-        s["phases"][pid] = {"status": "pending", "reopened": reason}
-    for p in PHASES[idx:]:
-        if p.get("gate"):
-            s["gates"][p["gate"]] = {"status": "pending"}
-    save(root, s)
-    log(root, {"event": "reopen", "phase": phase, "reason": reason})
+    with locked(root):
+        s = load(root)
+        for pid in PHASE_IDS[idx:]:
+            s["phases"][pid] = {"status": "pending", "reopened": reason}
+        for p in PHASES[idx:]:
+            if p.get("gate"):
+                s["gates"][p["gate"]] = {"status": "pending"}
+        save(root, s)
+        log(root, {"event": "reopen", "phase": phase, "reason": reason})
     return summary(root, s)
