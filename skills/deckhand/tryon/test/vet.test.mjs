@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { mktmp } from './helpers.mjs';
 import { keyOf } from '../lib/registry.mjs';
 
 // a private fixture world: fake registries and a fake GitHub API, replayed offline
-const FX = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-vet-fx-'));
-const HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-vet-home-'));
+const FX = mktmp('dh-vet-fx-');
+const HOME = mktmp('dh-vet-home-');
 process.env.DH_FIXTURES = FX;
-process.env.DH_CACHE = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-vet-cache-'));
+process.env.DH_CACHE = mktmp('dh-vet-cache-');
 process.env.DECKHAND_LIBRARY = path.join(HOME, 'library');
 const put = (url, body, status) => fs.writeFileSync(path.join(FX, keyOf(url) + (status ? '.' + status : '.txt')), status ? url : (typeof body === 'string' ? body : JSON.stringify(body)));
 const index = (items) => ({ name: 'x', items });

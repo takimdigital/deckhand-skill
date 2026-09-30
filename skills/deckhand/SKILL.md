@@ -118,6 +118,10 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
     cost; the owner chooses where accepted proposals go (their own pool, the community, nowhere). It never edits
     the skill: Deckhand issues go to the maintainer report. A check satisfied some other way than the documented one is
     reported as such.
+13. **Leave no trace.** Deckhand removes its own temp files, and so must you: no scratch folders, site copies or browser
+    profiles left in the OS temp dir. `dh clean` is the safety net (dry run: lists what it would remove with sizes;
+    `--apply` removes it; never anything younger than 2 h, never a project, `~/.deckhand` or an agent's own folders;
+    patterns in `data/clean.json`). Run it after long sessions; `--caches` also verifies the npm cache.
 
 ## 4. Command surface
 
@@ -138,6 +142,7 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 | copy that does not read as AI | `dh slop brief [--lang L]` (before writing) · `dh slop check [PATH… \| --text T \| --url U]` · `dh slop allow "word"` · `dh slop add "tic" --lang L` · `dh slop export\|langs\|lint` |
 | try-on | `node <skill>/tryon/cli.mjs setup\|serve\|try\|show\|keep\|discard\|save\|query\|doctor\|clean` (or `dh tryon …`) · inspect: `inspect\|slots\|status\|library` · adjust: `tune --file F --line N --col C --preset P` · `theme --accent X --corners Y` · `theme --undo` · AI draft: `drafts [--wait]\|draft-check\|draft-done --id D` |
 | found on Google | `dh seo audit [--url U]` · `dh seo apply` (add/improve, never overwrite) · `dh seo undo` · `dh seo ping` · `dh seo facts` (engine: `tryon seo inspect\|apply\|undo`) |
+| clean machine | `dh clean [--apply] [--older-than HOURS] [--caches]` (dry run by default) |
 | review | `dh verify [--url U]` |
 | deploy | `dh deploy target --app UUID --url U` · `dh deploy ship` · `dh deploy smoke` · `dh deploy raw <coolify args>` · `dh handoff` |
 | operate | `dh ops suggest` · `dh ops add BOT --runner github\|cron` |

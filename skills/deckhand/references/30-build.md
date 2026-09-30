@@ -57,6 +57,10 @@ Declare them once: `dh dev port --from 5700` (a bind-tested free port — Window
 `dh dev stop` stops all; `dh dev status` and RESUME show what is down. Never keep a database alive by hand in a
 terminal: a pause or a restart kills it silently. A dev script that pins its port (`next dev -p 3010`) is kept as is.
 
+Leftovers: a crashed clone/scaffold can strand `.<name>.deckhand-hold` or `dh-scaffold-*` beside the project, and test
+runs leave `dh-*` folders in the OS temp dir. `dh clean` lists them (dry run), `dh clean --apply` removes the old ones
+(`data/clean.json` is the whole pattern list; a hold that still carries Deckhand files is kept).
+
 ## Implementing the plan
 - Solo: build WP by WP in `.deckhand/work/index.json` order (WP-00 shell first).
 - Parallel (`references/team.md`): you build WP-00 (schema, migrations, seed, auth, layout, shared UI), prove it

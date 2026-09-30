@@ -1,0 +1,23 @@
+{
+  "_doc": "What dh clean may remove. Everything else is left alone. Matched by exact name prefix, directly inside the OS temp dir (or beside the project for 'sibling').",
+  "min_age_hours": 2,
+  "temp_prefixes": [
+    "dh-tryon-", "dh-cache-", "dh-lib-", "dh-seo-", "dh-seo-vite-", "dh-fx-", "dh-cb-", "dh-fit-home-", "dh-fit-site-",
+    "dh-fitcheck-", "dh-vet-", "dh-playground-", "dh-scaffold-", "dh-hermes-", "dh-test-"
+  ],
+  "browser_profile_prefixes": [
+    "cdp-chrome-", "puppeteer_dev_chrome_profile-", "playwright_chromium_profile-", "playwright_chromiumdev_profile-"
+  ],
+  "python_tmp": {
+    "regex": "^tmp[a-z0-9_]{8}$",
+    "_doc": "Only when one of these markers exists; otherwise skipped as not ours.",
+    "markers": [".deckhand", "proj/.git", "proj/.deckhand", "proj/package.json"]
+  },
+  "sibling": {
+    "hold_suffix": ".deckhand-hold",
+    "scaffold_prefix": "dh-scaffold-",
+    "_doc": "Beside the current project only. A hold is removed only when it is empty or the project already has its own .deckhand (nothing stranded)."
+  },
+  "never": [".deckhand (owner vault/profile/library)", ".claude", ".codex", ".gemini", "Cursor data", "anything inside a project", "any path not matched above"],
+  "caches": {"apply": ["npm cache verify"], "report_only": ["npm cache dir", "pnpm store path"]}
+}

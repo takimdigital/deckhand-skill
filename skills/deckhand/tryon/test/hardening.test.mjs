@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { tempSite, locate, HERE } from './helpers.mjs';
+import { tempSite, locate, HERE, mktmp } from './helpers.mjs';
 import { dialsOf, tuneOpen, tuneSet, tuneKeep, tuneReset } from '../lib/tune.mjs';
 import { cleanTheme, themeApply, themeCss } from '../lib/sitetheme.mjs';
 import { loadSession } from '../lib/engine.mjs';
@@ -78,7 +78,7 @@ test('headless Tune and Site: `tryon tune` / `tryon theme` apply, then restore b
 });
 
 test('the personal library refuses every credential shape of the shared policy (data/secrets.json)', () => {
-  const lib = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-lib-'));
+  const lib = mktmp('dh-lib-');
   process.env.DECKHAND_LIBRARY = lib;
   try {
     for (const secret of ['12|' + 'a'.repeat(44), 'sk-ant-' + 'b'.repeat(40), 'eyJ' + 'c'.repeat(24) + '.' + 'd'.repeat(24) + '.x']) {

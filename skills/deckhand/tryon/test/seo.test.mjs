@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { mktmp } from './helpers.mjs';
 import { createRequire } from 'node:module';
 import { seoInspect, seoApply, seoUndo } from '../lib/seo.mjs';
 
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 `;
 
 function nextApp() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-seo-'));
+  const dir = mktmp('dh-seo-');
   const w = (f, t) => { fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), t); };
   w('package.json', JSON.stringify({ name: 'shop', dependencies: { next: '16.3.6', react: '19.0.0' } }));
   w('tsconfig.json', JSON.stringify({ compilerOptions: { paths: { '@/*': ['./*'] } } }));
@@ -106,7 +107,7 @@ test('files the owner wrote are kept; ours are regenerated from the brief', () =
 });
 
 test('static / Vite sites get head tags and static robots, sitemap and llms.txt', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-seo-vite-'));
+  const dir = mktmp('dh-seo-vite-');
   fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ name: 'v', devDependencies: { vite: '6.0.0' } }));
   fs.writeFileSync(path.join(dir, 'index.html'), '<!doctype html>\n<html>\n  <head>\n    <title>Vite + React</title>\n  </head>\n  <body><div id="root"></div></body>\n</html>\n');
   const i = seoInspect(dir);
@@ -143,7 +144,7 @@ test('F17: a wrong literal <html lang> is corrected to the brief\'s first langua
   fs.writeFileSync(path.join(dir2, 'app/layout.tsx'), read(dir2, 'app/layout.tsx').replace('<html>', '<html lang={locale}>'));
   seoApply(dir2, fr);
   assert.match(read(dir2, 'app/layout.tsx'), /<html lang=\{locale\}>/);      // i18n code is the owner's
-  const dir3 = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-seo-vite-'));
+  const dir3 = mktmp('dh-seo-vite-');
   fs.writeFileSync(path.join(dir3, 'package.json'), JSON.stringify({ name: 'v', devDependencies: { vite: '6.0.0' } }));
   fs.writeFileSync(path.join(dir3, 'index.html'), '<!doctype html>\n<html lang="en">\n  <head>\n    <title>Vite + React</title>\n  </head>\n  <body><div id="root"></div></body>\n</html>\n');
   seoApply(dir3, fr);
