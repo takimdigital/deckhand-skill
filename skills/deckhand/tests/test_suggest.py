@@ -183,7 +183,8 @@ class Suggestions(Base):
         self.dh("status")
         text = (self.root / ".deckhand" / "RESUME.md").read_text(encoding="utf-8")
         self.assertLess(text.index("## Waiting on the owner"), text.index("## Next (optional"))
-        self.assertRegex(text, r"→ `py \"[^`]*dh\.py\" autopsy --apply`")          # B9: runnable form
+        launcher = "py" if os.name == "nt" else "python3"                               # the prefix util.DH picks per platform
+        self.assertRegex(text, r"→ `" + launcher + r" \"[^`]*dh\.py\" autopsy --apply`")          # B9: runnable form
         self.assertNotIn("→ `dh profile doctor`", text)                             # already the first `do` step
 
     def test_a_refused_gate_is_a_decision_not_a_failure(self):
