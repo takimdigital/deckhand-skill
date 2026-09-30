@@ -15,6 +15,7 @@ from pathlib import Path
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL))
 import tmpclean  # noqa: E402
+import hermetic  # noqa: E402  (no secrets of the machine the suite runs on)
 
 from dhlib import profile as PROFILE, state  # noqa: E402
 from dhlib.cli import main  # noqa: E402

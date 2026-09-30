@@ -175,7 +175,8 @@ def next_step(root: Path) -> dict:
     if s and not s.get("moved_to"):
         drift = STATE.plan_drift(root, s)
         if drift:
-            out["drift"] = f"the approved plan changed after G1: {', '.join(drift)} — show the owner what changed (`dh resume --check`)"
+            out["drift"] = (f"the approved plan changed after G1: {', '.join(drift)} — show the owner what changed (`dh resume --check`); "
+                            "accept it: `dh gate pass G1 --quote \"[their words]\"`, or undo it: `dh reopen plan --reason \"[why]\"`")
     if isinstance(out.get("do"), list):
         out["do"] = [ANGLE_RX.sub(r"[\1]", x) for x in out["do"]]
     return out
