@@ -116,7 +116,7 @@ class TestCorruptState(Base):                                                # B
         dk = d / ".deckhand"
         junk = b"\xff\xfe\x80 not json\n"
         good = {"history.jsonl": b'{"at":"2026-01-01T00:00:00Z","event":"x"}\n', "notes.jsonl": b'{"at":"2026-01-02T00:00:00Z","kind":"doing","text":"t"}\n',
-                "runs.jsonl": b'{"at":"2026-01-02T00:00:00Z","cmd":"dh x","exit":0,"out":""}\n',
+                "runs.jsonl": b'{"at":"2026-01-02T00:00:00Z","cmd":"py x","exit":0,"out":""}\n',
                 "blackboard.jsonl": b'{"at":"2026-01-02T00:00:00Z","wp":"all","kind":"note","msg":"m"}\n'}
         for n, row in good.items():
             (dk / n).write_bytes(row + junk + row + b'\xc3\x28 {"at":"x\xff"}\n')
@@ -288,7 +288,7 @@ class TestHintsRunVerbatim(unittest.TestCase):                               # B
         self.assertIn(DH + " autopsy --apply", o["then"])
         self.assertEqual(o["do"], [DH + " workflow query  # x"])
         self.assertEqual(o["say"], "dh next")                      # prose is left alone
-        self.assertEqual(runnable_obj({"next": "see dh.py and the dh folder"}), {"next": "see dh.py and the dh folder"})
+        self.assertEqual(runnable_obj({"next": "see dh.py and the skill folder"}), {"next": "see dh.py and the skill folder"})
 
     def test_commands_print_runnable_hints(self):
         d = Path(tempfile.mkdtemp(prefix="dh-hint2-")).resolve()
