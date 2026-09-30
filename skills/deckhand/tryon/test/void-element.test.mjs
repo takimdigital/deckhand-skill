@@ -31,3 +31,16 @@ test('buildError recognises a React render error in the 500 page and returns its
   assert.match(buildError({ status: 500, text: 'Error: Element type is invalid: expected a string' }), /Element type is invalid/);
   assert.equal(buildError({ status: 200, text: '<p>Hydration failed is a phrase in this blog post</p>' }), null);
 });
+
+test('culpritsOf blames the design named in the error itself, not every design the page lists', async () => {
+  // found by a real-browser run on the sidebar: sidebar-09 threw "useSidebar must be used within a SidebarProvider"; the page's
+  // client-module list also names sidebar-13, which renders fine, so both were dropped and the owner lost a working design
+  const { culpritsOf } = await import('../lib/engine.mjs');
+  const v = (slug) => ({ id: 'shadcn/' + slug.replace('shadcn-', '') + '@radix', slug, dir: 'components/dh-tryon/' + slug });
+  const variants = [v('shadcn-sidebar-09'), v('shadcn-sidebar-13')];
+  const page = '<template data-next-error-message="useSidebar must be used within a SidebarProvider." data-next-error-stack="Error: useSidebar must be used within a SidebarProvider.\n    at useSidebar (components/dh-tryon/shadcn-sidebar-09/sidebar.tsx:91:11)\n    at NavUser (components/dh-tryon/shadcn-sidebar-09/nav-user.tsx:12:5)"></template>'
+    + '<script>self.__next_f.push([1,"3a1:I[\\"[project]/components/dh-tryon/shadcn-sidebar-13/shadcn-sidebar-13.tsx [app-client]\\"]"])</script>';
+  assert.deepEqual(culpritsOf('/x', variants, page).map((x) => x.id), ['shadcn/sidebar-09@radix']);
+  // no Next error attributes (a Vite or plain error text): every design named anywhere is still a suspect, as before
+  assert.deepEqual(culpritsOf('/x', variants, 'Failed to resolve import from components/dh-tryon/shadcn-sidebar-13/a.tsx').map((x) => x.id), ['shadcn/sidebar-13@radix']);
+});
