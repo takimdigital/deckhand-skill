@@ -285,7 +285,7 @@ export async function fetchBundle(prof, item) {
     const ns = item.draftDir ? 'ai/' + item.n : 'mine/' + item.local;
     const files = fs.readdirSync(dir).filter((f) => /\.(tsx|ts|jsx|js|css)$/.test(f)).map((f) => ({ path: ns + '/' + f, content: fs.readFileSync(path.join(dir, f), 'utf8').replace(/^\/\* .*? \*\/\n/, '') }));
     const entry = ns + '/' + item.entry;
-    const deps = new Set(item.deps || []);
+    const deps = new Set(realPackages(item.deps));
     const external = {};
     for (const f of files) for (const imp of importsOf(f.path, f.content)) {
       const prov = projectProvides(prof, imp.spec);
@@ -302,7 +302,7 @@ export async function fetchBundle(prof, item) {
       if (g.unresolved.length) throw new Error('UNRESOLVED_IMPORTS ' + g.unresolved.join(', '));
       return {
         origin: 'gh', sourceUrl: `https://github.com/${repo.split('/').slice(0, 2).join('/')}/blob/${repoParts[2]}/${entryPath}`,
-        entry: g.entry, files: [...g.files].map(([p, content]) => ({ path: p, content })), deps: [...new Set([...(item.deps || []), ...g.deps])],
+        entry: g.entry, files: [...g.files].map(([p, content]) => ({ path: p, content })), deps: [...new Set([...realPackages(item.deps), ...realPackages(g.deps)])],
         external: g.external, css: null, cssVars: null,
       };
     } catch (e) { errors.push('gh: ' + e.message); }
@@ -335,10 +335,17 @@ export function rawSource(content) {
   return content.replace(/(\bfrom\s+)(["'])cn\2/g, '$1$2@/lib/utils$2');
 }
 
+/**
+ * A registry's dependency list as npm packages: shadcn DECLARES its workspace alias `cn` there (89 catalog items list it),
+ * and installing it would add an unrelated npm package named `cn` to the owner's package.json (Discard then leaves it behind).
+ */
+export const realPackages = (list) => (list || []).filter((d) => d && d !== 'cn');
+
 /** shadcn-schema JSON -> bundle; unresolved `@/registry|components/ui/x` become shadcn/registry deps. */
 async function jsonBundle(prof, item, doc, url) {
-  const files = (doc.files || []).filter((f) => f.content).map((f) => ({ path: f.path, content: f.content }));
-  const deps = new Set(doc.dependencies || []);
+  // a registry's workspace alias `from "cn"` is the project's utils, in every file it serves (JSON items too, not only raw repo files)
+  const files = (doc.files || []).filter((f) => f.content).map((f) => ({ path: f.path, content: rawSource(f.content) }));
+  const deps = new Set(realPackages(doc.dependencies));
   const external = {};
   const have = new Set(files.map((f) => f.path));
   const extra = [];
@@ -394,9 +401,9 @@ async function jsonBundle(prof, item, doc, url) {
       }
     }
     if (!got) throw new Error('UNRESOLVED_REGISTRY_DEP ' + x.spec);
-    for (const d of got.dependencies || []) deps.add(d);
+    for (const d of realPackages(got.dependencies)) deps.add(d);
     for (const f of got.files) if (!have.has(f.path)) {
-      const nf = { path: f.path, content: f.content, aliasOf: x.spec };
+      const nf = { path: f.path, content: rawSource(f.content), aliasOf: x.spec };
       files.push(nf);
       have.add(f.path);
       scan(nf);
