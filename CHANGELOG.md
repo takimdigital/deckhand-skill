@@ -33,6 +33,19 @@
 - `playground/`: a saved source-only try-on test site, a `/kitchen-sink` page with 45 slot kinds, `playground.mjs`
   (restore, reset, start, kitchen, snapshot) and a structural CI test.
 
+- A design that spreads props onto a void element (`<input {...props} />`) is not a wrapper, so trying an input or textarea can no
+  longer put the owner's form inside it and break the page; React render errors are now recognised as build errors, with the
+  readable message instead of markup.
+
+### A clean machine
+- New `dh clean [--apply] [--older-than HOURS] [--caches]`: a dry run by default that lists, then removes, only what Deckhand and
+  its known tools leave behind (its temp folders, abandoned browser-automation profiles, stranded sibling folders), by exact name
+  patterns in `data/clean.json`; never younger than 2 hours, never follows a link, never touches a project, `~/.deckhand`, or another
+  tool's data. `--caches` only runs the official `npm cache verify`.
+- Deckhand's own leak fixed: `dh autopsy` left a `dh-hermes-*` copy of the session store behind.
+- The test suites leave nothing behind (they had filled a drive): Python tests remove read-only git objects properly, node tests
+  keep every temp folder under one root removed on exit; guards fail if either pattern returns.
+
 ### Other
 - `dh scaffold` builds in `dh-scaffold-<slug>-<random>`; the old sibling folder began with a dot, which npm rejects.
 
