@@ -48,3 +48,12 @@ packages one after the other in this session, or open one session per package �
 across sessions. The checklist is `dh workflow todo --format md`. For the autopsy: `.deckhand/runs.jsonl` is always read
 (run risky commands through `dh run -- …`); a chat export as JSONL (`{"role", "content"}` per line) adds the
 questions and answers.
+
+## Handing over to a fresh session
+
+1. `dh resume` first (`--check` to re-prove it); it must say SAFE TO START A FRESH SESSION before you stop.
+2. The dev server port is in `.deckhand/dev.json`; `dh dev status` tells whether it still answers. Do not start a second one.
+3. Form smoke test: `curl -s -o /dev/null -w "%{http_code}" URL/route` for each planned page, then POST each form once with valid and with invalid data (expect the success and the error state).
+4. A hand-edit made after `dh compose` is recorded at once: `dh note doing "edited components/x.tsx: why"`.
+5. Owner decisions: `dh note decision "…"`; open asks: `dh pending add`. Nothing lives only in the chat.
+6. Secrets stay in the vault (`dh vault list`), never in the handover text.

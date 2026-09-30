@@ -120,5 +120,90 @@ class Coherence(unittest.TestCase):
         self.assertEqual(claimed, actual, "update the CI line in README.md ✅ Proven")
 
 
+class DocNumbers(unittest.TestCase):
+    """Numbers the docs state must be derived from the source of truth, not typed twice."""
+    ROOT = Path(__file__).resolve().parents[1]
+
+    def read(self, rel):
+        return (self.ROOT / rel).read_text(encoding="utf-8")
+
+    def test_invariant_count_matches_skill_md(self):
+        sec = self.read("skills/deckhand/SKILL.md").split("## 3. Invariants", 1)[1].split("\n## 4.", 1)[0]
+        n = len(re.findall(r"^(\d+)\. \*\*", sec, re.M))
+        self.assertEqual([int(x) for x in re.findall(r"^(\d+)\. \*\*", sec, re.M)], list(range(1, n + 1)))
+        bad = []
+        for rel in ("README.md", "docs/USE-CASES.md", "docs/architecture-atlas.html", "skills/deckhand/SKILL.md", "AGENTS.md", "playground/README.md"):
+            p = self.ROOT / rel
+            if not p.exists():
+                continue
+            for m in re.finditer(r"\b(\d+|twelve|thirteen) (?:non-negotiable )?invariants\b", p.read_text(encoding="utf-8"), re.I):
+                if m.group(1).lower() != str(n):
+                    bad.append(f"{rel}: {m.group(0)}")
+        self.assertEqual(bad, [], f"SKILL.md §3 lists {n} invariants")
+        atlas = self.read("docs/architecture-atlas.html")
+        table = atlas.split('id="invariants"', 1)[1].split("</section>", 1)[0]
+        self.assertEqual(len(re.findall(r"<tr><td>\d+</td>", table)), n)
+
+    def test_subcommand_count_matches_the_parser(self):
+        sys.path.insert(0, str(self.ROOT / "skills" / "deckhand"))
+        from dhlib.cli import build_parser
+        import argparse
+        subs = next(a for a in build_parser()._actions if isinstance(a, argparse._SubParsersAction))
+        n = len(subs.choices)
+        atlas = self.read("docs/architecture-atlas.html")
+        for m in re.finditer(r"\b(\d+) (?:<code>dh</code> )?subcommands", atlas):
+            self.assertEqual(int(m.group(1)), n, m.group(0))
+        self.assertIn("(%d subcommands)" % n, atlas)
+        mapped = set(re.findall(r"\bdh ([a-z]+)", atlas.split('id="commands"', 1)[1]))
+        self.assertEqual(sorted(set(subs.choices) - mapped - {"tryon"}), [], "commands missing from the atlas command map")
+
+    def test_slot_kind_claims_match_the_index(self):
+        import json
+        items = json.loads(self.read("skills/deckhand/data/components.index.json"))["items"]
+        n = len({i["slot"] for i in items})
+        for rel in ("docs/architecture-atlas.html", "playground/README.md"):
+            t = self.read(rel)
+            self.assertIn("%d slot kinds" % n, t, rel)
+            self.assertNotIn("about 45", t, rel)
+
+    def test_cli_flags_reference_is_current_and_complete(self):
+        import subprocess
+        r = subprocess.run([sys.executable, str(self.ROOT / "scripts" / "gen_cli_flags.py"), "--check"], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        doc = self.read("skills/deckhand/references/cli-flags.md")
+        for flag in ("--cause", "--lane", "--buzz", "--shape", "--baseline-research", "--install-hook"):
+            self.assertIn(flag, doc)
+        self.assertIn("references/cli-flags.md", self.read("skills/deckhand/SKILL.md"))
+
+    def test_version_check_covers_atlas_and_release_notes(self):
+        import subprocess
+        r = subprocess.run([sys.executable, str(self.ROOT / "scripts" / "version_check.py")], capture_output=True, text=True)
+        self.assertIn("atlas header", r.stdout)
+        self.assertIn("release notes", r.stdout)
+        self.assertEqual(r.returncode, 0, r.stdout)
+
+    def test_review_reference_lists_every_verify_row(self):
+        src = self.read("skills/deckhand/dhlib/verify.py")
+        rows = set(re.findall(r'row\("([a-z0-9-]+)"', src))
+        doc = self.read("skills/deckhand/references/60-review.md")
+        self.assertEqual(sorted(r for r in rows if f"| {r} |" not in doc), [])
+
+    def test_data_cross_references(self):
+        import json
+        d = self.ROOT / "skills" / "deckhand"
+        names = set(json.loads((d / "data" / "harness.json").read_text(encoding="utf-8"))) - {"why"}
+        wf = (d / "dhlib" / "workflow.py").read_text(encoding="utf-8")
+        body = wf.split("def harness", 1)[1].split("def todo_how", 1)[0]
+        self.assertEqual(names, set(re.findall(r'return "([a-z-]+)"', body)))
+        for b in json.loads((d / "data" / "bots.json").read_text(encoding="utf-8"))["bots"]:
+            if b.get("script"):
+                self.assertTrue((d / "templates" / "bots" / b["script"]).exists(), b["id"])
+        ids = {i["id"] for i in json.loads((d / "data" / "components.index.json").read_text(encoding="utf-8"))["items"]}
+        verdicts = set()
+        for f in (d / "data" / "checks").glob("*.json"):
+            verdicts |= set(json.loads(f.read_text(encoding="utf-8"))["verdicts"])
+        self.assertEqual(ids ^ verdicts, set())
+
+
 if __name__ == "__main__":
     unittest.main()

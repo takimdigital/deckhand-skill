@@ -21,7 +21,7 @@ node playground/playground.mjs reset                # throw away every try-on ch
 Open the printed URL and click **Try-on**. Two pages:
 
 - `/` : the composed site (7 sections).
-- `/kitchen-sink` : **one owner element for every slot kind try-on knows** (about 45: hero, pricing, tabs, dialog, table, sidebar, chart,
+- `/kitchen-sink` : **one owner element for each fit-check reference** (45 of them; the catalog knows 58 slot kinds, several share a reference: hero, pricing, tabs, dialog, table, sidebar, chart,
   calendar…), written from the fit-check's own reference sections (`skills/deckhand/tryon/lib/fitcheck.mjs`), so it never drifts from
   what the catalog can be tried against.
 
