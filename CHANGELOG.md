@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.4.4] — 2026-10-01 — drift you can clear, a fresh clone is not an edit, tests that never read your secrets
+
+- **Plan drift.** `dh next` now says how to clear a plan edit made after G1: accept it with the owner's own words (`dh gate pass G1 --quote "…"`, which re-records the plan hashes) or undo it (`dh reopen plan`). A run whose G1 has no recorded hashes no longer reads a fresh clone as "edited after G1": the file's last commit time is compared, not its mtime.
+- **Hermetic tests.** The suite removes `COOLIFY_*`, `VPS_*`, `CF_*` and mail-provider keys from its environment, so a developer shell or CI job that carries real secrets can no longer change a result or put a token in a failure message; a test checks that every test module that reads secrets does so.
+
 ## [2.4.3] — 2026-09-30 — a verify is not made stale by the files it writes itself
 
 Found by a real deploy of the first-owner sandbox site: `dh verify` adds the SEO owner items to `PENDING.md`, and committing that made `dh deploy ship` refuse with `VERIFY_STALE` — a green verify that could never be shipped. `PENDING.md`, `HANDOFF.md` and `RESUME.md` (written by deckhand) are now treated like `.deckhand/`; a real code change still makes the verify stale, and a message naming both lists only the code.

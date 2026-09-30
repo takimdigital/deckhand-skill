@@ -63,7 +63,10 @@ class F19(unittest.TestCase):
         s = state.load(self.root)
         s["gates"]["G1"] = {"status": "passed", "at": now(), "by": "owner"}
         state.save(self.root, s)
-        time.sleep(1.5)                                   # the brief's mtime could fall AFTER G1 only if seo wrote it
+        brief = self.root / ".deckhand" / "brief.json"
+        back = time.time() - 30                           # clearly before G1: only a write by `seo apply` can move it past G1
+        os.utime(brief, (back, back))
+        time.sleep(1.5)
         with redirect_stdout(io.StringIO()):
             main(["--project", str(self.root), "seo", "apply"])
         buf = io.StringIO()
@@ -72,6 +75,7 @@ class F19(unittest.TestCase):
         out = json.loads(buf.getvalue().strip().splitlines()[-1])
         bad = [c for c in out.get("claims", []) if not c["ok"] and "approved plan" in c["claim"]]
         self.assertEqual(bad, [], out)
+        self.assertAlmostEqual(brief.stat().st_mtime, back, delta=1.0)        # and the brief itself was not rewritten
 
 
 if __name__ == "__main__":

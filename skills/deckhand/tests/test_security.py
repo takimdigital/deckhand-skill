@@ -14,6 +14,7 @@ from pathlib import Path
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL))
 import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
+import hermetic  # noqa: E402  (no secrets of the machine the suite runs on)
 sys.path.insert(0, str(SKILL / "ops" / "scripts"))
 
 from dhlib import autopsy as AU, harvest, learn, profile, state, util  # noqa: E402

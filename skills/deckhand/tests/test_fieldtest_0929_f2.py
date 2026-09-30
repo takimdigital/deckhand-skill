@@ -10,6 +10,7 @@ from unittest import mock
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
 import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
+import hermetic  # noqa: E402  (no secrets of the machine the suite runs on)
 from dhlib import profile  # noqa: E402
 
 NAMES = ("CLOUDFLARE_API_TOKEN", "CF_API_TOKEN", "COOLIFY_TOKEN", "VPS_OPS_HOME")

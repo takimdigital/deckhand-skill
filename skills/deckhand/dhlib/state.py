@@ -328,7 +328,20 @@ def plan_drift(root: Path, s: dict) -> list:
         t = _dt.datetime.strptime(str(g1.get("at"))[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=_dt.timezone.utc).timestamp()
     except ValueError:
         return []
-    return [f for f in PLAN_FILES if (root / ".deckhand" / f).exists() and (root / ".deckhand" / f).stat().st_mtime > t + 1]
+    return [f for f in PLAN_FILES if (root / ".deckhand" / f).exists() and _changed_since(root, f, t)]
+
+
+def _changed_since(root: Path, name: str, t: float) -> bool:
+    """No recorded hash: a file the repository holds unmodified changed when its last commit was made (a clone gives every
+    file a new mtime, which is no edit); an edited or untracked file falls back to its mtime."""
+    rel = f".deckhand/{name}"
+    from .util import run
+    if (root / ".git").exists():
+        dirty = run(["git", "status", "--porcelain", "--", rel], cwd=root)
+        log = run(["git", "log", "-1", "--format=%ct", "--", rel], cwd=root)
+        if dirty["code"] == 0 and log["code"] == 0 and not dirty["out"].strip() and log["out"].strip().isdigit():
+            return int(log["out"].strip()) > t + 1
+    return (root / ".deckhand" / name).stat().st_mtime > t + 1
 
 
 def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -> dict:
