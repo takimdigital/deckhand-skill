@@ -215,7 +215,7 @@ const ts = (prof) => prof.lang === 'ts';
 function siteModule(prof, plan) {
   const T = ts(prof);
   const s = plan.site;
-  const pages = plan.pages.filter((p) => !p.noindex).map((p) => ({ route: p.route }));
+  const pages = plan.pages.filter((p) => !p.noindex).map((p) => (p.alternates ? { route: p.route, alternates: p.alternates } : { route: p.route }));
   return HEADER + `
 export const SITE = {
   name: ${J(s.name)},
@@ -232,7 +232,7 @@ export const SITE = {
 export const NOINDEX = process.env.DH_NOINDEX === "1";
 
 /** Public, indexable routes (from the plan). The sitemap is built from this list. */
-export const PAGES${T ? ': { route: string }[]' : ''} = ${J(pages)};
+export const PAGES${T ? ': { route: string; alternates?: Record<string, string> }[]' : ''} = ${J(pages)};
 
 /** Who the business is, for search engines and AI answers — only facts the owner confirmed. */
 export const JSON_LD = ${JSON.stringify(plan.jsonld, null, 2)};
@@ -266,11 +266,16 @@ function sitemapModule(prof, plan, siteSpec, i18n) {
   const T = ts(prof);
   const langs = plan.site.languages || ['en'];
   const multi = i18n && langs.length > 1;
+  const prefixed = !multi && plan.i18n === 'prefix';
   return HEADER + (T ? 'import type { MetadataRoute } from "next";\n' : '') + `import { SITE, PAGES, NOINDEX } from ${J(siteSpec)};
 
 export default function sitemap()${T ? ': MetadataRoute.Sitemap' : ''} {
   if (NOINDEX) return [];
-${multi ? `  const langs = ${J(langs)};
+${prefixed ? `  // path-prefixed languages (/en): each page lists its translations (+ x-default), paired by the plan
+  return PAGES.map((p) => ({
+    url: SITE.url + (p.route === "/" ? "/" : p.route),
+    ...(p.alternates ? { alternates: { languages: Object.fromEntries(Object.entries(p.alternates).map(([l, r]) => [l, SITE.url + (r === "/" ? "" : r)])) } } : {}),
+  }));` : multi ? `  const langs = ${J(langs)};
   // every page in every language, each listing all its translations (+ x-default) — reciprocal hreflang
   return PAGES.flatMap((p) => langs.map((l) => ({
     url: \`\${SITE.url}/\${l}\${p.route === "/" ? "/" : p.route}\`,
@@ -540,7 +545,8 @@ function improvePage(prof, plan, page, code, changes) {
   const m = moduleMeta(code, page.file);
   if (m.client) { changes.push({ file: page.file, skipped: "'use client' page cannot export metadata — move the interactive part into a child component" }); return code; }
   if (m.gen) return code;
-  const canonical = `alternates: { canonical: ${J(page.route)} }`;
+  const langs = p.alternates ? `languages: ${J(p.alternates)}` : null;
+  const canonical = `alternates: { canonical: ${J(page.route)}${langs ? ', ' + langs : ''} }`;
   if (!m.meta) {
     const props = [];
     if (p.title) props.push(`title: ${titleExpr(p.title, brand)}`);
@@ -565,8 +571,11 @@ function improvePage(prof, plan, page, code, changes) {
   if (!alt) { add.push(canonical); what.push('canonical'); }
   else if (!propOf(unwrap(alt.value), 'canonical') && unwrap(alt.value).type === 'ObjectExpression') {
     const a = unwrap(alt.value);
-    edits.push(insertProps(code, a, [`canonical: ${J(page.route)}`]));
+    edits.push(insertProps(code, a, [`canonical: ${J(page.route)}`, ...(langs ? [langs] : [])]));
     what.push('canonical');
+  } else if (langs && unwrap(alt.value).type === 'ObjectExpression' && !propOf(unwrap(alt.value), 'languages')) {
+    edits.push(insertProps(code, unwrap(alt.value), [langs]));
+    what.push('hreflang');
   }
   if (add.length) edits.push(insertProps(code, o, add));
   if (!edits.length) return code;
@@ -679,7 +688,12 @@ export function seoApply(rootIn, plan) {
   }
   writeCommon(root, plan, J_, changes);
   const written = J_.save();
-  return { router: insp.router, written, changes, undo: written.length ? 'dh seo undo (byte-exact)' : null };
+  const say = [];
+  if (plan.i18n === 'prefix' && insp.layout) {
+    say.push(`languages are path-prefixed: hreflang alternates are written per page and in the sitemap; <html lang> stays "${insp.layout.lang || ''}" on every route from ONE root layout — `
+      + 'needs a manual edit: give each language its own route group with its own <html lang> (app/(fr)/layout.tsx, app/(en)/layout.tsx), or read the language from the path');
+  }
+  return { router: insp.router, written, changes, ...(say.length ? { say } : {}), undo: written.length ? 'dh seo undo (byte-exact)' : null };
 }
 
 export function seoUndo(rootIn, { force = false } = {}) {

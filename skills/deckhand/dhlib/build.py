@@ -314,6 +314,20 @@ def adopt(src: str, to: Path | None = None, do_install: bool = False) -> dict:
     return {"project": str(dest), "stack": stack, "install": inst, "next": "dh dev start"}
 
 
+def plain_layout(to: Path) -> bool:
+    """Next 16's `LayoutProps<"/">` is a global that only exists after `next dev/build` generated route types, so a fresh
+    `tsc --noEmit` fails TS2304. A plain children type typechecks from the first minute."""
+    for d in ("app", "src/app"):
+        f = Path(to) / d / "layout.tsx"
+        if f.is_file():
+            s = f.read_text(encoding="utf-8")
+            n = re.sub(r"\}\s*:\s*(Readonly<)?\s*LayoutProps<[^>]*>\s*>?", "}: Readonly<{ children: React.ReactNode }>", s)
+            if n != s:
+                f.write_text(n, encoding="utf-8")
+                return True
+    return False
+
+
 def scaffold(to: Path, pm: str = "npm") -> dict:
     """create-next-app wants a folder it creates itself. It builds in a sibling and moves in: `to` is never removed,
     because it may be the shell's cwd (`--to .`: Windows refuses to rmdir it, POSIX leaves the shell in a deleted
@@ -343,6 +357,7 @@ def scaffold(to: Path, pm: str = "npm") -> dict:
     for rel in ("components/ui/button.tsx", "lib/utils.ts"):
         (to / rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(base / rel, to / rel)
+    plain_layout(to)
     css = to / "app" / "globals.css"
     css.write_text((base / "app" / "globals.css").read_text(encoding="utf-8"), encoding="utf-8")
     deps = ["clsx", "tailwind-merge", "class-variance-authority", "radix-ui", "lucide-react", "tw-animate-css"]

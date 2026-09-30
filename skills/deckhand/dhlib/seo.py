@@ -245,6 +245,41 @@ def llms_text(brief: dict, url: str, pages: list, words: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def prefix_langs(ctx: dict) -> list:
+    """Languages that live under a path prefix (/en, /en/about) in the plan's routes: a site with no [locale] folder."""
+    langs = ctx["languages"]
+    routes = [p.get("route", "") for p in ctx["sitemap"].get("pages", [])]
+    return [l for l in langs[1:] if any(r == f"/{l}" or r.startswith(f"/{l}/") for r in routes)]
+
+
+def route_lang(route: str, ctx: dict) -> str:
+    return next((l for l in prefix_langs(ctx) if route == f"/{l}" or route.startswith(f"/{l}/")), ctx["languages"][0])
+
+
+def alternates_of(ctx: dict) -> dict:
+    """route -> {lang: route, 'x-default': route} for pages that have a translation (paired by plan id `<id>` / `<id>-<lang>`)."""
+    pl = prefix_langs(ctx)
+    if not pl:
+        return {}
+    dflt = ctx["languages"][0]
+    groups = {}
+    for p in public_pages(ctx):
+        lang = route_lang(p["route"], ctx)
+        base = str(p.get("id") or p["route"])
+        if lang != dflt and base.endswith("-" + lang):
+            base = base[: -len(lang) - 1]
+        elif lang != dflt:
+            base = "/" + p["route"][len(lang) + 2:].strip("/") if p["route"] != f"/{lang}" else "/"
+        groups.setdefault(base, {})[lang] = p["route"]
+    out = {}
+    for g in groups.values():
+        if len(g) > 1 and dflt in g:
+            alt = {**g, "x-default": g[dflt]}
+            for r in g.values():
+                out[r] = alt
+    return out
+
+
 def plan(root: Path) -> dict:
     root = Path(root)
     ctx = ctx_of(root)
@@ -261,6 +296,7 @@ def plan(root: Path) -> dict:
     key = indexnow_key(root, b, create=True)
     primary = brand.get("primary") or ""
     langs = ctx["languages"]
+    alts = alternates_of(ctx)
     locale = {"en": "en_US", "fr": "fr_FR", "es": "es_ES", "de": "de_DE", "it": "it_IT", "pt": "pt_PT", "nl": "nl_NL", "ar": "ar_AR"}.get(langs[0], f"{langs[0]}_{langs[0].upper()}")
     return {
         "site": {"name": name, "url": url, "url_known": bool(ctx["site"]), "description": _get(copy, "seo.description") or brand.get("tagline") or b.get("business") or "",
@@ -268,7 +304,9 @@ def plan(root: Path) -> dict:
                  "themeColor": primary if re.match(r"^#[0-9a-f]{6}$", primary, re.I) else "#111111", "background": "#ffffff"},
         "jsonld": jsonld(b, url),
         "pages": [{"route": p["route"], "title": (words.get(p["route"]) or {}).get("title") or (p.get("title") if p["route"] != "/" else None),
-                   "description": (words.get(p["route"]) or {}).get("description"), "noindex": bool(p.get("noindex"))} for p in pages],
+                   "description": (words.get(p["route"]) or {}).get("description"), "noindex": bool(p.get("noindex")),
+                   **({"alternates": alts[p["route"]]} if p["route"] in alts else {})} for p in pages],
+        "i18n": "prefix" if prefix_langs(ctx) else None,
         "robots": {"ai": _get(b, "seo.ai_crawlers") or "allow", "disallow": auth, "training": POLICY["ai_crawlers"]["training"]},
         "llms": llms_text(b, url, pages, words),
         "indexnow": key,
@@ -306,9 +344,22 @@ def apply(root: Path) -> dict:
     p = plan(root)
     pf = root / ".deckhand" / "seo-plan.json"
     write_json(pf, p)
+    before = audit(root, write=False)
     res = _node(root, "apply", "--plan", str(pf))
+    # a finding apply claims to fix but that is still there afterwards is a manual edit: say so, stop suggesting apply for it
+    sf = root / ".deckhand" / "seo-stuck.json"
+    if sf.exists():
+        sf.unlink()
+    rep = audit(root, write=False)
+    still = {x["rule"] for x in rep["findings"]}
+    stuck = sorted(r for r in before["auto_fixable"] if r in still)
+    if stuck:
+        write_json(sf, {"rules": stuck, "at": now()})
     rep = audit(root)
+    manual = [{"rule": x["rule"], "where": x["where"], "needs": f"needs a manual edit: {x['fix']}"} for x in rep["findings"]
+              if x["rule"] in stuck or x["rule"] == "M02" or x["fix"].startswith("needs a manual edit")]
     return {**{k: res[k] for k in ("router", "written", "changes") if k in res}, "undo": res.get("undo"),
+            **({"manual": manual} if manual else {}), **({"say": res["say"]} if res.get("say") else {}),
             "score": rep["score"], "blockers": rep["blockers"], "owner_open": len(rep["owner"]),
             "site_url": p["site"]["url"] + ("" if p["site"]["url_known"] else " (placeholder — `dh brief set domain=…`, then apply again)"),
             "next": "write any missing per-page titles/descriptions in .deckhand/copy.json → seo.pages, apply again; the owner's part is in PENDING.md"}
@@ -485,6 +536,11 @@ def check_page(route: str, status: int, headers: dict, html: str, ctx: dict) -> 
         f.append(_finding("M07", "<html> without lang", route))
     elif ctx["languages"] and lang not in ctx["languages"]:
         f.append(_finding("M07", f'lang="{p.lang}" but the site is {", ".join(ctx["languages"])}', route))
+    elif prefix_langs(ctx) and lang != route_lang(route, ctx):
+        x = _finding("M07", f'lang="{p.lang}" on {route}, which is in {route_lang(route, ctx)}', route)
+        x.update(auto=False, fix="needs a manual edit: one root <html> carries one lang; give each language its own route group "
+                 "(app/(fr)/layout.tsx, app/(en)/layout.tsx, each with <html lang=…>) or read the language from the path")
+        f.append(x)
     if "viewport" not in p.meta:
         f.append(_finding("M08", "", route))
     if "keywords" in p.meta:
@@ -716,6 +772,11 @@ def audit(root: Path, url: str | None = None, get=fetch, write: bool = True) -> 
             continue
         uniq.add(k)
         out.append(x)
+    stuck = set((read_json(root / ".deckhand" / "seo-stuck.json", {}) or {}).get("rules") or [])
+    for x in out:                                   # `dh seo apply` ran and this is still here: it is a manual edit, not an apply fix
+        if x["auto"] and x["rule"] in stuck:
+            x["auto"] = False
+            x["fix"] = "needs a manual edit (dh seo apply cannot fix it on this site): " + x["fix"]
     out.sort(key=lambda x: (list(WEIGHT).index(x["severity"]), x["rule"], x["where"]))
     failed = {x["rule"] for x in out}
     applicable = [r for r in POLICY["rules"] if _applies(r, ctx, fw) and r["id"] not in NOT_CHECKED and (base or r["id"] not in RENDERED)]
@@ -727,6 +788,7 @@ def audit(root: Path, url: str | None = None, get=fetch, write: bool = True) -> 
         "policy": POLICY["policy_by_path"].get(ctx["path"], "apply"), "site": ctx["site"],
         "blockers": [x for x in out if x["severity"] == "block"], "findings": out,
         "auto_fixable": sorted({x["rule"] for x in out if x["auto"]}),
+        "manual": sorted({x["rule"] for x in out if not x["auto"] and (x["rule"] in stuck or x["fix"].startswith("needs a manual edit"))}),
         "owner": owner_gaps(ctx), "router": insp.get("router"), "notes": insp.get("notes", []),
     }
     if write:

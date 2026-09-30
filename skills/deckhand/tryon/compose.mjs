@@ -24,6 +24,7 @@ import { parameterize, bind, contentProp } from './lib/transplant.mjs';
 import { ensureTokens, bake, PLACEHOLDER, logoLocalsFor, install, brandName, ensurePlaceholder, demoTexts, recordDemoCopy } from './lib/engine.mjs';
 import { contentCount } from './lib/transplant.mjs';
 import { siteLinks, fillLinks, linkTexts, FORM_SLOTS } from './lib/sitelinks.mjs';
+import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 const { parse, walk, jsxName } = createRequire(import.meta.url)('./lib/ast.cjs');
 
@@ -31,7 +32,12 @@ const args = process.argv.slice(2);
 const opt = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const root = path.resolve(opt('project', '.'));
 const page = opt('page', 'app/page.tsx');
-const sections = String(opt('sections', 'navbar,hero,features,pricing,faq,cta,footer')).split(',').map((s) => s.trim()).filter(Boolean);
+let sections = String(opt('sections', 'navbar,hero,features,pricing,faq,cta,footer')).split(',').map((s) => s.trim()).filter(Boolean);
+// an inner page gets no navbar/footer unless its section list names them (or the layout holds them): --chrome yes adds both
+if (opt('chrome', 'no') === 'yes') {
+  if (!sections.includes('navbar')) sections = ['navbar', ...sections];
+  if (!sections.includes('footer')) sections = [...sections, 'footer'];
+}
 const registry = opt('registry', null);
 const out = (o, c = 0) => { process.stdout.write(JSON.stringify(o) + '\n'); process.exit(c); };
 let copy = {};
@@ -64,13 +70,32 @@ function origFromCopy(c = {}) {
   return { units, images, inputs: [], lists, dynamicLists: 0 };
 }
 
+// A section folder holds ONE page's words (they are baked in), so a second page gets its own <slug>-2; re-composing the same page reuses its folders.
 // Candidates stage in <sections>/.dh-stage-N (the same depth as the final folder, so relative imports hold); the winner
 // then moves to <sections>/<slug>, or <slug>-2… when that folder exists: another page or a kept try-on may use it,
 // and the owner may have edited it. Nothing already in <sections> is ever cleared.
 const SECTIONS = (prof) => path.posix.join(prof.componentsDir, 'sections');
+const LEDGER = () => path.join(root, '.deckhand', 'compose.json');
+const readLedger = () => { try { return JSON.parse(fs.readFileSync(LEDGER(), 'utf8')); } catch { return {}; } };
+/** A fingerprint of a staged folder: a re-compose of the SAME page reuses its own unedited folders instead of adding -2 copies. */
+const folderSha = (abs) => {
+  const h = crypto.createHash('sha256');
+  const walkDir = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const f = path.join(d, e.name); if (e.isDirectory()) walkDir(f); else { h.update(e.name); h.update(fs.readFileSync(f)); } } };
+  if (fs.existsSync(abs)) walkDir(abs);
+  return h.digest('hex');
+};
 function settle(prof, stage, cand) {
   let name = slugOf(cand), n = 1;
-  while (fs.existsSync(path.join(root, SECTIONS(prof), name))) name = `${slugOf(cand)}-${++n}`;
+  // this page's own folder from an earlier compose, byte-identical to what compose left (nobody edited it): reuse its name
+  const mine = (readLedger().pages || {})[page] || {};
+  const prev = mine[cand.id];
+  if (prev && prev.folder && fs.existsSync(path.join(root, prev.folder)) && folderSha(path.join(root, prev.folder)) === prev.sha) {
+    fs.rmSync(path.join(root, prev.folder), { recursive: true, force: true });
+    name = path.posix.basename(prev.folder);
+    n = 0;
+  }
+  if (n) while (fs.existsSync(path.join(root, SECTIONS(prof), name))) name = `${slugOf(cand)}-${++n}`;
   const to = path.posix.join(SECTIONS(prof), name);
   try { fs.renameSync(path.join(root, stage.relDir), path.join(root, to)); }
   catch { fs.cpSync(path.join(root, stage.relDir), path.join(root, to), { recursive: true }); fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true }); }   // Windows: a watcher holds the folder
@@ -132,7 +157,8 @@ async function main() {
       }
     }
     if (!staged.length) { report.push({ slot, ok: false, why: 'no candidate could be staged' }); continue; }
-    staged.sort((x, y) => y.score - x.score);
+    // the owner's words are never silently dropped: a design that keeps all of them beats one that does not (ranked by carried/of)
+    staged.sort((x, y) => (x.b.dropped.length > 0) - (y.b.dropped.length > 0) || y.score - x.score);
     const best = staged[0];
     for (const o of staged.slice(1)) fs.rmSync(path.join(root, o.stage.relDir), { recursive: true, force: true });
     best.stage = settle(prof, best.stage, best.cand);
@@ -185,10 +211,21 @@ async function main() {
     });
     if (edits.length) fs.writeFileSync(f, edits.sort((a, b) => b[0] - a[0]).reduce((c, [a, b]) => c.slice(0, a) + 'h2' + c.slice(b), code));
   }
+  // remember this page's folders (and their fingerprint after every edit above) so the next compose of it reuses them
+  const led = readLedger();
+  led.pages = led.pages || {};
+  led.pages[page] = Object.fromEntries(placed.map((d) => [d.cand.id, { folder: d.stage.relDir, sha: folderSha(path.join(root, d.stage.relDir)) }]));
+  fs.mkdirSync(path.dirname(LEDGER()), { recursive: true });
+  fs.writeFileSync(LEDGER(), JSON.stringify(led, null, 1));
+  const dropped = report.filter((r) => r.ok && r.dropped && r.dropped.length).flatMap((r) => r.dropped.map((text) => ({ slot: r.slot, text })));
   const deps = [...new Set(placed.flatMap((d) => d.stage.missingDeps))];
   let installed = null;
   if (deps.length && opt('install', 'yes') !== 'no') installed = install(detectProject(root), deps);
-  out({ ok: placed.length > 0, page, sections: report, deps, installed, demo_copy_ledger: demoLeft.length ? '.deckhand/demo-copy.json' : null,
-    next: 'dh dev start; swap any section with try-on' + (installed && !installed.ok ? ` (install failed: ${installed.cmd})` : '') });
+  const chromeMissing = page !== 'app/page.tsx' && !['navbar', 'footer'].every((s) => sections.includes(s));
+  out({ ok: placed.length > 0, page, sections: report, dropped, deps,
+    ...(dropped.length ? { pending: dropped.map((d) => ({ what: `the owner's text for ${d.slot} has no room in any design tried: \"${String(d.text).slice(0, 80)}\"`,
+      how: 'add it as its own paragraph/section by hand in the page, or pick a section design with room (dh compose --sections … / try-on)', where: page })) } : {}),
+    ...(chromeMissing ? { chrome: 'this page has no navbar/footer from compose: they come from app/layout.tsx, or pass --chrome yes' } : {}), installed, demo_copy_ledger: demoLeft.length ? '.deckhand/demo-copy.json' : null,
+    next: dropped.length ? `PENDING: ${dropped.length} piece(s) of the owner's text were not placed (see dropped) — place them by hand or change the design, then dh compose again` : 'dh dev start; swap any section with try-on' + (installed && !installed.ok ? ` (install failed: ${installed.cmd})` : '') });
 }
 main().catch((e) => out({ ok: false, code: e.code || 'ERROR', message: String(e.message || e) }, 1));

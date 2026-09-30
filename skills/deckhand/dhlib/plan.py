@@ -262,10 +262,42 @@ def split(root: Path, agents: int = 3) -> dict:
     pages = {p["id"]: p for p in sm.get("pages", [])}
     owned = {}
     wps = []
-    for f in sm.get("features", []) or []:
-        mine = [pg for pg in f.get("pages", []) if pg not in owned]
+    say = []
+    feats_in = sm.get("features", []) or []
+    # a page listed by several features belongs to ONE owner, decided by the page itself, not by list order:
+    # "/" is the shell's; otherwise the feature whose other pages/APIs live in the same first route segment, then the narrower feature
+    claims = {}
+    for f in feats_in:
+        for pg in f.get("pages", []):
+            claims.setdefault(pg, [])
+            if f["id"] not in claims[pg]:
+                claims[pg].append(f["id"])
+    seg = lambda route: next((x for x in str(route).strip("/").split("/") if x and not x.startswith("[")), "")  # noqa: E731
+    by_id = {f["id"]: f for f in feats_in}
+
+    def winner(pg):
+        cs = claims[pg]
+        if len(cs) == 1:
+            return cs[0]
+        route = pages[pg]["route"] if pg in pages else ""
+        if route == "/":
+            return None                                    # shared by several features: the shell owns the home
+        s = seg(route)
+
+        def score(fid):
+            f = by_id[fid]
+            same = sum(1 for q in f.get("pages", []) if q in pages and seg(pages[q]["route"]) == s)
+            same += sum(1 for a in f.get("api", []) or [] if seg(str(a).split(" ", 1)[-1]) == s)
+            return (-same, len(f.get("pages", [])), cs.index(fid))
+        return min(cs, key=score)
+    owner_of = {pg: winner(pg) for pg in claims}
+    for f in feats_in:
+        mine = [pg for pg in f.get("pages", []) if owner_of.get(pg) == f["id"] and pg not in owned]
         for pg in mine:
             owned[pg] = f["id"]
+        if not mine and not (f.get("api") or f.get("entities") or f.get("emails")):
+            say.append(f"feature '{f['id']}' owns no page (its pages belong to other features or the shell) and no API: merged into the shell, no empty package")
+            continue
         wps.append({"id": f"WP-{len(wps) + 1:02d}", "context": f["id"], "title": f.get("title", f["id"]),
                     "pages": mine, "api": f.get("api", []) or [], "entities": f.get("entities", []) or [],
                     "emails": f.get("emails", []) or [], "done": f.get("done", "")})
@@ -335,6 +367,7 @@ def split(root: Path, agents: int = 3) -> dict:
                                     "why": "layout, navigation, shared UI, schema and seed are written and frozen BEFORE dispatch"},
              "dispatch": [{"agent": a["id"], "give": a["package"], "then": ".deckhand/work/CONVENTIONS.md"} for a in agents_out],
              "packages": [{k: wp.get(k) for k in ("id", "context", "title", "agent", "pages", "api", "consumes", "owns")} for lane in [[shell_wp]] + lanes for wp in lane],
+             **({"say": say} if say else {}),
              "next": "build WP-00 yourself, then give each sub-agent exactly ONE AGENT-n.md (references/team.md)"}
     write_json(wdir / "index.json", index)
     return index
