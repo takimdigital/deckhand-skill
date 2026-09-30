@@ -81,7 +81,7 @@
 <body>
 
 <nav id="toc">
-  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.3.2</span></div>
+  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.4.0</span></div>
   <div class="grp">Big picture</div>
   <a href="#overview">1 · What Deckhand is</a>
   <a href="#layers">2 · System layers</a>
@@ -131,7 +131,7 @@
   <div class="kicker">Complete system reference</div>
   <h1>Deckhand Architecture Atlas</h1>
   <p>Every layer, every command path, every diagram — how the methodology, control plane, try-on engine,
-  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then fact-checked claim by claim against the 2.3.1 code (about 230 claims; the 2.3.1 ordering rules and the fixes from the real-browser test are folded in).</p>
+  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then fact-checked claim by claim against the 2.4.0 code (about 230 claims; the 2.3.1 ordering rules and the fixes from the real-browser test are folded in).</p>
 </header>
 
 <!-- ============================================================ 1 -->
@@ -507,6 +507,8 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 
 <h3>The refresh hook — why RESUME.md is never stale</h3>
 <p class="small">After <b>every</b> command (in a finally block, even on failure; except resume/note themselves), RESUME.md is regenerated from project files. Also for clone/adopt/scaffold's target project. So any AI, any session, any harness starts by reading one file that re-proves itself: <code>dh resume</code>.</p>
+<h3>Harness lines — data, not code</h3>
+<p class="small">The <code>harness</code> block of <code>dh next</code> comes from <code>data/harness.json</code> (<code>guide.harness_row</code>): one row per detected harness — <b>hermes · claude-code · codex · cursor · gemini-cli · opencode</b> — plus <code>unknown</code> (7 rows). Each key a row does not set (background, delegate, todo, transcript, limits, browser, cron, context, install) falls back <b>per key</b> to <code>unknown</code>, so every harness gets every line and no tool name of any harness lives in the code (a test enforces it). On Hermes: <code>todo_list</code> fed by <code>dh workflow todo</code>; bots as no-agent cron jobs (<code>dh ops add --runner hermes</code>, §30); <code>.hermes.md</code> is a context file that wins over AGENTS.md, so the resume block is written into it when it exists; the installers update every Hermes profile.</p>
 </section>
 
 <!-- ============================================================ 10 -->
@@ -558,7 +560,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><td><code>dh bb post|read|flag NAME|wait NAME --max 170</code></td><td>Blackboard for parallel agents (jsonl + flag files)</td></tr>
 <tr><td><code>dh pool query|show|vet|add|list|sync</code></td><td>Ranked bases, licence vetting (refusals list what WOULD be accepted), personal pool</td></tr>
 <tr><td><code>dh clone T --to DIR · dh adopt PATH|URL · dh scaffold --to DIR · dh base record</code></td><td>Four ways in; deckhand files hold-aside during clone; profile/scope carried</td></tr>
-<tr><td><code>dh compose --sections … --copy .deckhand/copy.json</code></td><td>Assemble page from licensed sections; copy run through slop check</td></tr>
+<tr><td><code>dh compose --sections … --copy .deckhand/copy.json</code></td><td>Assemble page from licensed sections; copy run through slop check. Default sections (CLI and <code>tryon/compose.mjs</code>): navbar, hero, features, pricing, faq, cta, footer</td></tr>
 <tr><td><code>dh dev start|stop|status|add|remove|port</code></td><td>App + services lifecycle; committed services.json; bind-tested ports</td></tr>
 <tr><td><code>dh swap scan|check</code></td><td>Vendor-SDK removal map; payments kept; feeds verify's swaps row</td></tr>
 <tr><td><code>dh run [--fix] -- CMD</code></td><td>Run + log (redacted); known failure prints fix; --fix replays proven recipe</td></tr>
@@ -578,7 +580,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <table>
 <tr><th style="width:34%">Command</th><th>Does</th></tr>
 <tr><td><code>dh deploy target|ship|smoke|raw</code></td><td>Record target; ship = push→Coolify→wait commit→smoke→IndexNow; raw passthrough</td></tr>
-<tr><td><code>dh ops suggest|add|list</code> · runner <code>github|cron|local</code></td><td>Rank/install bots; schedule live only after its own trigger fires once</td></tr>
+<tr><td><code>dh ops suggest|add|list</code> · runner <code>github|cron|local|hermes</code></td><td>Rank/install bots; schedule live only after its own trigger fires once</td></tr>
 <tr><td><code>dh learn add|match|preflight|promote|from-failure|list</code></td><td>Lesson ledger (rungs: eliminate &gt; preflight &gt; reorder &gt; gate &gt; pitfall)</td></tr>
 <tr><td><code>dh autopsy [transcript|state.db|--latest] [--apply] [--session]</code></td><td>Failures → episodes → recipes → lessons/playbooks/skill-proposals (never edits the skill)</td></tr>
 <tr><td><code>dh autopsy --workflow [--part P]</code></td><td>Timeline / questions (LATE, DIRECTION-CHANGE, LOST) / deviations / costs / proposals</td></tr>
@@ -801,6 +803,8 @@ node tryon/cli.mjs show --id S --idx 2               # persist display choice
 node tryon/cli.mjs keep --id S --idx 2  |  discard --id S
 node tryon/cli.mjs save --id S --name n              # → personal library
 node tryon/cli.mjs status | clean</code></pre>
+<h3>Playground — a saved test site</h3>
+<p class="small"><code>playground/</code> holds a real Next.js site as <b>source only</b> (Deckhand's scaffold + the default compose for a fictional bakery; no node_modules, .next, .git, run or try-on state), so a try-on test starts from it instead of a multi-minute scaffold. <code>node playground/playground.mjs restore</code> copies it (default <code>~/deckhand-playground/tryon-site</code>), installs once and commits; <code>start</code> runs try-on setup + dev server + proxy and prints the URL; <code>reset</code> throws away every try-on change; <code>kitchen</code> and <code>snapshot</code> manage the <code>/kitchen-sink</code> page and refresh the snapshot. <code>/kitchen-sink</code> holds one owner element for each of about 45 slot kinds, written from the fit-check's own reference sections. CI runs <code>playground/playground.test.mjs</code> (structure: every import in the snapshot resolves; a real dev-server run only with <code>DH_PLAYGROUND=1</code>).</p>
 </section>
 
 <!-- ============================================================ 15 -->
@@ -863,6 +867,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <li><b>Pass B — parameterize(candidate)</b>: find the component function + returned JSX, inject a typed <code>content</code> prop; cut embedded chrome (headers/navs; a nested <code>&lt;main&gt;</code> becomes a plain block); static text → <code>{content.heading1 ?? &lt;&gt;demo&lt;/&gt;}</code>; demo arrays → list slots with fallback; prop defaults → slots; conditional chrome → show/hide keys; record form-swap and logo-row decisions.</li>
 <li><b>Pass C — bind(owner, candidate)</b>: pair units → props by role + order with heuristics: footer columns flattened to label+href lists; whole <code>&lt;form&gt;</code> swapped in place (else variant not offered); comparison tables filled row-by-row; role degradation (quote→text if needed); whole-item list placement — <i>never half a testimonial</i>; card groups pick the smallest row group that fits, unused rows hidden whole; owner logos replace demo brands. Returns carried / dropped / demo leftovers.</li>
 </ol>
+<p class="small muted"><b>Binding &amp; warnings:</b> a variant usage binds to the default export, else the PascalCase export named like the file (<code>bento-grid.tsx</code> → <code>BentoGrid</code>, not its first part), else the first PascalCase export. A zero-content self-closing usage (<code>&lt;Hero /&gt;</code>, its words live in its own file) returns an <code>EMPTY_USAGE</code> warning from the engine, <code>inspect</code> and the overlay. The registry alias <code>cn</code> is the project's <code>@/lib/utils</code>, never an npm package (<code>realPackages</code> drops it, so Discard leaves no <code>cn</code> in package.json).</p>
 <p class="small muted">The engine writes the resulting usage <code>&lt;Local content={{heading1: &lt;&gt;…&lt;/&gt;, list1: […]}} /&gt;</code> into the wrapper. Sources for links/menus: copy.json footer/nav, sitemap nav + page titles, brief brand social/name.</p>
 </section>
 
@@ -876,9 +881,9 @@ node tryon/cli.mjs status | clean</code></pre>
 <li>Extract chosen variant from wrapper → replace wrapper with it → rename tagged imports → re-parse → write</li>
 <li>Graduate folder: <code>components/dh-tryon/&lt;slug&gt;</code> → <code>components/sections|ui-kit/&lt;slug&gt;</code></li>
 <li><b>bake:</b> inline literal copy INTO the component — <code>??</code> fallbacks → owner literals; show/hide resolved (hidden demo buttons <b>deleted</b>, not dormant); lists rewritten with owner items; only usage-scope expressions stay as props → then <b>prune</b> unused imports/files</li>
-<li>Strip demo marks; leftover design-own words → <code>.deckhand/demo-copy.json</code> (rebrand check blocks on them)</li>
+<li>Strip demo marks; leftover design-own words → <code>.deckhand/demo-copy.json</code> (rebrand check blocks on them). The ledger also holds a demo <b>price</b> (<code>$19 / mo</code>) and a dead <code>href="#"</code> (kind <code>dead-link</code>, one finding per link at its own line); fit checks read without the ledger, so their counts do not move</li>
 <li><b>recordNotice</b> → <code>THIRD_PARTY_NOTICES.md</code> (dir · title · registry · licence · sourceUrl). AI drafts exempt (header already carries provenance)</li>
-<li>Losers deleted, their CSS removed, session → <code>kept</code></li></ol></div>
+<li>Losers deleted, their CSS removed, session → <code>kept</code>. A design array read in two places (a navbar's desktop and mobile menu) is rewritten <b>once</b>, so the file still parses</li></ol></div>
 <div class="card"><h4>Discard / undo semantics</h4><ol class="small">
 <li>File unchanged since try (sha match) → <b>byte-exact restore</b> from backup</li>
 <li>File edited meanwhile → <b>surgical</b> unwrap: keep variant 0, remove marked imports, preserve owner edits</li>
@@ -905,7 +910,7 @@ node tryon/cli.mjs status | clean</code></pre>
 </ol>
 
 <h3>Fit check — offline proof a design actually works here</h3>
-<p class="small">Builds a throwaway scaffold site per base (Next + Tailwind 4 + radix-ui umbrella + Button, or the Base UI equivalent), with reference owner sections, then stages each sampled design through the <b>same engine.stageCandidate</b> used in a real try — so what passes is exactly what the owner gets offered. Verdicts: <code>fits · partial · refused · broken · unchecked</code> → recorded (a registry that cannot be reached is reported, never recorded as a verdict) to <code>data/checks/&lt;reg&gt;.json</code> (shipped) or <code>~/.deckhand/catalog/checks/</code>. <code>rank()</code> hides broken, sinks refused.</p>
+<p class="small">Builds a throwaway scaffold site per base (Next + Tailwind 4 + radix-ui umbrella + Button, or the Base UI equivalent), with reference owner sections, then stages each sampled design through the <b>same engine.stageCandidate</b> used in a real try — so what passes is exactly what the owner gets offered. Verdicts: <code>fits · partial · refused · broken · unchecked</code> → recorded (a registry that cannot be reached is reported, never recorded as a verdict) to <code>data/checks/&lt;reg&gt;.json</code> (shipped) or <code>~/.deckhand/catalog/checks/</code>. <code>rank()</code> hides broken, sinks refused. <b>Coverage:</b> every slot kind is fit-checkable — the owner reference sections cover them, and <code>REF_OF</code> maps a slot with no section of its own (e.g. signup → login) to one that has — and a permanent fetch failure is classed <code>broken</code>. All 1,247 catalog designs carry a verdict: 462 fits · 258 partial · 431 refused · 96 broken · 0 unchecked.</p>
 
 <h3>Flags</h3>
 <p class="small">The overlay auto-checks each variant (missing owner words, visible demo text, overflow, broken images, console errors) and prefills a flag. <code>tryon flags report</code> → one deterministic Markdown with a <code>try --only &lt;id&gt;</code> reproduce command. Stays local.</p>
@@ -1061,7 +1066,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <figcaption>Fig 22.1 — Scripts write only from confirmed brief facts; never aggregateRating/review schema; audit keeps honest score.</figcaption>
 </figure>
 
-<p class="small"><b>Policy by path:</b> scratch/existing → apply by default; pool/mine → audit then DECISION NEEDED before launch. <b>Undo:</b> <code>dh seo undo</code> → engine journal, byte-exact, deletes created files. <b>audit output:</b> score, blockers, auto_fixable, owner_open, and the render writes SEO.md (Launch-breakers / To fix / Needed from owner / honesty line).</p>
+<p class="small"><b>Policy by path:</b> scratch/existing → apply by default; pool/mine → audit then DECISION NEEDED before launch. <b>Language:</b> a wrong literal <code>&lt;html lang&gt;</code> is corrected to the brief's first language (JSX and static HTML); an expression is left alone. <b>IndexNow key:</b> lives in <code>.deckhand/indexnow.json</code>, never in brief.json, so <code>seo apply</code> does not change the approved brief (no false <code>resume --check</code> DRIFT). <b>Undo:</b> <code>dh seo undo</code> → engine journal, byte-exact, deletes created files. <b>audit output:</b> score, blockers, auto_fixable, owner_open, and the render writes SEO.md (Launch-breakers / To fix / Needed from owner / honesty line).</p>
 </section>
 
 <!-- ============================================================ 23 -->
@@ -1102,7 +1107,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <p class="small">Automatic: the observe hook (§9) ticks matching steps after each command; stateful commands no step named → <code>unplanned</code> deviation; <code>dh phase done</code> closes the rest. Manual: <code>dh workflow step ID done|skip --why</code> (skip needs why → deviations). Checklist: <code>dh workflow todo --format md</code> (harness-neutral). Status line embedded in every report: <code>WORKFLOW id@v (level) · phase-id done-in-phase/total-in-phase · done/total steps · n deviations · p proposals waiting</code> (proposals clause only when p&gt;0).</p>
 
 <h3>Creation &amp; improvement</h3>
-<p class="small"><code>dh workflow new --from-run</code> extracts this run's phases + successful stateful commands + learned questions (deterministic, owner facts never copied). <code>dh autopsy --workflow</code> → timeline / questions (LATE, DIRECTION-CHANGE, LOST) / deviations / errors / delegation / guidance / <b>proposals</b> → owner picks where they go: <code>dh workflow save --from-autopsy W --proposals P1,P3 [--public]</code> (my pool / community PR / nothing) — adds this run as proof, bumps version. Lint rejects private commands, absolute user paths, <code>curl|sh</code>, <code>rm -rf /</code>, secret-shaped values, unknown <code>dh</code> subcommands (hard for base/community; warnings for mine, <code>--accept</code> then needed). >120 steps is a "split it" warning. Pools resolve <b>mine → base → community</b> (community sha-verified, offline never errors).</p>
+<p class="small"><code>dh workflow new --from-run</code> extracts this run's phases + successful stateful commands + learned questions (deterministic, owner facts never copied; <code>dh brief set</code> stays as a templated step with params — keys kept, values never). <code>dh autopsy --workflow</code> → timeline / questions (LATE, DIRECTION-CHANGE, LOST) / deviations / errors / delegation / guidance / <b>proposals</b> → owner picks where they go: <code>dh workflow save --from-autopsy W --proposals P1,P3 [--public]</code> (my pool / community PR / nothing) — adds this run as proof, bumps version. Lint rejects private commands, absolute user paths, <code>curl|sh</code>, <code>rm -rf /</code>, secret-shaped values, unknown <code>dh</code> subcommands (hard for base/community; warnings for mine, <code>--accept</code> then needed). >120 steps is a "split it" warning. Pools resolve <b>mine → base → community</b> (community sha-verified, offline never errors).</p>
 </section>
 
 <!-- ============================================================ 25 -->
@@ -1179,7 +1184,7 @@ node tryon/cli.mjs status | clean</code></pre>
 
 <table>
 <tr><th style="width:20%">Path</th><th>Mechanics</th></tr>
-<tr><td><b>dh clone T --to</b></td><td>Pool row → licence re-check → <b>hold/unhold</b>: Deckhand's own files step aside to <code>.&lt;name&gt;.deckhand-hold</code>, base lands (shallow at measured commit, fresh history, NOTICE with upstream+commit+licence), files return with merge rules → install → record base. Other files present → DEST_NOT_EMPTY. Seeds LOCAL secrets only (copies .env.example, generates values for the auth/JWT/session key names it finds; .env gitignored).</td></tr>
+<tr><td><b>dh clone T --to</b></td><td>Pool row → licence re-check → <b>hold/unhold</b>: Deckhand's own files step aside to <code>.&lt;name&gt;.deckhand-hold</code>, base lands (shallow at measured commit, fresh history, the base's own NOTICE kept byte-exact, a local base copied as git sees it — its and its parents' .gitignore honoured — and <code>licence_warning</code> when it has no LICENSE file), files return with merge rules → install → record base. Other files present → DEST_NOT_EMPTY. Seeds LOCAL secrets only (copies .env.example, generates values for the auth/JWT/session key names it finds; .env gitignored).</td></tr>
 <tr><td><b>dh adopt src</b></td><td>Owner's project, git history kept, stack detected, base kind existing.</td></tr>
 <tr><td><b>dh scaffold --to</b></td><td>create-next-app (ts, tailwind, app dir; built in a sibling <code>.&lt;name&gt;.deckhand-scaffold</code> and moved in, so the target folder is never removed, even as <code>--to .</code>; a relative <code>--to</code> is the project's, for clone and adopt too) + canonical UI base (button, utils, tokens) + deps (clsx, tailwind-merge, class-variance-authority, radix-ui, lucide-react, tw-animate-css) + fresh git.</td></tr>
 <tr><td><b>dh base record</b></td><td>Project built another way declares its base openly.</td></tr>
@@ -1189,8 +1194,9 @@ node tryon/cli.mjs status | clean</code></pre>
 <p class="small"><b>Run carry:</b> cloning from a planning folder moves brief/sitemap/plan/gates/notes into the app folder (excluding logs/dev/tryon/vault) and sets <code>run.json.moved_to</code> → <code>dh next</code> says <code>cd &lt;dest&gt;</code>.</p>
 <p class="small"><b>Dev services:</b> <code>dh dev add NAME --cmd … --port N|--ready REGEX</code> → committed <code>services.json</code> (every session starts the same things) → <code>dh dev start</code> = services first (restart dead DB under live app), then app (pinned port, HOSTNAME=127.0.0.1, waits for HTTP &lt;500); failures print log tail + lesson hint. <code>dh dev port --from N</code> = bind-tested, skips Windows reserved ranges.</p>
 <p class="small"><b>Swap scan:</b> every vendor SDK mapped to a replacement target (Clerk→better-auth, Neon→postgres, Resend→SMTP, Sentry→logs…) — payments kept by default; <code>dh swap check</code> fails while any vendor import remains.</p>
+<p class="small"><b>Build check:</b> <code>dh phase done build</code> probes the root and every public static planned page (must answer &lt;400) and requires each planned form's <code>&lt;form&gt;</code> on its page; a JS-drawn shell is not failed for a form it cannot show yet. Without a plan only the root is judged.</p>
 <p class="small"><b>Rebrand:</b> scan (template names, identity fields, logo assets) → apply (package name, display names, metadata, primary colour token, monogram — LICENSE/NOTICE/lockfiles NEVER) → check findings: template-name, demo-content (Acme/lorem/555…), placeholder images, try-on leftovers, third-party logos, previous-business-data (harvest manifest sha), demo-copy ledger, ai-slop.</p>
-<p class="small"><b>Compose:</b> <code>dh compose --page P --sections a,b,c --copy copy.json</code> → licensed blocks assembled by script; non-clean slop verdict returns a copy_check hint to rewrite copy.json and compose again (advisory, not a block).</p>
+<p class="small"><b>Compose:</b> <code>dh compose --page P --sections a,b,c --copy copy.json</code> (default sections: navbar, hero, features, pricing, faq, cta, footer) → licensed blocks assembled by script; non-clean slop verdict returns a copy_check hint to rewrite copy.json and compose again (advisory, not a block).</p>
 </section>
 
 <!-- ============================================================ 29 -->
@@ -1254,7 +1260,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <li>Runbooks: references/ops/ — 00 checklist · 10 bootstrap-VPS / 11 oracle-free-tier / 12 price-sheet · 20 domain-DNS-SSL / 21 free-domain-cloudflare · 30 deploy-app · 40 change-pipeline · 50 monitoring · 55 offsite-backups · 56 app-object-storage · 60 migrate-to-paid · 70 auth-and-email · 80 MCP integrations</li></ul></div>
 <div class="card"><h4>Bots</h4><ul class="small">
 <li><code>dh ops suggest</code> filters bots by brief shape + features, sorts by installed/priority (deployed only drives a "deploy first" note)</li>
-<li><code>dh ops add BOT --runner github|cron|local</code> → copies real script or app-bot skeleton (agent completes against the app)</li>
+<li><code>dh ops add BOT --runner github|cron|local|hermes</code> → copies real script or app-bot skeleton (agent completes against the app). <code>hermes</code> (the default inside a Hermes session) writes a no-agent cron script into <code>$HERMES_HOME/scripts</code> and returns the <code>cronjob</code> call to show the owner; <code>DECKHAND_NOTIFY=stdout</code> makes the script's stdout the alert</li>
 <li><b>verify_by_its_own_trigger</b>: a schedule goes live only after it has fired once through its own trigger</li></ul></div>
 </div>
 </section>
@@ -1437,6 +1443,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td><code>tryon/cli.mjs · server.mjs · overlay.js</code></td><td>Engine CLI, proxy+API+token server, browser overlay (~70 KB)</td></tr>
 <tr><td><code>tryon/lib/engine.mjs · transplant.mjs · materialize.mjs</code></td><td>Swap engine (~95 KB), 3-pass copy transplant (~96 KB), fetch/write bundles</td></tr>
 <tr><td><code>tryon/lib/draft.mjs · tune.mjs · sitetheme.mjs · theme.mjs · sitelinks.mjs</code></td><td>AI draft protocol + gates; dial transforms; whole-site theme; token wearing; menu wiring</td></tr>
+<tr><td><code>playground/</code></td><td>Saved source-only try-on test site, <code>playground.mjs</code> (restore · reset · start · kitchen · snapshot), structural CI test</td></tr>
 <tr><td><code>tryon/lib/seo.mjs · fitcheck.mjs · vet.mjs · catalog.mjs · slots.mjs · library.mjs</code></td><td>SEO writes, offline fit checks, registry vetting, 1,247-item catalog + ranking, slot vocabulary, personal library</td></tr>
 <tr><td><code>data/*</code></td><td>components.index.json · checks/*.json (8 registries) · pool.json + pool/*.json · licenses.json · slop packs (11 langs) · seo.json rules · bots.json · harness.json · research.json · industries.json · lessons.seed.jsonl · registries.json · secrets.json (redaction policy)</td></tr>
 <tr><td><code>workflows/ · templates/ · ops/scripts/ · tests/</code></td><td>Base workflows · brief/PENDING/sitemap/scaffold/bots/ops templates · Coolify/Hostinger/backup API scripts · Python + try-on node test suites</td></tr>

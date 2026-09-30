@@ -1,5 +1,54 @@
 # Changelog
 
+## [2.4.0] — 2026-09-30 — the field-test findings closed, harness lines as data, a try-on playground
+
+### The 2026-09-29 field test, all 23 findings closed (docs/field-tests/2026-09-29-report.md; each fix has a test)
+- Build (F9): `phase done build` probes the root and every public static planned page (<400) and requires each planned
+  form's `<form>` (a JS-drawn shell is skipped). Default compose (F16) starts with a navbar (navbar, hero, features,
+  pricing, faq, cta, footer, in the CLI and `tryon/compose.mjs`).
+- Copy honesty (F13): a demo price (`$19/mo`) and `href="#"` are recorded in the demo-copy ledger and the rebrand check
+  blocks them, one dead-link finding per link at its own line. A zero-content self-closing usage warns `EMPTY_USAGE` (F21).
+- SEO (F17, F19): `seo apply` corrects a wrong literal `<html lang>` (JSX and static, expressions left alone); the
+  IndexNow key lives in `.deckhand/indexnow.json`, so `seo apply` no longer bumps `brief.json` (false `resume --check` DRIFT).
+- Clone (F10): keeps the base's own NOTICE byte-exact, copies a local base as git sees it (its and its parents'
+  `.gitignore`), `licence_warning` when there is no LICENSE file. `workflow new --from-run` keeps `brief set` as a templated step (F12).
+- Isolation (F2, F23): an isolated `DECKHAND_HOME` never reads `~/.vps-ops` (an explicit `VPS_OPS_HOME` still does; `doctor`
+  makes no Cloudflare call without a token); project resolution never climbs into the home folder and a git root bounds the
+  `package.json` search.
+- Windows-local test suite green (`resolve_dh` ignores the process cwd; file remotes are plain paths).
+
+### Harnesses
+- Harness lines are data (`data/harness.json`) with a per-key fallback to `unknown`; rows for Gemini CLI and OpenCode (F15),
+  new keys cron/context/install/limits/browser; no harness tool name in code (a test enforces it).
+- Hermes: `todo_list` checklist from `dh workflow todo`; `dh ops add <bot> --runner hermes` (the default inside Hermes)
+  writes a no-agent cron script into `$HERMES_HOME/scripts` and returns the `cronjob` call; `DECKHAND_NOTIFY=stdout`;
+  `.hermes.md` carries the resume block; the installers update every Hermes profile.
+
+### Try-on
+- Fit check covers every slot kind: 24 new owner reference sections and a wider `REF_OF`; a permanent fetch failure is
+  `broken`. All 1,247 catalog designs have a verdict (462 fits, 258 partial, 431 refused, 96 broken, 0 unchecked).
+- Found by a follow-up real-browser run: a file with no default export binds to the export named like the file (compose gave
+  HTTP 500 on the bento grid); Keep no longer corrupts a design array read in two places (3 of 4 navbars failed to keep);
+  the registry alias `cn` is the project's utils, never an npm package (Discard left `cn` in `package.json`).
+- `playground/`: a saved source-only try-on test site, a `/kitchen-sink` page with 45 slot kinds, `playground.mjs`
+  (restore, reset, start, kitchen, snapshot) and a structural CI test.
+
+- A design that spreads props onto a void element (`<input {...props} />`) is not a wrapper, so trying an input or textarea can no
+  longer put the owner's form inside it and break the page; React render errors are now recognised as build errors, with the
+  readable message instead of markup.
+
+### A clean machine
+- New `dh clean [--apply] [--older-than HOURS] [--caches]`: a dry run by default that lists, then removes, only what Deckhand and
+  its known tools leave behind (its temp folders, abandoned browser-automation profiles, stranded sibling folders), by exact name
+  patterns in `data/clean.json`; never younger than 2 hours, never follows a link, never touches a project, `~/.deckhand`, or another
+  tool's data. `--caches` only runs the official `npm cache verify`.
+- Deckhand's own leak fixed: `dh autopsy` left a `dh-hermes-*` copy of the session store behind.
+- The test suites leave nothing behind (they had filled a drive): Python tests remove read-only git objects properly, node tests
+  keep every temp folder under one root removed on exit; guards fail if either pattern returns.
+
+### Other
+- `dh scaffold` builds in `dh-scaffold-<slug>-<random>`; the old sibling folder began with a dot, which npm rejects.
+
 ## [2.3.2] — 2026-09-29 — a real field test and a full audit, fixed
 
 ### From the 2026-09-29 field test (docs/field-tests/2026-09-29-report.md)
