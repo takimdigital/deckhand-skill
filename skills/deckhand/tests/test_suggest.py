@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 import tempfile
+import datetime
 import time
 import unittest
 from contextlib import redirect_stdout
@@ -114,7 +115,8 @@ class Suggestions(Base):
 
     def test_pending_reminders_and_deferred_items_that_come_due(self):
         state.init(self.root, "Bakery", "phased", "scratch")
-        old = time.strftime("%Y-%m-%d", time.gmtime(time.time() - 10 * 86400))
+        # the same calendar the code counts age in (util.today() is local): a UTC date here is a day off every evening west of Greenwich
+        old = (datetime.date.today() - datetime.timedelta(days=10)).isoformat()
         (self.root / "PENDING.md").write_text(
             "# PENDING\n\n## Open\n"
             f"- [ ] P-001 · Send the logo · WHY: header · HOW: email · WHERE: hello@… · asked {old} · status: open · nag: yes\n"

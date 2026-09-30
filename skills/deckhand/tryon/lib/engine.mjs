@@ -1256,7 +1256,11 @@ export function bake(root, fileRel, local, variant) {
             return `{ ${parts.join(', ')} }`;
           };
           const ind = indentAt(comp, decl.elements[0].start);
-          edits.push({ start: decl.start, end: decl.end, text: `[\n${ownerItems.map((_, i) => ind + objSrc(i)).join(',\n')},\n${ind.slice(0, -2) || ''}]` });
+          // a design array read in several places (a navbar's desktop AND mobile menu) is several list slots over ONE
+          // declaration: it is rewritten once, from the first slot; queuing it per slot overlaps the edits and corrupts it
+          if (!edits.some((x) => x.start === decl.start && x.end === decl.end)) {
+            edits.push({ start: decl.start, end: decl.end, text: `[\n${ownerItems.map((_, i) => ind + objSrc(i)).join(',\n')},\n${ind.slice(0, -2) || ''}]` });
+          }
           const target = parent && parent.type === 'TSAsExpression' ? parent : n;
           edits.push({ start: target.start, end: target.end, text: arrName });
           return false;
