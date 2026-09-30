@@ -732,6 +732,13 @@ export async function probeVite(url, root, id, deadlineMs = 25000, { clean = fal
 
 /** Which variants a build error points at: their folder in the error's import trace, else the module it cannot load. */
 export function culpritsOf(root, variants, text) {
+  // The error's own message and stack come first: a Next 500 page also lists every client module on the page, so a design that
+  // only appears there (it renders fine) must not be blamed for a sibling's error.
+  const own = [...String(text).matchAll(/data-next-error-(?:message|stack)=(\\*)"((?:(?!\1")[^])*)/g)].map((m) => m[2]).join('\n');
+  if (own) {
+    const hit = variants.filter((v) => own.includes(v.slug) || own.includes(v.dir));
+    if (hit.length) return hit;
+  }
   const named = variants.filter((v) => text.includes(v.slug) || text.includes(v.dir));
   if (named.length) return named;
   const mods = new Set();
