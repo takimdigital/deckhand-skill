@@ -9,6 +9,7 @@ import http from 'node:http';
 import net from 'node:net';
 import { spawn, spawnSync } from 'node:child_process';
 import { restore, kitchen, snapshot } from './playground.mjs';
+import { scratch } from '../skills/deckhand/tryon/test/helpers.mjs';
 
 const get = (url) => new Promise((res) => { http.get(url, (r) => { let b = ''; r.on('data', (d) => (b += d)); r.on('end', () => res({ status: r.statusCode, body: b })); }).on('error', () => res({ status: 0, body: '' })); });
 const freePort = () => new Promise((res) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => res(p)); }); });
@@ -30,7 +31,7 @@ test('the snapshot is source only and every section imports what its file export
 });
 
 test('DH_PLAYGROUND: restore, dev server, / and /kitchen-sink answer 200 with no React error', { skip: !process.env.DH_PLAYGROUND, timeout: 600000 }, async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-playground-'));
+  const dir = scratch('dh-playground-');                      // removed when the process ends, whatever happens
   const r = await restore(dir);
   assert.ok(r.kitchen >= 40, 'a kitchen-sink block for every slot kind');
   const port = await freePort();

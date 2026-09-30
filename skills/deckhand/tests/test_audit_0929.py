@@ -16,6 +16,7 @@ from unittest import mock
 SKILL = Path(__file__).resolve().parents[1]
 REPO = SKILL.parents[1]
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 sys.path.insert(0, str(SKILL / "ops" / "scripts"))
 
 from dhlib import build, checks, cli, harvest, pool, slop, state, verify, vet, workflow  # noqa: E402
@@ -50,7 +51,7 @@ class Base(unittest.TestCase):
     def tearDown(self):
         os.chdir(self.cwd)
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def dh(self, *args):
         buf = io.StringIO()

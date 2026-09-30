@@ -11,6 +11,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import build, state  # noqa: E402
 from dhlib.util import run as real_run  # noqa: E402
 
@@ -37,7 +38,7 @@ class ScaffoldNpmName(unittest.TestCase):
     def tearDown(self):
         os.chdir(self.cwd)
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def fake(self, seen):
         def run(argv, cwd=None, timeout=900, env=None, check=False):
@@ -70,7 +71,7 @@ class ScaffoldNpmName(unittest.TestCase):
             out, seen = self.scaffold_into(name)
             self.assertEqual([npm_name_problem(s) for s in seen], [None], (name, seen))
             self.assertTrue((self.tmp / "proj" / name / "app" / "page.tsx").exists(), name)
-            shutil.rmtree(self.tmp / "proj" / name, ignore_errors=True)
+            tmpclean.rmtree(self.tmp / "proj" / name)
 
     def test_the_leftover_folder_never_survives(self):
         self.scaffold_into("app")

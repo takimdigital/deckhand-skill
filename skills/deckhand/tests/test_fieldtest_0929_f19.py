@@ -9,6 +9,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import seo as SEO, state  # noqa: E402
 from dhlib.util import read_json, write_json  # noqa: E402
 
@@ -27,7 +28,7 @@ class F19(unittest.TestCase):
 
     def tearDown(self):
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def test_F19_planning_seo_never_writes_brief_json_and_the_key_is_stable(self):
         p = self.root / ".deckhand" / "brief.json"

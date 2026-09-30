@@ -10,6 +10,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import build  # noqa: E402
 
 
@@ -35,7 +36,7 @@ class F10(unittest.TestCase):
 
     def tearDown(self):
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def clone(self):
         with mock.patch.object(build.POOL, "rows", return_value=[self.row]):

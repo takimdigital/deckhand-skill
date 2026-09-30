@@ -11,6 +11,7 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 
 from dhlib import autopsy as AU, learn  # noqa: E402
 from dhlib.cli import main  # noqa: E402
@@ -64,7 +65,7 @@ class Base(unittest.TestCase):
             os.environ.pop("DECKHAND_HOME", None)
         else:
             os.environ["DECKHAND_HOME"] = self.old
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
 
 class Analysis(Base):

@@ -11,6 +11,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import checks, state  # noqa: E402
 from dhlib.util import write_json  # noqa: E402
 
@@ -54,7 +55,7 @@ class F9(unittest.TestCase):
 
     def tearDown(self):
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def run_check(self, pages):
         srv = serve(pages)

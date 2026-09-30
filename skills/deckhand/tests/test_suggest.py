@@ -15,6 +15,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 
 from dhlib import build, pending, state, suggest, wfautopsy, workflow as WF  # noqa: E402
 from dhlib.cli import main  # noqa: E402
@@ -44,7 +45,7 @@ class Base(unittest.TestCase):
                 os.environ.pop(k, None)
             else:
                 os.environ[k] = v
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def dh(self, *args):
         buf = io.StringIO()

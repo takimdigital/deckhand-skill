@@ -8,11 +8,11 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { offline, tempSite, read, locate } from './helpers.mjs';
+import { offline, tempSite, read, locate, scratch } from './helpers.mjs';
 
 offline();
 // verdicts and added registries live beside the library: a private home for this file
-const HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fit-home-'));
+const HOME = scratch('dh-fit-home-');
 process.env.DECKHAND_LIBRARY = path.join(HOME, 'library');
 
 const { REFERENCE, REF_OF, permanentFetchFailure, referenceFor, makeSite, contextFor, checkItem, openSite, fitCheck, sampleOf, recordVerdicts, fitMarkdown, VERDICTS } = await import('../lib/fitcheck.mjs');
@@ -51,7 +51,7 @@ test('every owner section parses, is found where a click lands, and holds the ow
 });
 
 test('the site is what `dh scaffold` gives an owner: Next, Tailwind 4, tokens, Button, the radix-ui umbrella (or Base UI)', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fit-site-'));
+  const dir = scratch('dh-fit-site-');
   const p = makeSite(path.join(dir, 'r'));
   assert.equal(p.framework, 'next');
   assert.equal(p.tailwind, 4);
@@ -216,7 +216,7 @@ test('a Base UI button (`render={<Link>…</Link>}`, no children) carries the ow
 test('a shadcn block read raw: its page\'s one component is the entry, `from "cn"` is the project\'s utils, and a fetched primitive\'s own primitives are fetched too', async () => {
   const { fetchBundle, rawSource } = await import('../lib/materialize.mjs');
   const { keyOf } = await import('../lib/registry.mjs');
-  const fx = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fx-'));
+  const fx = scratch('dh-fx-');
   const put = (url, text) => fs.writeFileSync(path.join(fx, keyOf(url) + (text === 404 ? '.404' : '.txt')), text === 404 ? url : text);
   const GH = 'shadcn-ui/ui/main/apps/v4/registry/new-york-v4/blocks/login-01';
   put(`https://raw.githubusercontent.com/${GH}/page.tsx`, 'import { LoginForm } from "@/registry/new-york-v4/blocks/login-01/components/login-form"\nexport default function Page() { return <div className="min-h-svh"><LoginForm /></div> }\n');
@@ -259,7 +259,7 @@ test('the catalog build: --only rebuilds one registry from a snapshot and keeps 
   const { slotFromName } = await import('../lib/slots.mjs');
   assert.equal(slotFromName('radio-group-01'), 'radio-group');
   assert.equal(slotFromName('button-group'), null);
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-cb-'));
+  const dir = scratch('dh-cb-');
   const out = path.join(dir, 'index.json');
   const keep = { id: 'tailark-oss/x@radix', r: 'tailark-oss', n: 'x', base: 'radix', slot: 'hero', kind: 'block' };
   fs.writeFileSync(out, JSON.stringify({ version: 2, count: 2, items: [keep, { id: 'blocks-so/gone@any', r: 'blocks-so', n: 'gone', slot: 'login' }] }));
@@ -277,7 +277,7 @@ test('the catalog build: --only rebuilds one registry from a snapshot and keeps 
 test('a block importing another block\'s file, or its registry\'s own primitive, gets them from that registry', async () => {
   const { fetchBundle } = await import('../lib/materialize.mjs');
   const { keyOf } = await import('../lib/registry.mjs');
-  const fx = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fx-'));
+  const fx = scratch('dh-fx-');
   const put = (url, v) => fs.writeFileSync(path.join(fx, keyOf(url) + (v === 404 ? '.404' : '.txt')), v === 404 ? url : JSON.stringify(v));
   const R = 'https://raw.githubusercontent.com/o/blocks/main/public/r/';
   put(R + 'hero-03.json', { files: [{ path: 'src/registry/blocks/radix/hero-03/components/hero.tsx', content: 'import { Logo } from "@/registry/blocks/radix/navbar-04/components/logo"\nimport { Marquee } from "@/registry/bases/radix/ui/marquee"\nexport default function Hero() { return <section><Logo /><Marquee><h1>Hi</h1></Marquee></section> }\n' }] });
@@ -336,7 +336,7 @@ test('a registry item served as JSON: a `from "cn"` alias in its files, or in a 
   // found by a real-browser run: trying a contact design added a `cn` package to package.json, and Discard left it behind
   const { fetchBundle } = await import('../lib/materialize.mjs');
   const { keyOf } = await import('../lib/registry.mjs');
-  const fx = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fx-'));
+  const fx = scratch('dh-fx-');
   const putJson = (url, v) => fs.writeFileSync(path.join(fx, keyOf(url) + (v === 404 ? '.404' : '.txt')), v === 404 ? url : JSON.stringify(v));
   const URL = 'https://example.dev/r/contact-02.json';
   putJson(URL, { name: 'contact-02', dependencies: ['lucide-react', 'cn'], registryDependencies: ['card'], files: [
