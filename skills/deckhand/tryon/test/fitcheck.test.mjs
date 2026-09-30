@@ -331,3 +331,26 @@ test('a fetch that can never succeed (a dependency its registry does not ship, a
   assert.equal(permanentFetchFailure('getaddrinfo ENOTFOUND example.invalid'), false);
   assert.equal(permanentFetchFailure(undefined), false);
 });
+
+test('a registry item served as JSON: a `from "cn"` alias in its files, or in a primitive it pulls, is the project\'s utils (never an npm package `cn`)', async () => {
+  // found by a real-browser run: trying a contact design added a `cn` package to package.json, and Discard left it behind
+  const { fetchBundle } = await import('../lib/materialize.mjs');
+  const { keyOf } = await import('../lib/registry.mjs');
+  const fx = fs.mkdtempSync(path.join(os.tmpdir(), 'dh-fx-'));
+  const putJson = (url, v) => fs.writeFileSync(path.join(fx, keyOf(url) + (v === 404 ? '.404' : '.txt')), v === 404 ? url : JSON.stringify(v));
+  const URL = 'https://example.dev/r/contact-02.json';
+  putJson(URL, { name: 'contact-02', dependencies: ['lucide-react', 'cn'], registryDependencies: ['card'], files: [
+    { path: 'blocks/contact-02/contact.tsx', type: 'registry:block', content: 'import { cn } from "cn"\nimport { Card } from "@/components/ui/card"\nexport default function Contact() { return <Card className={cn("p-4")}><h1>Write to us</h1></Card> }\n' }] });
+  putJson('https://ui.shadcn.com/r/styles/new-york-v4/card.json', { name: 'card', dependencies: ['cn'], files: [
+    { path: 'registry/new-york-v4/ui/card.tsx', type: 'registry:ui', content: 'import { cn } from "cn"\nexport function Card(p: any) { return <div className={cn("rounded-xl border", p.className)} {...p} /> }\n' }] });
+  const was = process.env.DH_FIXTURES;
+  process.env.DH_FIXTURES = fx;
+  try {
+    const prof = { ui: {}, base: 'radix', utilsExists: false, root: fx };
+    const b = await fetchBundle(prof, { id: 'x/contact-02@radix', json: URL, deps: ['cn'] });        // the catalog index lists it too (89 shadcn items)
+    assert.ok(!b.deps.includes('cn'), 'never an npm package named "cn": ' + b.deps.join(','));
+    assert.ok(b.files.length >= 2, 'the block and the primitive it pulled: ' + b.files.map((f) => f.path).join(','));
+    assert.ok(b.files.every((f) => !/from ["']cn["']/.test(f.content)), 'every file imports the project\'s utils: ' + b.files.filter((f) => /from ["']cn["']/.test(f.content)).map((f) => f.path).join(','));
+    assert.ok(b.files.some((f) => /from ["']@\/lib\/utils["']/.test(f.content)));
+  } finally { process.env.DH_FIXTURES = was; }
+});
