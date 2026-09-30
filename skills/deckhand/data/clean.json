@@ -11,7 +11,7 @@
   "python_tmp": {
     "regex": "^tmp[a-z0-9_]{8}$",
     "_doc": "Only when one of these markers exists; otherwise skipped as not ours.",
-    "markers": [".deckhand", "proj/.git", "proj/.deckhand", "proj/package.json"]
+    "markers": [".deckhand", "proj/.git", "proj/.deckhand"]
   },
   "sibling": {
     "hold_suffix": ".deckhand-hold",

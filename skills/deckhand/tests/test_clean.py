@@ -120,6 +120,14 @@ class CleanTest(unittest.TestCase):
         self.assertFalse(ours.exists())
         self.assertTrue((self.temp / "tmpzz99yy88").exists())
 
+    def test_a_python_tmp_with_only_a_package_json_is_not_ours(self):
+        # any user project or tool can have proj/package.json: only Deckhand's own markers (its state folder, a git repo
+        # inside proj) identify one of its test folders
+        other = self.mk("tmpqq11ww22", files=["proj/package.json"])
+        r = CLEAN.clean(self.temp, apply=True)
+        self.assertEqual(r["removed"], [])
+        self.assertTrue(other.exists())
+
     def test_name_match_outside_root_is_kept(self):
         outside = self.mk("dh-tryon-elsewhere", where=self.base)          # not directly in the temp root
         (self.temp / "deeper").mkdir()
