@@ -1,7 +1,7 @@
 ---
 name: deckhand
 description: "Idea → live, owned web business on a $5 VPS (or $0), or a boilerplate product to sell: define, research, plan the page/feature graph, build from a vetted MIT base or scratch with parallel sub-agents, rebrand, live-swap sections for licensed designs (try-on), verify, deploy to Coolify, operate with bots; follow proven workflows (query the best 3, step by step) and improve them from each run's autopsy; resume any project from any fresh session or AI (Claude Code, Hermes, Codex…). Use for building, launching, redesigning, deploying or maintaining a website/SaaS/booking/catalogue/lead-gen business, for component try-on/swap, for ops bots/crons, or to turn a project into a reusable base or workflow."
-version: 2.4.0
+version: 2.4.1
 license: MIT
 compatibility: "Any agent harness that can run shell commands (Claude Code, Codex, Cursor, Hermes, OpenCode, Gemini CLI …). Needs Python 3.9+ (stdlib) and Node 18+ for try-on/compose. Windows: `py` instead of `python3`."
 metadata:
