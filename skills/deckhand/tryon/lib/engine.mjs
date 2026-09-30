@@ -187,6 +187,7 @@ export function rendersChildren(file, code, exp) {
   // divs and paragraphs there are invalid HTML (hydration errors on every render)
   const PHRASING = /^(p|span|a|button|label|h[1-6]|strong|em|b|i|small|q|cite|dt|summary|legend|option)$/;
   let block = false, inline = false;
+  const VOID_TAG = /^(input|img|br|hr|area|base|col|embed|link|meta|source|track|wbr)$/;
   const visit = (n, host) => {
     if (!n || typeof n.type !== 'string' || inline) return;
     if (n.type === 'JSXElement') {
@@ -194,7 +195,11 @@ export function rendersChildren(file, code, exp) {
       // `<button {...props}>` passes the owner's children on — unless the element writes children of its own
       // (`<Button {...props}><span>Hover me</span></Button>`: JSX children win over props.children)
       if (n.openingElement.attributes.some((a) => a.type === 'JSXSpreadAttribute' && a.argument.type === 'Identifier' && spreadNames.has(a.argument.name))
-        && !(n.children || []).some((c) => !(c.type === 'JSXText' && !c.value.trim()))) { if (PHRASING.test(nm)) inline = true; else block = true; }
+        && !(n.children || []).some((c) => !(c.type === 'JSXText' && !c.value.trim()))) {
+        // a void element (`<input {...props} />`) cannot take children: React throws on render, so it is no wrapper
+        if (VOID_TAG.test(nm)) return;
+        if (PHRASING.test(nm)) inline = true; else block = true;
+      }
       if (/^[a-z]/.test(nm)) host = nm;
     }
     if ((n.type === 'Identifier' && n.name === 'children') || (n.type === 'MemberExpression' && !n.computed && n.property.name === 'children')) {
@@ -640,7 +645,9 @@ process.stdout.write(JSON.stringify(out));`;
 
 // ------------------------------------------------------------------ the page still builds (or nothing stays)
 
-const BUILD_ERR = /(Module not found|Can't resolve|Failed to resolve import|Pre-transform error|Build Error|Failed to compile|Export [\w$]+ doesn't exist|is not exported from|doesn't exist in target module|Unexpected token|Expected .* got|SyntaxError|ReferenceError: [\w$]+ is not defined)/;
+const BUILD_ERR = /(is a self-closing tag|Element type is invalid|Hydration failed|Cannot read propert(?:y|ies) of|Module not found|Can't resolve|Failed to resolve import|Pre-transform error|Build Error|Failed to compile|Export [\w$]+ doesn't exist|is not exported from|doesn't exist in target module|Unexpected token|Expected .* got|SyntaxError|ReferenceError: [\w$]+ is not defined)/;
+
+const REACT_ERR = /^(is a self-closing tag|Element type is invalid|Hydration failed|Cannot read propert)/;
 
 /** GET a page from the dev server (it compiles on request). {status, text} or {status: 0} when unreachable. */
 export function probePage(url, page = '/', timeoutMs = 90000) {
@@ -665,6 +672,10 @@ export function buildError(pr) {
   const m = BUILD_ERR.exec(pr.text || '');
   if (pr.status < 500 && !(m && /Module not found|Can't resolve|Build Error|Failed to compile/.test(m[1]))) return null;
   if (!m && pr.status < 500) return null;
+  // Next's error page carries the render error in an attribute (<template data-next-error-message="…">): markup
+  // stripping would erase it, so read it from there
+  const tpl = /data-next-error-message=[\\]*"([^"\\]+)/.exec(pr.text || '');
+  if (tpl && (!m || REACT_ERR.test(m[1]))) return tpl[1].replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
   const at = m ? m.index : 0;
   const from = Math.max(0, at - 60);
   const lead = from ? (pr.text || '').slice(from, at).search(/[\s"'>(]/) + 1 : 0;   // start on a word, not mid-path
