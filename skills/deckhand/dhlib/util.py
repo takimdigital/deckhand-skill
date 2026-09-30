@@ -110,7 +110,7 @@ def locked(target, wait: float = 5.0, stale: float = 15.0):
             except OSError:
                 continue
             if time.time() > deadline:
-                raise DhError("LOCK_BUSY", f"{lock} is held by another dh process - retry in a moment (a crashed holder's lock clears after {int(stale)}s)")
+                raise DhError("LOCK_BUSY", f"{lock} is held by another deckhand process - retry in a moment (a crashed holder's lock clears after {int(stale)}s)")
             time.sleep(0.01 + random.random() * 0.03)
     _HELD[key] = 1
     try:
