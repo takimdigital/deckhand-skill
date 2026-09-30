@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.4.1] — 2026-09-30 — try-on drops only the design that broke the page
+
+- When a try broke the page, the engine blamed every design the error page listed, so a working design was dropped with the
+  broken one (the sidebar lost `sidebar-13` with `sidebar-09`). It now blames the design the error itself names, and the
+  whole page only when the error names none.
+- Confirmed in a real browser on 2.4.0: `textarea` and `input` now try cleanly; `radio-group` and `dashboard` honestly say no
+  design has room for the content.
+
 ## [2.4.0] — 2026-09-30 — the field-test findings closed, harness lines as data, a try-on playground
 
 ### The 2026-09-29 field test, all 23 findings closed (docs/field-tests/2026-09-29-report.md; each fix has a test)
