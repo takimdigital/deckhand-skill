@@ -28,6 +28,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 from .util import DATA, REFS, DhError, append_jsonl, now, read_json, read_jsonl, write_json
+from .redact import scrub_text
 
 POLICY = json.loads((DATA / "research.json").read_text(encoding="utf-8"))
 LABELS = tuple(POLICY["labels"])
@@ -115,7 +116,8 @@ def add_source(root, url: str, by: str, kind: str = "", note: str = "") -> dict:
         raise DhError("BAD_URL", f"not an http(s) URL: {url!r}")
     if not AGENT_RX.match(by or ""):
         raise DhError("BAD_ID", "--by: the agent id (letters, digits, - or _)")
-    note = (note or "").strip()
+    url, kind = scrub_text((url or "").strip()), scrub_text(kind or "")
+    note = scrub_text((note or "").strip())
     if THIN_NOTE.match(note) or (len(note) < 12 and not re.search(r"\d", note)):
         raise DhError("NOTE_TOO_THIN", f"--note {note!r} tells the next agent nothing: write the dense facts found on the page "
                       "(\"€25/h standard, €35/h deep, min 2 h\"), or \"nothing usable: <why>\"")

@@ -61,9 +61,9 @@ def note(root: Path, kind: str, text: str) -> dict:
         raise DhError("USAGE", f"dh note {kind} \"what\" — one line")
     if not STATE.load(root, required=False):
         raise DhError("NO_RUN", "no project here — `dh init` first (or --project)")
-    from .learn import secret_values
+    from .redact import scrub_text
     s = STATE.load(root)
-    row = {"at": now(), "ts": round(time.time(), 3), "kind": kind, "text": redact(text, secret_values())[:400],
+    row = {"at": now(), "ts": round(time.time(), 3), "kind": kind, "text": scrub_text(text)[:400],
            "phase": STATE.current(s)["id"]}
     append_jsonl(_dk(root) / "notes.jsonl", row)
     write(root)
@@ -312,7 +312,8 @@ def render(st: dict) -> str:
     L += ["", "## Where to look (only if the step needs it)",
           "- " + " · ".join(f".deckhand/{f}" if not f.endswith(".md") or f in ("PLAN.md", "SEO.md", "VERIFY.md") else f for f in st["files"]),
           "- how the skill works: SKILL.md in the skill folder · full history: .deckhand/history.jsonl · commands run: .deckhand/runs.jsonl"]
-    text = "\n".join(L) + "\n"
+    from .redact import scrub_text
+    text = scrub_text("\n".join(L) + "\n")            # defence in depth: stored notes / pending text from before the scrubber existed
     if len(text) > BUDGET:                      # stay cheap: trim the oldest detail first, never the verdict or the next step
         text = text[: BUDGET - 80].rsplit("\n", 1)[0] + "\n- … (trimmed to stay under the cold-start budget; `dh resume` for the rest)\n"
     return text
