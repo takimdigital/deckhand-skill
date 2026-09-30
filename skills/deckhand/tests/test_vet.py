@@ -9,6 +9,7 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 
 from dhlib import pool, vet  # noqa: E402
 from dhlib.util import DhError, read_json  # noqa: E402
@@ -75,7 +76,7 @@ class Add(unittest.TestCase):
             os.environ.pop("DECKHAND_HOME", None)
         else:
             os.environ["DECKHAND_HOME"] = self.old
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def test_refused_is_never_written_and_accepted_is_written_without_raw_evidence(self):
         with self.assertRaises(DhError) as e:

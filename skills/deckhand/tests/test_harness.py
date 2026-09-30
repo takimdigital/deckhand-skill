@@ -11,6 +11,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import guide, workflow  # noqa: E402
 from dhlib.util import read_json  # noqa: E402
 
@@ -83,7 +84,7 @@ class HermesFeatures(unittest.TestCase):
 
     def tearDown(self):
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def test_hermes_md_wins_over_agents_md_so_it_carries_the_resume_block_too(self):
         from dhlib import resume

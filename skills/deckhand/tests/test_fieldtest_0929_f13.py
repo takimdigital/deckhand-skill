@@ -10,6 +10,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import brand  # noqa: E402
 
 
@@ -24,7 +25,7 @@ class F13(unittest.TestCase):
 
     def tearDown(self):
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def test_F13_dead_links_and_demo_prices_in_the_ledger_are_blocking(self):
         (self.root / "components" / "f.tsx").write_text('<a href="#">x</a><span>$19 / mo</span>', encoding="utf-8")

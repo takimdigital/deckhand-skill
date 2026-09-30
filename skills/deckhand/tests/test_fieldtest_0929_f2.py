@@ -9,6 +9,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import profile  # noqa: E402
 
 NAMES = ("CLOUDFLARE_API_TOKEN", "CF_API_TOKEN", "COOLIFY_TOKEN", "VPS_OPS_HOME")
@@ -28,7 +29,7 @@ class F2(unittest.TestCase):
 
     def tearDown(self):
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def test_F2_isolated_home_reads_no_v1_keyring_and_makes_no_call(self):
         with mock.patch("pathlib.Path.home", return_value=self.real), \

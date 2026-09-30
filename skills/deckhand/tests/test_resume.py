@@ -18,6 +18,7 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 
 from dhlib import guide, profile, resume, state  # noqa: E402
 from dhlib.cli import main  # noqa: E402
@@ -43,7 +44,7 @@ class Base(unittest.TestCase):
             else:
                 os.environ[k] = v
         profile.use_project(None)
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def dh(self, *args, root=None):
         buf = io.StringIO()

@@ -9,6 +9,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import util  # noqa: E402
 
 
@@ -19,7 +20,7 @@ class F23(unittest.TestCase):
 
     def tearDown(self):
         os.chdir(self.cwd)
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def test_F23_home_package_json_is_ignored(self):
         home = self.tmp / "h"

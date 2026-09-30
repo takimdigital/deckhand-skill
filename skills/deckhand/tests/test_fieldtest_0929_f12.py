@@ -13,6 +13,7 @@ from unittest import mock
 
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL))
+import tmpclean  # noqa: E402  (read-only-safe removal of temp folders)
 from dhlib import workflow as WF  # noqa: E402
 from dhlib.cli import main  # noqa: E402
 
@@ -25,7 +26,7 @@ class F12(unittest.TestCase):
 
     def tearDown(self):
         self.env.stop()
-        shutil.rmtree(self.tmp, ignore_errors=True)
+        tmpclean.rmtree(self.tmp)
 
     def dh(self, root, line):
         buf = io.StringIO()
