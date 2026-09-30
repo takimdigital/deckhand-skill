@@ -15,8 +15,10 @@ import os
 import re
 from pathlib import Path
 
-from .util import DATA, DhError, append_jsonl, home, now, read_jsonl, redact, run
+from .util import DATA, DhError, append_jsonl, home, now, read_jsonl, run
+from . import redact as RD
 from . import state as STATE
+from .lock import locked
 
 RUNGS = ("eliminate", "preflight", "reorder", "gate", "pitfall")
 
@@ -63,27 +65,61 @@ def add(root: Path | None, phase: str, symptom: str, cause: str, fix: str, signa
         extra: dict | None = None) -> dict:
     if rung not in RUNGS:
         raise DhError("BAD_RUNG", f"rung: {RUNGS}")
-    sig = signature or re.escape(symptom.strip()[:120])
+    # nothing a lesson stores may hold a credential or one person's folder (C6, C8): scrub, then placeholders
+    symptom, cause, fix = (RD.clean_text(x or "", root) for x in (symptom, cause, fix))
+    command = RD.clean_text(command, root) if command else command
+    extra = RD.clean_obj(extra, root) if extra else extra
+    if signature:
+        sig = RD.signature_paths(RD.scrub_text(signature))
+    else:
+        sig = sig_from_symptom(symptom.strip()[:120])
     try:
         re.compile(sig)
     except re.error as e:
         raise DhError("BAD_SIGNATURE", f"signature is not a valid regex: {e}")
     target = (home() / "lessons.jsonl") if scope == "global" or not root else Path(root) / ".deckhand" / "lessons.jsonl"
-    existing = read_jsonl(target)
-    for l in existing:
-        if l.get("signature") == sig:
-            l["seen"] = l.get("seen", 1) + 1
-            l["last_seen"] = now()
-            l.update({"fix": fix, "cause": cause, **({"command": command} if command else {}), **(extra or {})})
-            if RUNGS.index(rung) < RUNGS.index(l.get("rung", "pitfall")):
-                l["rung"] = rung                                   # evidence can only move a lesson UP the ladder
-            target.write_text("".join(__import__("json").dumps(x, ensure_ascii=False) + "\n" for x in existing), encoding="utf-8")
-            return {"updated": l["id"], "seen": l["seen"]}
-    n = len(all_lessons(root)) + 1
-    lesson = {"id": f"L-{n:04d}", "at": now(), "phase": phase, "signature": sig, "symptom": symptom, "cause": cause, "fix": fix,
-              **({"command": command} if command else {}), "rung": rung, "stack": stack or [], "seen": 1, "last_seen": now(), **(extra or {})}
-    append_jsonl(target, lesson)
+    with locked(home() / "lessons.jsonl"):                          # one writer at a time: ids are allocated under the lock (C7)
+        existing = read_jsonl(target)
+        for l in existing:
+            if l.get("signature") == sig:
+                l["seen"] = l.get("seen", 1) + 1
+                l["last_seen"] = now()
+                l.update({"fix": fix, "cause": cause, **({"command": command} if command else {}), **(extra or {})})
+                if RUNGS.index(rung) < RUNGS.index(l.get("rung", "pitfall")):
+                    l["rung"] = rung                               # evidence can only move a lesson UP the ladder
+                target.write_text("".join(__import__("json").dumps(x, ensure_ascii=False) + "\n" for x in existing), encoding="utf-8")
+                return {"updated": l["id"], "seen": l["seen"]}
+        n = _next_number(root)
+        lesson = {"id": f"L-{n:04d}", "at": now(), "phase": phase, "signature": sig, "symptom": symptom, "cause": cause, "fix": fix,
+                  **({"command": command} if command else {}), "rung": rung, "stack": stack or [], "seen": 1, "last_seen": now(), **(extra or {})}
+        append_jsonl(target, lesson)
     return {"added": lesson["id"], "to": str(target)}
+
+
+_PH = re.compile(r"<(?:home|tmp|project)>(?:[\\/][^\s'\"`]*)?")
+
+
+def sig_from_symptom(symptom: str) -> str:
+    """A regex for a symptom: a personal path (already a <home>/<tmp>/<project> placeholder) matches any path."""
+    return r"\S+".join(re.escape(part) for part in _PH.split(symptom))
+
+
+def _next_number(root) -> int:
+    """max existing L-number + 1 over every ledger this project reads, recomputed under the lock."""
+    top = 0
+    for p in _paths(root) + [home() / "lessons.jsonl"]:
+        for l in read_jsonl(p):
+            m = re.match(r"^L-(\d+)$", str(l.get("id") or ""))
+            if m:
+                top = max(top, int(m.group(1)))
+    seq = home() / "lessons.seq"                     # ids ever issued (by any project's ledger too): never reused
+    try:
+        top = max(top, int(seq.read_text(encoding="utf-8").strip() or 0))
+    except (OSError, ValueError):
+        pass
+    seq.parent.mkdir(parents=True, exist_ok=True)
+    seq.write_text(str(top + 1), encoding="utf-8")
+    return top + 1
 
 
 def match(root: Path | None, text: str) -> list:
@@ -112,14 +148,11 @@ def preflight(root: Path | None, phase: str, limit: int = 8) -> list:
             + ("  (auto: dh run --fix replays it)" if l.get("auto") else "") for l in out[:limit]]
 
 
-def secret_values() -> list:
-    """Every secret value the owner stored (vault + legacy ops keyring): exact strings to redact."""
-    from . import profile as PROFILE
-    return list(PROFILE.vault_read().values()) + list(PROFILE.legacy_read().values())
+secret_values = RD.secret_values                   # every stored secret value (project + machine vault, legacy keyring)
 
 
 def scrub(text: str) -> str:
-    return redact(text or "", secret_values())
+    return RD.scrub_text(text or "")
 
 
 def log_run(root: Path | None, cmd: str, code: int, out: str = "", phase: str | None = None) -> None:
@@ -188,6 +221,8 @@ def run_cmd(root: Path | None, argv: list, phase: str | None = None, fix: bool =
 def _signature_from(tail: str) -> str:
     lines = [l.strip() for l in tail.splitlines() if l.strip()]
     pick = next((l for l in lines if re.search(r"(error|Error|ERR!|failed|Failed|EACCES|ENOENT|Cannot|not found|refused)", l)), lines[-1] if lines else "")
+    pick = RD.norm_paths(RD.scrub_text(pick))                 # a Windows or home path would never match on another machine
+    pick = _PH.sub("PATH", pick)
     pick = re.sub(r"(/[^\s:'\"]+)+", "PATH", pick)[:160]
     sig = re.escape(pick)
     sig = sig.replace("PATH", r"\S+")

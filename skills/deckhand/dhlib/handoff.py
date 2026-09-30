@@ -65,5 +65,6 @@ def write(root: Path) -> dict:
     L += ["## Still needed from you", ""] + (pending or ["- nothing open"]) + [""]
     L += ["## Stack & licences", "", f"- {', '.join(f'{k}: {v}' for k, v in ((s.get('base') or {}).get('stack') or {}).items() if v) or pkg.get('name', '')}",
           "- `NOTICE` (base template) and `THIRD_PARTY_NOTICES.md` (components) must stay in the repository.", ""]
-    (root / "HANDOFF.md").write_text("\n".join(L), encoding="utf-8")
+    from .redact import scrub_text
+    (root / "HANDOFF.md").write_text(scrub_text("\n".join(L)), encoding="utf-8")       # stored text is scrubbed again on the way out
     return {"written": str(root / "HANDOFF.md"), "pending": len(pending)}
