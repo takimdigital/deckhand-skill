@@ -224,7 +224,14 @@ def load_hermes_db(path: Path, session: str | None = None, project: Path | None 
         con = sqlite3.connect(Path(path).resolve().as_uri() + "?mode=ro", uri=True)
         con.execute("select 1 from sqlite_master limit 1")
     except sqlite3.Error:
-        con = sqlite3.connect(_db_copy(Path(path)))          # a live, locked store: read a copy (with its WAL)
+        copy = _db_copy(Path(path))                          # a live, locked store: read a copy (with its WAL)
+        try:
+            con = sqlite3.connect(copy)
+        except BaseException:
+            _drop_copy(copy)
+            raise
+    else:
+        copy = None
     con.row_factory = sqlite3.Row
     try:
         tables = {r[0] for r in con.execute("select name from sqlite_master where type='table'")}
@@ -273,18 +280,31 @@ def load_hermes_db(path: Path, session: str | None = None, project: Path | None 
                                             "results": [str((x or {}).get("status") or (x or {}).get("state") or "?") for x in results] if isinstance(results, list) else [],
                                             "logs": str(Path(path).parent / "cache" / "delegation" / "live" / str(d.get("delegation_id")))})
     finally:
-        con.close()
+        con.close()                                          # first: an open sqlite file cannot be deleted on Windows
+        _drop_copy(copy)
     return _hermes_rows(rows, meta), meta
+
+
+def _drop_copy(copy) -> None:
+    """Remove the temp copy made by _db_copy (its folder), so a read leaves nothing in the temp dir."""
+    if copy:
+        from .util import rmtree
+        rmtree(Path(copy).parent)
 
 
 def _db_copy(path: Path) -> str:
     import shutil
     import tempfile
     d = Path(tempfile.mkdtemp(prefix="dh-hermes-"))
-    for suffix in ("", "-wal", "-shm"):
-        src = Path(str(path) + suffix)
-        if src.exists():
-            shutil.copy2(src, d / (path.name + suffix))
+    try:
+        for suffix in ("", "-wal", "-shm"):
+            src = Path(str(path) + suffix)
+            if src.exists():
+                shutil.copy2(src, d / (path.name + suffix))
+    except BaseException:
+        from .util import rmtree
+        rmtree(d)
+        raise
     return str(d / path.name)
 
 

@@ -275,6 +275,9 @@ def build_parser():
     p.add_argument("action", choices=["audit", "apply", "undo", "ping", "facts"]); p.add_argument("--url")
     p.add_argument("--force", action="store_true", help="undo: even over files edited since the apply")
     sub.add_parser("handoff")
+    p = sub.add_parser("clean", help="leave no trace: remove Deckhand's own leftover temp folders, browser profiles and stranded siblings (dry run unless --apply)")
+    p.add_argument("--apply", action="store_true"); p.add_argument("--older-than", type=float, default=None, metavar="HOURS", help="never touch anything younger (default 2)")
+    p.add_argument("--caches", action="store_true", help="also report npm/pnpm caches; with --apply run `npm cache verify`")
     p = sub.add_parser("tryon", help="passthrough to the try-on engine (node)"); p.add_argument("rest", nargs=argparse.REMAINDER)
     return ap
 
@@ -577,6 +580,9 @@ def dispatch(a):
             raise DhError("RESEARCH_UNVERIFIED", f"{r['summary']['mismatch']} quotes not on their page, {r['summary']['invalid']} invalid claims, "
                           f"{r['summary']['terms_bad']} bad terms — fix or relabel (references/research-card.md)", **r)
         return r
+    if c == "clean":
+        from . import clean as CLEAN
+        return CLEAN.clean(project=root, apply=a.apply, older_than=a.older_than, caches=a.caches)
     if c == "seo":
         from . import seo as SEO
         if a.action == "apply":
