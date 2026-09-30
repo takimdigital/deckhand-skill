@@ -1,12 +1,15 @@
 """Shared plumbing for the dh control plane (stdlib only, Python 3.9+)."""
 from __future__ import annotations
 
+import contextlib
 import json
 import os
+import random
 import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -40,19 +43,82 @@ def today() -> str:
     return time.strftime("%Y-%m-%d")
 
 
-def read_json(p: Path, default=None):
+def read_json(p: Path, default=None, expect=None):
+    """The file's JSON, or `default` when it is missing, unreadable, or of the wrong type: `expect` (a type), else the
+    type of a dict/list default - a hand-edited `5` where an object belongs is "no data", never an AttributeError later."""
+    want = expect or (type(default) if isinstance(default, (dict, list)) else None)
     try:
-        return json.loads(Path(p).read_text(encoding="utf-8"))
+        v = json.loads(Path(p).read_text(encoding="utf-8"))
     except Exception:
         return default
+    return default if want is not None and not isinstance(v, want) else v
 
 
 def write_json(p: Path, obj) -> None:
+    """Atomic: a tmp file unique to this process and thread, then os.replace (retried: on Windows a reader or an
+    antivirus can hold the target for a moment)."""
     p = Path(p)
     p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_suffix(p.suffix + ".tmp")
+    tmp = p.with_name(f"{p.name}.{os.getpid()}.{threading.get_ident()}.tmp")
     tmp.write_text(json.dumps(obj, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    os.replace(tmp, p)
+    deadline = time.time() + 5
+    while True:
+        try:
+            os.replace(tmp, p)
+            return
+        except PermissionError:
+            if time.time() > deadline:
+                with contextlib.suppress(OSError):
+                    tmp.unlink()
+                raise
+            time.sleep(0.02)
+
+
+_HELD: dict = {}
+
+
+@contextlib.contextmanager
+def locked(target, wait: float = 5.0, stale: float = 15.0):
+    """Cross-process lock for a read-modify-write of run.json, brief.json or a PENDING.md. `target` is a project root
+    (the lock file is <root>/.deckhand/.lock). Created with O_EXCL, retried up to `wait` seconds; a lock older than
+    `stale` seconds is a crashed holder's and is removed. Re-entrant inside one process."""
+    d = Path(target)
+    if d.name != ".deckhand":
+        d = d / ".deckhand"
+    d.mkdir(parents=True, exist_ok=True)
+    lock = d / ".lock"
+    key = str(lock)
+    if _HELD.get(key):
+        _HELD[key] += 1
+        try:
+            yield
+        finally:
+            _HELD[key] -= 1
+        return
+    deadline = time.time() + wait
+    while True:
+        try:
+            fd = os.open(str(lock), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, str(os.getpid()).encode())
+            os.close(fd)
+            break
+        except (FileExistsError, PermissionError):
+            try:
+                if time.time() - lock.stat().st_mtime > stale:
+                    lock.unlink()
+                    continue
+            except OSError:
+                continue
+            if time.time() > deadline:
+                raise DhError("LOCK_BUSY", f"{lock} is held by another dh process - retry in a moment (a crashed holder's lock clears after {int(stale)}s)")
+            time.sleep(0.01 + random.random() * 0.03)
+    _HELD[key] = 1
+    try:
+        yield
+    finally:
+        _HELD.pop(key, None)
+        with contextlib.suppress(OSError):
+            lock.unlink()
 
 
 def append_jsonl(p: Path, obj) -> None:
@@ -62,18 +128,33 @@ def append_jsonl(p: Path, obj) -> None:
         f.write(json.dumps(obj, ensure_ascii=False) + "\n")
 
 
+class Rows(list):
+    """read_jsonl's result: a list of the good rows; `.skipped` counts the lines that were not a JSON object."""
+    skipped = 0
+
+
+SKIPPED = {"lines": 0}                                  # across this process: main() reports it as `skipped_lines`
+
+
 def read_jsonl(p: Path) -> list:
+    """One JSON object per line. Bytes that are not UTF-8 are replaced and a bad line is skipped and counted
+    (`.skipped`): a half-written or corrupted log never stops `dh resume`."""
     p = Path(p)
+    out = Rows()
     if not p.exists():
-        return []
-    out = []
-    for line in p.read_text(encoding="utf-8").splitlines():
+        return out
+    for line in p.read_bytes().decode("utf-8", errors="replace").splitlines():
         line = line.strip()
         if line:
             try:
-                out.append(json.loads(line))
+                row = json.loads(line)
             except Exception:
-                continue
+                row = None
+            if isinstance(row, dict):
+                out.append(row)
+            else:
+                out.skipped += 1
+    SKIPPED["lines"] += out.skipped
     return out
 
 
@@ -226,6 +307,55 @@ def free_port(start: int = 3000, span: int = 200) -> int:
         if port_free(p):
             return p
     raise DhError("NO_PORT", f"no free port in {start}-{start + span - 1} (reserved ranges: {reserved_ports() or 'none'})")
+
+
+def listener_pid(port: int):
+    """The pid of the process LISTENING on a local TCP port (stdlib only): `netstat -ano` on Windows, lsof/ss elsewhere.
+    `npm run dev` starts wrappers; the wrapper's pid is not the server's."""
+    port = int(port)
+    try:
+        if os.name == "nt":
+            r = subprocess.run(["netstat", "-ano", "-p", "tcp"], capture_output=True, text=True, timeout=20, encoding="utf-8", errors="replace")
+            for line in r.stdout.splitlines():
+                c = line.split()
+                if len(c) >= 5 and c[0].upper() == "TCP" and c[3].upper() == "LISTENING" and c[1].rsplit(":", 1)[-1] == str(port) and c[4].isdigit():
+                    return int(c[4])
+            return None
+        if shutil.which("lsof"):
+            r = subprocess.run(["lsof", "-nP", f"-iTCP:{port}", "-sTCP:LISTEN", "-t"], capture_output=True, text=True, timeout=20, encoding="utf-8", errors="replace")
+            for x in r.stdout.split():
+                if x.isdigit():
+                    return int(x)
+        if shutil.which("ss"):
+            r = subprocess.run(["ss", "-ltnpH", f"sport = :{port}"], capture_output=True, text=True, timeout=20, encoding="utf-8", errors="replace")
+            m = re.search(r"pid=(\d+)", r.stdout)
+            if m:
+                return int(m.group(1))
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+DH = f'{"py" if os.name == "nt" else "python3"} "{SKILL / "dh.py"}"'
+_BARE_DH = re.compile(r"(?<![\w./\\-])dh (?=(?:next|init|status|resume|note|brief|phase|gate|reopen|profile|vault|pending|pool|plan|bb|clone|adopt|"
+                      r"scaffold|compose|dev|suggest|workflow|base|rebrand|slop|swap|verify|deploy|ops|learn|run|autopsy|harvest|research|seo|handoff|"
+                      r"clean|tryon)\b)")
+RUNNABLE_KEYS = ("next", "then", "cmd", "restore", "hint", "workflow_hint", "set_them", "todo", "do")
+
+
+def runnable(text):
+    """`dh next` -> the full `py "<skill>/dh.py" next`: there is no `dh` executable, a printed hint must run as it is."""
+    return _BARE_DH.sub(lambda m: DH + " ", text) if isinstance(text, str) else text
+
+
+def runnable_obj(obj, key: str = ""):
+    if isinstance(obj, str):
+        return runnable(obj) if key in RUNNABLE_KEYS else obj
+    if isinstance(obj, list):
+        return [runnable_obj(x, key) for x in obj]
+    if isinstance(obj, dict):
+        return {k: runnable_obj(v, k) for k, v in obj.items()}
+    return obj
 
 
 def which(cmd: str):

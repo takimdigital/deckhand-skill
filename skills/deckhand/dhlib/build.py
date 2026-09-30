@@ -601,7 +601,11 @@ def dev_start(root: Path, port: int | None = None, wait: int = 180) -> dict:
     script = "dev" if "dev" in (pkg.get("scripts") or {}) else "start"
     log = root / ".deckhand" / "dev.log"
     proc, url, status = serve(root, script, port or pinned_port(root, script) or _free_port(), log, wait)
-    info = {"url": url, "pid": proc.pid, "cmd": proc.cmd, "started": now(), "status": status, **({"services": svc_state} if svc_state else {})}
+    from .util import listener_pid
+    port_ = int(url.rsplit(":", 1)[1])
+    real = listener_pid(port_) if status else None       # `npm run dev` is a wrapper: stop the process that listens
+    info = {"url": url, "pid": real or proc.pid, "wrapper_pid": proc.pid, "cmd": proc.cmd, "started": now(), "status": status,
+            **({"services": svc_state} if svc_state else {})}
     write_json(root / ".deckhand" / "dev.json", info)
     tail = log.read_text(encoding="utf-8", errors="replace")[-1500:]
     if not status or status >= 500:
@@ -612,6 +616,7 @@ def dev_start(root: Path, port: int | None = None, wait: int = 180) -> dict:
 def dev_stop(root: Path) -> dict:
     info = read_json(Path(root) / ".deckhand" / "dev.json", {}) or {}
     stopped, errors = [], []
+    wrapper = info.get("wrapper_pid")
     for name, pid in [("app", info.get("pid"))] + [(n, (v or {}).get("pid")) for n, v in reversed(list((info.get("services") or {}).items()))]:
         if not pid:
             continue
@@ -620,6 +625,11 @@ def dev_stop(root: Path) -> dict:
             stopped.append(name)
         except Exception as e:  # noqa: BLE001
             errors.append(f"{name}: {e}")
+    if wrapper and wrapper != info.get("pid") and stopped:
+        try:
+            kill_tree(wrapper)                           # the npm/cmd wrapper usually ends with its child; if not, it goes too
+        except Exception:  # noqa: BLE001
+            pass
     if not stopped and not errors:
         return {"stopped": False, "reason": "not started by dh"}
     return {"stopped": bool(stopped), "what": stopped, **({"errors": errors} if errors else {}), "pid": info.get("pid")}

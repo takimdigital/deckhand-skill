@@ -105,8 +105,9 @@ class Resume(Base):
         self.assertIn("doing (", text)
         self.dh("note", "doing", "done")
         self.assertNotIn("wiring the contact form", self.resume_text().split("## Owner decisions")[0])
-        with self.assertRaises(SystemExit):                                 # argparse refuses unknown kinds (exit 2)
-            main(["--project", str(self.root), "note", "maybe", "x"])
+        with redirect_stdout(io.StringIO()) as buf:              # B1: argparse refuses unknown kinds: JSON USAGE, exit 2
+            rc = main(["--project", str(self.root), "note", "maybe", "x"])
+        self.assertEqual((rc, json.loads(buf.getvalue())["code"]), (2, "USAGE"))
 
     def test_the_switch_verdict_follows_edits_made_after_the_last_note(self):
         self.repo()

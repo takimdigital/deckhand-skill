@@ -68,7 +68,7 @@ class GateQuote(Base):
     def test_a_change_request_reopens_instead_of_passing(self):
         code, out = self.dh("gate", "pass", "G1", "--quote", "make it ike a real buisness")
         self.assertEqual((code, out["code"]), (1, "CHANGE_REQUEST"))
-        self.assertIn("dh reopen plan", out["do"][0])
+        self.assertIn("reopen plan", out["do"][0])            # B9: printed as the runnable `py \"…/dh.py\" reopen plan`
         self.assertNotEqual(state.load(self.root)["gates"]["G1"]["status"], "passed")
 
     def test_a_go_passes_and_keeps_the_quote(self):
@@ -326,6 +326,7 @@ class DevServices(Base):
     """D5: the database was run by hand for hours, then silently died during a pause."""
 
     def test_add_validates(self):
+        self.dh("init", "--name", "x")                          # B4: writers need a project
         for args, code in ((("dev", "add", "app", "--cmd", "x", "--port", "1"), "BAD_NAME"),
                            (("dev", "add", "db", "--cmd", "x"), "NO_READY_SIGNAL")):
             c, out = self.dh(*args)
@@ -394,6 +395,7 @@ class SmallThings(Base):
         self.assertEqual(code, 0)
 
     def test_brief_values_are_checked(self):
+        self.dh("init", "--name", "x")                          # B4: writers need a project
         code, out = self.dh("brief", "set", "deliverable=boilerplate")
         self.assertEqual((code, out["code"]), (1, "BAD_VALUE"))
         code, out = self.dh("brief", "set", "deliverable=product", "category=cleaning business software")

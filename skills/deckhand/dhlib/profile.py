@@ -102,7 +102,7 @@ def binding(root=None) -> dict | None:
     r, p = _proj(root), layout_path(root)
     if not p or not p.exists():
         return None
-    b = read_json(p, None)
+    b = read_json(p, None, expect=dict)
     if not isinstance(b, dict) or b.get("location") not in ("here", "machine", "folder"):
         return {"ok": False, "problem": "is not a valid layout file", "file": str(p)}
     problem = None

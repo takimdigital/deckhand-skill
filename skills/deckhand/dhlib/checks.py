@@ -27,7 +27,7 @@ def define(root: Path, s: dict) -> dict:
 
 
 def research(root: Path, s: dict) -> dict:
-    r = read_json(root / ".deckhand" / "research.json")
+    r = read_json(root / ".deckhand" / "research.json", None, expect=dict)
     if not r:
         return _res(False, ["no .deckhand/research.json"], "fill templates/research.json (web research, URLs only) then re-run")
     why = []
@@ -184,7 +184,7 @@ def edited_after_verify(root: Path, r: dict) -> str:
 
 
 def review(root: Path, s: dict) -> dict:
-    r = read_json(root / ".deckhand" / "verify.json")
+    r = read_json(root / ".deckhand" / "verify.json", None, expect=dict)
     if not r:
         return _res(False, ["no verify report"], "dh verify")
     stale = verify_stale(root, r) or edited_after_verify(root, r)

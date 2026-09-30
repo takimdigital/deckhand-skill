@@ -22,6 +22,7 @@ not ask for. One recommendation per decision, with the reason in one line.
 
 `dh` = `python3 <this-skill>/dh.py` (`py` on Windows). Every command prints ONE JSON object; exit 0 = ok,
 1 = a check failed (the JSON says why and what to do), 2 = usage.
+Commands that change a project answer `NO_RUN` (and write nothing) in a folder without `.deckhand/run.json`; only init, scaffold, clone, adopt, harvest, profile, vault, workflow list/show/query, learn, suggest, clean and pool work there, and only `init` creates a missing `--project` folder.
 
 **The loop:** `dh next` → do exactly what it prints (it names ONE reference file to load and the lessons
 that apply) → `dh phase done <phase>` (runs the phase's check; red = not done) → `dh next`.

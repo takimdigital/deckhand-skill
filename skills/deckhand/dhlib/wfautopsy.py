@@ -394,14 +394,14 @@ def workflow_save(root: Path, aid: str, accepted: list, public: bool = False, wi
     """Apply the proposals the owner accepted to the pinned workflow (or this run's extraction), add this run as
     proof, bump the version, record why — then save to the owner's pool or as a community bundle."""
     root = Path(root)
-    rep = read_json(root / ".deckhand" / "autopsy" / f"{aid}.json", None)
+    rep = read_json(root / ".deckhand" / "autopsy" / f"{aid}.json", None, expect=dict)
     if not rep:
         raise DhError("NO_REPORT", f"no workflow autopsy {aid} in .deckhand/autopsy/ (dh autopsy --workflow)")
     props = {p["id"]: p for p in rep["proposals"]}
     bad = [x for x in accepted if x not in props]
     if bad:
         raise DhError("NO_SUCH_PROPOSAL", f"{', '.join(bad)} not in {aid} ({', '.join(props) or 'no proposals'})")
-    wf = read_json(root / ".deckhand" / "workflow.json", None)
+    wf = read_json(root / ".deckhand" / "workflow.json", None, expect=dict)
     pin = WF.pinned(root)
     if not wf:
         made = WF.new_from_run(root, wid)

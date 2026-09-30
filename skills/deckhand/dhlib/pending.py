@@ -17,7 +17,7 @@ import datetime as _dt
 import re
 from pathlib import Path
 
-from .util import DhError, SKILL, home, today
+from .util import DhError, SKILL, home, locked, today
 
 ITEM = re.compile(r"^- \[( |x|X)\] (P-(?:SEO-[\w.]+|\d{3,}))\b(.*)$")
 TEMPLATE = "# PENDING — {name}\n\nThings only the owner can do. Agents add a line the moment one appears; nothing lives only in chat.\n" \
@@ -32,6 +32,11 @@ def path_for(root: Path | None, machine: bool) -> Path:
     if machine or not root or not (Path(root) / ".deckhand").is_dir():
         return machine_path()
     return Path(root) / "PENDING.md"
+
+
+def _lock(root, machine: bool):
+    """The lock for one ledger: the project's .deckhand/.lock, or the machine's (every read-modify-write of a PENDING.md)."""
+    return locked(root if (not machine and root and (Path(root) / ".deckhand").is_dir()) else home())
 
 
 def _read(p: Path) -> str:
@@ -111,6 +116,11 @@ def add(root: Path | None, what: str, why: str = "", how: str = "", where: str =
     if SECRET_RX.search(blob) or mask_tokens(blob) != blob:
         raise DhError("SECRET_IN_TEXT", "a pending item names WHERE a secret goes, never the secret itself — "
                       "store it with `dh vault set NAME` and write the name")
+    with _lock(root, machine):
+        return _add_locked(root, what, why, how, where, machine, when, project, decide, rec)
+
+
+def _add_locked(root, what, why, how, where, machine, when, project, decide, rec) -> dict:
     p = path_for(root, machine)
     text = _read(p)
     body0 = (f"decide: {what.strip()}" + (f" (rec: {rec})" if rec else "")) if decide else what.strip()
@@ -149,6 +159,11 @@ def _insert_open(text: str, line: str) -> str:
 
 
 def close(root: Path | None, pid: str, machine: bool = False, drop_reason: str | None = None) -> dict:
+    with _lock(root, machine):
+        return _close_locked(root, pid, machine, drop_reason)
+
+
+def _close_locked(root, pid: str, machine: bool, drop_reason) -> dict:
     if pid.startswith("P-SEO-"):
         raise DhError("SEO_ITEM", f"{pid} closes itself: put the fact in the brief (`dh brief set seo.…=…`) or record the action, "
                       "then `dh seo audit` — a hand-closed SEO line would come back at the next audit")
