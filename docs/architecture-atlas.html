@@ -131,7 +131,7 @@
   <div class="kicker">Complete system reference</div>
   <h1>Deckhand Architecture Atlas</h1>
   <p>Every layer, every command path, every diagram — how the methodology, control plane, try-on engine,
-  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then fact-checked claim by claim against the 2.4.1 code (about 230 claims; the 2.3.1 ordering rules and the fixes from the real-browser test are folded in).</p>
+  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then checked against the 2.4.4 code. The counts, command and action names, flags, error codes, gate examples and file paths are asserted by <code>scripts/test_repo_coherence.py</code>, so a change that makes one false fails CI; the behaviour described in prose was read against the source section by section.</p>
 </header>
 
 <!-- ============================================================ 1 -->
@@ -245,7 +245,7 @@ The owner only ever interacts at gates, pending asks, and the try-on browser UI.
 
 <div class="callout"><b>The loop:</b> <code>dh next</code> → do what it prints (it names <b>ONE reference file</b> in <code>read</code>, that phase's steps in <code>do</code>, the preflight <code>lessons</code> that apply) → <code>dh phase done &lt;phase&gt;</code> (runs the phase's check; red = not done → exit 1 <code>CHECK_FAILED</code>, the phase stays pending; <code>--force "&lt;reason&gt;"</code> records it done anyway, marked <code>forced</code>) → <code>dh next</code> …
 <b>State events</b> (<code>init · phase_done · phase_skip · gate · reopen · workflow</code>) append to <code>.deckhand/history.jsonl</code>; every command except <code>run · autopsy · next · status · resume · note · suggest</code> is logged separately in <code>.deckhand/runs.jsonl</code>.
-Marking a phase done while <b>any earlier</b> phase is neither done nor skipped is refused <span class="tag block">OUT_OF_ORDER</span> (exit 1); in <b>phased</b> mode a phase whose owed gate is still unpaid is refused <span class="tag block">GATE_BLOCKED</span> (exit 1) — <code>auto</code> mode has no blocking gate. A skipped phase still owes its gate in phased mode: skip try-on and G3 still waits for the owner before review. The same order check covers <code>phase skip</code> (only the current phase), <code>gate pass</code> (refused <span class="tag block">GATE_NOT_DUE</span> before its phase is done), clone/scaffold, <code>rebrand apply</code> and <code>deploy ship</code> (<code>dh adopt</code> stays allowed at define). Review can never be skipped (<span class="tag block">NOT_SKIPPABLE</span>).</div>
+Marking a phase done while <b>any earlier</b> phase is neither done nor skipped is refused <span class="tag block">OUT_OF_ORDER</span> (exit 1); in <b>phased</b> mode a phase whose owed gate is still unpaid is refused <span class="tag block">GATE_BLOCKED</span> (exit 1) — <code>auto</code> mode has no blocking gate. A skipped phase still owes its gate in phased mode: skip try-on and G3 still waits for the owner before review. The same order check covers <code>phase skip</code> (only the current phase), <code>gate pass</code> (refused <span class="tag block">GATE_NOT_DUE</span> before its phase is done), clone/scaffold, <code>rebrand apply</code> and <code>deploy ship</code> (<code>dh adopt</code> stays allowed at define). Review can never be skipped (<span class="tag block">NOT_SKIPPABLE</span>). A finished phase cannot be skipped (<span class="tag block">ALREADY_DONE</span>: <code>dh reopen</code> it); <code>--force</code> needs a reason (<span class="tag block">NEED_REASON</span>) and is refused for review (<span class="tag block">NOT_FORCEABLE</span>); <code>dh reopen</code> refuses a phase the run never reached (<span class="tag block">NOT_REACHED</span>).</div>
 
 <figure>
 <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
@@ -324,14 +324,14 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <h3>Exit checks (the exact thing each phase must prove)</h3>
 <table>
 <tr><th style="width:11%">Phase</th><th style="width:47%">Done when (check)</th><th>Reference</th></tr>
-<tr><td><b>define</b></td><td>Brief has required keys: business, shape, languages, audience (+ validated <code>deliverable</code> own|client|product)</td><td><code>00-define.md</code></td></tr>
+<tr><td><b>define</b></td><td>Brief has required keys: business, shape, languages, audience; <code>shape</code> is one of saas | marketplace | booking | catalogue | leadgen | internal (+ validated <code>deliverable</code> own|client|product)</td><td><code>00-define.md</code></td></tr>
 <tr><td><b>research</b></td><td><code>research.json</code>: ≥3 competitors (URL + strengths + gaps), audience, conversion plays, day-one features, ≥3 harvested terms, and <code>dh research verify</code> OK after last edit with at least 3 quotes actually found on their pages (<code>min_found</code> in <code>data/research.json</code>; every fetch blocked = not done, <code>dh phase skip research --reason</code> is the way out)</td><td><code>10-research.md</code></td></tr>
 <tr><td><b>plan</b></td><td><code>dh plan lint</code> = 0 errors (E0–E11; warnings don't block), and <code>sitemap.json</code> is no longer the untouched <code>dh plan init</code> example</td><td><code>20-plan.md</code></td></tr>
 <tr><td><b>build</b></td><td>Base recorded in run state + package manifest + <code>.deckhand/dev.json</code> URL answers without ≥500</td><td><code>30-build.md</code></td></tr>
 <tr><td><b>brand</b></td><td><code>dh rebrand check</code> = 0 blocking findings</td><td><code>40-brand.md</code> + <code>45-seo.md</code></td></tr>
 <tr><td><b>tryon</b> <span class="tag opt">optional</span></td><td>No open session in <code>.deckhand/tryon/sessions/*.json</code></td><td><code>50-tryon.md</code></td></tr>
-<tr><td><b>review</b></td><td><code>.deckhand/verify.json</code> exists and ok — every red blocking row fixed</td><td><code>60-review.md</code></td></tr>
-<tr><td><b>deploy</b></td><td><code>deploy.json</code> has url + smoke.ok AND <code>HANDOFF.md</code> exists</td><td><code>70-deploy.md</code></td></tr>
+<tr><td><b>review</b></td><td><code>.deckhand/verify.json</code> exists, is ok (every red blocking row fixed) and still describes the code: refused when code was committed or edited after it, or when a blocking row was <code>--skip</code>ped without a <code>--reason</code></td><td><code>60-review.md</code></td></tr>
+<tr><td><b>deploy</b></td><td><code>deploy.json</code> has url + smoke.ok (not older than the last deploy) AND <code>HANDOFF.md</code> exists</td><td><code>70-deploy.md</code></td></tr>
 <tr><td><b>operate</b></td><td>Check always returns true — steady state forever</td><td><code>80-operate.md</code></td></tr>
 </table>
 </section>
@@ -371,15 +371,15 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <h3>How a gate passes — deterministic quote classifier</h3>
 <pre><code>dh gate pass G1 --quote "&lt;owner's words, verbatim&gt;"   # phased mode: --quote REQUIRED</code></pre>
 
-<p>The quote runs through a regex classifier → <code>approve</code> | <code>approve_with_changes</code> | <code>change_request</code>:</p>
+<p>The quote runs through a deterministic classifier → <code>approve</code> | <code>approve_with_changes</code> | <code>change_request</code>. <b>Only a bare approval is a go</b>: approval words and nothing asked.</p>
 <ul>
-<li><span class="tag ok">approve</span> "go", "ok", "yes", "approved", "looks good", "lgtm", "ship it", "go live", "go ahead", confirm(ed), "do it", "let's go", "g[1-4] ok" + fr/de/es/ar equivalents + the thumbs-up / check emoji. "No problem / no worries" is stripped before matching &mdash; still a go.</li>
-<li><span class="tag block">NOT a go</span> change / make it / but / however / add / remove / fix / not yet / should / must / wrong / redo — these words make it a <b>change request</b></li>
-<li><span class="tag block">hold = no go</span> "don't ship it", "wait", "hold", "stop" — a held go is not a go. A pure hold (hold words, no change words) returns <code>HOLD</code>: wait and ask, never reopen</li>
-<li><b>strong-go carve-out</b>: only an explicit strong approval ("G1 ok", "approved", "ship it") may carry a change and pass as <i>approve_with_changes</i> — then the change is recorded (<code>dh note decision</code>) and executed next phase. A bare "ok but add…" = change request (the recipe embeds their words truncated to 80 chars).</li>
-<li><b>When in doubt → change request:</b> the gate asks again rather than passing on a "no". A change request returns <code>CHANGE_REQUEST</code> with a <code>do:</code> recipe = <code>dh reopen &lt;phase&gt; --reason "&lt;their words&gt;"</code> → change → show again → ask again.</li>
+<li><span class="tag ok">approve</span> only approval words (filler such as "please" or "thanks" is ignored): "go", "ok", "yes", "approved", "looks good", "lgtm", "ship it", "go live", "go ahead", confirm(ed), "do it", "let's go", "g[1-4] ok" + French, Spanish, German and Arabic equivalents (also Maghrebi transliterations such as "wakha" or "mzyan") and the thumbs-up / check emoji. "No problem", "no changes" and "pas de souci" are stripped before matching — still a go.</li>
+<li><span class="tag block">NOT a go</span> anything else: a request after the approval word ("ok, make the hero bigger", "yes but add a pricing page"), a complaint ("the hero is wrong"), an empty or unclear quote ("hmm"). These are a <b>change request</b>.</li>
+<li><span class="tag block">hold = no go</span> a held or delayed go is not a go: "don't ship it", "wait", "hold", "stop", "ok, I'll look tomorrow", "let me think about it". A pure hold (hold or delay words, no change words) returns <code>HOLD</code>: wait and ask, never reopen</li>
+<li><b>strong-go carve-out</b>: only an explicit strong approval ("G1 ok", "approved", "ship it", "go ahead", "lgtm", "go live", "let's go") followed by <i>but</i> and a named change ("G1 ok, but add a pricing page") may carry the change and pass as <i>approve_with_changes</i> — then the change is recorded (<code>dh note decision</code>) and executed next phase. A bare "ok but add…" is a change request, and so is "approved, but" with nothing after it.</li>
+<li><b>When in doubt → change request:</b> the gate asks again rather than passing on a "no". A change request returns <code>CHANGE_REQUEST</code> with a <code>do:</code> recipe = <code>dh reopen &lt;phase&gt; --reason "&lt;their words, cut to 80 characters&gt;"</code> → change → show again → ask again (and if they did say go, quote the words that say it).</li>
 </ul>
-<div class="callout danger"><b>Never paraphrase an owner into approval.</b> (Embedded incident D2 in the source: an agent once passed G1 on its own paraphrase of "make it like a real business".) Gate pass records <code>by:"owner"</code> + the verbatim quote; the workflow autopsy flags any gate passed without the owner's words.</div>
+<div class="callout danger"><b>Never paraphrase an owner into approval.</b> (Embedded incident D2 in the source: an agent once passed G1 on its own paraphrase of "make it like a real business".) Gate pass records <code>by:"owner"</code> + the verbatim quote; the workflow autopsy flags any gate passed without the owner's words. G1 also records content hashes of <code>brief.json</code> and <code>sitemap.json</code>, so a later edit of the approved plan shows up as drift (§12).</div>
 </section>
 
 <!-- ============================================================ 6 -->
@@ -423,11 +423,11 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><th style="width:4%">#</th><th style="width:26%">Invariant</th><th>Operational meaning</th></tr>
 <tr><td>1</td><td>Owner facts never invented</td><td>Prices, reviews, addresses, licences, testimonials, logos unknown → <code>PENDING.md</code>. An unconfirmed demo value is a defect.</td></tr>
 <tr><td>2</td><td>Access before asks</td><td><code>dh profile doctor</code> first; what access can do, DO. Capability walls proven by cheap probe + verbatim error. Ask ONLY what nothing covers, in ONE batched labeled message; later needs parked with <code>dh pending add … --when</code>, never re-asked.</td></tr>
-<tr><td>3</td><td>Secrets in the vault</td><td><code>dh vault set NAME</code> (0600, stdin, single-quoted shell lines). Secret pasted in chat → vault it + warn it's in history → rotate. Never in chat/profile/commits/logs/HANDOFF. Layout <code>here|machine|folder</code>; <code>BINDING_BROKEN</code> = ask, never write around. Client projects never machine-bound.</td></tr>
+<tr><td>3</td><td>Secrets in the vault</td><td><code>dh vault set NAME</code> (0600, stdin, single-quoted shell lines). Secret pasted in chat → vault it + warn it's in history → rotate. Never in chat/profile/commits/logs/HANDOFF. Layout <code>here|machine|folder</code>; <code>BINDING_BROKEN</code> = ask, never write around. Client projects never machine-bound. One scrubber (<code>dhlib/redact.py</code>) cleans every free-text sink before it reaches disk — notes, <code>bb post</code>, <code>brief set</code>, research, lessons, RESUME, HANDOFF — and <code>pending add</code> refuses a stored secret: every vault value, common credential shapes, URL credentials and private keys.</td></tr>
 <tr><td>4</td><td>Licences</td><td>Permissive only (MIT, Apache-2.0, BSD-2/3, ISC, 0BSD, Unlicense). NOTICE/THIRD_PARTY never rewritten. Pool/registry vetting refuses copyleft, unknown, paywalls, secrets, dead repos — refusals stay refused.</td></tr>
 <tr><td>5</td><td>Evidence over assertion</td><td>"Works/deployed/fixed" require the command and its output. A check that cannot fail is not a check.</td></tr>
 <tr><td>6</td><td>Deterministic first</td><td>If a script does it, the agent MUST NOT hand-write it. The model writes words + app-specific logic — not boilerplate.</td></tr>
-<tr><td>7</td><td>Gates are hard</td><td>Phased mode: pass on owner's own words with --quote; change/hold words are not a go; never paraphrase into approval.</td></tr>
+<tr><td>7</td><td>Gates are hard</td><td>Phased mode: pass on the owner's own words with --quote; only a bare approval is a go (a request, a hold or a delay is not); never paraphrase into approval.</td></tr>
 <tr><td>8</td><td>Failures are paid once</td><td><code>dh run -- &lt;cmd&gt;</code> (known error prints its fix; <code>--fix</code> replays a proven recipe). After a hard session: <code>dh autopsy --latest --apply</code>.</td></tr>
 <tr><td>9</td><td>Dev-only tooling never ships</td><td>Try-on stamps must be absent from production builds (verify row <code>prod-clean</code>); <code>tryon clean</code> before release.</td></tr>
 <tr><td>10</td><td>Production changes follow the pipeline</td><td>edit → verify → commit → <code>dh deploy ship</code> (proof) → report. Rollback path known before shipping.</td></tr>
@@ -503,6 +503,8 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <figcaption>Fig 9.1 — dh next prints one phase step-list + one reference to read. Everything else is attached context.</figcaption>
 </figure>
 
+<p class="small"><b>Drift line:</b> when the approved plan (<code>brief.json</code> / <code>sitemap.json</code>) changed after G1, <code>dh next</code> adds a <code>drift</code> line naming the files and both ways out (§12).</p>
+
 <h3>The observe hook — why workflow steps tick themselves</h3>
 <p class="small">After every successful dh command (except next/status/resume/note/workflow/autopsy/suggest), <code>_observe</code> normalizes it (<code>dh &lt;sub&gt; &lt;action&gt;</code>) and matches it against the pinned workflow's pending <code>do/check/gate</code> steps → auto-ticks <code>done</code>. A state-changing command no step named is recorded as an <code>unplanned</code> deviation — leaving the path is recorded, not hidden. <code>dh phase done|skip</code> closes the remaining steps: ask/write/delegate/optional → done, the rest → skipped with a <code>not-run</code> deviation, and gate steps are left for <code>dh gate pass</code>.</p>
 
@@ -523,18 +525,19 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><td><code>dh init --name N --mode phased|auto --path pool|mine|existing|scratch --for me|client</code></td><td>Idempotent project start (<code>--project DIR</code> optional, also accepted after any subcommand); writes run.json, PENDING.md, gitignore + AGENTS.md cold-start blocks</td></tr>
 <tr><td><code>dh status</code></td><td>Full phase/gate/base snapshot JSON</td></tr>
 <tr><td><code>dh next</code></td><td>The one next instruction (§9)</td></tr>
-<tr><td><code>dh phase done|skip &lt;phase&gt; [--reason] [--force]</code></td><td>Done only after its check passes; skip needs a reason and only the current phase can be skipped; review is never skippable; out-of-order/gate-blocked refused</td></tr>
+<tr><td><code>dh phase done|skip &lt;phase&gt; [--reason] [--force]</code></td><td>Done only after its check passes (<code>--force</code> needs a reason, never for review); skip needs a reason, only the current phase, never a finished one; review is never skippable; out-of-order/gate-blocked refused</td></tr>
 <tr><td><code>dh gate pass Gx --quote "…"</code></td><td>Phased: quote mandatory; classifier decides approve / approve_with_changes / change_request</td></tr>
-<tr><td><code>dh reopen &lt;phase&gt; --reason "…"</code></td><td>Resets this phase + all after it (and their gates) to pending</td></tr>
+<tr><td><code>dh reopen &lt;phase&gt; --reason "…"</code></td><td>Resets this phase + all after it (and their gates) to pending; refused for a phase the run never reached</td></tr>
 <tr><td><code>dh brief show|set k=v …</code></td><td>Dotted-key brief edits (deliverable validated)</td></tr>
 <tr><td><code>dh note decision|doing|next "…"</code></td><td>One-line redacted note → notes.jsonl → RESUME</td></tr>
 <tr><td><code>dh resume [--check [--online]] [--hook] [--install-hook claude]</code></td><td>Regenerate/prove RESUME.md; plain-text hook; install SessionStart hook</td></tr>
 <tr><td><code>dh suggest [--all] · dh suggest dismiss ID [--days N]</code></td><td>20 deterministic rules → top-3 NOW/SOON/LATER next-actions</td></tr>
 <tr><td><code>dh handoff</code></td><td>Writes HANDOFF.md (URL, secret locations, commands, bots, verify, pending, licences)</td></tr>
 </table>
-<p class="small muted"><b>Refusals you will actually see</b> (all exit 1, one JSON object): <code>MOVED</code> (the run continues in another folder — <code>cd</code> there) ·
+<p class="small muted"><b>Refusals you will actually see</b> (exit 1, one JSON object): <code>MOVED</code> (the run continues in another folder — <code>cd</code> there) ·
 <code>BAD_PHASE</code> · <code>OUT_OF_ORDER</code> (an earlier phase is neither done nor skipped) · <code>GATE_BLOCKED</code> (phased mode, owed gate unpaid) ·
-<code>CHECK_FAILED</code> (the phase's check is red) · <code>NEED_QUOTE</code> (gate pass without the owner's words) · <code>NEED_REASON</code> (skip / drop without one) · <code>GATE_NOT_DUE</code> (gate pass before its phase is done) · <code>NOT_SKIPPABLE</code> (skipping review) · <code>CHANGE_REQUEST</code> (the owner's words asked for a change, §5) · <code>HOLD</code> (the owner held it back without asking for a change: wait, reopen nothing).</p>
+<code>CHECK_FAILED</code> (the phase's check is red) · <code>NEED_QUOTE</code> (gate pass without the owner's words) · <code>NEED_REASON</code> (skip / drop / force without one) · <code>GATE_NOT_DUE</code> (gate pass before its phase is done) · <code>NOT_SKIPPABLE</code> (skipping review) · <code>NOT_FORCEABLE</code> (forcing review) · <code>ALREADY_DONE</code> (skipping a finished phase: reopen it) · <code>NOT_REACHED</code> (reopening a phase the run never reached) · <code>CHANGE_REQUEST</code> (the owner's words asked for a change, §5) · <code>HOLD</code> (the owner held it back without asking for a change: wait, reopen nothing) · <code>DIRTY_TREE</code> / <code>VERIFY_STALE</code> (<code>deploy ship</code>, §30) · <code>LOCK_BUSY</code> (another deckhand process holds the project lock for more than 5 s; a crashed holder's lock clears after 15 s).
+Bad input is different: an unknown flag or a missing argument is <code>USAGE</code> (exit 2) and <code>--help</code> is a JSON object too. Outside a project a command answers <code>NO_RUN</code> and creates nothing. A <code>run.json</code> or <code>brief.json</code> that is not valid JSON is <code>RUN_CORRUPT</code> / <code>BRIEF_CORRUPT</code>: <code>resume</code> and <code>handoff</code> say so, <code>brief set</code> will not overwrite it, and <code>dh init</code> repairs a corrupt run, keeping the broken file beside it as <code>run.json.corrupt-&lt;time&gt;</code>.</p>
 
 <h3>Owner asks &amp; identity</h3>
 <table>
@@ -574,13 +577,13 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><td><code>dh slop brief|check|allow|add|export|langs|lint</code></td><td>Deterministic AI-tell detector, 11 language packs, per-project allowlist</td></tr>
 <tr><td><code>dh seo audit|apply|undo|ping|facts</code></td><td>Score + launch-breakers; apply never overwrites owner words; IndexNow; owner gaps → PENDING</td></tr>
 <tr><td><code>dh tryon …</code></td><td>Passthrough to node tryon/cli.mjs (§13–18)</td></tr>
-<tr><td><code>dh verify [--url] [--skip] [--allow]</code></td><td>All rows (§29); red blocking → VERIFY_FAILED → blocks G4</td></tr>
+<tr><td><code>dh verify [--url] [--skip] [--allow] [--reason]</code></td><td>All rows (§29); red blocking → VERIFY_FAILED → blocks G4; a skipped blocking row stays red unless <code>--reason</code> says why</td></tr>
 </table>
 
 <h3>Deploy, ops, learning, reuse</h3>
 <table>
 <tr><th style="width:34%">Command</th><th>Does</th></tr>
-<tr><td><code>dh deploy target|ship|smoke|raw</code></td><td>Record target; ship = push→Coolify→wait commit→smoke→IndexNow; raw passthrough</td></tr>
+<tr><td><code>dh deploy target|ship|smoke|raw</code></td><td>Record target; ship = clean tree → verify not stale → push → Coolify → wait for this commit → smoke → IndexNow (not for a preview address); raw passthrough</td></tr>
 <tr><td><code>dh ops suggest|add|list</code> · runner <code>github|cron|local|hermes</code></td><td>Rank/install bots; schedule live only after its own trigger fires once</td></tr>
 <tr><td><code>dh learn add|match|preflight|promote|from-failure|list</code></td><td>Lesson ledger (rungs: eliminate &gt; preflight &gt; reorder &gt; gate &gt; pitfall)</td></tr>
 <tr><td><code>dh autopsy [transcript|state.db|--latest] [--apply] [--session]</code></td><td>Failures → episodes → recipes → lessons/playbooks/skill-proposals (never edits the skill)</td></tr>
@@ -609,13 +612,15 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <p class="sub">Everything is files. Nothing lives only in the chat.</p>
 
 <div class="grid2">
-<div class="card"><h4>Project — <code>&lt;project&gt;/.deckhand/</code> (gitignored runtime)</h4>
+<div class="card"><h4>Project — <code>&lt;project&gt;/.deckhand/</code> </h4>
 <ul class="small">
-<li><code>run.json</code> — version, name, mode, path, phases{status,check,forced}, gates{status,by,quote,verdict}, base, moved_to, workflow pin</li>
+<li><b>Gitignored</b> (command output and this machine's own state, never pushed): <code>runs.jsonl · failures.jsonl · *.log · dev.json · autopsy/ · tryon/ · RESUME.md · notes.jsonl · suggest.json · research/cache/ · profile.json · vault.env · profile.md · layout.json</code>. Everything else here is not ignored by deckhand's block.</li>
+<li><code>run.json</code> — version, name, mode, path, phases{status,check,forced}, gates{status,by,quote,verdict; G1 also plan_hashes}, base, moved_to, workflow pin</li>
 <li><code>history.jsonl</code> — events: init / phase_done / phase_skip / gate / reopen / workflow</li>
 <li><code>RESUME.md</code> — regenerated after every command (6,000-char budget)</li>
 <li><code>brief.json · sitemap.json · copy.json · research.json</code> + <code>research/agents/*.json</code> + <code>research/verify.json</code></li>
-<li><code>verify.json · deploy.json · dev.json + dev.log · services.json · swap-map.json</code></li>
+<li><code>verify.json</code> (+ <code>verify-serve.log</code>) · <code>deploy.json · dev.json + dev.log · services.json · swap-map.json · workflow.json</code> (the pinned workflow) · <code>.lock</code> (the cross-process lock: writes of the run state, the brief and PENDING wait for it up to 5 s)</li>
+<li><code>seo-plan.json</code> (what <code>seo apply</code> was given) · <code>seo-stuck.json</code> (rules it ran and could not fix, shown as manual edits) · <code>slop.json</code> (the project's allowlist) · <code>slop-report.json</code></li>
 <li><code>PLAN.md · VERIFY.md · SEO.md · SLOP.md</code> (reports) · <code>runs.jsonl</code> (redacted cmd log — every command except run/autopsy/next/status/resume/note/suggest) · <code>failures.jsonl</code> · <code>notes.jsonl</code> · <code>suggest.json</code> (dismissals)</li>
 <li><code>tryon/</code> — sessions, backups, runtime, drafts, tune, theme, flags, setup journal</li>
 <li><code>work/</code> — AGENT-n.md, CONVENTIONS.md, WP packages · <code>blackboard.jsonl</code> (at <code>.deckhand/</code> level)</li>
@@ -639,14 +644,15 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 
 <h3>RESUME.md — cold start for any AI</h3>
 <p class="small">Regenerated after every command from project files (never from memory): stage, exact next command, what is done <i>with proof</i>, what's in progress, owner decisions, what waits on the owner, timeline, git HEAD + dirty files, open try-on/tune/draft sessions, services up/down, last failure + known fixes. Line 4 is the verdict:</p>
-<div class="callout"><b>SAFE TO START A FRESH SESSION</b> = yes iff (a) no dirty file modified after the last note, AND (b) no unexplained later failure (non-guard fail, never succeeded afterwards, after last note, no known fix). <code>dh resume --check</code> re-proves claims against reality (re-runs phase checks, G1 drift by mtime, app answers, verify/deploy commit == HEAD, sessions closed) — any drift → exit 1 <code>DRIFT</code>.</div>
+<div class="callout"><b>SAFE TO START A FRESH SESSION</b> = yes iff (a) no dirty file modified after the last note, AND (b) no unexplained later failure (non-guard fail, never succeeded afterwards, after last note, no known fix). <code>dh resume --check</code> re-proves claims against reality (re-runs phase checks, plan drift after G1, app answers, verify/deploy commit == HEAD and not stale, sessions closed) — any drift → exit 1 <code>DRIFT</code>.</div>
 <p class="small"><b>fresh_session signal</b>: last history event is a gate AND safe() → <code>dh next</code> says a fresh session is safer/sharper; tell the owner.</p>
+<p class="small"><b>Plan drift:</b> G1 records content hashes of <code>brief.json</code> and <code>sitemap.json</code>. An edit after G1 shows in <code>dh resume --check</code> and as a line in <code>dh next</code> naming the file and the two ways out: accept it on the owner's words (<code>dh gate pass G1 --quote "…"</code>, which records the new hashes) or undo it (<code>dh reopen plan --reason "…"</code>). A run whose G1 has no hashes (an older run) compares the file's last commit time with G1, not its mtime, so a fresh clone is not an edit. <code>seo apply</code> never touches the brief: the IndexNow key lives in <code>.deckhand/indexnow.json</code>.</p>
 
 <h3>suggest — computed, never invented</h3>
 <p class="small">20 deterministic rules read local files only (run state, history, runs.jsonl, safety facts, pending ages, autopsy reports, brief/verify/seo/deploy, git, services, session size) → scored NOW ≥80 / SOON ≥50 / LATER. Top 3 shown (unless <code>--all</code>), deduped against what <code>dh next</code> already prints, dismissals honored (default 7 days). Examples of scores: unsaved work 95, gate 88, deferred pending due 86, services down 85, repeated failure 82.</p>
 
 <h3>pending — the two ledgers</h3>
-<p class="small">One line format: <code>- [ ] P-0NN · what · WHY · HOW · WHERE · asked date [· when: trigger]</code>. <code>add</code> requires HOW+WHERE (refuses secret-shaped text). <code>--when</code> sets nag:no → deferred until the named phase/gate is reached → fires as a suggestion at score 86. <code>P-SEO-*</code> items can't be hand-closed — they re-derive from <code>dh seo audit</code>. Every report ends with open items + age.</p>
+<p class="small">One line format: <code>- [ ] P-0NN · what · WHY · HOW · WHERE · asked date [· when: trigger]</code>. <code>add</code> requires HOW+WHERE (refuses secret-shaped text). <code>--when</code> sets nag:no → deferred until the named phase/gate is reached → fires as a suggestion at score 86. <code>P-SEO-*</code> items can't be hand-closed (<code>SEO_ITEM</code>) — they re-derive from <code>dh seo audit</code>. An exact duplicate of an open item (case and spacing ignored) is not added again. Every report ends with open items + age.</p>
 </section>
 
 <!-- ============================================================ 13 -->
@@ -857,7 +863,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <figcaption>Fig 15.1 — Owner content is extracted first, then candidates are ranked and staged. The wrapper holds variant 0 (the original, hidden) plus variants 1..n; imports are tagged <code>// dh-tryon:&lt;id&gt;</code>; the session journal and a byte-copy backup are written before anything touches disk.</figcaption>
 </figure>
 
-<div class="callout"><b>Wrapper vs section.</b> A <i>wrapper</i> component (renders children) keeps the owner's JSX inline and just empties demo props. A <i>section</i> gets parameterized: the design's static text becomes <code>content.*</code> slots and the owner's units are bound into them. Fit ratio = carried/total units — shown to the owner as "your content 8/8".</div>
+<div class="callout"><b>Wrapper vs section.</b> A <i>wrapper</i> component (renders children) keeps the owner's JSX inline and just empties demo props. A <i>section</i> gets parameterized: the design's static text becomes <code>content.*</code> slots and the owner's units are bound into them. Fit ratio = carried/total units — shown to the owner as "your content 8/8". <b>Ranking:</b> a design the fit check marked <i>fits</i> gets +3 and <i>refused</i> −30 (last); <i>broken</i> is never offered (counted, and reachable only by a flag report's <code>--only</code>). <b>Which design broke the page:</b> the error's own message and stack name the culprit; a design that only appears in the framework's list of loaded modules is not blamed for a sibling's error, and only the blamed designs are dropped before the retry.</div>
 </section>
 
 <!-- ============================================================ 16 -->
@@ -1068,7 +1074,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <figcaption>Fig 22.1 — Scripts write only from confirmed brief facts; never aggregateRating/review schema; audit keeps honest score.</figcaption>
 </figure>
 
-<p class="small"><b>Policy by path:</b> scratch/existing → apply by default; pool/mine → audit then DECISION NEEDED before launch. <b>Language:</b> a wrong literal <code>&lt;html lang&gt;</code> is corrected to the brief's first language (JSX and static HTML); an expression is left alone. <b>IndexNow key:</b> lives in <code>.deckhand/indexnow.json</code>, never in brief.json, so <code>seo apply</code> does not change the approved brief (no false <code>resume --check</code> DRIFT). <b>Undo:</b> <code>dh seo undo</code> → engine journal, byte-exact, deletes created files. <b>audit output:</b> score, blockers, auto_fixable, owner_open, and the render writes SEO.md (Launch-breakers / To fix / Needed from owner / honesty line).</p>
+<p class="small"><b>Policy by path:</b> scratch/existing → apply by default; pool/mine → audit then DECISION NEEDED before launch. <b>Language:</b> a wrong literal <code>&lt;html lang&gt;</code> is corrected to the brief's first language (JSX and static HTML); an expression is left alone. <b>Path-prefixed languages</b> (<code>/en</code>): hreflang alternates (+ <code>x-default</code>) are written per page and in the sitemap, but <code>&lt;html lang&gt;</code> stays that of the one root layout — apply says so and names the manual edit (a route group per language, or read the language from the path). A finding that apply claimed to fix and that is still there is recorded in <code>seo-stuck.json</code> and shown as a manual edit, so <code>dh next</code> stops suggesting a fix that cannot be applied. <b>IndexNow key:</b> lives in <code>.deckhand/indexnow.json</code>, never in brief.json, so <code>seo apply</code> does not change the approved brief (no false <code>resume --check</code> DRIFT). <b>Undo:</b> <code>dh seo undo</code> → engine journal, byte-exact, deletes created files. <b>audit output:</b> score, blockers, auto_fixable, owner_open, and the render writes SEO.md (Launch-breakers / To fix / Needed from owner / honesty line).</p>
 </section>
 
 <!-- ============================================================ 23 -->
@@ -1081,7 +1087,7 @@ node tryon/cli.mjs status | clean</code></pre>
 (b) model writes the copy
 (c) dh slop check [PATH… | --text T | --url U]   # → clean | review | slop</code></pre>
 
-<p class="small"><b>Scoring:</b> weighted hits per 100 words (strong tell 3, buzz 1, phrase w, unnumbered superlative 2…) → thresholds clean &lt;4 · review ≥4 · slop ≥10; any single strong hit → at least review; kind:"leak" (chatbot voice pasted on a page) → always slop. Language-free signals (any language): em-dash/exclamation rates, decorative emoji, flat sentence rhythm. Transitions and triads only fire when a language pack defines them.</p>
+<p class="small"><b>Scoring:</b> weighted hits per 100 words (strong tell 3, buzz 1, phrase 3, transition 1.5, unnumbered superlative 2, em-dash 1, exclamation 0.5, decorative emoji 1, triad 0.5, flat rhythm 3; at least 40 words are counted, so a short hero is not let off; weights and thresholds live in <code>data/slop/_common.json</code> and a pack may override them) → thresholds clean &lt;4 · review ≥4 · slop ≥10; any single strong hit → at least review; kind:"leak" (chatbot voice pasted on a page) → always slop. Language-free signals (any language): em-dash/exclamation rates, decorative emoji, flat sentence rhythm. Transitions and triads only fire when a language pack defines them.</p>
 
 <p class="small"><b>Three overlay layers:</b> shipped packs (<code>data/slop/&lt;lang&gt;.json</code>) · personal overlay via <code>dh slop add</code> · project allowlist via <code>dh slop allow "brand word"</code> — brand words never slop on their own site; a line marked <code>dh:slop-ok</code> is never read.</p>
 
@@ -1151,7 +1157,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td>E9/E10/E11</td><td>anchor → missing section · modal undeclared · action missing label</td></tr>
 </table>
 
-<p class="small"><code>dh plan render</code> → <code>.deckhand/PLAN.md</code> with a mermaid flowchart. <code>dh plan split --agents N</code> (requires lint-clean): one WP per feature + <b>WP-00 shell</b> (layout/nav/shared UI — orchestrator builds &amp; freezes first); folder-prefix ownership via union-find so <b>two agents never write the same directory</b>; cross-package links become consume contracts; outputs AGENT-i.md + CONVENTIONS.md + index.json.</p>
+<p class="small"><code>dh plan render</code> → <code>.deckhand/PLAN.md</code> with a mermaid flowchart. <code>dh plan split --agents N</code> (requires lint-clean): one WP per feature + <b>WP-00 shell</b> (layout/nav/shared UI — orchestrator builds &amp; freezes first); folder-prefix ownership via union-find so <b>two agents never write the same directory</b>; cross-package links become consume contracts; a feature that owns no page and no API is merged into the shell, never an empty package; outputs AGENT-i.md + CONVENTIONS.md + index.json.</p>
 </section>
 
 <!-- ============================================================ 27 -->
@@ -1188,17 +1194,17 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><th style="width:20%">Path</th><th>Mechanics</th></tr>
 <tr><td><b>dh clone T --to</b></td><td>Pool row → licence re-check → <b>hold/unhold</b>: Deckhand's own files step aside to <code>.&lt;name&gt;.deckhand-hold</code>, base lands (shallow at measured commit, fresh history, the base's own NOTICE kept byte-exact, a local base copied as git sees it — its and its parents' .gitignore honoured — and <code>licence_warning</code> when it has no LICENSE file), files return with merge rules → install → record base. Other files present → DEST_NOT_EMPTY. Seeds LOCAL secrets only (copies .env.example, generates values for the auth/JWT/session key names it finds; .env gitignored).</td></tr>
 <tr><td><b>dh adopt src</b></td><td>Owner's project, git history kept, stack detected, base kind existing.</td></tr>
-<tr><td><b>dh scaffold --to</b></td><td>create-next-app (ts, tailwind, app dir; built in a sibling <code>.&lt;name&gt;.deckhand-scaffold</code> and moved in, so the target folder is never removed, even as <code>--to .</code>; a relative <code>--to</code> is the project's, for clone and adopt too) + canonical UI base (button, utils, tokens) + deps (clsx, tailwind-merge, class-variance-authority, radix-ui, lucide-react, tw-animate-css) + fresh git.</td></tr>
+<tr><td><b>dh scaffold --to</b></td><td>create-next-app (ts, tailwind, app dir; built in a unique sibling <code>dh-scaffold-&lt;name&gt;-&lt;hex&gt;</code> and moved in, so the target folder is never removed, even as <code>--to .</code>; a relative <code>--to</code> is the project's, for clone and adopt too) + canonical UI base (button, utils, tokens) + deps (clsx, tailwind-merge, class-variance-authority, radix-ui, lucide-react, tw-animate-css) + fresh git; the layout is typed so <code>tsc --noEmit</code> passes before the first <code>next dev</code>.</td></tr>
 <tr><td><b>dh base record</b></td><td>Project built another way declares its base openly.</td></tr>
 </table>
 <p class="small muted">Order is enforced on the commands too (2.3.1): <code>dh clone</code> and <code>dh scaffold</code> are refused before their phase, <code>dh rebrand apply</code> (not <code>--dry</code>) before G2 and <code>dh deploy ship</code> before G4, with <code>OUT_OF_ORDER</code> or <code>GATE_BLOCKED</code>. <code>dh adopt</code> stays allowed at define.</p>
 
 <p class="small"><b>Run carry:</b> cloning from a planning folder moves brief/sitemap/plan/gates/notes into the app folder (excluding logs/dev/tryon/vault) and sets <code>run.json.moved_to</code> → <code>dh next</code> says <code>cd &lt;dest&gt;</code>.</p>
-<p class="small"><b>Dev services:</b> <code>dh dev add NAME --cmd … --port N|--ready REGEX</code> → committed <code>services.json</code> (every session starts the same things) → <code>dh dev start</code> = services first (restart dead DB under live app), then app (pinned port, HOSTNAME=127.0.0.1, waits for HTTP &lt;500); failures print log tail + lesson hint. <code>dh dev port --from N</code> = bind-tested, skips Windows reserved ranges.</p>
+<p class="small"><b>Dev services:</b> <code>dh dev add NAME --cmd … --port N|--ready REGEX</code> → committed <code>services.json</code> (every session starts the same things) → <code>dh dev start</code> = services first (restart dead DB under live app), then app (pinned port, HOSTNAME=127.0.0.1, waits for HTTP &lt;500); failures print log tail + lesson hint. <code>dev.json</code> keeps the pid of the process that listens (the npm wrapper's pid is kept apart), so <code>dev stop</code> stops the real server. <code>dh dev port --from N</code> = bind-tested, skips Windows reserved ranges.</p>
 <p class="small"><b>Swap scan:</b> every vendor SDK mapped to a replacement target (Clerk→better-auth, Neon→postgres, Resend→SMTP, Sentry→logs…) — payments kept by default; <code>dh swap check</code> fails while any vendor import remains.</p>
 <p class="small"><b>Build check:</b> <code>dh phase done build</code> probes the root and every public static planned page (must answer &lt;400) and requires each planned form's <code>&lt;form&gt;</code> on its page; a JS-drawn shell is not failed for a form it cannot show yet. Without a plan only the root is judged.</p>
-<p class="small"><b>Rebrand:</b> scan (template names, identity fields, logo assets) → apply (package name, display names, metadata, primary colour token, monogram — LICENSE/NOTICE/lockfiles NEVER) → check findings: template-name, demo-content (Acme/lorem/555…), placeholder images, try-on leftovers, third-party logos, previous-business-data (harvest manifest sha), demo-copy ledger, ai-slop.</p>
-<p class="small"><b>Compose:</b> <code>dh compose --page P --sections a,b,c --copy copy.json</code> (default sections: navbar, hero, features, pricing, faq, cta, footer) → licensed blocks assembled by script; non-clean slop verdict returns a copy_check hint to rewrite copy.json and compose again (advisory, not a block).</p>
+<p class="small"><b>Rebrand:</b> scan (template names, identity fields, logo assets) → apply (package name, display names, metadata, primary colour token, monogram — LICENSE/NOTICE/lockfiles NEVER) → check findings: template-name, demo-content (Acme/lorem/555…), placeholder images (the stand-in <code>/deckhand-placeholder.svg</code> on a live route blocks: the owner's photo goes in <code>public/</code>, via <code>hero.image</code> in copy.json), try-on leftovers, third-party logos, the design vendor's own logo left in a section, previous-business-data (harvest manifest sha), demo-copy ledger, ai-slop. "Company name" as a form label is the owner's; the TitleCase "Company Name" is demo copy.</p>
+<p class="small"><b>Compose:</b> <code>dh compose --page P --sections a,b,c --copy copy.json</code> (default sections: navbar, hero, features, pricing, faq, cta, footer) → licensed blocks assembled by script; the owner's hero text, actions and image from copy.json are carried, and copy a design has no room for comes back as <code>dropped</code> and <code>pending</code> items instead of being silently lost; a non-clean slop verdict returns a copy_check hint to rewrite copy.json and compose again (advisory, not a block).</p>
 </section>
 
 <!-- ============================================================ 29 -->
@@ -1220,11 +1226,11 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td>product-kit</td><td><span class="tag block">yes*</span></td><td>README, LICENSE, CUSTOMIZE, seed/reset scripts (product deliverables)</td></tr>
 <tr><td>honesty</td><td><span class="tag block">yes</span></td><td>rebrand check blocking findings = 0</td></tr>
 <tr><td>prod-serve</td><td><span class="tag block">yes*</span></td><td>production start answers (*emitted only when it fails)</td></tr>
-<tr><td>routes</td><td><span class="tag block">yes</span></td><td>static public sitemap routes + home links &lt;400 on the served build</td></tr>
+<tr><td>routes</td><td><span class="tag block">yes</span></td><td>static public sitemap routes + home links &lt;400 on the served build; with no build to serve and no running URL it is a red "not checked" row</td></tr>
 <tr><td>seo</td><td><span class="tag block">yes</span></td><td>launch-breakers only</td></tr>
 <tr><td>lint · a11y-basics · deps-audit · copy-slop</td><td><span class="tag ok">advisory</span></td><td>reported, never blocks G4</td></tr>
 </table>
-<p class="small muted">Report records git HEAD so <code>dh resume --check</code> can detect drift (code changed since the verified commit → drift; commits of .deckhand/ alone do not count). With no URL/build, routes degrades to a non-blocking "not checked" row.</p>
+<p class="small muted">Report records git HEAD so <code>dh resume --check</code>, <code>dh phase done review</code> and <code>dh deploy ship</code> can tell a stale verify: code changed since the verified commit. Commits of <code>.deckhand/</code>, <code>PENDING.md</code>, <code>HANDOFF.md</code> or <code>RESUME.md</code> alone do not count — deckhand writes those itself (<code>dh verify</code> adds the SEO owner items to PENDING.md). <code>--skip</code> takes row names (typecheck, lint, build, routes, seo, slop, audit, product-kit): a skipped <i>blocking</i> row (typecheck, build, routes, seo, product-kit) is listed as skipped and keeps the report red unless <code>--reason</code> is given; with a reason it is recorded in verify.json, and <code>phase done review</code> refuses a skip that has none.</p>
 </section>
 
 <!-- ============================================================ 30 -->
@@ -1255,6 +1261,8 @@ node tryon/cli.mjs status | clean</code></pre>
 </svg>
 <figcaption>Fig 30.1 — Every release is the same pipeline; proof = command output, not assertion.</figcaption>
 </figure>
+
+<p class="small"><b>What <code>dh deploy ship</code> refuses, in order:</b> <code>NO_TARGET</code> (no app recorded: the first deploy is the runbook, then <code>dh deploy target</code>) · <code>DIRTY_TREE</code> (uncommitted files outside <code>.deckhand/</code> — Coolify builds what is pushed) · <code>VERIFY_STALE</code> (code committed after the verified commit; deckhand's own files do not count) · <code>PUSH_FAILED</code> · <code>DEPLOY_REJECTED</code> · <code>DEPLOY_FAILED</code> (the deployment of <i>this</i> commit did not finish) · <code>SMOKE_FAILED</code> (roll back per the runbook). A plain-<code>http</code> preview address (Coolify's generated <code>sslip.io</code> URL) is fine to share, but the smoke result carries a <code>NO_TLS</code> warning: no logins, payments or personal data until a domain and HTTPS; no IndexNow ping is sent for a preview address.</p>
 
 <div class="grid2">
 <div class="card"><h4>Handoff &amp; ops docs</h4><ul class="small">
@@ -1314,7 +1322,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <figcaption>Fig 31.1 — Rungs (best→debt): eliminate &gt; preflight &gt; reorder &gt; gate &gt; pitfall. Seed lessons ship in the skill at <code>skills/deckhand/data/lessons.seed.jsonl</code> (26 lessons, S-001…S-026).</figcaption>
 </figure>
 
-<p class="small"><b>Sources auto-detected:</b> Hermes state.db (read-only), Hermes session export, Claude Code transcript, conversation JSONL, command logs, deckhand runs.jsonl — <code>--latest</code> picks by fixed priority (Hermes db → newest Claude transcript → runs.jsonl). Guard refusals (NEED_QUOTE, CHANGE_REQUEST…) are marked guards, never learned as failures.</p>
+<p class="small"><b>Sources auto-detected:</b> Hermes state.db (read-only), Hermes session export, Claude Code transcript, conversation JSONL, command logs, deckhand runs.jsonl — <code>--latest</code> picks by fixed priority (Hermes db → newest Claude transcript → runs.jsonl). Guard refusals (NEED_QUOTE, CHANGE_REQUEST…) are marked guards, never learned as failures. A lesson keeps no personal path (a home or drive path becomes a placeholder), gets a unique id, and <code>autopsy --apply</code> run twice on the same session adds nothing the second time.</p>
 </section>
 
 <!-- ============================================================ 32 -->
@@ -1431,8 +1439,8 @@ node tryon/cli.mjs status | clean</code></pre>
 
 <table>
 <tr><th style="width:30%">Path</th><th>Contents</th></tr>
-<tr><td><code>SKILL.md</code></td><td>The spec: charter, loop, state table, 13 invariants, command surface, try-on summary, delegation, comms protocol (20 KB — what you were given when this skill loaded)</td></tr>
-<tr><td><code>references/00–80-*.md</code></td><td>One playbook per phase (define, research, plan, build, brand, seo, tryon, review, deploy, operate) + team.md, harness.md, research-card.md</td></tr>
+<tr><td><code>SKILL.md</code></td><td>The spec: charter, loop, state table, 13 invariants, command surface, try-on summary, delegation, comms protocol (~22 KB — what you were given when this skill loaded)</td></tr>
+<tr><td><code>references/00–80-*.md</code></td><td>One playbook per phase (define, research, plan, build, brand, seo, tryon, review, deploy, operate) + team.md, harness.md, research-card.md, cli-flags.md (every flag of every command, generated from the parser and checked by a test)</td></tr>
 <tr><td><code>references/ops/*</code></td><td>VPS bootstrap, domain/DNS/TLS, deploy-app, change pipeline, backups, object storage, email, auth, monitoring runbooks</td></tr>
 <tr><td><code>dhlib/cli.py</code></td><td>38 subcommands: parser + dispatch + observe/refresh hooks + runs.jsonl logging</td></tr>
 <tr><td><code>dhlib/state.py · checks.py</code></td><td>run.json transitions, gate quote classifier, per-phase exit checks</td></tr>
@@ -1442,12 +1450,13 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td><code>dhlib/research.py · plan.py · pool.py · vet.py</code></td><td>Research brief/merge/verify/score; sitemap lint + split + blackboard; pool scoring + licence vetting</td></tr>
 <tr><td><code>dhlib/build.py · brand.py · swap.py · slop.py · seo.py · verify.py · deploy.py · ops.py · handoff.py · util.py · github.py</code></td><td>The phase machinery (§28–30)</td></tr>
 <tr><td><code>dhlib/learn.py · autopsy.py · harvest.py</code></td><td>Lesson ledger, failure→recipe autopsy, base harvesting</td></tr>
+<tr><td><code>dhlib/redact.py · lock.py · clean.py</code></td><td>The one scrubber for every free-text sink; a file lock for the lessons ledger (the project lock for run.json, brief and PENDING is <code>util.locked</code>); <code>dh clean</code> (invariant 13)</td></tr>
 <tr><td><code>tryon/cli.mjs · server.mjs · overlay.js</code></td><td>Engine CLI, proxy+API+token server, browser overlay (~70 KB)</td></tr>
-<tr><td><code>tryon/lib/engine.mjs · transplant.mjs · materialize.mjs</code></td><td>Swap engine (~95 KB), 3-pass copy transplant (~96 KB), fetch/write bundles</td></tr>
+<tr><td><code>tryon/lib/engine.mjs · transplant.mjs · materialize.mjs</code></td><td>Swap engine (~100 KB), 3-pass copy transplant (~98 KB), fetch/write bundles</td></tr>
 <tr><td><code>tryon/lib/draft.mjs · tune.mjs · sitetheme.mjs · theme.mjs · sitelinks.mjs</code></td><td>AI draft protocol + gates; dial transforms; whole-site theme; token wearing; menu wiring</td></tr>
 <tr><td><code>playground/</code></td><td>Saved source-only try-on test site, <code>playground.mjs</code> (restore · reset · start · kitchen · snapshot), structural CI test</td></tr>
-<tr><td><code>tryon/lib/seo.mjs · fitcheck.mjs · vet.mjs · catalog.mjs · slots.mjs · library.mjs</code></td><td>SEO writes, offline fit checks, registry vetting, 1,247-item catalog + ranking, slot vocabulary, personal library</td></tr>
-<tr><td><code>data/*</code></td><td>components.index.json · checks/*.json (8 registries) · pool.json + pool/*.json · licenses.json · slop packs (11 langs) · seo.json rules · bots.json · harness.json · research.json · industries.json · lessons.seed.jsonl · registries.json · secrets.json (redaction policy)</td></tr>
+<tr><td><code>tryon/lib/seo.mjs · fitcheck.mjs · vet.mjs · catalog.mjs · slots.mjs · library.mjs · flags.mjs · project.mjs · registry.mjs · regmap.mjs · setup.mjs</code></td><td>SEO writes, offline fit checks, registry vetting, 1,247-item catalog + ranking, slot vocabulary, personal library, owner flag reports, measured project profile, registry fetch and mapping, dev-stamp setup/unwire</td></tr>
+<tr><td><code>data/*</code></td><td>components.index.json · checks/*.json (8 registries) · pool.json + pool/*.json · licenses.json · slop packs (11 langs) · seo.json rules · bots.json · harness.json · research.json · industries.json · lessons.seed.jsonl · registries.json · secrets.json (redaction policy) · clean.json (what dh clean may remove)</td></tr>
 <tr><td><code>workflows/ · templates/ · ops/scripts/ · tests/</code></td><td>Base workflows · brief/PENDING/sitemap/scaffold/bots/ops templates · Coolify/Hostinger/backup API scripts · Python + try-on node test suites</td></tr>
 </table>
 </section>
