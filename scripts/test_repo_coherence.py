@@ -205,5 +205,78 @@ class DocNumbers(unittest.TestCase):
         self.assertEqual(ids ^ verdicts, set())
 
 
+    # ---- the architecture atlas: the numbers and names a script can check are checked here --------------------------
+
+    def atlas_text(self):
+        import html
+        return html.unescape(re.sub(r"<[^>]+>", " ", self.read("docs/architecture-atlas.html")))
+
+    def test_atlas_fit_verdict_counts_match_the_checks_data(self):
+        import json
+        d = self.ROOT / "skills" / "deckhand" / "data" / "checks"
+        real = {}
+        for f in d.glob("*.json"):
+            for v in json.loads(f.read_text(encoding="utf-8"))["verdicts"].values():
+                real[v["v"]] = real.get(v["v"], 0) + 1
+        m = re.search(r"(\d+) fits · (\d+) partial · (\d+) refused · (\d+) broken · (\d+) unchecked", self.atlas_text())
+        self.assertIsNotNone(m, "the atlas states the fit-check verdict counts")
+        self.assertEqual([int(x) for x in m.groups()],
+                         [real.get("fits", 0), real.get("partial", 0), real.get("refused", 0), real.get("broken", 0), 0])
+
+    def test_atlas_rule_pack_and_lesson_counts_match_the_code(self):
+        import json
+        sys.path.insert(0, str(self.ROOT / "skills" / "deckhand"))
+        from dhlib import suggest
+        d = self.ROOT / "skills" / "deckhand" / "data"
+        atlas = self.atlas_text()
+        packs = len([p for p in (d / "slop").glob("*.json") if not p.name.startswith("_")])
+        lessons = len([ln for ln in (d / "lessons.seed.jsonl").read_text(encoding="utf-8").splitlines() if ln.strip()])
+        registries = len(list((d / "checks").glob("*.json")))
+        items = len(json.loads((d / "components.index.json").read_text(encoding="utf-8"))["items"])
+        self.assertIn(f"{len(suggest.RULES)} deterministic rules", atlas)
+        self.assertIn(f"{packs} language packs", atlas)
+        self.assertIn(f"({lessons} lessons, S-001…S-{lessons:03d})", atlas)
+        self.assertIn(f"({registries} registries)", atlas)
+        self.assertIn(f"{items:,} indexed components", atlas)
+
+    def test_atlas_gate_examples_classify_as_it_says(self):
+        sys.path.insert(0, str(self.ROOT / "skills" / "deckhand"))
+        from dhlib import state
+        for q in ("go", "ok", "yes", "approved", "looks good", "lgtm", "ship it", "go live", "go ahead", "let's go", "G1 ok"):
+            self.assertEqual(state.classify_quote(q), "approve", q)
+        for q in ("ok, make the hero bigger", "yes but add a pricing page", "ok but add a pricing page", ""):
+            self.assertEqual(state.classify_quote(q), "change_request", q)
+        self.assertEqual(state.classify_quote("G1 ok, but add a pricing page"), "approve_with_changes")
+        for q in ("don't ship it", "wait", "ok, I'll look tomorrow"):
+            self.assertTrue(state.is_hold(q), q)
+
+    def test_atlas_names_the_refusal_codes_an_owner_meets(self):
+        sys.path.insert(0, str(self.ROOT / "skills" / "deckhand"))
+        code = "\n".join(p.read_text(encoding="utf-8") for p in (self.ROOT / "skills" / "deckhand" / "dhlib").glob("*.py"))
+        atlas = self.atlas_text()
+        codes = ("NO_RUN", "RUN_CORRUPT", "USAGE", "NOT_REACHED", "ALREADY_DONE", "NOT_FORCEABLE", "LOCK_BUSY", "BRIEF_CORRUPT",
+                 "DIRTY_TREE", "VERIFY_STALE", "NO_TARGET", "DEPLOY_FAILED", "SMOKE_FAILED")
+        for c in codes:
+            self.assertIn(f'"{c}"', code, f"{c} is no longer raised: drop it from this list")
+        self.assertEqual([c for c in codes if c not in atlas], [], "the atlas has to name these refusals")
+
+    def test_atlas_has_none_of_the_claims_found_false(self):
+        """Each phrase was in the atlas and contradicted the code (found by the 2.4.4 read of every section)."""
+        atlas = self.atlas_text()
+        raw = self.read("docs/architecture-atlas.html")
+        wrong = {
+            "drift by mtime": "G1 stores content hashes of the plan files; older runs compare the last commit time (state.plan_drift)",
+            ".<name>.deckhand-scaffold": "scaffold builds in a unique sibling dh-scaffold-<name>-<hex> (build.py)",
+            'non-blocking "not checked"': "a verify that could not run routes is a blocking red row (verify.py)",
+            "(gitignored runtime)": "only the run logs and local state are gitignored (util.GITIGNORE_LINES)",
+            "phrase w,": "the slop weights are in data/slop/_common.json",
+            "claim by claim against the 2.4.1": "the atlas is checked against the current code",
+            "about 230 claims": "an unverifiable count",
+            "(~95 KB), 3-pass copy transplant (~96 KB)": "engine.mjs is ~100 KB and transplant.mjs ~98 KB",
+        }
+        found = {k: why for k, why in wrong.items() if k in atlas or k.replace("<", "&lt;").replace(">", "&gt;") in raw}
+        self.assertEqual(found, {})
+
+
 if __name__ == "__main__":
     unittest.main()
