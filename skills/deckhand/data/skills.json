@@ -1,0 +1,49 @@
+{
+  "why": "Agent skills (SKILL.md, an open format every major harness loads) that make a phase better. `dh next` names only the ones installed on this machine, at most four, with why. Names are the skills' own `name:`; add rows freely — nothing breaks when a skill is missing.",
+  "phases": {
+    "define": [
+      {"name": "market-compliance", "why": "the market's legal must-haves (consumer law, privacy, licences) known before the plan"}
+    ],
+    "research": [
+      {"name": "grounded-citations", "why": "every claim with a source you can re-check — what `dh research verify` then proves"},
+      {"name": "adaptive-web-research", "why": "search that adapts to blocked or thin sources"},
+      {"name": "competitor-news-monitor", "why": "what the named competitors changed recently"},
+      {"name": "blocked-page-recovery", "why": "a competitor page that 403s or hides behind a wall"}
+    ],
+    "plan": [
+      {"name": "oss-reuse-evaluation", "why": "judge a base or library before it enters the plan (licence, health, fit)"},
+      {"name": "marketplace-booking-pipelines", "why": "the request → confirm → pay flow for a marketplace or booking shape"},
+      {"name": "multilingual-web-apps", "why": "routes, RTL and message files when the brief has several languages"},
+      {"name": "spike", "why": "a throwaway experiment when one feature's feasibility is unknown"}
+    ],
+    "build": [
+      {"name": "test-driven-development", "why": "each feature lands with the test that proves it"},
+      {"name": "systematic-debugging", "why": "root cause before a fix when the build breaks"},
+      {"name": "multilingual-web-apps", "why": "i18n wiring done once, right"},
+      {"name": "browser-e2e-testing", "why": "the planned forms and flows exercised in a real browser before G2"}
+    ],
+    "brand": [
+      {"name": "humanizer", "why": "copy that reads like a person wrote it — then `dh slop check` proves it"},
+      {"name": "design-md", "why": "the brand's tokens written down as a DESIGN.md every agent follows"},
+      {"name": "popular-web-designs", "why": "proven design systems to borrow structure from"},
+      {"name": "claude-design", "why": "a one-off designed page or section when nothing licensed fits"}
+    ],
+    "tryon": [
+      {"name": "design-md", "why": "keep the kept designs inside the brand's tokens"}
+    ],
+    "review": [
+      {"name": "dogfood", "why": "exploratory QA of the running app: the bugs a script does not look for"},
+      {"name": "browser-e2e-testing", "why": "every planned journey clicked through before G4"},
+      {"name": "requesting-code-review", "why": "a security and quality pass before going live"},
+      {"name": "market-compliance", "why": "legal pages and consent checked against the market's rules"}
+    ],
+    "deploy": [
+      {"name": "github", "why": "repository, secrets and Actions for the deploy and the bots"}
+    ],
+    "operate": [
+      {"name": "cron-watchdog-jobs", "why": "unattended jobs that watch the site and act"},
+      {"name": "competitor-news-monitor", "why": "a digest when a competitor moves"},
+      {"name": "product-price-monitor", "why": "price watching for a catalogue or marketplace"}
+    ]
+  }
+}

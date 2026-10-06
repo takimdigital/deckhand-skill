@@ -52,7 +52,8 @@
         },
         "note": "Hermes asks consent once per hook command on first use; check with `hermes hooks doctor`"
       }
-    }
+    },
+    "skill_load": "skill_view(name=\"[name]\") loads it (its references: skill_view(name=\"[name]\", file_path=\"references/…\"))"
   },
   "claude-code": {
     "background": "Bash with run_in_background; wait with Monitor (never sleep loops). `dh dev start` detaches by itself.",
@@ -110,7 +111,8 @@
           "start": "startup|resume|clear|compact"
         }
       }
-    }
+    },
+    "skill_load": "the Skill tool loads it by name (or read the SKILL.md at its path)"
   },
   "codex": {
     "background": "a background terminal; `dh dev start` detaches by itself.",
@@ -167,7 +169,8 @@
         },
         "note": "Codex asks you to review and trust a new hook once before it runs"
       }
-    }
+    },
+    "skill_load": "read the SKILL.md at its path (Codex loads skills from ~/.codex/skills and ~/.agents/skills)"
   },
   "cursor": {
     "background": "a background terminal; `dh dev start` detaches by itself.",
@@ -229,7 +232,8 @@
         },
         "note": "edit tool names beyond Shell/Write are best-effort (Cursor documents Shell, Read, Write, MCP, Task)"
       }
-    }
+    },
+    "skill_load": "read the SKILL.md at its path (Cursor loads Agent Skills from its skills folders)"
   },
   "gemini-cli": {
     "background": "run_shell_command with is_background=true (or a second terminal); `dh dev start` detaches by itself.",
@@ -284,7 +288,8 @@
           "start": "startup|resume|clear"
         }
       }
-    }
+    },
+    "skill_load": "read the SKILL.md at its path"
   },
   "opencode": {
     "background": "a second terminal or a background shell; `dh dev start` detaches by itself.",
@@ -330,7 +335,8 @@
           "post": "tool.execute.after"
         }
       }
-    }
+    },
+    "skill_load": "read the SKILL.md at its path (OpenCode's skill tool loads it by name when it is installed for OpenCode)"
   },
   "unknown": {
     "background": "a second terminal, or the harness's background mode; `dh dev start` detaches by itself.",
@@ -366,6 +372,7 @@
         "start": "text",
         "stop": "exit2"
       }
-    }
+    },
+    "skill_load": "read the SKILL.md at its path, then follow it for this step"
   }
 }
