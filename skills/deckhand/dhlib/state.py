@@ -2,7 +2,7 @@
 
 Phases run in order. A phase is DONE only when its check (a script, never an opinion) passes.
 In `phased` mode a gate after a phase blocks the next one until the owner says go
-(`dh gate pass G1`); in `auto` mode gates pass themselves and are logged.
+(`dh gate pass G1`); in `auto` mode G1–G3 pass themselves and are logged, G4 (going live) still waits for the owner.
 `dh next` prints ONE instruction + the ONE reference to load + the lessons for that phase:
 the agent never needs to re-read the whole skill to know what to do.
 """
@@ -32,6 +32,14 @@ GATES = {"G1": "the plan (page map + features) is approved",
          "G3": "the design (brand + try-on) is approved",
          "G4": "go live: deploy to the server"}
 MODES = ("phased", "auto")
+# a gate that is the owner's in EVERY mode: going live publishes a public site and can spend money (a real fork, never
+# a step auto mode may take alone — foundation audit F1)
+OWNER_GATES = ("G4",)
+
+
+def owner_gate(s: dict, gate: str) -> bool:
+    """Does this gate wait for the owner's own words in this run? Phased: every gate; auto: only OWNER_GATES."""
+    return s.get("mode") == "phased" or gate in OWNER_GATES
 PATHS = ("pool", "mine", "existing", "scratch")
 
 
@@ -134,12 +142,10 @@ def current(s: dict):
 
 
 def blocking_gate(s: dict):
-    """A gate owed by a finished phase that still blocks progress (phased mode only)."""
-    if s.get("mode") != "phased":
-        return None
+    """A gate owed by a finished phase that still blocks progress (phased: every gate; auto: G4 only)."""
     for p in PHASES:
         g = p.get("gate")
-        if g and s["phases"][p["id"]]["status"] in ("done", "skipped") and s["gates"][g]["status"] != "passed":
+        if g and owner_gate(s, g) and s["phases"][p["id"]]["status"] in ("done", "skipped") and s["gates"][g]["status"] != "passed":
             return g
     return None
 
@@ -196,7 +202,7 @@ def phase_done(root: Path, phase: str, evidence: dict | None = None, force_reaso
         s["phases"][phase] = {"status": "done", "at": now(), "check": result, **({"forced": force_reason} if not result["ok"] else {}),
                               **({"evidence": evidence} if evidence else {})}
         p = PHASES[idx]
-        if p.get("gate") and s["mode"] == "auto":
+        if p.get("gate") and not owner_gate(s, p["gate"]):
             s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "auto"}
         save(root, s)
         log(root, {"event": "phase_done", "phase": phase, "ok": result["ok"], "forced": force_reason})
@@ -222,7 +228,7 @@ def phase_skip(root: Path, phase: str, reason: str) -> dict:
         s = load(root)
         s["phases"][phase] = {"status": "skipped", "at": now(), "reason": reason}
         p = PHASES[PHASE_IDS.index(phase)]
-        if p.get("gate") and s["mode"] == "auto":       # phased: the owner still gives the go (G3 = the brand, try-on or not)
+        if p.get("gate") and not owner_gate(s, p["gate"]):   # phased: the owner still gives the go (G3 = the brand, try-on or not)
             s["gates"][p["gate"]] = {"status": "passed", "at": now(), "by": "skip"}
         save(root, s)
         log(root, {"event": "phase_skip", "phase": phase, "reason": reason})

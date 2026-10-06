@@ -59,8 +59,8 @@ owner; never re-derive what a script computes.
 | 9 | operate | continuous: change loop, bots, lessons, harvest | — | `references/80-operate.md` |
 
 **Modes** (asked once, at define): `phased` (default, recommended for a first business: the run STOPS at
-G1–G4 until the owner says go — `dh gate pass Gx`) · `auto` (gates pass themselves; only genuine
-forks, owner-only facts and failures stop the run).
+G1–G4 until the owner says go — `dh gate pass Gx`) · `auto` (G1–G3 pass themselves; G4 — going live — always waits for the owner's
+words; genuine forks, owner-only facts and failures stop the run too).
 **Paths**: `pool` (vetted permissive-licence base) · `mine` (the owner's harvested base) · `existing` (their repo
 or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes their mind → `dh reopen <phase>`.
 

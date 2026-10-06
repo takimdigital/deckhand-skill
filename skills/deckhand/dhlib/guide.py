@@ -158,7 +158,7 @@ def _fit(steps: list, mode: str, path: str) -> list:
             if path not in m.group(1).split("|"):
                 continue
             x = x[m.end():]
-        if mode == "auto" and "phase done" in x and WAIT_RX.search(x):
+        if mode == "auto" and "phase done" in x and WAIT_RX.search(x) and not any(f"({g})" in x for g in STATE.OWNER_GATES):
             x = WAIT_RX.sub("   # auto mode: the gate passes by itself — run `dh next`", x)
         out.append(x)
     return out

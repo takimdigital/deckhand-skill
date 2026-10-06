@@ -417,7 +417,7 @@ def dispatch(a):
         return r
     if c == "gate":
         s = STATE.load(root)
-        if s.get("mode") == "phased" and not a.quote:
+        if STATE.owner_gate(s, a.gate) and not a.quote:
             raise DhError("NEED_QUOTE", f"a gate passes on the owner's own words: dh gate pass {a.gate} --quote \"<their message, verbatim>\"",
                           why="an agent once passed G1 on its own paraphrase of a change request")
         return STATE.gate_pass(root, a.gate, a.note, quote=a.quote)
