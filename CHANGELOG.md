@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.5.0] — 2026-10-06 — every path holds together, and the harness itself keeps deckhand honest
+
+Found by running the real `dh` through all 9 phases for every path × mode and recording what the owner gets at each step; each break fixed test-first.
+
+- **Auto mode never goes live alone.** G1–G3 still pass themselves; G4 waits for the owner's own words in every mode (`dh gate pass G4 --quote …`).
+- **The `existing` path starts from the app he has.** `dh adopt` at define; `dh plan init --from-app` reads the routes the app already serves (Next.js app/pages routers); each page is keep / edit / new, and only edit/new pages become work.
+- **His brand before he looks.** `dh rebrand apply` runs at the end of build, so the G2 look shows his business, not the template's.
+- **Launch needs are asked at define.** A missing server or domain becomes a PENDING item the moment define closes, not at deploy.
+- **Client projects.** The client approves at every gate (`approver` in `dh next`, recorded on the gate); HANDOFF.md adds "Transfer to the client" (repo, domain, server, secrets) as PENDING items.
+- **Research fits the shape.** An internal tool needs users, their jobs and the tools they use today — no competitor hunt (`data/research.json` → `by_shape`).
+- **Smaller ones.** `path=mine` ranks only the owner's bases (`dh pool query --mine`); PLAN.md opens with what the research found; define warns when the brand name is missing.
+- **Hooks: deckhand guards itself in 6 harnesses.** `dh harness install|doctor` wires `dh hook` into Claude Code, Codex, Gemini CLI, Cursor and OpenCode (Hermes: a block to paste, never a script edit). The harness then blocks a hand edit of run/history/verify/deploy state, a deploying push before G4 and a vault value written in clear; logs every shell command for `dh autopsy`; loads RESUME at start; and asks once for a `dh note` before a session ends with unexplained edits. Tool names and output shapes are data (`data/harness.json` → `hooks`).
+- **Skills.** `dh next` names the installed agent skills that help the current phase (`data/skills.json`) and how this harness loads one.
+
 ## [2.4.4] — 2026-10-01 — drift you can clear, a fresh clone is not an edit, tests that never read your secrets
 
 - **Plan drift.** `dh next` now says how to clear a plan edit made after G1: accept it with the owner's own words (`dh gate pass G1 --quote "…"`, which re-records the plan hashes) or undo it (`dh reopen plan`). A run whose G1 has no recorded hashes no longer reads a fresh clone as "edited after G1": the file's last commit time is compared, not its mtime.

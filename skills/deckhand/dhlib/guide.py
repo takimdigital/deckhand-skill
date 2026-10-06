@@ -15,6 +15,7 @@ TRYON = f'node "{SKILL / "tryon" / "cli.mjs"}"'
 
 STEPS = {
     "define": ["{dh} profile doctor            # what access exists (never ask for what a token already covers)",
+               "{dh} harness doctor            # hooks on? then deckhand guards its own records and logs every command itself (off: {dh} harness install, show the owner first)",
                "path=existing: {dh} adopt [folder|git-url]   # read-only first look: stack + the routes it already serves (the run moves into the app folder if it is elsewhere)",
                "{dh} workflow query            # the 3 proven paths that fit: show them, the owner picks one (dh workflow use REF) or none",
                "{dh} brief set business=\"…\" shape=[saas|booking|catalogue|marketplace|leadgen|internal] languages=en,… audience=\"…\" brand.name=\"…\" deliverable=[own|client|product] category=\"3–5 words\"",
@@ -236,6 +237,13 @@ def _next_step(root: Path) -> dict:
     h = harness_notes(cur["id"])
     if h:
         out["harness"] = h
+    try:                                                 # installed agent skills that make this phase better (data/skills.json)
+        from . import skillbridge as SB
+        sk = SB.for_phase(root, cur["id"])
+    except Exception:  # noqa: BLE001 — guidance never breaks on a skill folder
+        sk = []
+    if sk:
+        out["skills"] = {"load": sk, "how": harness_row().get("skill_load", "read its SKILL.md")}
     out["suggest"] = _suggest(root, out["do"])
     books = _playbook(cur["id"])
     if books:

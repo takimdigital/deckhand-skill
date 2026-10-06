@@ -222,6 +222,10 @@ def build_parser():
     p.add_argument("--check", action="store_true", help="re-prove every claim against reality"); p.add_argument("--online", action="store_true")
     p.add_argument("--hook", action="store_true", help="SessionStart hook: plain text, nothing outside a deckhand project")
     p.add_argument("--install-hook", choices=["claude"], help="add the SessionStart hook to Claude Code's user settings")
+    p = sub.add_parser("hook", help="harness hook entry point (dh harness install wires it): stdin = the harness's hook JSON; raw output, exit 2 = block")
+    p.add_argument("event", choices=["pre", "post", "start", "stop"]); p.add_argument("--harness")
+    p = sub.add_parser("harness", help="write deckhand's hooks into the agent harness's own config, and prove they block")
+    p.add_argument("action", choices=["detect", "install", "doctor", "uninstall"]); p.add_argument("--harness"); p.add_argument("--dry", action="store_true")
     p = sub.add_parser("note", help="decision | doing | next — what would otherwise live only in the chat")
     p.add_argument("kind", choices=RESUME.KINDS); p.add_argument("text", nargs="+")
     p = sub.add_parser("brief"); p.add_argument("action", choices=["show", "set"]); p.add_argument("pairs", nargs="*")
@@ -704,6 +708,22 @@ def dispatch(a):
                 "top": [{k: x[k] for k in ("rule", "severity", "title", "detail", "where", "auto")} for x in r["findings"][:12]],
                 "owner_open": [o["label"] for o in r["owner"]], "report": ".deckhand/SEO.md", "pending": "PENDING.md (Detected by dh seo)",
                 "next": nxt if (r["auto_fixable"] or r["blockers"]) else "write/refine per-page titles and descriptions (copy.json → seo.pages); owner items are in PENDING.md"}
+    if c == "harness":
+        from . import harness as HA
+        from .workflow import harness as detected
+        if a.action == "detect":
+            return HA.detect()
+        h = a.harness or detected()
+        if h == "unknown":
+            raise DhError("USAGE", "which harness? dh harness " + a.action + " --harness claude-code|codex|gemini-cli|cursor|hermes|opencode")
+        if a.action == "install":
+            return HA.install(h, dry=a.dry)
+        if a.action == "uninstall":
+            return HA.uninstall(h)
+        r = HA.doctor(h)
+        if not r["ok"]:
+            raise DhError("HOOKS_OFF", f"{h}: deckhand's hooks are not all working", **r)
+        return r
     if c == "handoff":
         from . import handoff as HO
         return HO.write(root)
@@ -741,6 +761,14 @@ def main(argv=None) -> int:
     if a.cmd == "resume" and a.hook:                     # the one non-JSON output: a harness injects it as context
         sys.stdout.write(RESUME.hook(RESUME.stdin_if_piped(), start=Path(a.project) if getattr(a, "project", None) else None))
         return 0
+    if a.cmd == "hook":                                  # raw output for the harness, like resume --hook; not logged (runs per tool call)
+        from . import hooks as HOOKS
+        code, out, err = HOOKS.handle(a.event, RESUME.stdin_if_piped(), a.harness)
+        if out:
+            sys.stdout.write(out)
+        if err:
+            sys.stderr.write(err)
+        return code
     shown = "dh " + " ".join(argv if argv is not None else sys.argv[1:])
     root = None
     out = None
