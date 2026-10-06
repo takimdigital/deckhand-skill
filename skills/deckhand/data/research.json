@@ -5,6 +5,12 @@
   "vocabulary_kinds": ["customer", "trade", "search"],
   "min_vocabulary": 3,
   "min_found": 3,
+  "by_shape": {
+    "why": "research asks what fits the business shape; a shape not listed keeps the full bar (3 competitors, conversion plays, verified quotes)",
+    "internal": {"about": "a tool for the owner's own team: no competitors to beat, no visitors to convert",
+                 "competitors": 0, "conversion": false, "evidence": false,
+                 "need": ["audience.primary", "audience.jobs_to_be_done", "current.tools", "features.now"]}
+  },
   "focus": {
     "competitors": {
       "budget": {"searches": 8, "pages": 10},
