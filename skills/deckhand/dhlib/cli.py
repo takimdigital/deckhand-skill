@@ -250,6 +250,7 @@ def build_parser():
     p.add_argument("--shape"); p.add_argument("--features"); p.add_argument("--languages"); p.add_argument("--top", type=int, default=3); p.add_argument("--mine", action="store_true"); p.add_argument("--lane", default="web")
 
     p = sub.add_parser("plan"); p.add_argument("action", choices=["init", "lint", "render", "split"]); p.add_argument("--agents", type=int, default=3); p.add_argument("--force", action="store_true")
+    p.add_argument("--from-app", action="store_true", help="path=existing: start the sitemap from the routes the app already serves")
     p = sub.add_parser("bb", help="shared memory for parallel agents: post · read · flag NAME · wait NAME --max S")
     p.add_argument("action", choices=["post", "read", "flag", "wait"]); p.add_argument("name", nargs="?"); p.add_argument("--wp", default="all"); p.add_argument("--kind", default="note")
     p.add_argument("--msg"); p.add_argument("--last", type=int, default=40); p.add_argument("--max", type=int, default=170)
@@ -414,10 +415,13 @@ def dispatch(a):
         r = STATE.phase_done(root, a.phase, force_reason=None if a.force is None else (a.force.strip() or (a.reason or "").strip()))
         if not r["ok"]:
             raise DhError("CHECK_FAILED", f"phase {a.phase} is not done yet", check=r["check"])
+        if a.phase == "define":                          # launch needs from the owner: asked now, not at deploy (audit F6)
+            from . import pending as PEND
+            r["launch"] = PEND.launch_readiness(root)
         return r
     if c == "gate":
         s = STATE.load(root)
-        if s.get("mode") == "phased" and not a.quote:
+        if STATE.owner_gate(s, a.gate) and not a.quote:
             raise DhError("NEED_QUOTE", f"a gate passes on the owner's own words: dh gate pass {a.gate} --quote \"<their message, verbatim>\"",
                           why="an agent once passed G1 on its own paraphrase of a change request")
         return STATE.gate_pass(root, a.gate, a.note, quote=a.quote)
@@ -473,7 +477,7 @@ def dispatch(a):
             if a.features: brief["features"] = [x.strip() for x in a.features.split(",")]
             if a.languages: brief["languages"] = [x.strip() for x in a.languages.split(",")]
             brief["lane"] = a.lane
-            return POOL.query(brief, a.top)
+            return POOL.query(brief, a.top, source="mine" if a.mine else None)
         if a.action == "show":
             return POOL.show(a.target)
         if a.action == "sync":
@@ -499,7 +503,7 @@ def dispatch(a):
     if c == "plan":
         from . import plan as PL
         if a.action == "init":
-            return PL.init(root, a.force)
+            return PL.init(root, a.force, from_app=a.from_app)
         if a.action == "lint":
             r = PL.lint(root)
             if not r["ok"]:
@@ -573,7 +577,7 @@ def dispatch(a):
             return BR.scan(root)
         if a.action == "apply":
             if not a.dry:
-                STATE.require(root, "brand")             # no rebrand before G2
+                STATE.require(root, "build")             # after G1: his brand goes on at the end of build, before G2 (audit F3)
             brand = {k.replace("brand.", ""): v for k, v in _kv(a.pairs).items()}
             return BR.apply(root, brand, dry=a.dry)
         r = BR.check(root, allow=tuple(x for x in a.allow.split(",") if x))

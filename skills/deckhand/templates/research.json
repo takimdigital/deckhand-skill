@@ -11,6 +11,10 @@
     "objections": []
   },
   "discovery": { "keywords": [], "local": false, "pages_that_rank": [] },
+  "current": {
+    "tools": [],
+    "process": ""
+  },
   "features": { "now": [], "later": [], "not": [] },
   "claims": [],
   "vocabulary": [],

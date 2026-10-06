@@ -120,9 +120,12 @@ def score(row: dict, brief: dict) -> tuple:
     return s, reasons, blockers
 
 
-def query(brief: dict, top: int = 3) -> dict:
+def query(brief: dict, top: int = 3, source: str | None = None) -> dict:
+    """source="mine": only the owner's own bases (path=mine — audit F7)."""
     out, blocked = [], []
     for r in rows():
+        if source and r["source"] != source:
+            continue
         s, reasons, blockers = score(r, brief)
         item = {"name": r["name"], "repo": r.get("repo") or r.get("path"), "source": r["source"], "score": s,
                 "stack": r.get("stack"), "stars": r.get("stars"), "license": r.get("license"), "reasons": reasons,

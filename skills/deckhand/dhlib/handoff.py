@@ -8,6 +8,19 @@ from .util import now, package_json, read_json
 from . import profile as PROFILE
 
 
+# a client project ends with the client owning it (foundation audit F5): one PENDING item per thing that moves
+TRANSFER = (
+    {"what": "Transfer the code repository to the client", "why": "they own the code; you keep no hostage",
+     "how": "GitHub → repository Settings → Transfer ownership (or add them as owner, then leave)", "where": "the repository's Settings page"},
+    {"what": "Transfer the domain to the client", "why": "the address is their brand; renewals must reach them",
+     "how": "move it to their registrar account (or change the registrant contact to them)", "where": "your registrar → the domain → transfer / contacts"},
+    {"what": "Transfer the server (or move the app to the client's server)", "why": "they pay for and control where it runs",
+     "how": "give them the Coolify admin account, or redeploy on their VPS (references/ops/30-deploy-app.md)", "where": "Coolify → Settings → Team / the client's VPS"},
+    {"what": "Transfer the accounts and rotate the secrets", "why": "no key you know should keep working after the handoff",
+     "how": "create new tokens in the client's own accounts, set them in Coolify, revoke yours", "where": "each provider's API-keys page + Coolify → Environment Variables"},
+)
+
+
 def write(root: Path) -> dict:
     root = Path(root)
     brief = read_json(root / ".deckhand" / "brief.json", {}) or {}
@@ -63,6 +76,14 @@ def write(root: Path) -> dict:
     L += ["## Running on its own", ""] + ([f"- `ops/bots/{b}`" for b in bots] or ["- no bots yet (`dh ops suggest`)"]) + [""]
     L += ["## Quality at handoff", ""] + ([f"- {'✅' if r['ok'] else ('❌' if r['blocking'] else '⚠️')} {r['check']}: {r['detail']}" for r in ver.get("rows", [])] or ["- `dh verify` not run"]) + [""]
     L += ["## Still needed from you", ""] + (pending or ["- nothing open"]) + [""]
+    from . import state as STATE
+    if STATE.approver(root) == "client":
+        from . import pending as PEND
+        L += ["## Transfer to the client", "", "The client owns what was built for them. Each line is also an item in PENDING.md:", ""]
+        for x in TRANSFER:
+            L.append(f"- [ ] {x['what']} — {x['how']}")
+            PEND.add(root, x["what"], why=x["why"], how=x["how"], where=x["where"])
+        L.append("")
     L += ["## Stack & licences", "", f"- {', '.join(f'{k}: {v}' for k, v in ((s.get('base') or {}).get('stack') or {}).items() if v) or pkg.get('name', '')}",
           "- `NOTICE` (base template) and `THIRD_PARTY_NOTICES.md` (components) must stay in the repository.", ""]
     from .redact import scrub_text

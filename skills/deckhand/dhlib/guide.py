@@ -15,27 +15,33 @@ TRYON = f'node "{SKILL / "tryon" / "cli.mjs"}"'
 
 STEPS = {
     "define": ["{dh} profile doctor            # what access exists (never ask for what a token already covers)",
+               "path=existing: {dh} adopt [folder|git-url]   # read-only first look: stack + the routes it already serves (the run moves into the app folder if it is elsewhere)",
                "{dh} workflow query            # the 3 proven paths that fit: show them, the owner picks one (dh workflow use REF) or none",
                "{dh} brief set business=\"…\" shape=[saas|booking|catalogue|marketplace|leadgen|internal] languages=en,… audience=\"…\" brand.name=\"…\" deliverable=[own|client|product] category=\"3–5 words\"",
                "ask ONLY what the brief + profile cannot answer — one batched message, defaults proposed",
-               "{dh} phase done define"],
-    "research": ["{dh} research brief --focus competitors --agent A1   # one brief per focus (competitors, pricing, audience, conversion, discovery, local-rules, vocabulary); read the card it names",
+               "{dh} phase done define             # also puts what launch needs from the owner (server, domain) in PENDING.md now: tell him, it runs in parallel"],
+    "research": ["shape=internal (a tool for his own team)? no competitor hunt: research.json → audience.primary + audience.jobs_to_be_done, current.tools (what they use today), features.now — then {dh} phase done research",
+                 "{dh} research brief --focus competitors --agent A1   # one brief per focus (competitors, pricing, audience, conversion, discovery, local-rules, vocabulary); read the card it names",
                  "search per the card; every page opened: {dh} research add URL --by A1 --kind K --note \"…\" ({dh} research seen URL first — never reread)",
                  "claims (label + url + verbatim quote) and vocabulary (harvested terms) → .deckhand/research/agents/A1.json; summary fields → .deckhand/research.json (template: {skill}/templates/research.json)",
                  "{dh} research verify                # merges the agents' files, fetches every cited page, checks each quote",
                  "{dh} phase done research            # or: {dh} phase skip research --reason \"owner declined\""],
-    "plan": ["path=pool|mine: {dh} pool query     # top 3 bases for this brief (reasons + gaps)",
+    "plan": ["path=pool: {dh} pool query     # top 3 bases for this brief (reasons + gaps)",
+             "path=mine: {dh} pool query --mine   # only YOUR bases (made by dh harvest); none fits? say so — the public pool is dh pool query",
+             "path=existing: {dh} plan init --from-app   # the sitemap starts from the app's real routes, each change=keep; mark what this run edits (change=edit) or adds (change=new)",
              "write .deckhand/sitemap.json: every page, section, action and its target, every form's success+error (template in .deckhand/ after `{dh} plan init`)",
              "path=scratch: write .deckhand/copy.json now — the words compose places at build, per section slot (schema: references/20-plan.md § Copy); owner facts only, the rest → PENDING.md",
              "{dh} plan lint                      # until 0 errors — no dead ends, no orphan pages, no un-owned API",
              "{dh} plan render && {dh} plan split --agents N   # PLAN.md for the owner; N = the sub-agents you will really run (AGENT-n.md + CONVENTIONS.md)",
-             "{dh} phase done plan  → show .deckhand/PLAN.md + the chosen base; wait for the owner's go (G1)"],
+             "{dh} phase done plan  → show .deckhand/PLAN.md (pages, features; the base on pool|mine, what changes on existing); wait for the owner's go (G1)"],
     "build": ["path=pool|mine: {dh} clone <template> --to <dir>   (the planning folder itself is fine: Deckhand's files step aside and come back)",
               "path=existing: {dh} adopt <folder|git-url>",
               "path=scratch: {dh} scaffold --to <dir> && {dh} compose --sections navbar,hero,features,pricing,faq,cta,footer --copy .deckhand/copy.json",
               "built another way (by hand, another generator)? {dh} base record --kind scratch|existing --note \"how\"   (never a private function)",
               "the app needs a database/queue running? {dh} dev add db --cmd \"…\" --port N [--env-file .env]   # once; dev start/stop/status then handle it",
-              "build the shell (WP-00: layout, nav, shared UI, schema, seed) yourself; then one sub-agent per .deckhand/work/AGENT-n.md (references/team.md)",
+              "path=pool|mine|scratch: build the shell (WP-00: layout, nav, shared UI, schema, seed) yourself; then one sub-agent per .deckhand/work/AGENT-n.md (references/team.md)",
+              "path=existing: build only the pages marked change=edit|new (PLAN.md marks them; .deckhand/work/ holds only those) — the app's own layout and kept pages stay as they are",
+              "path=pool|mine|scratch: {dh} rebrand apply             # his name, tagline and colours on the app BEFORE he sees it (G2); the leak check comes in brand",
               "{dh} dev start                      # services first, then the app; prints the local URL for the owner",
               "{dh} phase done build  → give the owner the URL, logins, what you tested; wait for their go (G2)"],
     "brand": ["{dh} rebrand scan && {dh} rebrand apply     # brand from the brief: name, tagline, primary colour, icon",
@@ -158,7 +164,7 @@ def _fit(steps: list, mode: str, path: str) -> list:
             if path not in m.group(1).split("|"):
                 continue
             x = x[m.end():]
-        if mode == "auto" and "phase done" in x and WAIT_RX.search(x):
+        if mode == "auto" and "phase done" in x and WAIT_RX.search(x) and not any(f"({g})" in x for g in STATE.OWNER_GATES):
             x = WAIT_RX.sub("   # auto mode: the gate passes by itself — run `dh next`", x)
         out.append(x)
     return out
@@ -194,8 +200,9 @@ def _next_step(root: Path) -> dict:
     gate = STATE.blocking_gate(s)
     cur = STATE.current(s)
     if gate:
-        out = {"state": "waiting for the owner", "gate": gate, "what": STATE.GATES[gate],
-               "do": [f"show the owner what {gate} is about; ask ONE question; on their go: {DH} gate pass {gate} --quote \"<their words, verbatim>\"",
+        who = STATE.approver(root)
+        out = {"state": f"waiting for the {who}", "gate": gate, "what": STATE.GATES[gate], "approver": who,
+               "do": [f"show the {who} what {gate} is about; ask ONE question; on their go: {DH} gate pass {gate} --quote \"<their words, verbatim>\"",
                       f"their words ask for changes (\"make it…\", \"add…\", \"but…\"): {DH} reopen <phase> --reason \"<their words>\" — not a go"],
                "dh": DH, "pending": _pending(root)}
         wfp = _workflow(root)
@@ -237,8 +244,8 @@ def _next_step(root: Path) -> dict:
         brief = read_json(root / ".deckhand" / "brief.json", {}) or {}
         if s["path"] in ("pool", "mine") and brief:
             from . import pool as POOL
-            q = POOL.query({**brief, "lane": brief.get("lane", "web")})
+            q = POOL.query({**brief, "lane": brief.get("lane", "web")}, source="mine" if s["path"] == "mine" else None)
             out["pool_top"] = [{"name": t["name"], "score": t["score"], "reasons": t["reasons"][:4]} for t in q["top"]]
             if q["gap"]:
-                out["pool_gap"] = "nothing in the pool fits — offer path=scratch (scaffold + compose) or measure more repos (dh pool add owner/repo)"
+                out["pool_gap"] = ("none of your own bases fits — show the public pool (dh pool query) or harvest one first; " if s["path"] == "mine" else "") + "nothing in the pool fits — offer path=scratch (scaffold + compose) or measure more repos (dh pool add owner/repo)"
     return out

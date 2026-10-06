@@ -23,7 +23,9 @@ def define(root: Path, s: dict) -> dict:
     shape = str(b.get("shape") or "").strip().lower()
     if shape and shape not in SHAPES:
         why.append(f"brief.shape '{b.get('shape')}' is not one of {', '.join(SHAPES)}")
-    return _res(not why, why, "dh brief set business=\"…\" shape=saas languages=en,fr audience=\"…\"")
+    warn = [] if ((b.get("brand") or {}).get("name") or b.get("name")) else         ["brand.name not set — ask it now in the same batch: his name goes on the app at the end of build, before he looks (G2)"]
+    return _res(not why, why, "dh brief set business=\"…\" shape=saas languages=en,fr audience=\"…\" brand.name=\"…\"",
+                **({"warnings": warn} if warn else {}))
 
 
 def research(root: Path, s: dict) -> dict:
@@ -31,19 +33,30 @@ def research(root: Path, s: dict) -> dict:
     if not r:
         return _res(False, ["no .deckhand/research.json"], "fill templates/research.json (web research, URLs only) then re-run")
     why = []
+    from . import research as RS
+    shape = str((read_json(root / ".deckhand" / "brief.json", {}) or {}).get("shape") or "").strip().lower()
+    rule = (RS.POLICY.get("by_shape") or {}).get(shape) or {}         # data/research.json: what this shape's research needs
+    for dotted in rule.get("need", []):
+        v = r
+        for k in dotted.split("."):
+            v = v.get(k) if isinstance(v, dict) else None
+        if not v:
+            why.append(f"{dotted} missing (what a {shape} project's research needs)")
+    need_comps = rule.get("competitors", 3)
     comps = [c for c in r.get("competitors", []) if str(c.get("url", "")).startswith("http")]
-    if len(comps) < 3:
-        why.append(f"{len(comps)} competitors with a URL (need 3)")
+    if len(comps) < need_comps:
+        why.append(f"{len(comps)} competitors with a URL (need {need_comps})")
     for c in comps:
         if not c.get("strengths") or not c.get("gaps"):
             why.append(f"competitor {c.get('name') or c.get('url')}: strengths + gaps required")
-    if not (r.get("audience") or {}).get("primary"):
+    if not (r.get("audience") or {}).get("primary") and "audience.primary" not in rule.get("need", []):
         why.append("audience.primary missing")
-    if not (r.get("conversion") or {}).get("plays"):
+    if rule.get("conversion", True) and not (r.get("conversion") or {}).get("plays"):
         why.append("conversion.plays missing (what makes the best in this niche convert)")
-    if not (r.get("features") or {}).get("now"):
+    if not (r.get("features") or {}).get("now") and "features.now" not in rule.get("need", []):
         why.append("features.now missing (what must exist on day one)")
-    from . import research as RS
+    if not rule.get("evidence", True):
+        return _res(not why, why, f"research for a {shape} project: {rule.get('about', '')}")
     if not r.get("claims") and not list((root / ".deckhand" / "research" / "agents").glob("*.json")):
         why.append("claims[] missing — each fact with label, url and verbatim quote (references/research-card.md)")
     if len(RS._all_vocab(root)) < RS.POLICY["min_vocabulary"]:

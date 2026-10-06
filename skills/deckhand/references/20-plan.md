@@ -52,3 +52,14 @@ The consumers also read `eyebrow`, `navbar.links[{label, href}]`, `footer.column
 section needs them. Key the map by slot, so two pages that would share a slot need distinct keys (e.g. `terms`,
 `privacy`) instead of colliding on one block. `state:<page>.<state>` targets are not lint-checked: declare the
 page's `states[]` yourself so the target cannot point nowhere.
+
+## Existing app (path=existing)
+
+The plan starts from what the app already serves, never from a blank page:
+
+1. `dh adopt <folder|git-url>` (allowed at define: read-only) records the app as the base.
+2. `dh plan init --from-app` writes `.deckhand/sitemap.json` from its routes (Next.js `app/`, `src/app/`, `pages/`;
+   route groups dropped, API routes left out). Every page is `"change": "keep"`.
+3. Mark what this run touches: `"change": "edit"` (an existing page changes) or `"change": "new"` (add the page).
+   Kept pages are live and linked by the app itself: `plan lint` does not ask for links to them, `plan split` gives
+   them to nobody, and PLAN.md marks each page *kept as is*, **changes** or **new** for the owner's G1.
