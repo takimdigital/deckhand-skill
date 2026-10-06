@@ -250,6 +250,7 @@ def build_parser():
     p.add_argument("--shape"); p.add_argument("--features"); p.add_argument("--languages"); p.add_argument("--top", type=int, default=3); p.add_argument("--mine", action="store_true"); p.add_argument("--lane", default="web")
 
     p = sub.add_parser("plan"); p.add_argument("action", choices=["init", "lint", "render", "split"]); p.add_argument("--agents", type=int, default=3); p.add_argument("--force", action="store_true")
+    p.add_argument("--from-app", action="store_true", help="path=existing: start the sitemap from the routes the app already serves")
     p = sub.add_parser("bb", help="shared memory for parallel agents: post · read · flag NAME · wait NAME --max S")
     p.add_argument("action", choices=["post", "read", "flag", "wait"]); p.add_argument("name", nargs="?"); p.add_argument("--wp", default="all"); p.add_argument("--kind", default="note")
     p.add_argument("--msg"); p.add_argument("--last", type=int, default=40); p.add_argument("--max", type=int, default=170)
@@ -499,7 +500,7 @@ def dispatch(a):
     if c == "plan":
         from . import plan as PL
         if a.action == "init":
-            return PL.init(root, a.force)
+            return PL.init(root, a.force, from_app=a.from_app)
         if a.action == "lint":
             r = PL.lint(root)
             if not r["ok"]:

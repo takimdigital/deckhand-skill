@@ -23,8 +23,10 @@ def sitemap_path(root: Path) -> Path:
     return Path(root) / ".deckhand" / "sitemap.json"
 
 
-def init(root: Path, force: bool = False) -> dict:
+def init(root: Path, force: bool = False, from_app: bool = False) -> dict:
     root = Path(root)
+    if from_app:
+        return init_from_app(root, force)
     from . import state as STATE
     s = STATE.load(root, required=False) or {}
     skipped = (s.get("phases", {}).get("research") or {}).get("status") == "skipped"
@@ -38,6 +40,67 @@ def init(root: Path, force: bool = False) -> dict:
         dst.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
         made.append(str(dst.relative_to(root)))
     return {"created": made}
+
+
+PAGE_FILE = re.compile(r"^page\.(tsx|jsx|ts|js|mdx)$")
+PAGES_SKIP = re.compile(r"^(_app|_document|_error|404|500)\.")
+ROUTE_DIRS = (("app", "app"), ("src/app", "app"), ("pages", "pages"), ("src/pages", "pages"))
+
+
+def routes_from_app(root: Path) -> list:
+    """The routes an existing app already serves, read from its files (Next.js app and pages routers): route groups
+    `(x)` dropped, `[param]` kept, API routes and private `_folders` left out. Sorted, unique."""
+    root = Path(root)
+    out = set()
+    for rel, kind in ROUTE_DIRS:
+        d = root / rel
+        if not d.is_dir():
+            continue
+        for f in d.rglob("*"):
+            parts = f.relative_to(d).parts
+            if not f.is_file() or "node_modules" in parts or parts[0] == "api" or any(p.startswith("_") for p in parts[:-1]):
+                continue
+            if kind == "app":
+                if not PAGE_FILE.match(f.name):
+                    continue
+                segs = [p for p in parts[:-1] if not (p.startswith("(") and p.endswith(")")) and not p.startswith("@")]
+            else:
+                if f.suffix not in (".tsx", ".jsx", ".ts", ".js", ".mdx") or PAGES_SKIP.match(f.name):
+                    continue
+                segs = list(parts[:-1]) + ([] if f.stem == "index" else [f.stem])
+            out.add("/" + "/".join(segs))
+    return sorted(out)
+
+
+def _page_id(route: str, taken: set) -> str:
+    base = re.sub(r"[^a-z0-9]+", "-", route.lower()).strip("-") or "home"
+    pid, n = base, 2
+    while pid in taken:
+        pid, n = f"{base}-{n}", n + 1
+    taken.add(pid)
+    return pid
+
+
+def init_from_app(root: Path, force: bool = False) -> dict:
+    """path=existing: the sitemap starts from what the app already serves. Every page is `change: keep`; the plan says
+    which ones this run edits or adds (`change: edit|new`), and only those become work (`dh plan split`)."""
+    dst = sitemap_path(root)
+    if dst.exists() and not force:
+        return {"created": [], "kept": str(dst.relative_to(root)), "note": "a sitemap exists: kept (--force rebuilds it from the app)"}
+    routes = routes_from_app(root)
+    if not routes:
+        raise DhError("NO_ROUTES", f"no page routes found in {root} (app/, src/app/, pages/, src/pages/): write .deckhand/sitemap.json "
+                      "by hand (`dh plan init`), or run this inside the app folder (`dh adopt` first)")
+    brief = read_json(Path(root) / ".deckhand" / "brief.json", {}) or {}
+    taken = set()
+    pages = [{"id": _page_id(r, taken), "route": r, "title": r.strip("/").split("/")[-1].replace("-", " ").title() or "Home",
+              "auth": "public", "change": "keep", "sections": []} for r in routes]
+    sm = {"name": brief.get("name") or (brief.get("brand") or {}).get("name") or Path(root).name, "from_app": True,
+          "nav": {"header": [f"route:{r}" for r in routes if r.count("/") == 1 and "[" not in r], "footer": []},
+          "pages": pages, "features": [], "forms": [], "entities": []}
+    write_json(dst, sm)
+    return {"created": [str(dst.relative_to(root))], "routes": routes,
+            "next": "mark each page change=keep|edit|new (keep = untouched), add the new pages and features, then dh plan lint"}
 
 
 def _target(t: str):
@@ -191,7 +254,7 @@ def lint(root: Path, sm: dict | None = None) -> dict:
                     seen.add(n)
                     q.append(n)
         for p in pages:
-            if p.get("id") in ids and p["id"] not in seen and not p.get("entry"):
+            if p.get("id") in ids and p["id"] not in seen and not p.get("entry") and p.get("change") != "keep":   # kept: live in the app, linked by it
                 E("E3", f"{p['id']} ({p['route']}) cannot be reached from / (link it, or mark entry: true for email/deep-link pages)", page=p["id"])
     # protected pages need a way in
     if any((p.get("auth") or "public") != "public" for p in pages):
@@ -234,7 +297,8 @@ def render(root: Path) -> dict:
                         L.append(f'  {p["id"]} -->|{(a.get("label") or "")[:24]}| {tgt["id"]}')
     L += ["```", ""]
     for p in pid.values():
-        L += [f"## {p.get('title', p['id'])} — `{p['route']}` ({p.get('auth', 'public')})", ""]
+        mark = {"keep": " · kept as is", "edit": " · **changes**", "new": " · **new**"}.get(p.get("change"), "")
+        L += [f"## {p.get('title', p['id'])} — `{p['route']}` ({p.get('auth', 'public')}){mark}", ""]
         if p.get("purpose"):
             L += [p["purpose"], ""]
         for s in p.get("sections", []) or []:
@@ -260,7 +324,8 @@ def split(root: Path, agents: int = 3) -> dict:
     if not lint_r["ok"]:
         raise DhError("PLAN_NOT_CLEAN", "fix the plan first (dh plan lint)", errors=lint_r["errors"][:10])
     pages = {p["id"]: p for p in sm.get("pages", [])}
-    owned = {}
+    kept = [pid for pid, p in pages.items() if p.get("change") == "keep"]     # path=existing: untouched pages are no work
+    owned = {pid: "kept" for pid in kept}
     wps = []
     say = []
     feats_in = sm.get("features", []) or []
@@ -361,6 +426,7 @@ def split(root: Path, agents: int = 3) -> dict:
         agents_out.append({"id": f"A{i}", "package": f".deckhand/work/AGENT-{i}.md", "owns": owns, "wps": [w["id"] for w in lane]})
     (wdir / "CONVENTIONS.md").write_text(_conventions(agents_out, shell_wp, pages), encoding="utf-8")
     index = {"at": now(), "agents": n, "asked": agents,
+             **({"kept": [pages[p]["route"] for p in kept]} if kept else {}),
              **({"note": f"{agents} agents asked, {n} independent folder groups exist: {n} agents"
                         + ("" if n else " — build it yourself, no dispatch")} if n < agents else {}),
              "orchestrator_first": {"wp": "WP-00", "pages": [pages[p]["route"] for p in shell_wp["pages"]],
