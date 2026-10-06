@@ -81,7 +81,7 @@
 <body>
 
 <nav id="toc">
-  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.4.4</span></div>
+  <div class="brand"><b>Deckhand — Architecture Atlas</b><span>complete system map · v2.5.0</span></div>
   <div class="grp">Big picture</div>
   <a href="#overview">1 · What Deckhand is</a>
   <a href="#layers">2 · System layers</a>
@@ -131,7 +131,7 @@
   <div class="kicker">Complete system reference</div>
   <h1>Deckhand Architecture Atlas</h1>
   <p>Every layer, every command path, every diagram — how the methodology, control plane, try-on engine,
-  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then checked against the 2.4.4 code. The counts, command and action names, flags, error codes, gate examples and file paths are asserted by <code>scripts/test_repo_coherence.py</code>, so a change that makes one false fails CI; the behaviour described in prose was read against the source section by section.</p>
+  AI draft, and proven-path machinery connect. Built from a five-agent parallel read of the full skill source, then checked against the 2.5.0 code. The counts, command and action names, flags, error codes, gate examples and file paths are asserted by <code>scripts/test_repo_coherence.py</code>, so a change that makes one false fails CI; the behaviour described in prose was read against the source section by section.</p>
 </header>
 
 <!-- ============================================================ 1 -->
@@ -184,7 +184,7 @@ The owner only ever interacts at gates, pending asks, and the try-on browser UI.
 
   <!-- L2 -->
   <rect x="40" y="112" width="600" height="66" rx="8" fill="#FFFFFF" stroke="#0F766E" stroke-width="1.4"/>
-  <text x="56" y="134" font-size="13" font-weight="600">② Control plane — dh.py → dhlib/*.py (38 subcommands)</text>
+  <text x="56" y="134" font-size="13" font-weight="600">② Control plane — dh.py → dhlib/*.py (40 subcommands)</text>
   <text x="56" y="154" font-size="11.5" fill="#5F6570">state · guide(next) · checks · resume · pending · profile/vault · workflow · plan · research</text>
   <text x="56" y="170" font-size="11.5" fill="#5F6570">pool · build · brand · slop · seo · verify · deploy · ops · learn/autopsy · suggest</text>
 
@@ -517,7 +517,7 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <!-- ============================================================ 10 -->
 <section id="commands">
 <h2><span class="no">10</span>Full command map</h2>
-<p class="sub">All 38 <code>dh</code> subcommands by intent, plus the try-on engine's own CLI. One JSON object per command; exit 0 ok / 1 check failed / 2 usage.</p>
+<p class="sub">All 40 <code>dh</code> subcommands by intent, plus the try-on engine's own CLI. One JSON object per command; exit 0 ok / 1 check failed / 2 usage.</p>
 
 <h3>State machine &amp; control</h3>
 <table>
@@ -531,6 +531,8 @@ Marking a phase done while <b>any earlier</b> phase is neither done nor skipped 
 <tr><td><code>dh brief show|set k=v …</code></td><td>Dotted-key brief edits (deliverable validated)</td></tr>
 <tr><td><code>dh note decision|doing|next "…"</code></td><td>One-line redacted note → notes.jsonl → RESUME</td></tr>
 <tr><td><code>dh resume [--check [--online]] [--hook] [--install-hook claude]</code></td><td>Regenerate/prove RESUME.md; plain-text hook; install SessionStart hook</td></tr>
+<tr><td><code>dh harness detect|install|doctor|uninstall [--harness H] [--dry]</code></td><td>Write deckhand's hooks into the harness's own config (Claude Code, Codex, Gemini CLI, Cursor, OpenCode; Hermes: a block to paste) and prove a hand edit of run.json is blocked</td></tr>
+<tr><td><code>dh hook pre|post|start|stop --harness H</code></td><td>The hook entry point the harness calls: guard deckhand's records, log every shell command to runs.jsonl, RESUME at start, a note reminder at stop</td></tr>
 <tr><td><code>dh suggest [--all] · dh suggest dismiss ID [--days N]</code></td><td>20 deterministic rules → top-3 NOW/SOON/LATER next-actions</td></tr>
 <tr><td><code>dh handoff</code></td><td>Writes HANDOFF.md (URL, secret locations, commands, bots, verify, pending, licences)</td></tr>
 </table>
@@ -1442,7 +1444,7 @@ node tryon/cli.mjs status | clean</code></pre>
 <tr><td><code>SKILL.md</code></td><td>The spec: charter, loop, state table, 13 invariants, command surface, try-on summary, delegation, comms protocol (~22 KB — what you were given when this skill loaded)</td></tr>
 <tr><td><code>references/00–80-*.md</code></td><td>One playbook per phase (define, research, plan, build, brand, seo, tryon, review, deploy, operate) + team.md, harness.md, research-card.md, cli-flags.md (every flag of every command, generated from the parser and checked by a test)</td></tr>
 <tr><td><code>references/ops/*</code></td><td>VPS bootstrap, domain/DNS/TLS, deploy-app, change pipeline, backups, object storage, email, auth, monitoring runbooks</td></tr>
-<tr><td><code>dhlib/cli.py</code></td><td>38 subcommands: parser + dispatch + observe/refresh hooks + runs.jsonl logging</td></tr>
+<tr><td><code>dhlib/cli.py</code></td><td>40 subcommands: parser + dispatch + observe/refresh hooks + runs.jsonl logging</td></tr>
 <tr><td><code>dhlib/state.py · checks.py</code></td><td>run.json transitions, gate quote classifier, per-phase exit checks</td></tr>
 <tr><td><code>dhlib/guide.py · resume.py · suggest.py · pending.py</code></td><td>dh next logic, RESUME generation/safety/check, 20 suggestion rules, two pending ledgers</td></tr>
 <tr><td><code>dhlib/profile.py</code></td><td>profile/vault/layout binding, PERSON facts, client-project rule, BINDING_BROKEN</td></tr>

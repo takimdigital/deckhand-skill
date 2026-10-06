@@ -1,7 +1,7 @@
 ---
 name: deckhand
 description: "Idea → live, owned web business on a $5 VPS (or $0), or a boilerplate product to sell: define, research, plan the page/feature graph, build from a vetted MIT base or scratch with parallel sub-agents, rebrand, live-swap sections for licensed designs (try-on), verify, deploy to Coolify, operate with bots; follow proven workflows (query the best 3, step by step) and improve them from each run's autopsy; resume any project from any fresh session or AI (Claude Code, Hermes, Codex…). Use for building, launching, redesigning, deploying or maintaining a website/SaaS/booking/catalogue/lead-gen business, for component try-on/swap, for ops bots/crons, or to turn a project into a reusable base or workflow."
-version: 2.4.4
+version: 2.5.0
 license: MIT
 compatibility: "Any agent harness that can run shell commands (Claude Code, Codex, Cursor, Hermes, OpenCode, Gemini CLI …). Needs Python 3.9+ (stdlib) and Node 18+ for try-on/compose. Windows: `py` instead of `python3`."
 metadata:
@@ -135,6 +135,7 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
 | proven paths | `dh workflow query [--industry --deliverable --features --min-level]` (top 3) · `dh workflow use REF [--set k=v] [--accept]` · `dh workflow status\|todo [--format md]\|step ID done\|skip --why` · `dh workflow show\|list\|lint\|sync` · `dh workflow new --from-run` · `dh workflow save --from-autopsy ID --proposals P1,P3 [--public]` · `dh workflow publish REF` |
 | phases + gates | `dh phase done PHASE` (runs its check) · `dh phase skip PHASE --reason "…"` (the current phase only, never a done one; never review) · `dh phase done PHASE --force --reason "…"` (a reason is required) · `dh gate pass Gx --quote "the owner's words"` (once its phase is done) · `dh reopen PHASE --reason "…"` (a phase the run has reached) |
 | owner's tasks | `dh pending list [--all]` · `dh pending add "what" --why --how --where [--machine] [--when T]` · `dh pending decide "question" --rec X` · `dh pending done\|wait\|drop P-0NN [--reason]` |
+| harness hooks | `dh harness detect\|install\|doctor\|uninstall [--harness H] [--dry]` (deckhand's hooks in the harness's own config; doctor proves a hand edit of run.json is blocked) · `dh hook pre\|post\|start\|stop --harness H` (what the harness calls) |
 | resume a session | `dh resume [--check [--online]]` · `dh note decision\|doing\|next "…"` · `dh resume --install-hook claude` (adds `dh resume --hook` as a SessionStart hook) |
 | owner profile / secrets | `dh profile show\|doctor\|set k=v [--here\|--machine]` · `dh profile where [--set here\|machine\|FOLDER]` · `dh vault set NAME [--here\|--machine]` (value via stdin) · `dh vault list` (names + `shell` line) |
 | bases | `dh pool query [--shape --features]` · `dh pool show N` · `dh pool vet owner/repo` · `dh pool add owner/repo [--mine]` (vetted) · `dh pool add D:/your/project --mine` · `dh pool list [--mine]` |
@@ -212,4 +213,8 @@ phase needs — backgrounding, waiting, delegating, the checklist, the cron bots
 the lines are per-harness data (`data/harness.json`), so any harness works and a named one uses its own tools. `dh dev start`
 detaches by itself. Hermes: never `nohup … &`; `terminal(background=true)` + `process_manage`; the checklist is
 `todo_list`; site bots are no-agent `cronjob`s (`dh ops add --runner hermes`); no `{x}` or `<x>` in any `delegate_task`
-text. Full table: `references/harness.md`. Paths with spaces MUST be quoted. On Windows use `py`, and `node` must be on PATH.
+text. **Hooks** (`dh harness install`, once per harness; `dh harness doctor` at define): the harness itself then blocks a hand
+edit of `.deckhand/run.json`/`history.jsonl`/`verify.json`/`deploy.json`, a deploying `git push` before G4 and a vault value
+written in clear; logs every shell command to `runs.jsonl` (autopsy sees the whole session); injects RESUME at start; and
+asks once for a `dh note` before a session ends with unexplained edits. **Skills**: `dh next` → `skills` names installed
+agent skills that help this phase (`data/skills.json`) and how this harness loads one. Full table: `references/harness.md`. Paths with spaces MUST be quoted. On Windows use `py`, and `node` must be on PATH.

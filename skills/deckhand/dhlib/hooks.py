@@ -7,7 +7,7 @@ call. One policy serves them all; what differs — tool names, field names, how 
 is DATA (data/harness.json → `hooks`), so no harness tool name lives in this file.
 
   pre    a hand edit of deckhand's own records (run, history, verify, deploy) · a push that deploys before G4 ·
-         a vault value written in clear                                                       → blocked, with the dh way
+         a vault value written in clear                                                       → blocked, naming the right dh command
   post   every shell command and its result → .deckhand/runs.jsonl (scrubbed): `dh autopsy` and `dh learn` see the
          whole session, not only what went through `dh run`
   start  the project's RESUME as context (once per session)
@@ -170,7 +170,7 @@ def _output_of(payload: dict) -> str:
 def _post(ev: dict, payload: dict, root: Path) -> tuple:
     cmd = ev["command"].strip()
     if ev["kind"] != "shell" or not cmd or DH_CMD.match(cmd):
-        return 0, "", ""                                   # dh logs its own calls
+        return 0, "", ""                                   # deckhand already logs its own calls
     from . import learn as LEARN
     LEARN.log_run(root, cmd, _exit_of(payload), _output_of(payload)[-4000:])      # scrubbed by log_run
     return 0, "", ""

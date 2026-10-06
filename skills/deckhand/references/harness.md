@@ -49,6 +49,38 @@ across sessions. The checklist is `dh workflow todo --format md`. For the autops
 (run risky commands through `dh run -- …`); a chat export as JSONL (`{"role", "content"}` per line) adds the
 questions and answers.
 
+## Hooks — deckhand guards itself (every harness with hooks)
+
+`dh harness install` (once per harness and machine; show the owner first) writes `dh hook …` into the harness's own
+config; `dh harness doctor` proves it: a synthetic hand edit of `run.json` must come back blocked (exit 2).
+
+| event | what deckhand does |
+|---|---|
+| before a tool | **blocks** a hand edit of `.deckhand/run.json`, `history.jsonl`, `verify.json`, `deploy.json` (use `dh phase/gate/verify/deploy`) · a `git push` while auto-deploy is wired and G4 is not passed · a vault value written in clear |
+| after a shell command | logs it with its result to `.deckhand/runs.jsonl` (scrubbed): `dh autopsy`/`dh learn` see the whole session, not only `dh run` |
+| session start | the project's RESUME as context (Hermes: on the first turn only) |
+| end of turn | unexplained edits or failure → ONE reminder to `dh note doing "…"` (never a loop: once per 10 min) |
+
+Outside a deckhand project every hook is silent; on any internal error it fails open (only a guard decision blocks).
+
+| harness | config written | notes |
+|---|---|---|
+| Claude Code | `~/.claude/settings.json` (or `$CLAUDE_CONFIG_DIR`) | replaces the older `resume --hook` entry |
+| Codex | `~/.codex/hooks.json` (or `$CODEX_HOME`) | Codex asks you to trust a new hook once; `apply_patch` paths are read from the patch |
+| Gemini CLI | `~/.gemini/settings.json` | stdout is JSON only; start context via `hookSpecificOutput.additionalContext` |
+| Cursor | `~/.cursor/hooks.json` | a pass prints `{"permission":"allow"}` (empty output would block); the end-of-turn reminder is a `followup_message` |
+| OpenCode | `~/.config/opencode/plugins/deckhand.js` | a tiny plugin calling the same `dh hook`; no start/stop events |
+| Hermes | **never written by a script** — `dh harness install` prints the `hooks:` block | paste it with `hermes config edit`, restart, accept the one-time consent, check `hermes hooks doctor` |
+
+Tool names, field names and output shapes per harness are data: `data/harness.json` → `hooks`.
+
+## Skills — the ones already installed, named per phase
+
+`dh next` → `skills.load`: up to four installed agent skills (SKILL.md folders found in `~/.claude/skills`,
+`~/.codex/skills`, `~/.agents/skills`, `~/.cursor/skills`, `~/.gemini/skills`, `~/.config/opencode/skills`,
+`$HERMES_HOME/skills` and the project's own) that help the current phase, each with why; `skills.how` says how this
+harness loads one. The map is `data/skills.json` — add a row, nothing breaks when a skill is missing.
+
 ## Handing over to a fresh session
 
 1. `dh resume` first (`--check` to re-prove it); it must say SAFE TO START A FRESH SESSION before you stop.
