@@ -26,7 +26,8 @@ STEPS = {
                  "claims (label + url + verbatim quote) and vocabulary (harvested terms) → .deckhand/research/agents/A1.json; summary fields → .deckhand/research.json (template: {skill}/templates/research.json)",
                  "{dh} research verify                # merges the agents' files, fetches every cited page, checks each quote",
                  "{dh} phase done research            # or: {dh} phase skip research --reason \"owner declined\""],
-    "plan": ["path=pool|mine: {dh} pool query     # top 3 bases for this brief (reasons + gaps)",
+    "plan": ["path=pool: {dh} pool query     # top 3 bases for this brief (reasons + gaps)",
+             "path=mine: {dh} pool query --mine   # only YOUR bases (made by dh harvest); none fits? say so — the public pool is dh pool query",
              "path=existing: {dh} plan init --from-app   # the sitemap starts from the app's real routes, each change=keep; mark what this run edits (change=edit) or adds (change=new)",
              "write .deckhand/sitemap.json: every page, section, action and its target, every form's success+error (template in .deckhand/ after `{dh} plan init`)",
              "path=scratch: write .deckhand/copy.json now — the words compose places at build, per section slot (schema: references/20-plan.md § Copy); owner facts only, the rest → PENDING.md",
@@ -243,8 +244,8 @@ def _next_step(root: Path) -> dict:
         brief = read_json(root / ".deckhand" / "brief.json", {}) or {}
         if s["path"] in ("pool", "mine") and brief:
             from . import pool as POOL
-            q = POOL.query({**brief, "lane": brief.get("lane", "web")})
+            q = POOL.query({**brief, "lane": brief.get("lane", "web")}, source="mine" if s["path"] == "mine" else None)
             out["pool_top"] = [{"name": t["name"], "score": t["score"], "reasons": t["reasons"][:4]} for t in q["top"]]
             if q["gap"]:
-                out["pool_gap"] = "nothing in the pool fits — offer path=scratch (scaffold + compose) or measure more repos (dh pool add owner/repo)"
+                out["pool_gap"] = ("none of your own bases fits — show the public pool (dh pool query) or harvest one first; " if s["path"] == "mine" else "") + "nothing in the pool fits — offer path=scratch (scaffold + compose) or measure more repos (dh pool add owner/repo)"
     return out

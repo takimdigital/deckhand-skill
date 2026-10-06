@@ -276,6 +276,26 @@ def _browser_line() -> str:
     return guide.harness_row().get("browser", "check pages with `curl -s`.")
 
 
+def _research_box(root: Path) -> list:
+    """What the research found, in 5 lines, above the map: the owner approves the plan with the reason for it (audit F8)."""
+    r = read_json(Path(root) / ".deckhand" / "research.json", None, expect=dict)
+    if not r:
+        return []
+    L = []
+    for c in [c for c in r.get("competitors", []) or [] if c.get("name") and c.get("url", "").startswith("http")][:3]:
+        gap = (c.get("gaps") or [""])[0]
+        L.append(f"- **{c['name']}**" + (f" — their gap: {gap}" if gap else ""))
+    if r.get("audience", {}).get("primary"):
+        L.append(f"- **Who:** {r['audience']['primary']}")
+    if (r.get("current") or {}).get("tools"):
+        L.append(f"- **Used today:** {', '.join(r['current']['tools'][:4])}")
+    if (r.get("conversion") or {}).get("plays"):
+        L.append(f"- **What makes them act:** {'; '.join(r['conversion']['plays'][:3])}")
+    if (r.get("features") or {}).get("now"):
+        L.append(f"- **Day one:** {', '.join(r['features']['now'][:6])}")
+    return ["## What the research found", "", *L, ""] if L else []
+
+
 def render(root: Path) -> dict:
     sm = read_json(sitemap_path(root), None, expect=dict)
     if not sm:
@@ -283,6 +303,7 @@ def render(root: Path) -> dict:
     brief = read_json(Path(root) / ".deckhand" / "brief.json", {}) or {}
     L = [f"# {brief.get('name') or sm.get('name') or 'Plan'} — site map", "",
          f"> {brief.get('business', '')}", ""]
+    L += _research_box(root)
     L += ["```mermaid", "flowchart LR"]
     pid = {p["id"]: p for p in sm.get("pages", []) if p.get("id")}
     for p in pid.values():

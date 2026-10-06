@@ -477,7 +477,7 @@ def dispatch(a):
             if a.features: brief["features"] = [x.strip() for x in a.features.split(",")]
             if a.languages: brief["languages"] = [x.strip() for x in a.languages.split(",")]
             brief["lane"] = a.lane
-            return POOL.query(brief, a.top)
+            return POOL.query(brief, a.top, source="mine" if a.mine else None)
         if a.action == "show":
             return POOL.show(a.target)
         if a.action == "sync":

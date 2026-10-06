@@ -23,7 +23,9 @@ def define(root: Path, s: dict) -> dict:
     shape = str(b.get("shape") or "").strip().lower()
     if shape and shape not in SHAPES:
         why.append(f"brief.shape '{b.get('shape')}' is not one of {', '.join(SHAPES)}")
-    return _res(not why, why, "dh brief set business=\"…\" shape=saas languages=en,fr audience=\"…\"")
+    warn = [] if ((b.get("brand") or {}).get("name") or b.get("name")) else         ["brand.name not set — ask it now in the same batch: his name goes on the app at the end of build, before he looks (G2)"]
+    return _res(not why, why, "dh brief set business=\"…\" shape=saas languages=en,fr audience=\"…\" brand.name=\"…\"",
+                **({"warnings": warn} if warn else {}))
 
 
 def research(root: Path, s: dict) -> dict:
