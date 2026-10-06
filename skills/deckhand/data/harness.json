@@ -11,7 +11,48 @@
     "context": "Hermes loads ONE project file, first match wins: .hermes.md → AGENTS.md → CLAUDE.md. `dh init` writes its resume block into AGENTS.md, and into .hermes.md when the owner has one.",
     "install": "the skill lives in $HERMES_HOME/skills/[category]/deckhand (each profile has its own; install.ps1 / install.sh update every one); the session store is $HERMES_HOME/state.db.",
     "cron_verify": "cronjob(action=\"run\", job_id=[the id create returns])   # fires once now; its stdout is the alert",
-    "cron_note": "show the owner this cronjob call, then make it: a no-agent job costs no model tokens per tick, and the bot's secrets are read from the Deckhand vault by name (dh vault set NAME)"
+    "cron_note": "show the owner this cronjob call, then make it: a no-agent job costs no model tokens per tick, and the bot's secrets are read from the Deckhand vault by name (dh vault set NAME)",
+    "hooks": {
+      "tools": {
+        "shell": [
+          "terminal"
+        ],
+        "edit": [
+          "write_file",
+          "patch"
+        ]
+      },
+      "fields": {
+        "command": [
+          "command"
+        ],
+        "path": [
+          "path"
+        ],
+        "content": [
+          "content",
+          "new_string"
+        ]
+      },
+      "out": {
+        "start": "context",
+        "stop": "decision"
+      },
+      "config": {
+        "kind": "hermes-config",
+        "events": {
+          "pre": "pre_tool_call",
+          "post": "post_tool_call",
+          "start": "pre_llm_call",
+          "stop": "pre_verify"
+        },
+        "matchers": {
+          "pre": "terminal|write_file|patch",
+          "post": "terminal"
+        },
+        "note": "Hermes asks consent once per hook command on first use; check with `hermes hooks doctor`"
+      }
+    }
   },
   "claude-code": {
     "background": "Bash with run_in_background; wait with Monitor (never sleep loops). `dh dev start` detaches by itself.",
@@ -20,7 +61,56 @@
     "transcript": "dh autopsy --latest reads ~/.claude/projects/<project>/*.jsonl; `dh resume --install-hook claude` starts every session from RESUME.",
     "context": "CLAUDE.md (a new one imports AGENTS.md); `dh resume --install-hook claude` starts every session from RESUME.",
     "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
-    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found."
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found.",
+    "hooks": {
+      "tools": {
+        "shell": [
+          "Bash"
+        ],
+        "edit": [
+          "Edit",
+          "Write",
+          "MultiEdit",
+          "NotebookEdit"
+        ]
+      },
+      "fields": {
+        "command": [
+          "command"
+        ],
+        "path": [
+          "file_path",
+          "notebook_path",
+          "path"
+        ],
+        "content": [
+          "content",
+          "new_string",
+          "edits"
+        ]
+      },
+      "out": {
+        "start": "text",
+        "stop": "exit2"
+      },
+      "config": {
+        "kind": "json-hooks",
+        "path": "~/.claude/settings.json",
+        "env": "CLAUDE_CONFIG_DIR",
+        "file": "settings.json",
+        "events": {
+          "pre": "PreToolUse",
+          "post": "PostToolUse",
+          "start": "SessionStart",
+          "stop": "Stop"
+        },
+        "matchers": {
+          "pre": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+          "post": "Bash",
+          "start": "startup|resume|clear|compact"
+        }
+      }
+    }
   },
   "codex": {
     "background": "a background terminal; `dh dev start` detaches by itself.",
@@ -29,7 +119,55 @@
     "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read.",
     "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
     "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found.",
-    "context": "AGENTS.md (read by most agents; CLAUDE.md can import it): `dh init` writes the resume block there."
+    "context": "AGENTS.md (read by most agents; CLAUDE.md can import it): `dh init` writes the resume block there.",
+    "hooks": {
+      "tools": {
+        "shell": [
+          "Bash"
+        ],
+        "edit": [
+          "apply_patch"
+        ]
+      },
+      "fields": {
+        "command": [
+          "command"
+        ],
+        "path": [
+          "file_path",
+          "notebook_path",
+          "path"
+        ],
+        "content": [
+          "content",
+          "new_string",
+          "edits"
+        ]
+      },
+      "patch_paths": true,
+      "out": {
+        "start": "text",
+        "stop": "exit2"
+      },
+      "config": {
+        "kind": "json-hooks",
+        "path": "~/.codex/hooks.json",
+        "env": "CODEX_HOME",
+        "file": "hooks.json",
+        "events": {
+          "pre": "PreToolUse",
+          "post": "PostToolUse",
+          "start": "SessionStart",
+          "stop": "Stop"
+        },
+        "matchers": {
+          "pre": "Bash|apply_patch",
+          "post": "Bash",
+          "start": "startup|resume|clear|compact"
+        },
+        "note": "Codex asks you to review and trust a new hook once before it runs"
+      }
+    }
   },
   "cursor": {
     "background": "a background terminal; `dh dev start` detaches by itself.",
@@ -38,7 +176,60 @@
     "transcript": "the run log .deckhand/runs.jsonl (run risky commands through `dh run --`).",
     "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
     "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found.",
-    "context": "AGENTS.md (read by most agents; CLAUDE.md can import it): `dh init` writes the resume block there."
+    "context": "AGENTS.md (read by most agents; CLAUDE.md can import it): `dh init` writes the resume block there.",
+    "hooks": {
+      "tools": {
+        "shell": [
+          "Shell"
+        ],
+        "edit": [
+          "Write",
+          "Edit",
+          "StrReplace",
+          "MultiEdit",
+          "Delete"
+        ]
+      },
+      "fields": {
+        "command": [
+          "command"
+        ],
+        "path": [
+          "file_path",
+          "path",
+          "target_file"
+        ],
+        "content": [
+          "content",
+          "new_string",
+          "contents"
+        ]
+      },
+      "out": {
+        "pass": {
+          "permission": "allow"
+        },
+        "block": "cursor",
+        "start": "cursor",
+        "stop": "cursor"
+      },
+      "config": {
+        "kind": "cursor-hooks",
+        "path": "~/.cursor/hooks.json",
+        "file": "hooks.json",
+        "events": {
+          "pre": "preToolUse",
+          "post": "postToolUse",
+          "start": "sessionStart",
+          "stop": "stop"
+        },
+        "matchers": {
+          "pre": "Shell|Write|Edit|StrReplace|MultiEdit|Delete",
+          "post": "Shell"
+        },
+        "note": "edit tool names beyond Shell/Write are best-effort (Cursor documents Shell, Read, Write, MCP, Task)"
+      }
+    }
   },
   "gemini-cli": {
     "background": "run_shell_command with is_background=true (or a second terminal); `dh dev start` detaches by itself.",
@@ -47,7 +238,53 @@
     "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read.",
     "context": "GEMINI.md, or AGENTS.md when configured as the context file: `dh init` writes the resume block into AGENTS.md.",
     "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
-    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found."
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found.",
+    "hooks": {
+      "tools": {
+        "shell": [
+          "run_shell_command"
+        ],
+        "edit": [
+          "write_file",
+          "replace"
+        ]
+      },
+      "fields": {
+        "command": [
+          "command"
+        ],
+        "path": [
+          "file_path",
+          "notebook_path",
+          "path"
+        ],
+        "content": [
+          "content",
+          "new_string",
+          "edits"
+        ]
+      },
+      "out": {
+        "start": "hso",
+        "stop": "exit2"
+      },
+      "config": {
+        "kind": "json-hooks",
+        "path": "~/.gemini/settings.json",
+        "file": "settings.json",
+        "events": {
+          "pre": "BeforeTool",
+          "post": "AfterTool",
+          "start": "SessionStart",
+          "stop": "AfterAgent"
+        },
+        "matchers": {
+          "pre": "run_shell_command|write_file|replace",
+          "post": "run_shell_command",
+          "start": "startup|resume|clear"
+        }
+      }
+    }
   },
   "opencode": {
     "background": "a second terminal or a background shell; `dh dev start` detaches by itself.",
@@ -56,7 +293,44 @@
     "transcript": "export the chat as JSONL (role, content) → dh autopsy --workflow chat.jsonl; the run log .deckhand/runs.jsonl is always read.",
     "context": "AGENTS.md: `dh init` writes the resume block there.",
     "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
-    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found."
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found.",
+    "hooks": {
+      "tools": {
+        "shell": [
+          "bash"
+        ],
+        "edit": [
+          "write",
+          "edit"
+        ]
+      },
+      "fields": {
+        "command": [
+          "command"
+        ],
+        "path": [
+          "filePath",
+          "file_path"
+        ],
+        "content": [
+          "content",
+          "newString"
+        ]
+      },
+      "out": {
+        "start": "none",
+        "stop": "none"
+      },
+      "config": {
+        "kind": "opencode-plugin",
+        "path": "~/.config/opencode/plugins/deckhand.js",
+        "file": "deckhand.js",
+        "events": {
+          "pre": "tool.execute.before",
+          "post": "tool.execute.after"
+        }
+      }
+    }
   },
   "unknown": {
     "background": "a second terminal, or the harness's background mode; `dh dev start` detaches by itself.",
@@ -67,6 +341,31 @@
     "browser": "check pages with `curl -s` (a cookie jar in your scratch folder); visual QA = a screenshot file.",
     "cron": "`dh ops add <bot> --runner github` (GitHub Actions) or `--runner cron` (the VPS crontab); both need the owner's push or ssh.",
     "context": "AGENTS.md (read by most agents; CLAUDE.md can import it): `dh init` writes the resume block there.",
-    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found."
+    "install": "`install.sh` / `install.ps1` copy the skill into every agent folder found.",
+    "hooks": {
+      "tools": {
+        "shell": [],
+        "edit": []
+      },
+      "fields": {
+        "command": [
+          "command"
+        ],
+        "path": [
+          "file_path",
+          "notebook_path",
+          "path"
+        ],
+        "content": [
+          "content",
+          "new_string",
+          "edits"
+        ]
+      },
+      "out": {
+        "start": "text",
+        "stop": "exit2"
+      }
+    }
   }
 }
