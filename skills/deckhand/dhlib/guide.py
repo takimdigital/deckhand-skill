@@ -19,7 +19,7 @@ STEPS = {
                "{dh} workflow query            # the 3 proven paths that fit: show them, the owner picks one (dh workflow use REF) or none",
                "{dh} brief set business=\"…\" shape=[saas|booking|catalogue|marketplace|leadgen|internal] languages=en,… audience=\"…\" brand.name=\"…\" deliverable=[own|client|product] category=\"3–5 words\"",
                "ask ONLY what the brief + profile cannot answer — one batched message, defaults proposed",
-               "{dh} phase done define"],
+               "{dh} phase done define             # also puts what launch needs from the owner (server, domain) in PENDING.md now: tell him, it runs in parallel"],
     "research": ["{dh} research brief --focus competitors --agent A1   # one brief per focus (competitors, pricing, audience, conversion, discovery, local-rules, vocabulary); read the card it names",
                  "search per the card; every page opened: {dh} research add URL --by A1 --kind K --note \"…\" ({dh} research seen URL first — never reread)",
                  "claims (label + url + verbatim quote) and vocabulary (harvested terms) → .deckhand/research/agents/A1.json; summary fields → .deckhand/research.json (template: {skill}/templates/research.json)",

@@ -14,10 +14,11 @@ must survive sessions (shown as DECISION NEEDED). Every report ends with the ope
 from __future__ import annotations
 
 import datetime as _dt
+import os
 import re
 from pathlib import Path
 
-from .util import DhError, SKILL, home, locked, today
+from .util import DhError, SKILL, home, locked, read_json, today
 
 ITEM = re.compile(r"^- \[( |x|X)\] (P-(?:SEO-[\w.]+|\d{3,}))\b(.*)$")
 TEMPLATE = "# PENDING — {name}\n\nThings only the owner can do. Agents add a line the moment one appears; nothing lives only in chat.\n" \
@@ -224,3 +225,38 @@ def profile_md() -> dict | None:
     facts = list(dict.fromkeys(facts))
     return {"path": str(paths[0]), **({"paths": [str(p) for p in paths]} if len(paths) > 1 else {}),
             "facts": facts[:60], "say": "these are answered — never ask for them again"}
+
+# What going live needs from the owner, asked the moment define closes (foundation audit F6): a server and a domain take
+# him time (an account, a payment, DNS that can need a day) and can be done while research, plan and build run.
+LAUNCH = (
+    {"key": "server", "what": "A server for the site (a VPS with Coolify)",
+     "why": "the site cannot go live without one; setting it up takes about an hour and can run in parallel with the build",
+     "how": "follow references/ops/00-user-checklist.md then 10-bootstrap-vps.md (or 11-oracle-free-tier.md for $0)",
+     "where": "your VPS provider; then dh profile set vps.ip=[ip] coolify.url=[https://…] and dh vault set COOLIFY_TOKEN"},
+    {"key": "domain", "what": "A domain name for the site",
+     "why": "DNS can take up to a day to settle; buying it now keeps launch day short",
+     "how": "buy it at a registrar (references/ops/20-domain-dns-ssl.md; a free one: 21-free-domain-cloudflare.md)",
+     "where": "your registrar; then dh brief set domain=[the domain]"},
+)
+
+
+def launch_missing(root: Path) -> list:
+    """The launch prerequisites not configured yet — from files only (no network: define must stay fast and offline)."""
+    from . import profile as PROFILE
+    prof = PROFILE.load()
+    brief = read_json(Path(root) / ".deckhand" / "brief.json", {}) or {}
+    have = {"server": bool(PROFILE._get(prof, "vps.ip") or ((PROFILE._get(prof, "coolify.url") or os.environ.get("COOLIFY_URL"))
+                                                             and PROFILE.secret("COOLIFY_TOKEN"))),
+            "domain": bool(brief.get("domain"))}
+    return [x for x in LAUNCH if not have[x["key"]]]
+
+
+def launch_readiness(root: Path) -> dict:
+    """Each missing prerequisite becomes a PENDING item (exact duplicates are ignored, so asking again adds nothing)."""
+    asked = []
+    for x in launch_missing(root):
+        add(root, x["what"], why=x["why"], how=x["how"], where=x["where"])
+        asked.append(x["what"])
+    return {"asked": asked, **({"say": "tell the owner now: these take him time and can run in parallel — "
+                                       "they are in PENDING.md"} if asked else {})}
+

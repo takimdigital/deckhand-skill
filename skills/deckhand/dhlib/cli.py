@@ -415,6 +415,9 @@ def dispatch(a):
         r = STATE.phase_done(root, a.phase, force_reason=None if a.force is None else (a.force.strip() or (a.reason or "").strip()))
         if not r["ok"]:
             raise DhError("CHECK_FAILED", f"phase {a.phase} is not done yet", check=r["check"])
+        if a.phase == "define":                          # launch needs from the owner: asked now, not at deploy (audit F6)
+            from . import pending as PEND
+            r["launch"] = PEND.launch_readiness(root)
         return r
     if c == "gate":
         s = STATE.load(root)
