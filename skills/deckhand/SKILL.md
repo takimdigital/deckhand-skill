@@ -98,7 +98,7 @@ or folder) · `scratch` (scaffold + compose from licensed blocks). Owner changes
    A check that cannot fail is not a check; fixes go into scripts/tests, not prose.
 6. **Deterministic first.** If a script does it (`dh …`, `tryon …`), the agent MUST NOT hand-write it.
    The model writes words (copy, research, plans) and app-specific logic — not boilerplate.
-7. **Gates are hard** in phased mode: no clone before G1, no rebrand/extra work before G2, no deploy
+7. **Gates are hard** in phased mode: no clone before G1, no extra work before G2 (his brand goes on at the end of build, so G2 shows it), no deploy
    before G4, "even when the work looks obviously right". A gate passes on the owner's own words:
    `dh gate pass Gx --quote "<their message>"`; words that ask for a change ("make it…", "add…", "but…") or hold it back ("don't ship it", "wait") are not a go —
    a change → `dh reopen <phase>`, change it, show it again; a hold (`HOLD`) → wait and ask, reopen nothing.

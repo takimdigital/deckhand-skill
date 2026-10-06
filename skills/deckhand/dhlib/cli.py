@@ -574,7 +574,7 @@ def dispatch(a):
             return BR.scan(root)
         if a.action == "apply":
             if not a.dry:
-                STATE.require(root, "brand")             # no rebrand before G2
+                STATE.require(root, "build")             # after G1: his brand goes on at the end of build, before G2 (audit F3)
             brand = {k.replace("brand.", ""): v for k, v in _kv(a.pairs).items()}
             return BR.apply(root, brand, dry=a.dry)
         r = BR.check(root, allow=tuple(x for x in a.allow.split(",") if x))

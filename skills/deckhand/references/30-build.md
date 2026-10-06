@@ -71,6 +71,12 @@ runs leave `dh-*` folders in the OS temp dir. `dh clean` lists them (dry run), `
   and error state. Forms validate server-side. Seed data is realistic but marked as sample.
 - Run commands through `dh run -- …` (known failures print their fix immediately).
 
+## His brand before he looks (G2)
+
+On `pool`, `mine` and `scratch`, run `dh rebrand apply` at the end of build (name, tagline, colours from the brief):
+the owner's first look at the app must show his business, never the template's. The brand phase still runs the leak
+check (`dh rebrand check`), the SEO decision and the design gate (G3). `existing` keeps its own brand.
+
 ## Run it
 `dh dev start` (detached; `.deckhand/dev.log`; waits until it answers) → the G2 message: the URL, the logins per role
 (a table), what you tested (route matrix, screens), what you found and fixed, ONE question. `dh phase done build` →

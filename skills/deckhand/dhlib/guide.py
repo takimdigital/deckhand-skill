@@ -39,6 +39,7 @@ STEPS = {
               "the app needs a database/queue running? {dh} dev add db --cmd \"…\" --port N [--env-file .env]   # once; dev start/stop/status then handle it",
               "path=pool|mine|scratch: build the shell (WP-00: layout, nav, shared UI, schema, seed) yourself; then one sub-agent per .deckhand/work/AGENT-n.md (references/team.md)",
               "path=existing: build only the pages marked change=edit|new (PLAN.md marks them; .deckhand/work/ holds only those) — the app's own layout and kept pages stay as they are",
+              "path=pool|mine|scratch: {dh} rebrand apply             # his name, tagline and colours on the app BEFORE he sees it (G2); the leak check comes in brand",
               "{dh} dev start                      # services first, then the app; prints the local URL for the owner",
               "{dh} phase done build  → give the owner the URL, logins, what you tested; wait for their go (G2)"],
     "brand": ["{dh} rebrand scan && {dh} rebrand apply     # brand from the brief: name, tagline, primary colour, icon",
