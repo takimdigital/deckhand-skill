@@ -198,8 +198,9 @@ def _next_step(root: Path) -> dict:
     gate = STATE.blocking_gate(s)
     cur = STATE.current(s)
     if gate:
-        out = {"state": "waiting for the owner", "gate": gate, "what": STATE.GATES[gate],
-               "do": [f"show the owner what {gate} is about; ask ONE question; on their go: {DH} gate pass {gate} --quote \"<their words, verbatim>\"",
+        who = STATE.approver(root)
+        out = {"state": f"waiting for the {who}", "gate": gate, "what": STATE.GATES[gate], "approver": who,
+               "do": [f"show the {who} what {gate} is about; ask ONE question; on their go: {DH} gate pass {gate} --quote \"<their words, verbatim>\"",
                       f"their words ask for changes (\"make it…\", \"add…\", \"but…\"): {DH} reopen <phase> --reason \"<their words>\" — not a go"],
                "dh": DH, "pending": _pending(root)}
         wfp = _workflow(root)

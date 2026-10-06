@@ -43,6 +43,14 @@ def owner_gate(s: dict, gate: str) -> bool:
 PATHS = ("pool", "mine", "existing", "scratch")
 
 
+def approver(root: Path) -> str:
+    """Who gives the go at a gate: "client" on a project built for a client (`dh init --for client`, or
+    brief.deliverable=client), else "owner" (foundation audit F5)."""
+    from . import profile as PROFILE
+    brief = read_json(Path(root) / ".deckhand" / "brief.json", {}) or {}
+    return "client" if PROFILE.scope(root) == "client" or brief.get("deliverable") == "client" else "owner"
+
+
 def state_path(root: Path) -> Path:
     return Path(root) / ".deckhand" / "run.json"
 
@@ -372,7 +380,7 @@ def gate_pass(root: Path, gate: str, note: str = "", quote: str | None = None) -
                                      "the owner did say go? quote the words that say it (\"ok go\", \"approved\", \"G1 ok\")"])
     with locked(root):
         s = load(root)
-        s["gates"][gate] = {"status": "passed", "at": now(), "by": "owner", "note": note, **({"plan_hashes": _plan_hashes(root)} if gate == "G1" else {}),
+        s["gates"][gate] = {"status": "passed", "at": now(), "by": approver(root), "note": note, **({"plan_hashes": _plan_hashes(root)} if gate == "G1" else {}),
                             **({"quote": quote, "verdict": verdict} if quote is not None else {})}
         save(root, s)
         log(root, {"event": "gate", "gate": gate, "note": note, **({"quote": quote, "verdict": verdict} if quote is not None else {})})
