@@ -17,7 +17,15 @@ if (Test-Path $dest) { throw "Refusing to overwrite $dest" }
 New-Item -ItemType Directory -Force (Join-Path $state 'bin'), (Split-Path $dest -Parent) | Out-Null
 Copy-Item -Recurse $src $dest
 $shim = Join-Path $state 'bin\hf.cmd'
-$cmd = "@echo off`r`nset \"DECKHAND_HOME=%HARBORFORGE_HOME%\"`r`nif \"%HARBORFORGE_HOME%\"==\"\" set \"DECKHAND_HOME=%USERPROFILE%\.harborforge\state\"`r`npy \"$dest\dh.py\" %*`r`n"
+$cmd = @'
+@echo off
+if "%HARBORFORGE_HOME%"=="" (
+  set "DECKHAND_HOME=%USERPROFILE%\.harborforge\state"
+) else (
+  set "DECKHAND_HOME=%HARBORFORGE_HOME%"
+)
+py "%USERPROFILE%\.harborforge\skill\harborforge\dh.py" %*
+'@
 Set-Content -Path $shim -Value $cmd -Encoding Ascii
 Write-Host "Harborforge lab ready: $shim next"
 Write-Warning 'Do not use Harborforge in an existing Deckhand project while project-state namespacing remains unfinished.'
