@@ -1,0 +1,31 @@
+name: Harborforge Lab Checks
+on:
+  push:
+    branches: [harborforge-lab]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  python:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Lab regression tests
+        run: python -m unittest discover -s skills/harborforge/tests -p test_lab_regressions.py -v
+      - name: Full copied Python suite
+        run: python -m unittest discover -s skills/harborforge/tests
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Copied Try-on tests
+        run: node --test skills/harborforge/tryon/test/*.test.mjs
