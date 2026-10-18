@@ -20,8 +20,9 @@ class LabRegressions(unittest.TestCase):
     def test_deploy_guard_handles_current_and_legacy_state(self):
         with tempfile.TemporaryDirectory() as d:
             project = Path(d)
-            (project / ".deckhand").mkdir()
-            write_json(project / ".deckhand" / "run.json", {"gates": {"G4": {"status": "pending"}}})
+            project.mkdir()
+            with mock.patch.dict(os.environ, {"DECKHAND_HOME": str(project.parent / "hf-state")}):
+                state.init(project, "Bakery", "phased", "pool")
             for key in ("app_uuid", "app"):
                 write_json(project / ".deckhand" / "deploy.json", {key: "uuid", "url": "https://example.invalid"})
                 self.assertTrue(hooks._g4_owed(project), key)
