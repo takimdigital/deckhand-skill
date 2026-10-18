@@ -1,0 +1,717 @@
+{
+  "repo": "vstorm-co/full-stack-ai-agent-template",
+  "slug": "full-stack-ai-agent-template",
+  "measured_at": "2026-09-24T03:06:58Z",
+  "upstream_commit": "3428d9a6214619d3514312886d59a36400747b7d",
+  "default_branch": "main",
+  "archived": false,
+  "size_kb": 254768,
+  "languages": {
+    "Python": 60.1,
+    "TypeScript": 37.9,
+    "CSS": 0.7,
+    "HTML": 0.4,
+    "Makefile": 0.4,
+    "MDX": 0.2,
+    "Dockerfile": 0.1,
+    "JavaScript": 0.1,
+    "Mako": 0.0
+  },
+  "framework": {
+    "name": "GENERATOR (not an app): Python CLI 'fastapi-fullstack' (cookiecutter) -> emits FastAPI backend + Next.js app-router frontend",
+    "version": "generator 0.2.19 ; generated frontend next ^15.1.0",
+    "router": "app",
+    "notes": "This repo is a PROJECT GENERATOR, not a clone-and-run app. Root is a Python package (fastapi_gen/) published to PyPI as 'fastapi-fullstack' with [project.scripts] fastapi-fullstack = fastapi_gen.cli:main; it renders template/{{cookiecutter.project_slug}}/ from template/cookiecutter.json. There is NO root Makefile/app entrypoint - `git clone` gives you the generator, not a website. To get an app you run `uv tool install fastapi-fullstack && fastapi-fullstack create my_app` (or the web configurator), then `cd my_app && make bootstrap`. The GENERATED app is FastAPI (Python 3.12 default) + Next.js 15 App Router (55 pages, 92 route handlers, 190 components) - that generated app is what a business would deploy, and it only exists after generation."
+  },
+  "package_manager": "uv",
+  "node_or_python_requirement": "generator requires-python >=3.11; generated backend requires-python >=3.12 (cookiecutter python_version default); generated frontend runs on bun (oven/bun:1 image, bun.lock) with Next.js 15",
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "Not a workspace monorepo. Layout is generator (fastapi_gen/, tests/) + a Jinja-cookiecutter template tree under template/{{cookiecutter.project_slug}}/{backend,frontend}. The rendered project is a 2-dir layout (backend/ + frontend/), not an npm workspace."
+  },
+  "stack": {
+    "db": "postgres",
+    "orm": "sqlalchemy",
+    "auth": {
+      "provider": "custom",
+      "methods": [
+        "email-password",
+        "oauth",
+        "magic-link",
+        "api-key"
+      ],
+      "roles": [
+        "user",
+        "admin"
+      ],
+      "notes": "Own implementation, not a SaaS: backend/app/api/routes/v1/auth.py + app/core/security.py, JWT HS256 (pyjwt) + bcrypt + optional X-API-Key, optional Google OAuth via authlib, optional delegated/JWKS IdP mode, multi-org RBAC with role + is_app_admin. No Clerk/NextAuth/better-auth anywhere."
+    },
+    "ui": [
+      "tailwind",
+      "shadcn",
+      "radix",
+      "lucide-react",
+      "recharts"
+    ],
+    "i18n": {
+      "library": "next-intl",
+      "default": "en",
+      "locales": [
+        "en",
+        "pl"
+      ],
+      "rtl_aware": false,
+      "translation_files": 2
+    },
+    "payments": {
+      "provider": "stripe",
+      "model": "subscription",
+      "webhooks": true
+    },
+    "email": {
+      "provider": "resend",
+      "templates": 10,
+      "transactional": true
+    },
+    "analytics": [],
+    "jobs": [
+      "celery",
+      "taskiq",
+      "arq",
+      "prefect"
+    ],
+    "search": [
+      "tavily-web-search",
+      "rag-vector-search-milvus/qdrant/chromadb/pgvector"
+    ],
+    "storage": [
+      "s3-minio",
+      "local-media"
+    ],
+    "realtime": [
+      "websockets"
+    ],
+    "flags": [],
+    "observability": [
+      "logfire",
+      "langsmith",
+      "sentry",
+      "prometheus",
+      "opentelemetry"
+    ]
+  },
+  "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "organizations",
+    "billing",
+    "i18n",
+    "uploads",
+    "search",
+    "jobs",
+    "notifications",
+    "chat-streaming",
+    "rag-knowledge-bases",
+    "api-keys",
+    "audit-log",
+    "conversation-sharing",
+    "magic-link",
+    "onboarding",
+    "contacts-marketing-site",
+    "mcp-client",
+    "usage-credits"
+  ],
+  "routes": {
+    "pages": [
+      "/[locale]",
+      "/[locale]/about",
+      "/[locale]/pricing",
+      "/[locale]/blog",
+      "/[locale]/blog/[slug]",
+      "/[locale]/changelog",
+      "/[locale]/community",
+      "/[locale]/contact",
+      "/[locale]/help",
+      "/[locale]/security",
+      "/[locale]/legal/privacy",
+      "/[locale]/legal/terms",
+      "/[locale]/legal/cookies",
+      "/[locale]/onboarding/[step]",
+      "/[locale]/(auth)/login",
+      "/[locale]/(auth)/register",
+      "/[locale]/(auth)/forgot-password",
+      "/[locale]/(auth)/reset-password",
+      "/[locale]/(auth)/magic-link-sent",
+      "/[locale]/auth/magic-link",
+      "/[locale]/auth/callback",
+      "/[locale]/(dashboard)/dashboard",
+      "/[locale]/(dashboard)/chat",
+      "/[locale]/(dashboard)/profile",
+      "/[locale]/(dashboard)/settings/account",
+      "/[locale]/(dashboard)/settings/profile",
+      "/[locale]/(dashboard)/settings/appearance",
+      "/[locale]/(dashboard)/settings/notifications",
+      "/[locale]/(dashboard)/settings/integrations",
+      "/[locale]/(dashboard)/settings/slash-commands",
+      "/[locale]/(dashboard)/orgs",
+      "/[locale]/(dashboard)/orgs/[id]/members",
+      "/[locale]/(dashboard)/orgs/[id]/integrations",
+      "/[locale]/(dashboard)/kb",
+      "/[locale]/(dashboard)/kb/[id]",
+      "/[locale]/(dashboard)/rag",
+      "/[locale]/(dashboard)/billing",
+      "/[locale]/(dashboard)/billing/subscription",
+      "/[locale]/(dashboard)/billing/usage",
+      "/[locale]/(dashboard)/billing/invoices",
+      "/[locale]/(dashboard)/billing/payment-methods",
+      "/[locale]/(dashboard)/billing/credits",
+      "/[locale]/(dashboard)/admin",
+      "/[locale]/(dashboard)/admin/users",
+      "/[locale]/(dashboard)/admin/conversations",
+      "/[locale]/(dashboard)/admin/ratings",
+      "/[locale]/(dashboard)/admin/stripe-events",
+      "/[locale]/(dashboard)/admin/system",
+      "/[locale]/(dashboard)/invitations/[token]",
+      "/[locale]/shared/[token]",
+      "/[locale]/demo",
+      "/[locale]/demo/[id]",
+      "/[locale]/(dashboard)/dev/components"
+    ],
+    "api": [
+      "frontend: /api/auth/login",
+      "/api/auth/register",
+      "/api/auth/logout",
+      "/api/auth/refresh",
+      "/api/auth/me",
+      "/api/auth/oauth-callback",
+      "/api/auth/magic-link/request",
+      "/api/auth/magic-link/verify",
+      "/api/auth/password-reset/request",
+      "/api/auth/password-reset/confirm",
+      "/api/billing/checkout",
+      "/api/billing/portal",
+      "/api/billing/invoices",
+      "/api/billing/me/[...path]",
+      "/api/conversations",
+      "/api/conversations/[id]",
+      "/api/conversations/[id]/messages",
+      "/api/conversations/[id]/shares",
+      "/api/conversations/[id]/messages/[messageId]/rate",
+      "/api/conversations/export",
+      "/api/files/upload",
+      "/api/files/[id]",
+      "/api/kb",
+      "/api/kb/[id]",
+      "/api/kb/[id]/documents",
+      "/api/kb/[id]/sync-sources",
+      "/api/orgs",
+      "/api/orgs/[id]",
+      "/api/orgs/[id]/members",
+      "/api/orgs/[id]/invitations",
+      "/api/me/mcp-connections",
+      "/api/me/slash-commands",
+      "/api/admin/stats",
+      "/api/admin/users",
+      "/api/admin/ratings",
+      "/api/v1/rag/collections",
+      "/api/v1/rag/documents",
+      "/api/v1/rag/search",
+      "/api/v1/agent/models",
+      "/api/health",
+      "backend: /api/v1/auth/*",
+      "/api/v1/agent",
+      "/api/v1/conversations",
+      "/api/v1/knowledge-bases",
+      "/api/v1/billing",
+      "/api/v1/organizations",
+      "/api/v1/invitations",
+      "/api/v1/files",
+      "/api/v1/rag",
+      "/api/v1/webhooks",
+      "/api/v1/sessions",
+      "/api/v1/channels/telegram/webhook",
+      "/api/v1/channels/slack/webhook",
+      "/api/v1/marketing",
+      "/api/v1/contact",
+      "/api/v1/admin/{users,conversations,ratings,stats}",
+      "/ws (WebSocket chat stream)"
+    ],
+    "protected": [
+      "/[locale]/(dashboard)/*  (middleware.ts gates the whole group)",
+      "/api/admin/*",
+      "/api/orgs/*"
+    ],
+    "count": 147,
+    "notes": "55 page.tsx + 92 route.ts under template/.../frontend/src/app/ (167 total Next.js entrypoints, minus 20 layout.tsx), plus 31 FastAPI route modules under template/.../backend/app/api/routes/v1/. count=147 is pages(55)+api(92) for the generated app."
+  },
+  "env": {
+    "count": 136,
+    "names": [
+      "PROJECT_NAME",
+      "DEBUG",
+      "DB_ECHO",
+      "ENVIRONMENT",
+      "TIMEZONE",
+      "MODELS_CACHE_DIR",
+      "POSTGRES_HOST",
+      "POSTGRES_PORT",
+      "POSTGRES_USER",
+      "POSTGRES_PASSWORD",
+      "POSTGRES_DB",
+      "SECRET_KEY",
+      "ACCESS_TOKEN_EXPIRE_MINUTES",
+      "ALGORITHM",
+      "API_KEY",
+      "API_KEY_HEADER",
+      "LOGFIRE_TOKEN",
+      "LOGFIRE_SERVICE_NAME",
+      "LOGFIRE_ENVIRONMENT",
+      "REDIS_HOST",
+      "REDIS_PORT",
+      "REDIS_DB",
+      "REDIS_PASSWORD",
+      "CELERY_BROKER_URL",
+      "CELERY_RESULT_BACKEND",
+      "TASKIQ_BROKER_URL",
+      "TASKIQ_RESULT_BACKEND",
+      "ARQ_REDIS_HOST",
+      "PREFECT_API_URL",
+      "PREFECT_API_KEY",
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "GOOGLE_API_KEY",
+      "OPENROUTER_API_KEY",
+      "AI_MODEL",
+      "AI_TEMPERATURE",
+      "AI_THINKING_ENABLED",
+      "AI_THINKING_EFFORT",
+      "TAVILY_API_KEY",
+      "LANGCHAIN_API_KEY",
+      "LANGCHAIN_PROJECT",
+      "SENTRY_DSN",
+      "PROMETHEUS_METRICS_PATH",
+      "S3_ENDPOINT",
+      "S3_ACCESS_KEY",
+      "S3_SECRET_KEY",
+      "S3_BUCKET",
+      "S3_REGION",
+      "MILVUS_HOST",
+      "MILVUS_TOKEN",
+      "QDRANT_HOST",
+      "QDRANT_API_KEY",
+      "CHROMA_HOST",
+      "CHROMA_PERSIST_DIR",
+      "EMBEDDING_MODEL",
+      "VOYAGE_API_KEY",
+      "COHERE_API_KEY",
+      "HF_TOKEN",
+      "LLAMAPARSE_API_KEY",
+      "PDF_PARSER",
+      "CHAT_PDF_PARSER",
+      "LITEPARSE_OCR_SERVER_URL",
+      "GOOGLE_DRIVE_CREDENTIALS_FILE",
+      "S3_RAG_ACCESS_KEY",
+      "S3_RAG_SECRET_KEY",
+      "MCP_SERVERS",
+      "MCP_CONNECT_TIMEOUT_SECS",
+      "TELEGRAM_WEBHOOK_BASE_URL",
+      "SLACK_SIGNING_SECRET",
+      "SLACK_BOT_TOKEN",
+      "SLACK_APP_TOKEN",
+      "CHANNEL_ENCRYPTION_KEY",
+      "EMAIL_FROM",
+      "EMAIL_FROM_NAME",
+      "RESEND_API_KEY",
+      "SMTP_HOST",
+      "SMTP_PORT",
+      "SMTP_USER",
+      "SMTP_PASSWORD",
+      "SMTP_TLS",
+      "STRIPE_SECRET_KEY",
+      "STRIPE_PUBLISHABLE_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "CREDITS_PER_USD",
+      "CORS_ORIGINS",
+      "DOMAIN",
+      "ACME_EMAIL",
+      "FLOWER_USER",
+      "FLOWER_PASSWORD",
+      "BACKEND_URL",
+      "NEXT_PUBLIC_WS_URL",
+      "NEXT_PUBLIC_API_URL",
+      "NEXT_PUBLIC_SITE_URL",
+      "NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB",
+      "NEXT_PUBLIC_RAG_ENABLED",
+      "NEXT_PUBLIC_OAUTH_PROVIDERS",
+      "NEXT_PUBLIC_BRAND_COLOR",
+      "NEXT_PUBLIC_BRAND_LOGO_URL",
+      "COOKIE_SECURE",
+      "OTEL_EXPORTER_OTLP_ENDPOINT",
+      "OTEL_EXPORTER_OTLP_HEADERS",
+      "DEEPAGENTS_BACKEND_TYPE"
+    ],
+    "required_at_build": [
+      "NEXT_PUBLIC_API_URL",
+      "NEXT_PUBLIC_WS_URL",
+      "NEXT_PUBLIC_SITE_URL",
+      "NEXT_PUBLIC_RAG_ENABLED"
+    ],
+    "notes": "136 unique names measured (130 from template/.../backend/.env.example + 6 from template/.../frontend/.env.example); names list above is a 102-name subset, the rest are feature-flag toggles (DEEPAGENTS_*, RAG_*, ENABLE_*). Values in .env.example are placeholders only (change-me-in-production, sk_test_xxx, re_xxx) - no real credentials committed. frontend/.env.example states NEXT_PUBLIC_* is inlined at build time and must be set BEFORE `bun run build` (Docker: build arg in docker-compose.frontend.yml); next.config.ts reads EMBED_ALLOWED_ORIGINS at build time too when embed mode is on."
+  },
+  "deploy": {
+    "docker": true,
+    "dockerfile_port": 8000,
+    "compose": true,
+    "standalone_output": true,
+    "build_cmd": "generator: `uv tool install fastapi-fullstack` then `fastapi-fullstack create <name>`; generated frontend: `bun install && bun run build`; generated backend runs from image (`make bootstrap` = build + up + migrate + seed)",
+    "start_cmd": "`make dev` / `make prod` (docker compose) - frontend container CMD [\"bun\",\"server.js\"]; backend uvicorn on 8000",
+    "migrations_cmd": "make db-migrate  (alembic upgrade head, 28 versioned migrations in backend/alembic/versions/)",
+    "paas_coupling": [
+      "vercel",
+      "docker-compose",
+      "kubernetes",
+      "traefik",
+      "nginx",
+      "gitlab-ci",
+      "github-actions"
+    ],
+    "notes": "Dockerfiles: backend/Dockerfile (python:X-slim, uv sync --frozen from uv.lock, EXPOSE 8000, non-root appuser) and frontend/Dockerfile (oven/bun:1 multi-stage, output standalone copied to runner, EXPOSE 3000). Four compose files (docker-compose.yml/.dev/.prod/.frontend) + kubernetes/ (deployment, service, ingress, configmap, secret, kustomization) + nginx/nginx.conf + Traefik labels option. frontend/vercel.json exists (framework nextjs, buildCommand bun run build) so Vercel is a first-class target. Dockerfile builds use `--frozen` so uv.lock must be current."
+  },
+  "tests": {
+    "frameworks": [
+      "pytest",
+      "vitest",
+      "playwright",
+      "testing-library"
+    ],
+    "unit_files": 55,
+    "e2e_files": 4,
+    "ci_workflows": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/release.yml",
+      ".github/workflows/docs.yml",
+      ".github/workflows/rename-guard.yml",
+      ".gitlab-ci.yml (generated project)"
+    ],
+    "notes": "Two layers. REPO (generator): tests/ with 21 test_*.py (test_generator, test_template_integration, test_upgrade_*, test_cli). GENERATED project: 34 backend tests (backend/tests/ incl. test_tenant_isolation, test_rbac_teams, test_ssrf, test_stripe_seats) and frontend vitest (only 1 unit test file found: components/ui/button.test.tsx) + 3 playwright e2e specs + auth.setup.ts. Generated jinja CI runs ruff + ty + pytest (with postgres service) + pip-audit + Trivy, frontend lint/type-check/vitest/playwright. Repo README claims `coverage-100%` badge and pyproject sets fail_under=100 for the generated app."
+  },
+  "vendor": [
+    {
+      "name": "stripe",
+      "where": [
+        "template/.../backend/pyproject.toml",
+        "backend/.env.example (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET)",
+        "backend/app/services/billing/",
+        "frontend/src/app/[locale]/(dashboard)/billing/*"
+      ],
+      "what_it_does": "subscriptions, checkout, invoices, seat-based billing, credit ledger",
+      "swap_target_hint": "lemonsqueezy/polar (cookiecutter already offers paddle/lemonsqueezy/polar as options)",
+      "effort_guess": "3-5 days"
+    },
+    {
+      "name": "openai",
+      "where": [
+        "template/.../backend/pyproject.toml (pydantic-ai-slim[openai])",
+        "backend/.env.example (OPENAI_API_KEY, AI_MODEL, EMBEDDING_MODEL)"
+      ],
+      "what_it_does": "default LLM + default embeddings provider",
+      "swap_target_hint": "anthropic/google/openrouter (cookiecutter llm_provider flag, code branches already exist)",
+      "effort_guess": "hours (flag) - 1 day"
+    },
+    {
+      "name": "anthropic",
+      "where": [
+        "backend/pyproject.toml (langchain-anthropic, pydantic-ai-slim[anthropic])",
+        "backend/.env.example ANTHROPIC_API_KEY"
+      ],
+      "what_it_does": "alternative LLM provider",
+      "swap_target_hint": "n/a - built-in option",
+      "effort_guess": "hours"
+    },
+    {
+      "name": "google",
+      "where": [
+        "backend/pyproject.toml (langchain-google-genai, google-genai, google-api-python-client)",
+        "backend/.env.example GOOGLE_API_KEY, GOOGLE_DRIVE_*"
+      ],
+      "what_it_does": "Gemini LLM, Gemini embeddings, Google Drive RAG ingestion",
+      "swap_target_hint": "n/a",
+      "effort_guess": "hours"
+    },
+    {
+      "name": "resend",
+      "where": [
+        "backend/pyproject.toml (resend>=2.0.0, gated on enable_email)",
+        "backend/.env.example RESEND_API_KEY",
+        "backend/app/services/email/providers/resend.py"
+      ],
+      "what_it_does": "transactional email + newsletter",
+      "swap_target_hint": "smtp (already implemented: providers/smtp.py) or sendgrid",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "vercel",
+      "where": [
+        "template/.../frontend/vercel.json",
+        "frontend/Dockerfile",
+        "frontend/src/app/[locale]/layout.tsx (Vercel Analytics path)"
+      ],
+      "what_it_does": "deployment target for the frontend (framework detection + bun build)",
+      "swap_target_hint": "docker/compose (already shipped) or netlify",
+      "effort_guess": "hours"
+    },
+    {
+      "name": "pydantic-logfire",
+      "where": [
+        "backend/pyproject.toml (logfire[fastapi]>=4.30.0, ON by default)",
+        "backend/.env.example LOGFIRE_TOKEN",
+        "frontend/.env.example OTEL_EXPORTER_OTLP_ENDPOINT"
+      ],
+      "what_it_does": "default observability/tracing (Pydantic's hosted service)",
+      "swap_target_hint": "remove the logfire flag / keep OpenTelemetry only",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "langsmith",
+      "where": [
+        "backend/pyproject.toml (langsmith, enable_langsmith flag)",
+        "backend/.env.example LANGCHAIN_API_KEY"
+      ],
+      "what_it_does": "LLM tracing for the LangChain/LangGraph agent options",
+      "swap_target_hint": "drop it (flag off by default)",
+      "effort_guess": "1 hour"
+    },
+    {
+      "name": "sentry",
+      "where": [
+        "backend/pyproject.toml (sentry-sdk[fastapi], flag off by default)",
+        "backend/.env.example SENTRY_DSN"
+      ],
+      "what_it_does": "error tracking",
+      "swap_target_hint": "glitchtip/self-hosted",
+      "effort_guess": "1 hour"
+    },
+    {
+      "name": "tavily",
+      "where": [
+        "backend/pyproject.toml (tavily-python, enable_web_search flag)",
+        "backend/.env.example TAVILY_API_KEY"
+      ],
+      "what_it_does": "agent web-search tool",
+      "swap_target_hint": "duckduckgo (pydantic-ai-slim[duckduckgo] already pulled in) or brave",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "milvus / qdrant / chromadb (vector DBs)",
+      "where": [
+        "backend/pyproject.toml (pymilvus, qdrant-client, chromadb, gated on enable_rag)",
+        "backend/.env.example MILVUS_*/QDRANT_*/CHROMA_*"
+      ],
+      "what_it_does": "RAG vector store (milvus is the cookiecutter default)",
+      "swap_target_hint": "pgvector (no extra dep - reuses postgres)",
+      "effort_guess": "1-2 days"
+    },
+    {
+      "name": "slack",
+      "where": [
+        "backend/pyproject.toml (slack-sdk, use_slack flag)",
+        "backend/.env.example SLACK_*",
+        "backend/app/api/routes/v1/slack_webhook.py"
+      ],
+      "what_it_does": "agent as a Slack bot channel",
+      "swap_target_hint": "telegram/teams (telegram already implemented)",
+      "effort_guess": "1 day"
+    },
+    {
+      "name": "telegram",
+      "where": [
+        "backend/pyproject.toml (aiogram>=3.17,<4.0, use_telegram flag)",
+        "backend/app/api/routes/v1/telegram_webhook.py",
+        "backend/.env.example TELEGRAM_WEBHOOK_BASE_URL"
+      ],
+      "what_it_does": "agent as a Telegram bot channel",
+      "swap_target_hint": "n/a",
+      "effort_guess": "1 day"
+    },
+    {
+      "name": "llamacloud (LlamaParse)",
+      "where": [
+        "backend/pyproject.toml (llama-cloud, use_llamaparse flag)",
+        "backend/.env.example LLAMAPARSE_API_KEY"
+      ],
+      "what_it_does": "AI PDF parsing for RAG ingestion",
+      "swap_target_hint": "pymupdf (local, default) or liteparse",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "cohere / voyageai",
+      "where": [
+        "backend/pyproject.toml (cohere, voyageai - optional reranker/embeddings)"
+      ],
+      "what_it_does": "reranking and embeddings",
+      "swap_target_hint": "local sentence-transformers / cross-encoder (both already options)",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "prefect",
+      "where": [
+        "backend/pyproject.toml (prefect>=3.4.0, use_prefect flag, prefect_cloud sub-flag)",
+        "backend/.env.example PREFECT_API_KEY (commented)"
+      ],
+      "what_it_does": "workflow orchestration alternative to celery",
+      "swap_target_hint": "celery/taskiq/arq (all implemented) or self-host prefect",
+      "effort_guess": "1 day"
+    },
+    {
+      "name": "google workspace / google-cloud (drive ingestion + OAuth)",
+      "where": [
+        "backend/pyproject.toml (google-api-python-client, google-auth)",
+        "backend/.env.example GOOGLE_DRIVE_CREDENTIALS_FILE, GOOGLE_DRIVE_CLIENT_SECRET"
+      ],
+      "what_it_does": "Google Drive RAG ingestion + Google OAuth login",
+      "swap_target_hint": "drop the feature or use a service account",
+      "effort_guess": "1 day"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "template/{{cookiecutter.project_slug}}/frontend/src/lib/seo.ts (SITE constant)",
+      "kind": "metadata",
+      "note": "site name/url/description/locales drive metadata, OG tags and canonical URLs in [locale]/layout.tsx"
+    },
+    {
+      "path": "template/{{cookiecutter.project_slug}}/frontend/next.config.ts (publicRuntimeConfig.appName)",
+      "kind": "metadata",
+      "note": "app name injected from cookiecutter project_name"
+    },
+    {
+      "path": "template/{{cookiecutter.project_slug}}/frontend/messages/en.json + pl.json",
+      "kind": "copy",
+      "note": "all UI strings incl. marketing landing copy live here (39KB/41KB)"
+    },
+    {
+      "path": "template/{{cookiecutter.project_slug}}/frontend/src/components/brand-override.tsx",
+      "kind": "logo",
+      "note": "optional brand color/logo injection (enable_brand_from_config) fed by NEXT_PUBLIC_BRAND_COLOR / NEXT_PUBLIC_BRAND_LOGO_URL build args"
+    },
+    {
+      "path": "template/{{cookiecutter.project_slug}}/frontend/src/app/globals.css",
+      "kind": "theme",
+      "note": "Tailwind v4 theme tokens / brand hue (cookiecutter brand_color_hue, default 250)"
+    },
+    {
+      "path": "template/{{cookiecutter.project_slug}}/backend/.env.example (EMAIL_FROM, DOMAIN, ACME_EMAIL)",
+      "kind": "domain",
+      "note": "noreply@<slug>.com and DOMAIN=example.com placeholders must be replaced"
+    },
+    {
+      "path": "template/{{cookiecutter.project_slug}}/emails/compiled/*.html",
+      "kind": "email",
+      "note": "10 compiled email templates (verification, invitation, magic_link, low_credits, newsletter_welcome) carry the product name"
+    },
+    {
+      "path": "template/{{cookiecutter.project_slug}}/frontend/public/",
+      "kind": "logo",
+      "note": "public/ is EMPTY (.gitkeep only) - favicon/logo assets must be added by the user"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "README quick start seeds a demo admin: admin@example.com / admin123 (make seed / `user create --email admin@example.com --superuser`)",
+    "cookiecutter defaults are placeholder copy: project_name 'my_project', description 'A FastAPI project', author 'Your Name' / your@email.com",
+    "backend/.env.example ships DOMAIN=example.com, ACME_EMAIL=admin@example.com, SMTP_HOST=smtp.example.com, EMAIL_FROM=noreply@<slug>.com",
+    "frontend/src/components/marketing/testimonial-grid.tsx + testimonial-carousel.tsx exist but render items passed in as props (no fake quotes baked in - the /page.tsx supplies them)",
+    "frontend/src/app/[locale]/demo/ and components/demo/demo-replay.tsx - a ~56KB demo-replay player plus /[locale]/demo/[id] page shipped only when enable_demo_export is on",
+    "frontend/src/app/[locale]/(dashboard)/dev/components/page.tsx - a UI component gallery page left in the generated app (gated by nothing but its route)",
+    "frontend/src/components/marketing/* (35 files) - a full marketing site (pricing, blog, changelog, community, legal pages) with English/Polish copy in messages/*.json"
+  ],
+  "pitfalls": [
+    {
+      "kind": "docs-lie",
+      "detail": "The README's Quick Start ('cd my_ai_app && make bootstrap') documents the GENERATED project, not this repo. Cloning the repo gives you a Python CLI with no root Makefile and no runnable app - a fresh agent that follows the README in the clone will look for make targets that do not exist at the repo root.",
+      "evidence": "README.md lines ~110-135 vs root tree (no Makefile, no app/ dir); Makefile exists only at template/{{cookiecutter.project_slug}}/Makefile"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "NEXT_PUBLIC_API_URL / NEXT_PUBLIC_WS_URL / NEXT_PUBLIC_SITE_URL are inlined into the client bundle at build time. Next.js bakes whatever is present when `bun run build` runs - a wrong or missing value produces a build that installs fine and then 401s/unreachable-WebSockets in the browser. In Docker they must be passed as build ARGs.",
+      "evidence": "template/.../frontend/.env.example comments ('has to be set before bun run build - in Docker that means a build arg'); frontend/Dockerfile ARG NEXT_PUBLIC_* block"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "frontend package.json has \"prepare\": \"husky\" - run on every install, it fails/no-ops outside a git repo and needs husky in devDependencies.",
+      "evidence": "template/{{cookiecutter.project_slug}}/frontend/package.json scripts.prepare"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "Backend needs compiled/binary deps: psycopg2-binary and asyncpg (wheels), plus the image installs Node.js 20 and `npm i -g @llamaindex/liteparse` when the liteparse parser is selected, and RAG OCR expects tesseract. Dockerfile builds use `uv sync --frozen`, so a stale uv.lock breaks the build.",
+      "evidence": "template/.../backend/pyproject.toml dependencies; backend/Dockerfile nodejs/liteparse RUN block; backend/.env.example RAG_ENABLE_OCR note"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "The generated backend pins FastAPI <0.137 AND fastapi-pagination <0.15.16 because 0.15.16 breaks against every FastAPI below 0.140.5 (app dies on import). Unpinning either without checking the other will break the app at import time.",
+      "evidence": "template/.../backend/pyproject.toml comments on fastapi>=0.135.3,<0.137 and fastapi-pagination>=0.12.31,<0.15.16"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "Repo is ~254 MB of git objects because assets/ holds 108 MB of GIF/MP4/PNG screenshots (~330 files). A full clone/download is slow and the media is irrelevant to running the tool.",
+      "evidence": "gh api repos/vstorm-co/full-stack-ai-agent-template -> size 254768 KB; git tree sums assets/ = 108,087,380 bytes"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "53 of 88 CLI flags were never rendered by CI until the 0.2.19 release (the maintainers' own changelog admits rate limiting shipped guarding no route and delegated-auth mode left self-registration mounted, allowing a stranger to self-register and reach /admin on a fresh delegated deployment). Fixed in 0.2.19 - pin >=0.2.19, do not vendor an older generator.",
+      "evidence": "CHANGELOG.md 0.2.19 Security entries; template/.../backend/app/api/routes/v1/auth.py"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "Generated admin panel (/admin, SQLAdmin) is live for local/development/staging environments and .env.example ships ENVIRONMENT=local, with make seed creating admin@example.com/admin123 - a generated project deployed without changing ENVIRONMENT and the seed password is trivially compromised.",
+      "evidence": "backend/.env.example ENVIRONMENT=local + seed admin block; README make seed credentials"
+    }
+  ],
+  "blocking": [],
+  "complexity": {
+    "pages": 55,
+    "components": 190,
+    "db_models": 25,
+    "migrations": 28,
+    "loc_estimate": 95000
+  },
+  "health": {
+    "stars": 1912,
+    "forks": 379,
+    "open_issues": 16,
+    "contributors": 7,
+    "top_contributor_share": 0.8,
+    "last_commit": "2026-08-01",
+    "last_release": "0.2.19",
+    "commits_last_90d": 25,
+    "issues_closed_last_90d": 6,
+    "notes": "top_contributor_share computed from contributors API: DEENUU1 323 of (323+41+16+11+6+1)=398 commits = 0.81 (7 contributors incl. anon). Last commit to the default branch is 2026-08-01 (repo `pushed_at` is 2026-09-21 but that is a non-default ref / bot activity - the HEAD commit 3428d9a is dated 2026-08-01). 16 open issues total; only 1 of those is a real issue (the rest are PRs). Bus factor is 1, effectively."
+  },
+  "verdict": {
+    "best_for": "A business that needs a production-grade AI-agent web app (RAG chat, subscriptions, multi-tenant orgs, admin panel) as GENERATED SOURCE they own - pick your flags, get a real FastAPI+Next.js codebase with 28 migrations, Docker/k8s, Stripe billing and i18n already wired.",
+    "weak_for": "Anyone wanting a repo to clone-and-run or a non-AI SaaS: this is a generator (you must install the CLI or use the web configurator to get an app at all), and every generated project carries the AI-agent assumption (Pydantic AI/LangChain) plus a 55-page, 190-component frontend you will spend real time deleting.",
+    "swap_burden": "medium - vendors are all feature-flagged with code branches already written (Stripe->Paddle/LS/Polar, OpenAI->Anthropic/Google, Milvus->pgvector, LangSmith/Sentry off by default), but the generated app is 95k LOC across two languages and the frontend's 190 components + 2-locale copy are hand-rewriting, not a config flip."
+  },
+  "evidence": {
+    "framework": "pyproject.toml [project.scripts] fastapi-fullstack = fastapi_gen.cli:main + template/cookiecutter.json + template/.../frontend/package.json (next ^15.1.0) + template/.../backend/pyproject.toml",
+    "stack": "template/cookiecutter.json (database/orm_type/auth/ai_framework defaults) + template/.../backend/pyproject.toml + template/.../frontend/package.json",
+    "auth": "template/{{cookiecutter.project_slug}}/backend/app/api/routes/v1/auth.py + app/core/security.py + app/db/models/user.py (role, is_app_admin)",
+    "i18n": "template/.../frontend/src/i18n.ts (locales = [\"en\",\"pl\"], no RTL locale) + frontend/messages/{en,pl}.json",
+    "vendor": "template/.../backend/pyproject.toml dependencies + template/.../frontend/package.json + backend/.env.example + frontend/.env.example (names only, no values)",
+    "deploy": "template/.../backend/Dockerfile + frontend/Dockerfile + docker-compose.yml/.dev/.prod/.frontend + kubernetes/ + nginx/nginx.conf + frontend/vercel.json",
+    "routes": "gh api repos/vstorm-co/full-stack-ai-agent-template/git/trees/main?recursive=1 (55 page.tsx, 92 route.ts, 31 backend api/routes/v1 modules)",
+    "health": "gh api repos/vstorm-co/full-stack-ai-agent-template{,/contributors,/releases,/commits,/issues} + search/issues closed:>=2026-06-25",
+    "blocking": "PyPI/npm existence probes for every non-obvious dep returned 200 (liteparse, pydantic-monty, pydantic-deep, subagents-pydantic-ai, summarization-pydantic-ai, pydantic-ai-todo, pydantic-ai-skills, pydantic-ai-backend, fastapi-pagination, lenis, react-leaflet, next-mdx-remote) - no phantom deps; .env.example values grepped for sk_live/pk_live/ghp_/xoxb-/AIza - none; template/.claude/settings.json contains only read-only git allow-rules, no hooks"
+  },
+  "unmeasured": [
+    "LOC is an ESTIMATE, not counted: derived from git blob byte sizes for template/ source (.py 1,841,104 B + .tsx 1,229,287 B + .ts 431,587 B) divided by ~40; no clone was made.",
+    "Runtime verification: nothing was installed or executed (remote-API measurement only), so I cannot confirm the generated app actually boots, that make bootstrap succeeds, or that the Stripe/agent flows work end to end.",
+    "Generated-project file counts are for the TEMPLATE AS SHIPPED (cookiecutter defaults are not the same as every output): e.g. 55 pages/92 route handlers exist for the full-featured render; a minimal render drops many. The repo ships a preset list but I did not render any preset.",
+    "Template variant matrix: cookiecutter.json exposes ~190 flags, so migration count (28), env count and route count vary per render; the numbers above are for the shipped template tree, not a specific render.",
+    "Whether assets/*.mp4 and .gif are actually referenced by docs (not checked file-by-file).",
+    "Email template count (10) counts files under emails/compiled/ seen in the tree; per-provider template selection logic was not read.",
+    "contributors API reports 7 (including anons); GitHub's contributor graph may count differently for large histories - top_contributor_share 0.80 is from the contributors API contribution counts.",
+    "Repo-level CI status / coverage: I read the workflow YAML but did not query check-runs, so whether main is green today is not measured."
+  ]
+}

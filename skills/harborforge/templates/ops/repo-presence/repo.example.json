@@ -1,0 +1,38 @@
+{
+  "repo": "owner/name",
+  "name": "App Name",
+  "tagline": "One line — what it does, for whom.",
+  "live_url": "https://example.com",
+  "version": "1.0.0",
+  "intro": "2–3 plain sentences: what it is, who it's for, how it's hosted. Facts only, no marketing fluff.",
+  "features": [
+    "**Feature name** — what the user actually gets (max ~8 bullets, honest, present tense)",
+    "**Second feature** — …"
+  ],
+  "stack": "Next.js · TypeScript · Postgres + Drizzle · self-hosted on a VPS via Coolify",
+  "setup_commands": [
+    "pnpm install",
+    "cp .env.example .env      # fill values (see below)",
+    "pnpm db:migrate",
+    "pnpm dev                  # http://localhost:3000"
+  ],
+  "env_note": "Vars are read from `.env`; `.env.example` lists every key.",
+  "env_table": [
+    "| `DATABASE_URL` | Postgres connection string |",
+    "| `AUTH_SECRET` | long random string that signs sessions |"
+  ],
+  "layout": [
+    "app/          routes",
+    "lib/          db, domain logic",
+    "scripts/      one-off tools + verifiers"
+  ],
+  "ci_line": "GitHub Actions runs typecheck + tests on every push (`.github/workflows/ci.yml`).",
+  "deploy_notes": "Builds from `main` (GitHub); a deploy is triggered explicitly after each push — the dashboard is loopback-only, so nothing deploys by itself, and docs-only commits don't need one.",
+  "status": "**Live since YYYY-MM-DD** · release **v1.0.0** · free tier: … · paid: …",
+  "package_json": true,
+  "license": "proprietary",
+  "license_owner": "Owner Name",
+  "license_derived_from": "nextjs/saas-starter (MIT — original notice retained below)",
+  "description": "GitHub repo description (≤160 chars): what it is + live site.",
+  "topics": ["nextjs", "postgresql", "saas"]
+}

@@ -1,0 +1,401 @@
+{
+  "repo": "burakorkmez/cal-ai-tutorial",
+  "slug": "cal-ai-tutorial",
+  "measured_at": "2026-09-24T03:07:44Z",
+  "upstream_commit": "7e9b0c43055cc175a5d0fb2e5a04c5f259823b40",
+  "default_branch": "master",
+  "archived": false,
+  "size_kb": 12866,
+  "languages": {
+    "TypeScript": 57.7,
+    "HTML": 34.7,
+    "CSS": 5.1,
+    "JavaScript": 2.5
+  },
+  "framework": {
+    "name": "expo",
+    "version": "~57.0.8",
+    "router": "expo-router",
+    "notes": "Expo SDK 57 + React Native 0.86 + React 19.2.3, expo-router file-based routing (typedRoutes + reactCompiler experiments on, app.json), NativeWind 4 for styling. FIRST-PASS CORRECTION: this is NOT react-vite — there is no vite/webpack/react-dom app, no index.html app shell and no `vite` script; package.json main is 'expo-router/entry' and the only web target is app.json web.output='server'. Also: default branch is 'master', not 'main'. Server code is Expo Router API routes (src/app/api/*+api.ts) under web.output='server', intended for EAS Hosting (PLAN.md A8)."
+  },
+  "package_manager": "npm",
+  "node_or_python_requirement": null,
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "Single Expo app at repo root; no workspaces key in package.json, no packages//apps/ dirs."
+  },
+  "stack": {
+    "db": "postgres",
+    "orm": "drizzle",
+    "auth": {
+      "provider": "clerk",
+      "methods": [
+        "oauth-google",
+        "oauth-apple"
+      ],
+      "roles": [
+        "user"
+      ],
+      "notes": "@clerk/expo v4 (useSSO, useAuth) on the client; @clerk/backend verifyToken guards API routes (src/lib/server-auth.ts) and createClerkClient deletes the Clerk user on account deletion; Clerk -> Trigger.dev webhook at src/app/api/webhooks/clerk+api.ts (svix signature + idempotency keys). Single role, no admin/teams — PLAN.md says explicitly no admin, no sharing. Native Google/Apple SSO requires an EAS dev build, not Expo Go. DATABASE_URL + CLERK_SECRET_KEY are hard-required: src/db/index.ts and src/lib/server-auth.ts throw when unset."
+    },
+    "ui": [
+      "nativewind",
+      "tailwind",
+      "react-native-reanimated",
+      "react-native-gesture-handler",
+      "react-native-svg",
+      "expo-symbols",
+      "expo-image",
+      "@expo/ui"
+    ],
+    "i18n": {
+      "library": "none",
+      "default": "en",
+      "locales": [
+        "en"
+      ],
+      "rtl_aware": false,
+      "translation_files": 0
+    },
+    "payments": {
+      "provider": "none",
+      "model": "none",
+      "webhooks": false
+    },
+    "email": {
+      "provider": "none",
+      "templates": 0,
+      "transactional": false
+    },
+    "analytics": [],
+    "jobs": [
+      "trigger.dev"
+    ],
+    "search": [],
+    "storage": [
+      "imagekit"
+    ],
+    "realtime": [
+      "trigger.dev-realtime"
+    ],
+    "flags": [],
+    "observability": [
+      "sentry"
+    ]
+  },
+  "features": [
+    "accounts",
+    "onboarding",
+    "dashboard",
+    "uploads",
+    "ai-meal-analysis",
+    "background-jobs",
+    "realtime-updates",
+    "account-deletion",
+    "streaks",
+    "meal-history"
+  ],
+  "routes": {
+    "pages": [
+      "/",
+      "/sign-in",
+      "/onboarding/[step]",
+      "/onboarding/plan",
+      "/onboarding/plan-includes",
+      "/onboarding/building",
+      "/home",
+      "/camera",
+      "/profile",
+      "/debug-sentry"
+    ],
+    "api": [
+      "/api/meals",
+      "/api/plan",
+      "/api/profile",
+      "/api/webhooks/clerk"
+    ],
+    "protected": [
+      "/home",
+      "/camera",
+      "/profile"
+    ],
+    "count": 14
+  },
+  "env": {
+    "count": 10,
+    "names": [
+      "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY",
+      "CLERK_SECRET_KEY",
+      "CLERK_WEBHOOK_SIGNING_SECRET",
+      "DATABASE_URL",
+      "TRIGGER_SECRET_KEY",
+      "OPENAI_API_KEY",
+      "IMAGEKIT_PUBLIC_KEY",
+      "IMAGEKIT_SECRET_KEY",
+      "IMAGEKIT_URL_ENDPOINT",
+      "SENTRY_AUTH_TOKEN"
+    ],
+    "required_at_build": [
+      "SENTRY_AUTH_TOKEN"
+    ],
+    "notes": "Names come from the README .env block; there is no .env.example in the tree. Code only reads 5 of them: EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY (src/app/_layout.tsx, throws on boot if missing) and server-side CLERK_SECRET_KEY, CLERK_WEBHOOK_SIGNING_SECRET, DATABASE_URL, IMAGEKIT_SECRET_KEY. OPENAI_API_KEY and TRIGGER_SECRET_KEY are read by the openai / @trigger.dev SDKs, not by name in the source. SENTRY_AUTH_TOKEN is consumed by the @sentry/react-native/expo config plugin (app.json) and getSentryExpoConfig (metro.config.js) during native build / sourcemap upload, hence the build-time entry. IMAGEKIT_PUBLIC_KEY and IMAGEKIT_URL_ENDPOINT are dead names (see pitfalls). No environment variable VALUES appear anywhere in tracked files."
+  },
+  "deploy": {
+    "docker": false,
+    "dockerfile_port": null,
+    "compose": false,
+    "standalone_output": null,
+    "build_cmd": null,
+    "start_cmd": "npm start (expo start)",
+    "migrations_cmd": "npm run db:migrate (drizzle-kit migrate)",
+    "paas_coupling": [
+      "expo-eas-hosting",
+      "trigger.dev-cloud",
+      "clerk-hosted",
+      "neon-managed"
+    ],
+    "notes": "No Dockerfile, no compose, no CI, no build script in package.json (scripts are start/android/ios/web/lint/db:*). Native dirs /ios and /android are gitignored (Expo CNG prebuild) so the mobile app is built via `npx expo run:ios|android` locally or EAS. API routes only exist as Expo Router server routes (app.json web.output='server'), which PLAN.md A8/R4 ties to EAS Hosting with a documented fallback to a standalone Hono server; Trigger.dev tasks deploy to Trigger.dev cloud from trigger.config.ts. app.json does not set the expo-router `origin`, which src/lib/api.ts says a production build needs for relative fetch('/api/...') calls."
+  },
+  "tests": {
+    "frameworks": [],
+    "unit_files": 1,
+    "e2e_files": 0,
+    "ci_workflows": [],
+    "notes": "The only test-like artifact is src/lib/plan.check.ts — a self-check script run with `node --experimental-strip-types src/lib/plan.check.ts` (node:assert/strict, asserts the Mifflin-St Jeor math, the AI-plan validator and the zod trust boundary); tsconfig explicitly excludes '**/*.check.ts'. No jest/vitest/playwright/testing-library in dependencies, no .github directory, and PLAN.md A8 states the project intentionally has 'no staging, no CI/CD'."
+  },
+  "vendor": [
+    {
+      "name": "clerk",
+      "where": [
+        "package.json (@clerk/expo ^4.0.3, @clerk/backend ^3.13.1)",
+        "app.json plugins",
+        "src/app/sign-in.tsx",
+        "src/lib/server-auth.ts",
+        "src/app/api/webhooks/clerk+api.ts",
+        ".env names CLERK_SECRET_KEY / CLERK_WEBHOOK_SIGNING_SECRET / EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY"
+      ],
+      "what_it_does": "auth, sessions, JWT verification, user lifecycle webhooks",
+      "swap_target_hint": "better-auth (with the Expo/native plugin) or Supabase auth",
+      "effort_guess": "2-3 days"
+    },
+    {
+      "name": "neon",
+      "where": [
+        "package.json (@neondatabase/serverless ^1.1.0)",
+        "src/db/index.ts",
+        "drizzle.config.ts",
+        "scripts/seed.ts"
+      ],
+      "what_it_does": "managed Postgres over HTTP (drizzle-orm/neon-http driver, casing snake_case)",
+      "swap_target_hint": "any Postgres (Supabase/RDS/self-hosted) — swap the driver to node-postgres",
+      "effort_guess": "half a day"
+    },
+    {
+      "name": "openai",
+      "where": [
+        "package.json (openai ^6.49.0)",
+        "src/trigger/analyze-meal.ts",
+        "src/trigger/generate-plan.ts",
+        ".env name OPENAI_API_KEY"
+      ],
+      "what_it_does": "vision meal recognition (photo -> calories/macros) and AI daily-target generation, both via Responses API + zodTextFormat structured outputs, model gpt-5.6-luna",
+      "swap_target_hint": "any vision LLM with structured output (Anthropic/Gemini) or an on-prem model",
+      "effort_guess": "1 day"
+    },
+    {
+      "name": "trigger.dev",
+      "where": [
+        "package.json (@trigger.dev/sdk 4.5.9, @trigger.dev/react-hooks 4.5.9)",
+        "trigger.config.ts",
+        "src/trigger/*.ts",
+        ".env name TRIGGER_SECRET_KEY"
+      ],
+      "what_it_does": "background jobs with retries + Realtime run subscriptions (tasks: analyze-meal, generate-plan, clerk-user-created/updated/deleted)",
+      "swap_target_hint": "in-house queue (BullMQ/pg-boss) for the jobs plus SSE/websocket for scan status — the deepest lock-in in the repo",
+      "effort_guess": "3-5 days"
+    },
+    {
+      "name": "imagekit",
+      "where": [
+        "src/lib/imagekit.ts (REST, not an SDK dependency)",
+        ".env names IMAGEKIT_SECRET_KEY / (dead: IMAGEKIT_PUBLIC_KEY, IMAGEKIT_URL_ENDPOINT)"
+      ],
+      "what_it_does": "meal photo storage + resize transform + batch delete by filename prefix on account deletion",
+      "swap_target_hint": "S3/R2 with presigned uploads",
+      "effort_guess": "1 day"
+    },
+    {
+      "name": "sentry",
+      "where": [
+        "package.json (@sentry/react-native ~7.11.0)",
+        "app.json plugin @sentry/react-native/expo (org codesistency-gs, project cal-ai-tutorial)",
+        "metro.config.js (getSentryExpoConfig)",
+        "src/lib/api.ts (Sentry.logger.*)",
+        "src/app/debug-sentry.tsx"
+      ],
+      "what_it_does": "error tracking, structured logs, sourcemap upload, in-app debug screen",
+      "swap_target_hint": "none needed (free tier); removable",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "expo-eas",
+      "where": [
+        "package.json (expo ~57.0.8, expo-dev-client)",
+        "app.json (plugins, experiments)",
+        "PLAN.md A8/R4"
+      ],
+      "what_it_does": "native build/dev-client + the only documented host for the API routes (EAS Hosting)",
+      "swap_target_hint": "port the 4 route handlers to a standalone Node/Hono host (PLAN.md R4 fallback)",
+      "effort_guess": "1-2 days"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "app.json",
+      "kind": "metadata",
+      "note": "expo.name/slug 'cal-ai-tut', scheme 'calaitut', ios.bundleIdentifier com.burakorkmez.cal-ai-tut, android.package com.burakorkmez.calaitut, ios.appleTeamId (author's Apple team), icon/splash asset paths, camera + photos permission strings that name the app"
+    },
+    {
+      "path": "src/app/index.tsx",
+      "kind": "copy",
+      "note": "welcome screen: 'Bulky AI' wordmark + 'Calorie tracking made easy' + 'Get Started'"
+    },
+    {
+      "path": "legal/index.html",
+      "kind": "copy",
+      "note": "full marketing landing page ('Bulky AI — Calorie tracking made easy', FAQ, '© 2026 Bulky AI')"
+    },
+    {
+      "path": "legal/privacy.html",
+      "kind": "copy",
+      "note": "privacy policy draft, app name throughout, empty mailto:"
+    },
+    {
+      "path": "legal/terms.html",
+      "kind": "copy",
+      "note": "terms of service draft, app name throughout, placeholder contact + example.com references"
+    },
+    {
+      "path": "app.json",
+      "kind": "metadata",
+      "note": "@sentry/react-native/expo plugin pins organization 'codesistency-gs' and project 'cal-ai-tutorial'"
+    },
+    {
+      "path": "trigger.config.ts",
+      "kind": "metadata",
+      "note": "Trigger.dev project ref 'proj_yebuanulzvpzjcrtbbjf' with the comment 'Cal AI Clone'"
+    },
+    {
+      "path": "assets/images/",
+      "kind": "logo",
+      "note": "brand assets: icon.png (799 KB), logo-dark/logo-glow/logo-mark, phone-mockup, screenshot-for-readme, tabIcons/"
+    },
+    {
+      "path": "src/constants/theme.ts",
+      "kind": "theme",
+      "note": "app colour palette; screens also hardcode hex colours inline (e.g. #FEFDFD, #208AEF splash background)"
+    },
+    {
+      "path": "design-prompt.md",
+      "kind": "copy",
+      "note": "the same product is specified there under a third working name, 'Snapcal' — three names exist in-tree (cal-ai-tut, Bulky AI, Snapcal)"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "legal/index.html: complete landing-page copy with FAQ, App Store / Google Play badges whose hrefs are '#' (no store URLs anywhere in the repo) and empty mailto: links; legal/_headers labels the pages 'Unreviewed drafts with unfilled placeholders' and keeps them noindex",
+    "legal/privacy.html + legal/terms.html: draft legal text with placeholder contact details and example.com references",
+    "scripts/seed.ts: seeds one demo user with fixed UUIDs, a real-looking Clerk user id and the author's personal Gmail address as the row email, plus 5 meals whose image_url values are unsplash.com photo URLs — a seeded account, not a product feature",
+    "design/ + assets/images: mockup PNGs (onboarding-1-5, welcome-screen-ui-design, settings-screen-design, phone-mockup, tutorial-web) used by the README and landing page — ~2.7 MB of design assets, not app code",
+    "src/app/debug-sentry.tsx: 11 KB Sentry test screen shipped inside the app tree",
+    "src/onboarding/steps.ts: all nine questionnaire screens and their option copy are inline data in the app (not user-editable content)"
+  ],
+  "pitfalls": [
+    {
+      "kind": "native-deps",
+      "detail": "Expo SDK 57 / RN 0.86 mobile app: /ios and /android are gitignored and never committed, so there is no server-style `install && run`. README's `npx expo run:ios|android` needs Xcode or the Android SDK locally and @clerk/expo's Google/Apple SSO needs an EAS dev build (Expo Go will not do). PLAN.md line 203: 'Create the EAS dev build early — Apple/Google credentials, bundle IDs. Do not defer this.'",
+      "evidence": "README.md Run the App section + .gitignore (/ios, /android) + app.json plugins [@clerk/expo] + PLAN.md"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "Server code throws at import when its key is unset: src/db/index.ts ('DATABASE_URL is not set'), src/lib/server-auth.ts ('Add CLERK_SECRET_KEY'), src/lib/imagekit.ts ('Add IMAGEKIT_SECRET_KEY'). Any API route or Trigger.dev task needs DATABASE_URL + CLERK_SECRET_KEY + IMAGEKIT_SECRET_KEY + TRIGGER_SECRET_KEY + OPENAI_API_KEY present before anything works.",
+      "evidence": "src/db/index.ts:7-8, src/lib/server-auth.ts:8-9, src/lib/imagekit.ts:7-8"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "The README .env block lists IMAGEKIT_PUBLIC_KEY and IMAGEKIT_URL_ENDPOINT, which no code path reads (all ImageKit traffic is server-side with the private key). Copying the README list verbatim adds two dead variables.",
+      "evidence": "README.md .env block vs grep for IMAGEKIT across every fetched src/**/*.ts|tsx — only IMAGEKIT_SECRET_KEY appears, in src/lib/imagekit.ts"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "src/lib/api.ts says a production build needs `origin` on the expo-router plugin in app.json pointing at the deployment; app.json lists \"expo-router\" with no options, so relative fetch('/api/...') calls in a native production build have no base URL. A fresh agent will watch the app hang on 'analyzing' before finding this.",
+      "evidence": "app.json plugins[] (bare \"expo-router\" entry) + src/lib/api.ts header comment"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "legal/ is an unwired static site: store badges href='#', every mailto: is empty, terms contains placeholders and example.com, and _headers keeps the whole thing noindex 'until the docs are final'. src/app/debug-sentry.tsx is a Sentry test screen reachable in the app tree.",
+      "evidence": "legal/index.html hrefs (mailto:, href=\"#\"), legal/terms.html placeholder/example.com lines, legal/_headers, src/app/debug-sentry.tsx"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "metro.config.js carries three hand-written resolver workarounds: a `browser` condition fallback for @trigger.dev/react-hooks' deps (nanoid/jose have no react-native key), dropping @s2-dev/streamstore's 'transport/s2s' import for Hermes, and a bugsnag/cuid '#fingerprint' special case. Bumping Trigger.dev or Clerk can silently break the native bundle — the file itself warns 'Expo HAS CHANGED' (AGENTS.md) about SDK 57.",
+      "evidence": "metro.config.js, AGENTS.md"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "Tightly pinned ecosystem: React 19.2.3 + RN 0.86.0 + expo ~57.0.8 + expo-router typed routes + reactCompiler experiment + NativeWind 4 on Tailwind 3 + TypeScript ~6.0.3. package-lock.json (lockfileVersion 3) is the only known-good combination — expect peer conflicts if any of these are bumped independently.",
+      "evidence": "package.json + package-lock.json"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "8 transitive packages declare install scripts in the lockfile (@sentry/cli, esbuild ×3, core-js, browser-tabs-lock, fsevents, unrs-resolver). Checked because a postinstall is the usual delivery vector: every one of the 1386 'resolved' entries points at https://registry.npmjs.org, none at a custom host, and package.json itself declares no install scripts.",
+      "evidence": "package-lock.json 'hasInstallScript' entries + `grep resolved` host histogram (1386/1386 registry.npmjs.org)"
+    }
+  ],
+  "blocking": [],
+  "complexity": {
+    "pages": 14,
+    "components": 24,
+    "db_models": 2,
+    "migrations": 2,
+    "loc_estimate": 3900
+  },
+  "health": {
+    "stars": 68,
+    "forks": 29,
+    "open_issues": 0,
+    "contributors": 1,
+    "top_contributor_share": 1.0,
+    "last_commit": "2026-08-04",
+    "last_release": null,
+    "commits_last_90d": 10,
+    "issues_closed_last_90d": 0
+  },
+  "verdict": {
+    "best_for": "A mobile-first AI photo logger: it is a genuinely functional product skeleton (anonymous onboarding -> AI-generated calorie/macro targets -> camera scan -> daily log with streaks and account deletion) for a consumer health, fitness or any-photo-logged app on iOS/Android.",
+    "weak_for": "Anything web-first, self-hosted or needing maintenance: the API exists only as Expo Router server routes aimed at EAS Hosting, it cannot run until four paid vendor accounts (Clerk, Neon, Trigger.dev, ImageKit) exist, and it is explicitly a course build — PLAN.md says 'This is a tutorial/course build', one author wrote all 10 commits over 10 days (2026-07-25 to 2026-08-04), there is no CI, no issue history and a single self-check file instead of a test suite.",
+    "swap_burden": "heavy — four coupled vendors (Clerk auth, Neon Postgres + Drizzle, Trigger.dev jobs + Realtime, ImageKit storage) are wired through routes, tasks and screens, and with no CI or tests nothing will catch a botched swap."
+  },
+  "evidence": {
+    "framework": "package.json (main: expo-router/entry, expo ~57.0.8, react-native 0.86.0), app.json (plugins, experiments, web.output), tree paths src/app/**",
+    "languages": "gh api repos/burakorkmez/cal-ai-tutorial/languages",
+    "auth": "src/app/sign-in.tsx (@clerk/expo useSSO oauth_apple/oauth_google), src/lib/server-auth.ts, src/app/api/webhooks/clerk+api.ts, src/db/schema.ts (clerkUserId unique)",
+    "vendor": "package.json dependencies + .env names in README.md + src/trigger/*.ts + src/lib/imagekit.ts + app.json sentry plugin",
+    "db": "src/db/schema.ts, src/db/index.ts, drizzle.config.ts, drizzle/0000_foamy_shatterstar.sql, drizzle/0001_narrow_bishop.sql",
+    "features": "route files under src/app/, src/trigger/*.ts task ids, src/lib/api.ts hooks (useProfile/useMeals/useLogMeal/deleteAccount)",
+    "env": "README.md .env block + grep of all fetched src/**/*.ts|tsx",
+    "deploy": "absence of Dockerfile/.github via gh api contents 404s + package.json scripts + app.json web.output + PLAN.md A8/R4",
+    "tests": "src/lib/plan.check.ts + tsconfig exclude '**/*.check.ts' + absence of .github (404)",
+    "health": "gh api repos/burakorkmez/cal-ai-tutorial, /contributors, /commits?per_page=100, /releases, /tags, /issues",
+    "tutorial_verdict": "PLAN.md ('This is a tutorial/course build', A8 'no staging, no CI/CD'), README.md course-style highlights list, commit history 2026-07-25..2026-08-04 all by burakorkmez",
+    "blocking_check": "character/scanner pass over every fetched text file for sk-*/sk_live_*/AKIA*/BEGIN PRIVATE KEY/JWT-shaped strings and for ignore-previous-instructions, curl|sh, base64-decode|sh patterns — no hits; the 6 committed .claude/skills/*/*.md (26 KB total) are Trigger.dev vendor docs; all 48 direct dependencies returned HTTP 200 from registry.npmjs.org and all 1386 lockfile 'resolved' URLs are registry.npmjs.org"
+  },
+  "unmeasured": [
+    "Whether the app installs and runs — measurement was remote-only by rule (no clone, no install, no execution); npm/EAS/Clerk/Neon/Trigger.dev/ImageKit integration is read from source, never exercised.",
+    "Real deployment state: no homepage field, no releases, no tags and no store URLs in the repo, so whether the app was ever published to the App Store / Google Play (the landing page implies it) could not be determined from the repo.",
+    "Node engine requirement: package.json has no engines field and there is no .nvmrc/.node-version; README only implies a Node capable of `--experimental-strip-types` for the check script and the drizzle-kit CLI.",
+    "Exact LOC: loc_estimate is a line count of the fetched src/**/*.ts|tsx + scripts/*.ts files (3917 lines) rounded; no cloc/tokei run and the static legal HTML/CSS (~2500 lines) and 2.7 MB of assets are excluded.",
+    "Contributor share: GitHub reports exactly one contributor (burakorkmez, 10 commits = 100%), but commit authorship for the 29 forks and any private collaboration is not measurable from the API.",
+    "Runtime behaviour of the 4 API routes and 4 Trigger.dev tasks, and the real error rates of the gpt-5.6-luna vision/plan calls."
+  ]
+}

@@ -1,0 +1,182 @@
+{
+ "version": 1,
+ "registry": "kokonutui",
+ "deckhand": "2.3.2",
+ "verdicts": {
+  "kokonutui/ai-input-search@any": {
+   "v": "fits",
+   "needs": [
+    "cn",
+    "motion"
+   ]
+  },
+  "kokonutui/ai-text-loading@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "kokonutui/apple-activity-card@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/2"
+  },
+  "kokonutui/attract-button@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "kokonutui/avatar-picker@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 4/10"
+  },
+  "kokonutui/background-paths@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/4"
+  },
+  "kokonutui/beams-background@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/4"
+  },
+  "kokonutui/bento-grid@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/8"
+  },
+  "kokonutui/card-flip@any": {
+   "v": "fits",
+   "carried": 2,
+   "of": 2
+  },
+  "kokonutui/card-stack@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/2"
+  },
+  "kokonutui/carousel-cards@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "kokonutui/command-button@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "kokonutui/dynamic-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "kokonutui/glitch-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "kokonutui/gradient-button@any": {
+   "v": "fits",
+   "carried": 1,
+   "of": 1
+  },
+  "kokonutui/hold-button@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "kokonutui/liquid-glass-card@any": {
+   "v": "fits",
+   "needs": [
+    "cn"
+   ],
+   "carried": 2,
+   "of": 2
+  },
+  "kokonutui/matrix-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "kokonutui/morphic-navbar@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/5"
+  },
+  "kokonutui/mouse-effect-card@any": {
+   "v": "fits",
+   "needs": [
+    "cn",
+    "motion"
+   ],
+   "carried": 2,
+   "of": 2
+  },
+  "kokonutui/particle-button@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "kokonutui/profile-dropdown@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/3"
+  },
+  "kokonutui/scroll-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "kokonutui/shape-hero@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 1/4"
+  },
+  "kokonutui/shimmer-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "kokonutui/sliced-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "kokonutui/slide-text-button@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "kokonutui/smooth-drawer@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/3"
+  },
+  "kokonutui/smooth-tab@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/3"
+  },
+  "kokonutui/social-button@any": {
+   "v": "fits",
+   "needs": [
+    "motion"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "kokonutui/switch-button@any": {
+   "v": "fits",
+   "needs": [
+    "next-themes"
+   ],
+   "carried": 1,
+   "of": 1
+  },
+  "kokonutui/swoosh-text@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 0/1"
+  },
+  "kokonutui/team-selector@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/10"
+  },
+  "kokonutui/tweet-card@any": {
+   "v": "refused",
+   "why": "POOR_FIT: carries 2/5"
+  }
+ }
+}

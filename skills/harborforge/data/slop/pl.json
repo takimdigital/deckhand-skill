@@ -1,0 +1,268 @@
+{
+  "schema": "deckhand.slop/1",
+  "lang": "pl",
+  "name": "Polski",
+  "maturity": "seed",
+  "maintainers": [
+    "deckhand"
+  ],
+  "script": "latin",
+  "suffixes": [
+    "a",
+    "e",
+    "y",
+    "i",
+    "ego",
+    "ej",
+    "ych",
+    "ym",
+    "ymi"
+  ],
+  "stopwords": [
+    "i",
+    "w",
+    "na",
+    "z",
+    "do",
+    "się",
+    "nie",
+    "to",
+    "że",
+    "jest",
+    "o",
+    "jak",
+    "dla",
+    "od",
+    "po",
+    "za",
+    "twój",
+    "twoja",
+    "nasz",
+    "nasza",
+    "nasze",
+    "oraz",
+    "przez",
+    "jako",
+    "ale",
+    "co",
+    "czy",
+    "tak",
+    "są",
+    "być"
+  ],
+  "words": {
+    "strong": [
+      "zrewolucjonizować|zrewolucjonizuj|rewolucyjny|rewolucyjna|rewolucyjne",
+      "przełomowy|przełomowa|przełomowe",
+      "holistyczny|holistyczne|holistyczna",
+      "synergia|synergii",
+      "paradygmat",
+      "niezrównany|niezrównana|niezrównane",
+      "bezprecedensowy|bezprecedensowa|bezprecedensowe",
+      "odblokuj|odblokować",
+      "zanurz|zanurzyć",
+      "gobelin",
+      "najnowocześniejszy|najnowocześniejsza|najnowocześniejsze|najnowocześniejszych",
+      "niezapomniany|niezapomniana|niezapomniane"
+    ],
+    "buzz": [
+      "innowacyjny|innowacyjna|innowacyjne|innowacyjnych",
+      "rozwiązania|rozwiązań",
+      "kompleksowy|kompleksowa|kompleksowe",
+      "optymalizować|zoptymalizuj",
+      "ekosystem",
+      "bezproblemowy|bezproblemowa|bezproblemowe",
+      "płynny|płynna|płynne",
+      "dynamiczny|dynamiczna",
+      "pasjonat|pasjonaci",
+      "wyjątkowy|wyjątkowa|wyjątkowe",
+      "unikalny|unikalna|unikalne",
+      "najwyższej jakości",
+      "szyty na miarę|szyte na miarę",
+      "doświadczenie"
+    ]
+  },
+  "fixes": {
+    "rozwiązania": "nazwij usługę",
+    "innowacyjny": "powiedz, co jest nowe",
+    "kompleksowy": "wymień, co obejmuje",
+    "najwyższej jakości": "dowód: materiał, certyfikat"
+  },
+  "phrases": [
+    {
+      "id": "dzisiejszy-swiat",
+      "kind": "opener",
+      "w": 4,
+      "rx": "w dzisiejszym (szybko zmieniającym się |dynamicznym |cyfrowym )?świecie|w (stale|szybko|ciągle) zmieniającym się świecie",
+      "example": "W dzisiejszym dynamicznym świecie liczy się czas.",
+      "fix": "zacznij od problemu klienta"
+    },
+    {
+      "id": "era-cyfrowa",
+      "kind": "opener",
+      "w": 3,
+      "rx": "w (erze|dobie) (cyfrowej|ai|sztucznej inteligencji|cyfryzacji)",
+      "example": "W erze cyfrowej strona to podstawa.",
+      "fix": "usuń"
+    },
+    {
+      "id": "warto-zauwazyc",
+      "kind": "hedge",
+      "w": 3,
+      "rx": "warto (zauważyć|podkreślić|zaznaczyć|pamiętać)|należy (zauważyć|podkreślić)",
+      "example": "Warto zauważyć, że działamy w niedziele.",
+      "fix": "podaj fakt"
+    },
+    {
+      "id": "nie-tylko-ale",
+      "kind": "structure",
+      "w": 2,
+      "rx": "nie tylko [^.;!?]{1,60},? (ale|lecz) (także|również|i)",
+      "example": "nie tylko szybko, ale także solidnie",
+      "fix": "dwa fakty, dwa zdania"
+    },
+    {
+      "id": "to-nie-to",
+      "kind": "structure",
+      "w": 3,
+      "rx": "to nie (tylko |jest tylko |jest )?[^.;!?]{1,50}[.,;—–-]+ ?to ",
+      "example": "To nie fryzura, to rytuał.",
+      "fix": "powiedz, czym to jest"
+    },
+    {
+      "id": "niezaleznie-czy",
+      "kind": "structure",
+      "w": 2,
+      "rx": "niezależnie od tego,? czy",
+      "example": "Niezależnie od tego, czy jesteś początkujący, zapraszamy.",
+      "fix": "powiedz, dla kogo"
+    },
+    {
+      "id": "nie-szukaj-dalej",
+      "kind": "cta",
+      "w": 3,
+      "rx": "nie szukaj dalej|nie czekaj dłużej|na co czekasz",
+      "example": "Szukasz hydraulika? Nie szukaj dalej.",
+      "fix": "jasny przycisk: Poproś o wycenę"
+    },
+    {
+      "id": "gotowy-na",
+      "kind": "cta",
+      "w": 2,
+      "rx": "gotow[ya]y? (na|do|by) [^?]{1,40}\\?",
+      "example": "Gotowy na zmianę swojego ogrodu?",
+      "fix": "jasny przycisk: Umów wizytę"
+    },
+    {
+      "id": "wyzszy-poziom",
+      "kind": "cta",
+      "w": 3,
+      "rx": "na (wyższy|kolejny|nowy) poziom",
+      "example": "Przenieś swój biznes na wyższy poziom.",
+      "fix": "wynik: 20 rezerwacji więcej tygodniowo"
+    },
+    {
+      "id": "potencjal",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(uwolnij|odblokuj|wykorzystaj|rozwiń) (swój |pełny |cały )?(pełny |swój )?potencjał",
+      "example": "Uwolnij swój pełny potencjał.",
+      "fix": "podaj wynik"
+    },
+    {
+      "id": "podsumowujac",
+      "kind": "closer",
+      "w": 2,
+      "rx": "^(podsumowując|reasumując|w podsumowaniu)[,.]",
+      "example": "Podsumowując, jesteśmy dla ciebie.",
+      "fix": "usuń"
+    },
+    {
+      "id": "w-marce-wierzymy",
+      "kind": "opener",
+      "w": 2,
+      "rx": "^w [a-z0-9ąćęłńóśźż&' -]{2,30} (wierzymy|rozumiemy)",
+      "example": "W Bloom wierzymy, że piękno jest osobiste.",
+      "fix": "powiedz, co robicie i dla kogo"
+    },
+    {
+      "id": "cos-wiecej-niz",
+      "kind": "structure",
+      "w": 2,
+      "rx": "(coś )?więcej niż (tylko |zwykł[ay] )",
+      "example": "więcej niż tylko piekarnia",
+      "fix": "powiedz, czym to jest"
+    },
+    {
+      "id": "doswiadczenie",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(niezapomniane|wyjątkowe|płynne|bezproblemowe) (doświadczenie|wrażenia|przeżycie)",
+      "example": "niezapomniane doświadczenie",
+      "fix": "powiedz, co się dzieje"
+    },
+    {
+      "id": "sercu",
+      "kind": "filler",
+      "w": 1,
+      "rx": "w (samym )?sercu",
+      "example": "w sercu Krakowa",
+      "fix": "ulica lub dzielnica"
+    },
+    {
+      "id": "chat-leak",
+      "kind": "leak",
+      "w": 5,
+      "rx": "jako (ai|model językowy|sztuczna inteligencja)|mam nadzieję, że to pomoże|świetne pytanie|oczywiście! oto|oto (poprawiona|ulepszona) wersja|śmiało (dostosuj|zmień)|\\[wstaw [a-ząćęłńóśźż ]+\\]",
+      "example": "Oczywiście! Oto sekcja dla twojej piekarni.",
+      "fix": "odpowiedź chatbota na stronie: usuń"
+    }
+  ],
+  "transitions": [
+    "ponadto",
+    "co więcej",
+    "dodatkowo",
+    "w związku z tym",
+    "zatem",
+    "dlatego",
+    "jednakże",
+    "niemniej",
+    "w rzeczywistości",
+    "ostatecznie",
+    "podsumowując",
+    "przede wszystkim"
+  ],
+  "superlatives": [
+    "najlepszy",
+    "najlepsza",
+    "najlepsze",
+    "najlepszych",
+    "lider",
+    "numer jeden",
+    "nr 1",
+    "#1",
+    "idealny",
+    "idealna",
+    "idealne",
+    "bezkonkurencyjny",
+    "bezkonkurencyjne"
+  ],
+  "and": [
+    "i",
+    "oraz",
+    "lub",
+    "a"
+  ],
+  "examples": {
+    "slop": [
+      "W dzisiejszym dynamicznym świecie nasze innowacyjne rozwiązania zrewolucjonizują twój biznes. Ponadto uwolnij swój pełny potencjał dzięki kompleksowym, bezproblemowym procesom.",
+      "W sercu Krakowa nasza piekarnia to coś więcej niż tylko piekarnia — to niezapomniane doświadczenie. Nie szukaj dalej.",
+      "Oczywiście! Oto sekcja dla twojego salonu fryzjerskiego."
+    ],
+    "clean": [
+      "Chleb na zakwasie, bagietki i croissanty pieczemy codziennie od 5 rano w Gdańsku. Zamów do 20 i odbierz następnego dnia.",
+      "Naprawiamy cieknące krany, zatkane odpływy i piece gazowe w Poznaniu. Dojazd kosztuje 80 zł, większość napraw trwa krócej niż godzinę.",
+      "Ana strzyże na ulicy Floriańskiej od 2009 roku. Strzyżenie z modelowaniem trwa 45 minut i kosztuje 90 zł."
+    ]
+  }
+}

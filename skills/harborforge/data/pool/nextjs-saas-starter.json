@@ -1,0 +1,400 @@
+{
+  "repo": "Shaisolaris/nextjs-saas-starter",
+  "slug": "nextjs-saas-starter",
+  "measured_at": "2026-09-23T22:14:56Z",
+  "upstream_commit": "f0b4448f7ea1e808a2341fa9722d58465814f308",
+  "default_branch": "main",
+  "archived": false,
+  "size_kb": 173,
+  "languages": {
+    "TypeScript": 75.8,
+    "JavaScript": 21.5,
+    "CSS": 1.4,
+    "Shell": 1.3
+  },
+  "framework": {
+    "name": "next",
+    "version": "14.2.35",
+    "router": "app",
+    "notes": "App Router only (src/app) with route groups (auth) and (dashboard); resolved version 14.2.35 in package-lock (package.json declares ^14.2.0). React 18.3.1. Middleware delegates to next-auth v4."
+  },
+  "package_manager": "npm",
+  "node_or_python_requirement": ">=18.17.0 (node_modules/next engines in package-lock.json); no engines field in package.json; CI pins Node 20",
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "single app at repo root; no turbo/workspaces/lerna config"
+  },
+  "stack": {
+    "db": "postgres",
+    "orm": "prisma",
+    "auth": {
+      "provider": "next-auth",
+      "methods": [
+        "email-password",
+        "oauth"
+      ],
+      "roles": [
+        "OWNER",
+        "ADMIN",
+        "MEMBER"
+      ],
+      "notes": "NextAuth v4.24 (not Auth.js v5); credentials + GitHub + Google; JWT session strategy, 30 days; PrismaAdapter present though strategy is jwt; UserRole enum has no VIEWER; events.createUser auto-creates a Tenant and sets role OWNER"
+    },
+    "ui": [
+      "tailwind"
+    ],
+    "i18n": {
+      "library": "none",
+      "default": "en",
+      "locales": [
+        "en"
+      ],
+      "rtl_aware": false,
+      "translation_files": 0
+    },
+    "payments": {
+      "provider": "stripe",
+      "model": "subscription",
+      "webhooks": true
+    },
+    "email": {
+      "provider": "none",
+      "templates": 0,
+      "transactional": false
+    },
+    "analytics": [],
+    "jobs": [],
+    "search": [],
+    "storage": [],
+    "realtime": [],
+    "flags": [],
+    "observability": []
+  },
+  "features": [
+    "accounts",
+    "dashboard",
+    "teams",
+    "billing"
+  ],
+  "routes": {
+    "pages": [
+      "/",
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/dashboard",
+      "/dashboard/projects",
+      "/dashboard/analytics",
+      "/dashboard/team",
+      "/dashboard/billing",
+      "/dashboard/settings"
+    ],
+    "api": [
+      "/api/auth/[...nextauth]",
+      "/api/users",
+      "/api/billing/checkout",
+      "/api/billing/portal",
+      "/api/billing/webhook"
+    ],
+    "protected": [
+      "/dashboard",
+      "/dashboard/projects",
+      "/dashboard/analytics",
+      "/dashboard/team",
+      "/dashboard/billing",
+      "/dashboard/settings"
+    ],
+    "count": 15
+  },
+  "env": {
+    "count": 20,
+    "names": [
+      "NEXTAUTH_SECRET",
+      "NEXTAUTH_URL",
+      "DATABASE_URL",
+      "STRIPE_SECRET_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+      "STRIPE_PRICE_PRO_MONTHLY",
+      "STRIPE_PRICE_PRO_YEARLY",
+      "STRIPE_PRICE_ENTERPRISE_MONTHLY",
+      "RESEND_API_KEY",
+      "EMAIL_FROM",
+      "NEXT_PUBLIC_APP_URL",
+      "NEXT_PUBLIC_APP_NAME",
+      "GITHUB_CLIENT_ID",
+      "GITHUB_CLIENT_SECRET",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "STRIPE_PRO_PRICE_ID",
+      "STRIPE_ENTERPRISE_PRICE_ID",
+      "DEMO_MODE"
+    ],
+    "required_at_build": [],
+    "notes": "13 names live in .env.example; 7 more are read only in code (the OAuth pairs, the two STRIPE_*_PRICE_ID actually used by src/lib/stripe.ts, DEMO_MODE). Only names recorded, no values. next.config.mjs reads no env and nothing fetches at build time, so next build should not need env (vercel.json buildCommand runs npx prisma generate && next build; prisma generate does not require DATABASE_URL) -- static reasoning only, not executed. Three .env.example names are never read by code: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (no @stripe/stripe-js), NEXT_PUBLIC_APP_NAME, STRIPE_PRICE_PRO_YEARLY."
+  },
+  "deploy": {
+    "docker": false,
+    "dockerfile_port": null,
+    "compose": false,
+    "standalone_output": false,
+    "build_cmd": "npm run build (next build); vercel.json overrides with \"npx prisma generate && next build\"",
+    "start_cmd": "npm run start (next start)",
+    "migrations_cmd": null,
+    "paas_coupling": [
+      "vercel"
+    ],
+    "notes": "No Dockerfile or compose file anywhere in the tree (open issue #3 asks for one) and next.config.mjs sets no output option, so self-hosting means writing the image and lifecycle yourself. No prisma migrate script exists and prisma/migrations/ is gitignored; schema changes go through npm run db:push (prisma db push). vercel.json sets framework nextjs and installCommand npm install. The README ships a Vercel one-click deploy button."
+  },
+  "tests": {
+    "frameworks": [],
+    "unit_files": 0,
+    "e2e_files": 0,
+    "ci_workflows": [
+      ".github/workflows/ci.yml"
+    ],
+    "notes": "Zero tests: no vitest/jest/playwright/testing-library in dependencies and no test or spec file in the tree. The only workflow triggers on push/PR to main and runs checkout, setup-node 20, npm install, npx prisma generate, npx tsc --noEmit -- typecheck only, no build, no lint, and npm install rather than npm ci."
+  },
+  "vendor": [
+    {
+      "name": "stripe",
+      "where": [
+        "package.json",
+        "src/lib/stripe.ts",
+        "src/app/api/billing/checkout/route.ts",
+        "src/app/api/billing/portal/route.ts",
+        "src/app/api/billing/webhook/route.ts",
+        "prisma/schema.prisma",
+        ".env.example"
+      ],
+      "what_it_does": "subscription billing: Checkout sessions, customer portal, webhook writes Tenant.stripeCustomerId/stripeSubId/stripePriceId/subStatus",
+      "swap_target_hint": "lemonsqueezy or paddle",
+      "effort_guess": "2-3 days"
+    },
+    {
+      "name": "vercel",
+      "where": [
+        "vercel.json",
+        "README.md"
+      ],
+      "what_it_does": "deployment target and build-command override; the only deploy path shipped",
+      "swap_target_hint": "own Dockerfile plus any VPS (must be written; issue #3)",
+      "effort_guess": "half day"
+    },
+    {
+      "name": "resend",
+      "where": [
+        ".env.example"
+      ],
+      "what_it_does": "nothing yet -- RESEND_API_KEY and EMAIL_FROM are declared but no resend package and no email code exist anywhere",
+      "swap_target_hint": "any provider once email is written",
+      "effort_guess": "1 day from scratch"
+    },
+    {
+      "name": "github-oauth",
+      "where": [
+        "src/lib/auth.ts",
+        ".env.example (GITHUB_CLIENT_ID/GITHUB_CLIENT_SECRET absent)"
+      ],
+      "what_it_does": "GitHub OAuth sign-in provider; client id and secret read with non-null assertions",
+      "swap_target_hint": "configure to keep or drop the provider",
+      "effort_guess": "1 hour"
+    },
+    {
+      "name": "google-oauth",
+      "where": [
+        "src/lib/auth.ts",
+        ".env.example (GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET absent)"
+      ],
+      "what_it_does": "Google OAuth sign-in provider; client id and secret read with non-null assertions",
+      "swap_target_hint": "configure to keep or drop the provider",
+      "effort_guess": "1 hour"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "src/app/layout.tsx",
+      "kind": "metadata",
+      "note": "title.default \"SaaSKit - Modern SaaS Starter\", title.template \"%s | SaaSKit\", description; html lang hardcoded en"
+    },
+    {
+      "path": "src/app/page.tsx",
+      "kind": "copy",
+      "note": "landing hero copy, inline feature grid, S logo block, footer"
+    },
+    {
+      "path": "src/components/layout/sidebar.tsx",
+      "kind": "logo",
+      "note": "SaaSKit wordmark, S logo block, hardcoded Free Plan upsell card"
+    },
+    {
+      "path": "src/components/layout/header.tsx",
+      "kind": "copy",
+      "note": "SaaSKit mobile heading; notification bell is decorative"
+    },
+    {
+      "path": "src/components/auth/auth-form.tsx",
+      "kind": "logo",
+      "note": "S logo block on login and register"
+    },
+    {
+      "path": "src/lib/stripe.ts",
+      "kind": "copy",
+      "note": "PLANS feature bullets and prices (Free, Pro 2900, Enterprise 9900 cents)"
+    },
+    {
+      "path": "src/app/(dashboard)/dashboard/billing/page.tsx",
+      "kind": "copy",
+      "note": "second, duplicated hardcoded PLANS list whose feature bullets differ from stripe.ts"
+    },
+    {
+      "path": "src/lib/demo-data.ts",
+      "kind": "copy",
+      "note": "Acme Corp tenant, Sarah Chen demo user, 6 sample projects, revenue and invoice figures"
+    },
+    {
+      "path": "src/app/(dashboard)/dashboard/settings/page.tsx",
+      "kind": "copy",
+      "note": "Organization inputs default to Acme Corp and acme-corp literals"
+    },
+    {
+      "path": ".env.example",
+      "kind": "domain",
+      "note": "NEXT_PUBLIC_APP_NAME=SaaS Starter, EMAIL_FROM=noreply@yourdomain.com, DATABASE_URL .../saas_db"
+    },
+    {
+      "path": "src/app/globals.css",
+      "kind": "theme",
+      "note": "CSS custom-property palette consumed by tailwind.config.ts"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "src/lib/demo-data.ts: DEMO_USER Sarah Chen (ADMIN, tenant demo-tenant-1), DEMO_TENANT \"Acme Corp\" (plan PRO)",
+    "src/lib/demo-data.ts: 6 fake projects (Website Redesign, Mobile App v2, ...), 5 fake team members including role VIEWER which the Prisma enum does not define",
+    "src/lib/demo-data.ts: 6 months of revenue and user series plus 4 fake invoices dated 2026",
+    "every dashboard page renders demo data even when DATABASE_URL is set, because src/lib/data.ts returns DEMO_* unconditionally",
+    "src/app/(dashboard)/dashboard/billing/page.tsx: Current Plan badge hardcoded to Pro; Upgrade/Downgrade buttons have no handler",
+    "src/app/(dashboard)/dashboard/settings/page.tsx: Organization name and slug pre-filled Acme Corp / acme-corp",
+    "src/components/layout/sidebar.tsx: Free Plan upgrade card regardless of the tenant plan",
+    "src/app/(auth)/forgot-password/page.tsx: setTimeout(1000) then \"We sent a password reset link to <email>\""
+  ],
+  "pitfalls": [
+    {
+      "kind": "docs-lie",
+      "detail": "postcss.config.mjs still carries an obfuscated JS payload (about 20.6 KB appended to line 12, after export default config;): whitespace padding then global[\"!\"]=\"9-5698-2\", hex-named functions, global[...]=require, closed as an IIFE. It is live JS on the same line, so it executes whenever PostCSS loads the config (next dev / next build). HEAD commit f0b4448f is titled \"security: remove injected obfuscated payload from postcss.config.mjs\" but its diff (-2/+1) only trimmed the front of the same line; the tail survives on main. Treat the checkout as compromised: audit or replace this file before running any npm script.",
+      "evidence": "postcss.config.mjs line 12 (20,661 chars) + patch of gh api repos/Shaisolaris/nextjs-saas-starter/commits/f0b4448f"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "Stripe price variables are mismatched: .env.example declares STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_PRO_YEARLY and STRIPE_PRICE_ENTERPRISE_MONTHLY, but src/lib/stripe.ts reads STRIPE_PRO_PRICE_ID and STRIPE_ENTERPRISE_PRICE_ID (falling back to empty string), so following the env file makes checkout post an empty priceId.",
+      "evidence": ".env.example vs src/lib/stripe.ts PLANS array"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "GitHub and Google providers are configured with non-null assertions on GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, none of which appear in .env.example -- the OAuth buttons on login render and then fail.",
+      "evidence": "src/lib/auth.ts + .env.example"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "The dashboard is demo-only by construction: src/lib/data.ts returns DEMO_* from every getter (getStats, getRecentProjects, getTeamMembers, getRevenueData, getActivity, getInvoices) regardless of demo mode, with \"In production: query database\" TODOs, and getCurrentUser swallows any error and falls back to DEMO_USER. The README claims of 6 pages with real data and per-tenant data scoping via Prisma middleware are not backed by code: src/lib/prisma.ts is a plain PrismaClient with no middleware.",
+      "evidence": "src/lib/data.ts, src/lib/demo-data.ts, src/lib/prisma.ts"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "Most interactive controls have no handlers: team Invite Member, projects New Project, settings Save Changes / Update Organization / Delete Account, billing Upgrade and Downgrade. Forgot-password waits one second and then claims an email was sent; there is no reset route, no reset table and no mailer.",
+      "evidence": "src/app/(auth)/forgot-password/page.tsx and the six (dashboard) pages"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "No migration story: prisma/migrations/ is listed in .gitignore and package.json has no prisma migrate script (only db:push, db:generate, db:studio), so there is nothing to replay in CI or at deploy time.",
+      "evidence": ".gitignore + package.json scripts"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "Deliberately dated stack: Next 14.2.35, React 18.3.1, NextAuth v4.24 rather than Auth.js v5. Anything assuming next-auth v5 (auth() helper, newer route signatures) or React 19 must rework the auth config, middleware and getServerSession call sites.",
+      "evidence": "package-lock.json resolved versions; src/middleware.ts; src/app/api/*/route.ts"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "Four declared dependencies are imported nowhere in the 54 tracked source and config files: recharts, sonner, date-fns, lucide-react (charts, toasts and icons are hand-rolled CSS bars and inline SVG). Expect dead install weight and misleading \"has charts/toasts\" assumptions.",
+      "evidence": "string scan of every tracked .ts/.tsx/.mjs/.js/.css/.json/.prisma/.yml/.sh file -- only package.json matches"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "Install-time scripts run for prisma, @prisma/client and @prisma/engines 5.22.0 (engine download plus client generate); CI works around it with an explicit npx prisma generate. No native compile is required (bcryptjs is pure JS; no better-sqlite3).",
+      "evidence": "package-lock.json hasInstallScript flags + .github/workflows/ci.yml"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "src/hooks/index.ts useMediaQuery is unsafe to copy: it reads window.matchMedia during render, attaches a change listener on every render with no cleanup, and calls useState after an early return, breaking the rules of hooks.",
+      "evidence": "src/hooks/index.ts"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "The README promises roles Owner/Admin/Member/Viewer and a team invite flow; the Prisma enum UserRole only defines OWNER, ADMIN and MEMBER (VIEWER exists only as a demo-data string) and there is no invite endpoint or email code -- the whole API surface is /api/users plus /api/billing/*.",
+      "evidence": "prisma/schema.prisma, src/lib/demo-data.ts, src/app/api tree"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "Commit d9dd66d8 advertises setup scripts, Docker, examples and a Makefile, but the tree contains only scripts/setup.sh: no Dockerfile, no Makefile, no examples dir (git history shows CI removed and re-added). Also committed: a 724 KB tsconfig.tsbuildinfo build artifact, larger than the reported repo size of 173 KB, plus a leftover config.bat line in .gitignore.",
+      "evidence": "git tree listing, .gitignore, gh api repos/.../commits"
+    }
+  ],
+  "complexity": {
+    "pages": 10,
+    "components": 15,
+    "db_models": 6,
+    "migrations": 0,
+    "loc_estimate": 2777
+  },
+  "health": {
+    "stars": 24,
+    "forks": 0,
+    "open_issues": 3,
+    "contributors": 1,
+    "top_contributor_share": 1.0,
+    "last_commit": "2026-06-05",
+    "last_release": "v1.0.0",
+    "commits_last_90d": 0,
+    "issues_closed_last_90d": 0
+  },
+  "verdict": {
+    "best_for": "A solo builder who wants a skinnable Next.js 14 SaaS UI shell (landing page, auth pages, six dashboard pages, working Stripe Checkout/portal/webhook plumbing) and accepts writing the real data layer, invites and email.",
+    "weak_for": "Anything expected to work on day one: tenant-scoped real data, team invites, password reset and transactional email, self-hosting (no Dockerfile, no standalone output), or any pipeline that would run the npm scripts before the postcss.config.mjs payload is removed.",
+    "swap_burden": "medium -- the Stripe checkout/portal/webhook trio and the Prisma schema are reusable, but the NextAuth v4 auth stack, the demo-only data layer, the missing migrations and the absent tests and email all need real work."
+  },
+  "evidence": {
+    "framework": "package.json (^14.2.0) + package-lock.json node_modules/next 14.2.35; next.config.mjs; src/app tree",
+    "stack": "prisma/schema.prisma (postgresql, 6 models, 4 enums), src/lib/auth.ts, src/lib/stripe.ts, src/lib/prisma.ts, tailwind.config.ts, plus a string scan of all 54 tracked source/config files (only package.json matches for recharts/sonner/date-fns/lucide-react; no match for resend, radix, framer-motion, next-intl, @stripe/stripe-js, sentry)",
+    "auth": "src/lib/auth.ts (providers, jwt/session callbacks, events.createUser), src/middleware.ts (next-auth/middleware, matcher /dashboard/:path*)",
+    "features": "gh api git/trees?recursive=1 plus reads of all 10 page.tsx files; src/lib/data.ts shows the dashboard reads demo data only",
+    "routes": "gh api git/trees recursive listing of page.tsx and route.ts paths",
+    "env": ".env.example plus a per-file grep of process.env.<NAME> across 27 source files",
+    "deploy": "vercel.json, next.config.mjs (no output option), full tree listing (no Dockerfile/compose), .gitignore (prisma/migrations/), package.json scripts",
+    "tests": "package.json dependencies (no test runner), .github/workflows/ci.yml, full tree listing (no test files)",
+    "vendor": ".env.example + package.json + src/lib/auth.ts + src/lib/stripe.ts + vercel.json",
+    "pitfalls": "postcss.config.mjs plus the patch of commit f0b4448f, .gitignore, package-lock.json install-script flags, git log messages, and per-file reads cited on each pitfall",
+    "complexity": "line counts of every tracked .ts/.tsx/.prisma/.css/.md/.yml/.sh/.json blob fetched from raw.githubusercontent (total 2,777 lines; excludes package-lock.json, tsconfig.tsbuildinfo and the postcss payload line)",
+    "health": "gh api repos/Shaisolaris/nextjs-saas-starter, /contributors, /commits, /releases, /issues, /commits?since=2026-06-25"
+  },
+  "unmeasured": [
+    "Build and run verification: the contract forbids cloning or executing the repo, so npm install, prisma generate, next build and whether the app boots are unverified -- and the postcss payload makes running it inadvisable before auditing.",
+    "Behavior of the injected obfuscated payload (what it would fetch or execute) was not analyzed beyond static markers; no deobfuscation was attempted.",
+    "Whether the CI workflow actually passes: workflow run history was not queried and the Actions API was not used.",
+    "Runtime env requirements beyond static reading: STRIPE_SECRET_KEY is instantiated at module scope in src/lib/stripe.ts, so a missing key fails at request time rather than build time -- reasoned, not proven.",
+    "Whether recharts/sonner/date-fns/lucide-react arrive transitively through other code paths (they are unused in-repo, but tree-shaking outcome was not measured).",
+    "Code-history breadth: only 12 commits exist and the GitHub code-search API was rate-limited (HTTP 403), so dependency-usage conclusions come from direct file reads rather than search counts.",
+    "Why pushed_at (2026-06-26) is later than the newest commit on main (2026-06-05): no other branches exist and refs/tags were not enumerated.",
+    "No live deployment URL exists (repo homepage is null and the README deploy link is a placeholder comment), so real rendering was never observed.",
+    "Database-level quality beyond the schema (indexes, seeding, provider limits on Neon/Supabase) and anything requiring a running database.",
+    "Loc estimate excludes package-lock.json, the committed tsconfig.tsbuildinfo and the obfuscated postcss line, which are not application code."
+  ],
+  "blocking": [
+    {
+      "kind": "injected-payload",
+      "why": "postcss.config.mjs ships ~20 KB of obfuscated JS welded onto the export line: 20,866 chars total, line 13 is 20,641 chars of which 20,039 are non-space (hex-escape soup: 0x-style literals, quotes, parens).",
+      "evidence": "verified by the pool owner: gh api repos/Shaisolaris/nextjs-saas-starter/contents/postcss.config.mjs -> 20,866 chars, line 13 = 20,641 chars (20,039 non-space)"
+    }
+  ]
+}

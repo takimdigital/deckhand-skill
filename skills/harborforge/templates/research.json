@@ -1,0 +1,23 @@
+{
+  "business_summary": "",
+  "audience": { "primary": "", "secondary": "", "language": "", "pains": [], "jobs_to_be_done": [] },
+  "competitors": [
+    { "name": "", "url": "https://", "positioning": "", "pricing": "", "strengths": [], "gaps": [] }
+  ],
+  "conversion": {
+    "plays": [],
+    "first_screen": [],
+    "trust": [],
+    "objections": []
+  },
+  "discovery": { "keywords": [], "local": false, "pages_that_rank": [] },
+  "current": {
+    "tools": [],
+    "process": ""
+  },
+  "features": { "now": [], "later": [], "not": [] },
+  "claims": [],
+  "vocabulary": [],
+  "unproven": [],
+  "sources": []
+}

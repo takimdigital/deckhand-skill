@@ -1,0 +1,743 @@
+{
+ "version": 2,
+ "policy": "MIT/Apache-2.0 only; every row measured from the live repository (dh pool add). Rows are facts, not opinions.",
+ "count": 12,
+ "templates": [
+  {
+   "name": "open-saas",
+   "repo": "wasp-lang/open-saas",
+   "url": "https://github.com/wasp-lang/open-saas",
+   "license": "MIT",
+   "stars": 15992,
+   "pushed_at": "2026-09-22",
+   "archived": false,
+   "branch": "main",
+   "commit": "cbd30162b05d798b3a3f955ab5781940b67bec89",
+   "lane": "web",
+   "shape": "saas",
+   "stack": {
+    "framework": "wasp",
+    "db": "postgres",
+    "orm": "none",
+    "auth": "custom",
+    "ui": [
+     "shadcn"
+    ],
+    "i18n": "dirs",
+    "rtl": false,
+    "docker": false,
+    "package_manager": "npm",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "billing",
+    "uploads",
+    "jobs",
+    "ai-demo-openai",
+    "contact-messages",
+    "analytics-dashboard",
+    "dark-mode",
+    "cookie-consent",
+    "credits",
+    "blog"
+   ],
+   "locales": [
+    "en"
+   ],
+   "vendors": [
+    "lemonsqueezy",
+    "openai",
+    "plausible",
+    "posthog",
+    "stripe"
+   ],
+   "swap_burden": "heavy",
+   "risks": [
+    "no-tests",
+    "no-docker"
+   ],
+   "weak_for": "Anyone who needs mainstream node tooling (no npm run dev/build), a non-Wasp framework, i18n/multi-tenancy/teams, or a test suite that runs offline - none of that is in the code, and the framework choice is the whole app.",
+   "measured": "github-api",
+   "measured_at": "2026-09-23T22:23:25Z",
+   "details": "pool/open-saas.json"
+  },
+  {
+   "name": "next-js-boilerplate",
+   "repo": "ixartz/Next-js-Boilerplate",
+   "url": "https://github.com/ixartz/Next-js-Boilerplate",
+   "license": "MIT",
+   "stars": 13079,
+   "pushed_at": "2026-09-09",
+   "archived": false,
+   "branch": "main",
+   "commit": "9df22d0980702729da01c4465b9fb8ca292d6cce",
+   "lane": "web",
+   "shape": "saas",
+   "stack": {
+    "framework": "next",
+    "db": "postgres",
+    "orm": "drizzle",
+    "auth": "clerk",
+    "ui": [
+     "tailwind"
+    ],
+    "i18n": "next-intl",
+    "rtl": false,
+    "docker": false,
+    "package_manager": "npm",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "dashboard",
+    "i18n"
+   ],
+   "locales": [
+    "en",
+    "fr"
+   ],
+   "vendors": [
+    "arcjet",
+    "clerk",
+    "posthog",
+    "sentry"
+   ],
+   "swap_burden": "light",
+   "risks": [
+    "no-docker"
+   ],
+   "weak_for": "Anything SaaS-shaped beyond accounts - no billing/Stripe, no teams, roles or permissions, no email, uploads, admin panel, analytics or API keys; the paid Pro/Plus sibling kits are where those live.",
+   "measured": "github-api",
+   "measured_at": "2026-09-23T22:23:28Z",
+   "details": "pool/next-js-boilerplate.json"
+  },
+  {
+   "name": "full-stack-fastapi-template",
+   "repo": "fastapi/full-stack-fastapi-template",
+   "url": "https://github.com/fastapi/full-stack-fastapi-template",
+   "license": "MIT",
+   "stars": 45711,
+   "pushed_at": "2026-09-18",
+   "archived": false,
+   "branch": "master",
+   "commit": "cb740b656d7a0a6c5e12c7bf8e50343ec94ee9c7",
+   "lane": "web",
+   "shape": null,
+   "stack": {
+    "framework": "fastapi",
+    "db": "postgres",
+    "orm": "sqlmodel",
+    "auth": "none",
+    "ui": [
+     "shadcn"
+    ],
+    "i18n": null,
+    "rtl": false,
+    "docker": true,
+    "package_manager": "bun",
+    "lang": "python"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "password-recovery",
+    "user-management-crud",
+    "items-crud-placeholder-domain",
+    "dark-mode",
+    "generated-typescript-api-client",
+    "docker-compose-deploy",
+    "email-templates",
+    "note: no teams/billing/i18n/uploads/search/jobs/realtime/api-keys/audit-log in code"
+   ],
+   "locales": [
+    "en"
+   ],
+   "vendors": [
+    "sentry"
+   ],
+   "swap_burden": "medium",
+   "risks": [],
+   "weak_for": "Anything needing multi-tenancy, teams/orgs, billing, i18n/RTL, file uploads, background jobs or a real Next.js/SSR frontend \u2014 none of those exist here, and the only domain model is a placeholder Item; it is also pinned to Python 3.14 and bleeding-edge JS majors.",
+   "measured": "github-api",
+   "measured_at": "2026-09-23T22:23:31Z",
+   "details": "pool/full-stack-fastapi-template.json"
+  },
+  {
+   "name": "micro-saas-starter-kit",
+   "repo": "UNC-GDSC/Micro-SaaS-Starter-Kit",
+   "url": "https://github.com/UNC-GDSC/Micro-SaaS-Starter-Kit",
+   "license": "MIT",
+   "stars": 2,
+   "pushed_at": "2025-11-23",
+   "archived": false,
+   "branch": "main",
+   "commit": "96a68ad7967b112a75956d37a51b3bef30c717c7",
+   "lane": "web",
+   "shape": "saas",
+   "stack": {
+    "framework": "next",
+    "db": "postgres",
+    "orm": "prisma",
+    "auth": "next-auth",
+    "ui": [
+     "tailwind"
+    ],
+    "i18n": null,
+    "rtl": false,
+    "docker": true,
+    "package_manager": "unknown",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "dashboard",
+    "admin",
+    "teams",
+    "billing",
+    "api-keys",
+    "notifications"
+   ],
+   "locales": [
+    "en"
+   ],
+   "vendors": [
+    "next-auth",
+    "resend",
+    "sentry",
+    "stripe",
+    "vercel"
+   ],
+   "swap_burden": "heavy",
+   "risks": [
+    "readme-placeholders",
+    "install-impossible"
+   ],
+   "weak_for": "Any real launch as-is: install is impossible (phantom @radix-ui/react-skeleton), there is no lockfile, no migrations, zero unit tests, sign-in is Google/GitHub OAuth only, and roughly half the advertised features are unreferenced lib code.",
+   "measured": "github-api",
+   "measured_at": "2026-09-23T22:23:35Z",
+   "details": "pool/micro-saas-starter-kit.json"
+  },
+  {
+   "name": "next-elite",
+   "repo": "salmanshahriar/Next-Elite",
+   "url": "https://github.com/salmanshahriar/Next-Elite",
+   "license": "MIT",
+   "stars": 114,
+   "pushed_at": "2026-09-21",
+   "archived": false,
+   "branch": "main",
+   "commit": "8865298a9a0ca62f8126283328ef6d25ccd0cdb8",
+   "lane": "web",
+   "shape": "saas",
+   "stack": {
+    "framework": "next",
+    "db": "unknown",
+    "orm": "none",
+    "auth": "better-auth",
+    "ui": [
+     "shadcn",
+     "tailwind"
+    ],
+    "i18n": "next-intl",
+    "rtl": true,
+    "docker": true,
+    "package_manager": "npm",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "i18n"
+   ],
+   "locales": [
+    "en",
+    "bn",
+    "ar",
+    "fr",
+    "es",
+    "zh"
+   ],
+   "vendors": [
+    "sentry",
+    "vercel"
+   ],
+   "swap_burden": "light",
+   "risks": [],
+   "weak_for": "Anything that must store data itself - there is no database, ORM, migrations, billing, email, uploads, jobs or search code, and Better Auth has no adapter wired, so accounts and sessions must be finished before the demo credentials mean anything.",
+   "measured": "github-api",
+   "measured_at": "2026-09-23T22:23:39Z",
+   "details": "pool/next-elite.json"
+  },
+  {
+   "name": "epic-stack",
+   "repo": "epicweb-dev/epic-stack",
+   "url": "https://github.com/epicweb-dev/epic-stack",
+   "license": "MIT",
+   "stars": 5542,
+   "pushed_at": "2026-08-29",
+   "archived": false,
+   "branch": "main",
+   "commit": "8473afd804b66dba6a23f317908dc35d1535e90d",
+   "lane": "web",
+   "shape": null,
+   "stack": {
+    "framework": "remix",
+    "db": "postgres",
+    "orm": "prisma",
+    "auth": "custom",
+    "ui": [
+     "shadcn",
+     "tailwind"
+    ],
+    "i18n": null,
+    "rtl": false,
+    "docker": true,
+    "package_manager": "npm",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "admin",
+    "uploads",
+    "search",
+    "notifications",
+    "2fa",
+    "passkeys",
+    "sso-github",
+    "notes-crud",
+    "rbac",
+    "theming",
+    "image-optimization",
+    "caching",
+    "seo",
+    "rate-limiting",
+    "healthcheck",
+    "data-export",
+    "email-verification"
+   ],
+   "locales": [
+    "en"
+   ],
+   "vendors": [
+    "aws-s3",
+    "resend",
+    "sentry"
+   ],
+   "swap_burden": "heavy",
+   "risks": [],
+   "weak_for": "Multi-tenant SaaS that needs billing, i18n/RTL, Postgres scale-out, background jobs or edge/serverless hosting - none of that exists here, and the Fly.io + LiteFS + Tigris coupling is opinionated.",
+   "measured": "github-api",
+   "measured_at": "2026-09-23T22:23:42Z",
+   "details": "pool/epic-stack.json"
+  },
+  {
+   "name": "nextjs-saas-starter",
+   "repo": "Shaisolaris/nextjs-saas-starter",
+   "url": "https://github.com/Shaisolaris/nextjs-saas-starter",
+   "license": "MIT",
+   "stars": 24,
+   "pushed_at": "2026-06-26",
+   "archived": false,
+   "branch": "main",
+   "commit": "f0b4448f7ea1e808a2341fa9722d58465814f308",
+   "lane": "web",
+   "shape": "saas",
+   "stack": {
+    "framework": "next",
+    "db": "postgres",
+    "orm": "prisma",
+    "auth": "next-auth",
+    "ui": [
+     "tailwind"
+    ],
+    "i18n": null,
+    "rtl": false,
+    "docker": false,
+    "package_manager": "npm",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "dashboard",
+    "teams",
+    "billing"
+   ],
+   "locales": [
+    "en"
+   ],
+   "vendors": [
+    "next-auth",
+    "resend",
+    "stripe",
+    "vercel"
+   ],
+   "swap_burden": "medium",
+   "risks": [
+    "no-tests",
+    "no-docker",
+    "injected-payload"
+   ],
+   "weak_for": "Anything expected to work on day one: tenant-scoped real data, team invites, password reset and transactional email, self-hosting (no Dockerfile, no standalone output), or any pipeline that would run the npm scripts before the postcss.config.mjs payload is removed.",
+   "measured": "github-api",
+   "measured_at": "2026-09-23T22:23:45Z",
+   "details": "pool/nextjs-saas-starter.json"
+  },
+  {
+   "name": "next-saas-stripe-starter",
+   "repo": "mickasmt/next-saas-stripe-starter",
+   "url": "https://github.com/mickasmt/next-saas-stripe-starter",
+   "license": "MIT",
+   "stars": 3003,
+   "pushed_at": "2024-08-16",
+   "archived": false,
+   "branch": "main",
+   "commit": "a78d130af7e04d0250d65c67f217976f7eb3adc2",
+   "lane": "web",
+   "shape": "saas",
+   "stack": {
+    "framework": "next",
+    "db": "postgres",
+    "orm": "prisma",
+    "auth": "next-auth",
+    "ui": [
+     "shadcn",
+     "tailwind"
+    ],
+    "i18n": null,
+    "rtl": false,
+    "docker": false,
+    "package_manager": "pnpm",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "billing",
+    "blog",
+    "docs",
+    "search",
+    "dark-mode"
+   ],
+   "locales": [
+    "en"
+   ],
+   "vendors": [
+    "next-auth",
+    "resend",
+    "stripe",
+    "vercel"
+   ],
+   "swap_burden": "medium",
+   "risks": [
+    "stale",
+    "no-tests",
+    "no-docker",
+    "bus-factor"
+   ],
+   "weak_for": "Anything needing teams/orgs, i18n, uploads, background jobs, API keys or an audit trail - and any team that wants tests, CI or a maintained upgrade path (dormant since 2024-07-26, zero test files, zero workflows, beta Auth.js).",
+   "measured": "github-api",
+   "measured_at": "2026-09-23T22:23:48Z",
+   "details": "pool/next-saas-stripe-starter.json"
+  },
+  {
+   "name": "bagisto",
+   "repo": "bagisto/bagisto",
+   "url": "https://github.com/bagisto/bagisto",
+   "license": "MIT",
+   "stars": 28163,
+   "pushed_at": "2026-09-23",
+   "archived": false,
+   "branch": 2.4,
+   "commit": "805b67013134ebc53f1da1285f0aa6632f5dde62",
+   "lane": "web",
+   "shape": "catalogue",
+   "stack": {
+    "framework": "laravel",
+    "db": "unknown",
+    "orm": "none",
+    "auth": "custom",
+    "ui": [],
+    "i18n": "dirs",
+    "rtl": true,
+    "docker": true,
+    "package_manager": "unknown",
+    "lang": "php"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "catalog-eav",
+    "product-types(simple/configurable/virtual/downloadable/bundled/booking/grouped)",
+    "categories",
+    "cart",
+    "onepage-checkout",
+    "orders",
+    "invoices",
+    "shipments",
+    "refunds",
+    "rma-returns",
+    "tax",
+    "cart-rules-coupons",
+    "catalog-rules",
+    "customer-groups",
+    "wishlist",
+    "compare",
+    "reviews",
+    "cms-pages",
+    "marketing-campaigns",
+    "newsletter-subscribers",
+    "url-rewrites",
+    "sitemap",
+    "multi-currency",
+    "multi-locale(22)",
+    "acl-roles",
+    "2fa",
+    "social-login",
+    "social-share",
+    "elasticsearch-search",
+    "full-page-cache",
+    "image-cache",
+    "theme-appearance-editor",
+    "magic-ai-content-generation",
+    "rest-api(shop)",
+    "rest-api(admin)",
+    "webmcp-endpoints",
+    "data-transfer-import-export",
+    "notifications",
+    "reporting",
+    "gdpr",
+    "eu-withdrawal",
+    "inventory-sources",
+    "installer-wizard",
+    "api-keys"
+   ],
+   "locales": [
+    "ar",
+    "bn",
+    "ca",
+    "de",
+    "en",
+    "es",
+    "fa",
+    "fr",
+    "he",
+    "hi_IN",
+    "id",
+    "it",
+    "ja",
+    "nl",
+    "pl",
+    "pt_BR",
+    "ro",
+    "ru",
+    "sin",
+    "tr",
+    "uk",
+    "zh_CN"
+   ],
+   "vendors": [
+    "aws-s3",
+    "openai",
+    "stripe"
+   ],
+   "swap_burden": "heavy",
+   "risks": [],
+   "weak_for": "Anyone assuming this repo is a multi-vendor marketplace (that is a separate paid extension), a JS/React app (it is Blade + Vue islands with 0 .vue files), or a small codebase they can read end-to-end - 2,621 package PHP files across 41 modules with a mandatory repository-pattern convention make deep changes a real onboarding project.",
+   "measured": "github-api",
+   "measured_at": "2026-09-24T03:06:09Z",
+   "details": "pool/bagisto.json"
+  },
+  {
+   "name": "cal-ai-tutorial",
+   "repo": "burakorkmez/cal-ai-tutorial",
+   "url": "https://github.com/burakorkmez/cal-ai-tutorial",
+   "license": "MIT",
+   "stars": 68,
+   "pushed_at": "2026-08-04",
+   "archived": false,
+   "branch": "master",
+   "commit": "7e9b0c43055cc175a5d0fb2e5a04c5f259823b40",
+   "lane": "mobile",
+   "shape": null,
+   "stack": {
+    "framework": "expo",
+    "db": "postgres",
+    "orm": "drizzle",
+    "auth": "clerk",
+    "ui": [
+     "tailwind"
+    ],
+    "i18n": null,
+    "rtl": false,
+    "docker": false,
+    "package_manager": "npm",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "onboarding",
+    "dashboard",
+    "uploads",
+    "ai-meal-analysis",
+    "background-jobs",
+    "realtime-updates",
+    "account-deletion",
+    "streaks",
+    "meal-history"
+   ],
+   "locales": [
+    "en"
+   ],
+   "vendors": [
+    "clerk",
+    "neon",
+    "openai",
+    "sentry"
+   ],
+   "swap_burden": "heavy",
+   "risks": [
+    "no-tests",
+    "no-docker"
+   ],
+   "weak_for": "Anything web-first, self-hosted or needing maintenance: the API exists only as Expo Router server routes aimed at EAS Hosting, it cannot run until four paid vendor accounts (Clerk, Neon, Trigger.dev, ImageKit) exist, and it is explicitly a course build \u2014 PLAN.md says 'This is a tutorial/course build', one author wrote all 10 commits over 10 days (2026-07-25 to 2026-08-04), there is no CI, no issue history and a single self-check file instead of a test suite.",
+   "measured": "github-api",
+   "measured_at": "2026-09-24T03:12:20Z",
+   "details": "pool/cal-ai-tutorial.json"
+  },
+  {
+   "name": "full-stack-ai-agent-template",
+   "repo": "vstorm-co/full-stack-ai-agent-template",
+   "url": "https://github.com/vstorm-co/full-stack-ai-agent-template",
+   "license": "MIT",
+   "stars": 1912,
+   "pushed_at": "2026-09-21",
+   "archived": false,
+   "branch": "main",
+   "commit": "3428d9a6214619d3514312886d59a36400747b7d",
+   "lane": "web",
+   "shape": "saas",
+   "stack": {
+    "framework": "next",
+    "db": "postgres",
+    "orm": "sqlmodel",
+    "auth": "custom",
+    "ui": [],
+    "i18n": "dirs",
+    "rtl": false,
+    "docker": true,
+    "package_manager": "unknown",
+    "lang": "typescript"
+   },
+   "canonical": true,
+   "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "organizations",
+    "billing",
+    "i18n",
+    "uploads",
+    "search",
+    "jobs",
+    "notifications",
+    "chat-streaming",
+    "rag-knowledge-bases",
+    "api-keys",
+    "audit-log",
+    "conversation-sharing",
+    "magic-link",
+    "onboarding",
+    "contacts-marketing-site",
+    "mcp-client",
+    "usage-credits"
+   ],
+   "locales": [
+    "en",
+    "pl"
+   ],
+   "vendors": [
+    "openai",
+    "resend",
+    "sentry",
+    "stripe",
+    "vercel"
+   ],
+   "swap_burden": "medium",
+   "risks": [
+    "readme-placeholders"
+   ],
+   "weak_for": "Anyone wanting a repo to clone-and-run or a non-AI SaaS: this is a generator (you must install the CLI or use the web configurator to get an app at all), and every generated project carries the AI-agent assumption (Pydantic AI/LangChain) plus a 55-page, 190-component frontend you will spend real time deleting.",
+   "measured": "github-api",
+   "measured_at": "2026-09-24T03:03:48Z",
+   "details": "pool/full-stack-ai-agent-template.json"
+  },
+  {
+   "name": "triply-ai",
+   "repo": "burakorkmez/triply-ai",
+   "url": "https://github.com/burakorkmez/triply-ai",
+   "license": "MIT",
+   "stars": 51,
+   "pushed_at": "2026-07-04",
+   "archived": false,
+   "branch": "master",
+   "commit": "8dd1112bb77985a4135c23228c0f5d06a5d94a91",
+   "lane": "mobile",
+   "shape": null,
+   "stack": {
+    "framework": "expo",
+    "db": "postgres",
+    "orm": "drizzle",
+    "auth": "clerk",
+    "ui": [
+     "tailwind"
+    ],
+    "i18n": null,
+    "rtl": false,
+    "docker": false,
+    "package_manager": "npm",
+    "lang": "typescript"
+   },
+   "canonical": false,
+   "features": [
+    "accounts",
+    "dashboard",
+    "uploads",
+    "jobs",
+    "map"
+   ],
+   "locales": [],
+   "vendors": [
+    "clerk",
+    "neon",
+    "openai",
+    "sentry"
+   ],
+   "swap_burden": "medium",
+   "risks": [
+    "no-tests",
+    "no-docker"
+   ],
+   "weak_for": "Anything expecting production maturity: it is a 6-day, single-author, 16-commit tutorial build with no tests, no CI, no Docker/migrations, hardcoded dev-mode Inngest, client-side-only route gating, no admin/roles, no i18n, no payments and no email \u2014 and it cannot run in Expo Go or a container, so a native toolchain (or a new EAS setup) is a prerequisite for even the first screen.",
+   "measured": "github-api",
+   "measured_at": "2026-09-24T03:12:18Z",
+   "details": "pool/triply-ai.json"
+  }
+ ]
+}

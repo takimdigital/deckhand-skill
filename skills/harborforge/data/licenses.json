@@ -1,0 +1,33 @@
+{
+ "_about": "One licence policy for bases (dh pool) and component registries (tryon registry). Permissive = anyone may use, modify, sell and keep the result closed, with attribution. Read by dhlib/vet.py and tryon/lib/vet.mjs. Committed-secret patterns live in data/secrets.json.",
+ "accepted": {
+  "MIT": "keep the copyright notice (THIRD_PARTY_NOTICES.md / NOTICE)",
+  "Apache-2.0": "keep LICENSE + NOTICE; state changes you made",
+  "BSD-2-Clause": "keep the copyright notice",
+  "BSD-3-Clause": "keep the copyright notice; no endorsement using the authors' names",
+  "ISC": "keep the copyright notice",
+  "0BSD": "no conditions",
+  "Unlicense": "public domain dedication"
+ },
+ "refused": {
+  "AGPL-3.0": "network copyleft: running it as a website obliges you to publish your whole app's source",
+  "GPL-2.0": "copyleft: derivative work must be GPL",
+  "GPL-3.0": "copyleft: derivative work must be GPL",
+  "LGPL-2.1": "library copyleft: modifications must stay LGPL — not a base you can own",
+  "LGPL-3.0": "library copyleft: modifications must stay LGPL — not a base you can own",
+  "MPL-2.0": "file-level copyleft: modified files must stay MPL",
+  "EPL-2.0": "weak copyleft",
+  "SSPL-1.0": "source-available, not open source",
+  "BUSL-1.1": "source-available with a commercial restriction",
+  "Elastic-2.0": "source-available with a commercial restriction",
+  "CC-BY-NC-4.0": "non-commercial only",
+  "CC-BY-SA-4.0": "share-alike (copyleft) and not meant for code",
+  "NOASSERTION": "the licence text is not a standard one — custom terms (often \"MIT + Commons Clause\" or a paid tier); refused unless a lawyer says otherwise",
+  "OTHER": "custom licence terms",
+  "NONE": "no licence = all rights reserved: you may read it, not use it"
+ },
+ "package_license_refused": ["UNLICENSED", "SEE LICENSE IN", "PROPRIETARY", "COMMERCIAL"],
+ "paid_packages": ["@tailwindplus/", "@fortawesome/pro-", "@fortawesome/fontawesome-pro", "@mui/x-data-grid-pro", "@mui/x-data-grid-premium", "@mui/x-date-pickers-pro",
+                   "ag-grid-enterprise", "@ag-grid-enterprise/", "@tiptap-pro/", "@syncfusion/", "@progress/kendo", "handsontable", "@bryntum/", "@devexpress/", "highcharts"],
+ "paywall_text": "(pro version|premium version|buy (a|the) licen[cs]e|purchase (a|the) licen[cs]e|licen[cs]e key|unlock (all|the full)|paid plan required|full version is available|get the full (source|code)|pro components)"
+}

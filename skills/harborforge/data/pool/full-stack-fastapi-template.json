@@ -1,0 +1,438 @@
+{
+  "repo": "fastapi/full-stack-fastapi-template",
+  "slug": "full-stack-fastapi-template",
+  "measured_at": "2026-09-23T22:12:13Z",
+  "upstream_commit": "cb740b656d7a0a6c5e12c7bf8e50343ec94ee9c7",
+  "default_branch": "master",
+  "archived": false,
+  "size_kb": 7087,
+  "languages": {
+    "TypeScript": 72.5,
+    "Python": 20.8,
+    "HTML": 4.8,
+    "CSS": 1.0,
+    "Dockerfile": 0.4,
+    "Shell": 0.4,
+    "Mako": 0.1
+  },
+  "framework": {
+    "name": "fastapi",
+    "version": "fastapi[standard]>=0.141.1,<1.0.0",
+    "router": "none",
+    "notes": "Python API framework (not a JS meta-framework). Frontend is a separate Vite SPA: React 19.2 + TanStack Router 1.170 (file-based routes) + TanStack Query. Backend serves the built SPA itself via FastAPI's new app.frontend(\"/\", directory=...) helper; openapi_url=/api/v1/openapi.json with custom_generate_unique_id for SDK generation."
+  },
+  "package_manager": "bun",
+  "node_or_python_requirement": "Python >=3.14,<4.0 (.python-version=3.14); Bun 1.x (CI pins bun 1.3.12; no engines field in frontend/package.json)",
+  "monorepo": {
+    "is_monorepo": true,
+    "workspaces": [
+      "frontend (bun workspace)",
+      "packages/* (bun workspace: packages/react-email)",
+      "backend (uv workspace member declared in root pyproject.toml)"
+    ],
+    "notes": "Dual-package-manager monorepo: JS side uses bun workspaces (bun.lock at root), Python side uses a uv workspace (uv.lock at root, [tool.uv.workspace] members = [\"backend\"]). Root scripts are bun --filter wrappers (dev/lint/test/email:dev/email:export)."
+  },
+  "stack": {
+    "db": "postgres",
+    "orm": "sqlmodel",
+    "auth": {
+      "provider": "custom",
+      "methods": [
+        "email-password"
+      ],
+      "roles": [
+        "user",
+        "admin"
+      ],
+      "notes": "Hand-rolled JWT auth: pyjwt HS256 access tokens (ACCESS_TOKEN_EXPIRE_MINUTES default 60*24*8 = 8 days) issued by POST /login/access-token, OAuth2PasswordBearer in backend/app/api/deps.py, password hashing via pwdlib with Argon2Hasher+BcryptHasher (argon2 preferred, bcrypt legacy support via verify_and_update). Admin = User.is_superuser boolean (no roles table, no RBAC beyond is_superuser). Password recovery emails a JWT reset token (EMAIL_RESET_TOKEN_EXPIRE_HOURS=48). No social/OAuth login, no MFA, no email verification on signup (signup is open, creates is_active=True user)."
+    },
+    "ui": [
+      "tailwind",
+      "shadcn",
+      "radix",
+      "lucide"
+    ],
+    "i18n": {
+      "library": "none",
+      "default": "en",
+      "locales": [
+        "en"
+      ],
+      "rtl_aware": false,
+      "translation_files": 0
+    },
+    "payments": {
+      "provider": "none",
+      "model": "none",
+      "webhooks": false
+    },
+    "email": {
+      "provider": "smtp",
+      "templates": 3,
+      "transactional": true
+    },
+    "analytics": [],
+    "jobs": [],
+    "search": [],
+    "storage": [],
+    "realtime": [],
+    "flags": [],
+    "observability": [
+      "sentry"
+    ]
+  },
+  "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "password-recovery",
+    "user-management-crud",
+    "items-crud-placeholder-domain",
+    "dark-mode",
+    "generated-typescript-api-client",
+    "docker-compose-deploy",
+    "email-templates",
+    "note: no teams/billing/i18n/uploads/search/jobs/realtime/api-keys/audit-log in code"
+  ],
+  "routes": {
+    "pages": [
+      "/",
+      "/login",
+      "/signup",
+      "/recover-password",
+      "/reset-password",
+      "/items",
+      "/admin",
+      "/settings"
+    ],
+    "api": [
+      "GET /api/v1/items/",
+      "POST /api/v1/items/",
+      "GET /api/v1/items/{id}",
+      "PUT /api/v1/items/{id}",
+      "DELETE /api/v1/items/{id}",
+      "POST /api/v1/login/access-token",
+      "POST /api/v1/login/test-token",
+      "POST /api/v1/login/password-recovery/{email}",
+      "POST /api/v1/login/reset-password/",
+      "POST /api/v1/login/recover-password-html-content/{email}",
+      "GET /api/v1/users/",
+      "POST /api/v1/users/",
+      "POST /api/v1/users/signup",
+      "GET /api/v1/users/me",
+      "PATCH /api/v1/users/me",
+      "DELETE /api/v1/users/me",
+      "PATCH /api/v1/users/me/password",
+      "GET /api/v1/users/{user_id}",
+      "PATCH /api/v1/users/{user_id}",
+      "DELETE /api/v1/users/{user_id}",
+      "POST /api/v1/utils/test-email/",
+      "GET /api/v1/utils/health-check/",
+      "POST /api/v1/private/users/ (only when FASTAPI_ENV=development)",
+      "GET /api/v1/openapi.json; GET /docs, GET /redoc (FastAPI defaults)"
+    ],
+    "protected": [
+      "/",
+      "/items",
+      "/admin",
+      "/settings"
+    ],
+    "count": 32
+  },
+  "env": {
+    "count": 26,
+    "names": [
+      "FASTAPI_ENV",
+      "PROJECT_NAME",
+      "SECRET_KEY",
+      "FIRST_SUPERUSER",
+      "FIRST_SUPERUSER_PASSWORD",
+      "DATABASE_URL",
+      "POSTGRES_PASSWORD",
+      "ACCESS_TOKEN_EXPIRE_MINUTES",
+      "FRONTEND_HOST",
+      "API_V1_STR",
+      "SENTRY_DSN",
+      "SMTP_HOST",
+      "SMTP_PORT",
+      "SMTP_TLS",
+      "SMTP_SSL",
+      "SMTP_USER",
+      "SMTP_PASSWORD",
+      "EMAILS_FROM_EMAIL",
+      "EMAILS_FROM_NAME",
+      "EMAIL_RESET_TOKEN_EXPIRE_HOURS",
+      "EMAIL_TEST_USER",
+      "VITE_API_URL",
+      "MAILPIT_HOST",
+      "DOMAIN",
+      "FASTAPI_CLOUD_TOKEN (CI secret only)",
+      "FASTAPI_CLOUD_APP_ID (CI secret only)"
+    ],
+    "required_at_build": [
+      "SECRET_KEY",
+      "FIRST_SUPERUSER",
+      "FIRST_SUPERUSER_PASSWORD",
+      "PROJECT_NAME",
+      "DATABASE_URL (all five are non-defaulted in backend/app/core/config.py Settings and are read at import time; a missing one breaks any `uv run` command), VITE_API_URL"
+    ],
+    "notes": "21 backend vars (backend/app/core/config.py Settings + committed root .env), 2 frontend vars (frontend/.env: VITE_API_URL, MAILPIT_HOST), 1 compose-deploy var (DOMAIN), 2 CI-only deploy secrets in .github/workflows/deploy.yml. No values recorded. DATABASE_URL is rewritten to postgresql+psycopg:// automatically. The repo COMMITS a root .env whose SECRET_KEY/FIRST_SUPERUSER_PASSWORD/POSTGRES_PASSWORD are the literal placeholder 'changethis' (checked by grep, not printed); .fastapicloudignore excludes .env from the FastAPI Cloud build. Secrets are enforced at import: Settings._enforce_non_default_secrets raises ValueError for 'changethis' unless FASTAPI_ENV=development."
+  },
+  "deploy": {
+    "docker": true,
+    "dockerfile_port": 8000,
+    "compose": true,
+    "standalone_output": false,
+    "build_cmd": "bun run --filter frontend build (root) / in Docker: backend/Dockerfile stage 1 runs `bun install` + `bun run build` in frontend, output lands in backend/app/frontend",
+    "start_cmd": "backend image CMD: fastapi run --workers 4 ; compose.override dev command: fastapi dev --host 0.0.0.0",
+    "migrations_cmd": "uv run bash scripts/prestart.sh (working dir backend/ or `docker compose run --rm backend bash scripts/prestart.sh`) -> alembic upgrade head && python app/initial_data.py",
+    "paas_coupling": [
+      "fastapi-cloud"
+    ],
+    "notes": "Four deploy paths in-repo: (1) FastAPI Cloud via .github/workflows/deploy.yml (`fastapi deploy`, app dir = backend, .fastapicloudignore), (2) self-hosted Docker Compose via compose.yml + compose.deploy.yml with Traefik v3.7 + Let's Encrypt TLS (docker.sock mounted, requires DOMAIN var), (3) local full-stack `docker compose watch` with live sync + Mailpit, (4) plain local dev (uv + bun). No EXPOSE line in backend/Dockerfile; the port 8000 is set by Traefik labels and the healthcheck. No separate frontend production image (Playwright-only frontend/Dockerfile.playwright). standalone_output is a Next.js concept and is not applicable -> false."
+  },
+  "tests": {
+    "frameworks": [
+      "pytest",
+      "playwright"
+    ],
+    "unit_files": 5,
+    "e2e_files": 6,
+    "ci_workflows": [
+      ".github/workflows/test-backend.yml",
+      ".github/workflows/playwright.yml",
+      ".github/workflows/test-docker-compose.yml",
+      ".github/workflows/deploy.yml",
+      ".github/workflows/deploy-docker-compose.yml",
+      ".github/workflows/pre-commit.yml",
+      ".github/workflows/smokeshow.yml",
+      ".github/workflows/zizmor.yml",
+      ".github/workflows/guard-dependencies.yml",
+      ".github/workflows/issue-manager.yml",
+      ".github/workflows/create-draft-release.yml",
+      ".github/workflows/prepare-release.yml",
+      ".github/workflows/detect-conflicts.yml",
+      ".github/workflows/add-to-project.yml",
+      ".github/workflows/bump-pre-commit-hooks.yml"
+    ],
+    "notes": "Backend: pytest 5 test modules (tests/api/routes/test_{items,login,private,users}.py + tests/crud/test_user.py) plus conftest.py and tests/utils; CI enforces `coverage report --fail-under=90` and uploads smokeshow HTML coverage. Frontend: Playwright only (6 spec files + tests/auth.setup.ts storage-state project, chromium/firefox/webkit projects) — no vitest/jest unit layer, so there is no frontend unit test safety net. E2E specs drive the real stack through Mailpit (frontend/tests/utils/mailpit.ts) for password-reset tokens. Lint/type CI: ruff+mypy+ty (backend), biome (frontend), pre-commit with zizmor. CI needs Docker (db + mailpit) and `scripts/prestart.sh` before tests."
+  },
+  "vendor": [
+    {
+      "name": "fastapi-cloud",
+      "where": [
+        "deployment.md",
+        ".github/workflows/deploy.yml",
+        ".fastapicloudignore",
+        "backend/pyproject.toml [tool.fastapi]"
+      ],
+      "what_it_does": "Hosted deploy target plus the `fastapi deploy` / `fastapi cloud setup-ci` CLI",
+      "swap_target_hint": "any Docker host (Fly.io / Railway / Render / plain VPS + compose.deploy.yml)",
+      "effort_guess": "0.5-1 day"
+    },
+    {
+      "name": "sentry",
+      "where": [
+        "backend/pyproject.toml (sentry-sdk[fastapi])",
+        "backend/app/main.py",
+        ".env (SENTRY_DSN)",
+        "deployment.md"
+      ],
+      "what_it_does": "Error tracking + tracing, initialised only when SENTRY_DSN set and FASTAPI_ENV != development",
+      "swap_target_hint": "GlitchTip (self-hosted, Sentry-compatible) or drop the 2 lines",
+      "effort_guess": "1-2 hours"
+    },
+    {
+      "name": "smtp-provider",
+      "where": [
+        "backend/app/utils.py",
+        "backend/app/core/config.py (SMTP_HOST/SMTP_USER/SMTP_PASSWORD/EMAILS_FROM_EMAIL)",
+        "deployment.md"
+      ],
+      "what_it_does": "Transactional email delivery (password recovery, new-account, test email) through a generic SMTP relay",
+      "swap_target_hint": "provider-agnostic already: point at Resend/SES/Mailgun SMTP, or swap the `emails`+jinja2 send_email() for an API SDK",
+      "effort_guess": "1-3 hours"
+    },
+    {
+      "name": "mailpit",
+      "where": [
+        "compose.yml",
+        "compose.override.yml",
+        "frontend/.env (MAILPIT_HOST)",
+        "frontend/tests/utils/mailpit.ts"
+      ],
+      "what_it_does": "Local/test SMTP catcher (axllent/mailpit) the Playwright suite reads tokens from",
+      "swap_target_hint": "Mailpit is OSS and dev-only; a real relay in prod or MailHog",
+      "effort_guess": "0 (dev only)"
+    },
+    {
+      "name": "traefik",
+      "where": [
+        "compose.yml (traefik:v3.7, docker.sock ro)",
+        "compose.deploy.yml (Let's Encrypt ACME)"
+      ],
+      "what_it_does": "Reverse proxy + automatic HTTPS for the self-hosted compose deploy",
+      "swap_target_hint": "Caddy or nginx-proxy; or skip if you only use FastAPI Cloud",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "neon/supabase",
+      "where": [
+        "deployment.md"
+      ],
+      "what_it_does": "Managed Postgres integrations that inject DATABASE_URL for the FastAPI Cloud deploy (docs only, no code coupling)",
+      "swap_target_hint": "any Postgres 14+ (compose ships postgres:18); DATABASE_URL is the only interface",
+      "effort_guess": "0"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": ".env",
+      "kind": "copy",
+      "note": "PROJECT_NAME=\"Full Stack FastAPI Project\" and EMAILS_FROM_EMAIL=info@example.com, injected into API title, Swagger docs and every email"
+    },
+    {
+      "path": "frontend/index.html",
+      "kind": "metadata",
+      "note": "<title>Full Stack FastAPI Project</title> plus a stale /vite.svg favicon link (asset does not exist in frontend/public)"
+    },
+    {
+      "path": "frontend/public/assets/images/fastapi-logo.svg (+ -light) / fastapi-icon.svg (+ -light) / favicon.png",
+      "kind": "logo",
+      "note": "4 FastAPI logos + favicon used by Logo.tsx with dark/light switching"
+    },
+    {
+      "path": "frontend/src/components/Common/Logo.tsx",
+      "kind": "logo",
+      "note": "hardcodes imports of the fastapi-icon/logo files"
+    },
+    {
+      "path": "frontend/src/routes/_layout/settings.tsx",
+      "kind": "metadata",
+      "note": "route head title 'Settings - FastAPI Template' (same pattern in other routes' head())"
+    },
+    {
+      "path": "README.md / backend/README.md / frontend/README.md / development.md / deployment*.md / release-notes.md",
+      "kind": "copy",
+      "note": "~1,700 lines of template-branded docs, incl. badge URLs that point back at the template repo"
+    },
+    {
+      "path": "img/*.png (9 screenshots)",
+      "kind": "metadata",
+      "note": "README screenshots of the FastAPI dashboard — replace before shipping"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "The whole Item/Items domain (backend/app/models.py Item, backend/app/api/routes/items.py, frontend/src/routes/_layout/items.tsx, 5 UI components) is a throwaway placeholder to be replaced by the real domain",
+    "Dashboard index page is an empty placeholder (frontend/src/routes/_layout/index.tsx, 32 lines)",
+    "README screenshots img/login.png, img/dashboard.png, img/dashboard-items.png, img/dashboard-dark.png, img/react-email.png, img/mailpit.png, img/docs.png",
+    "FIRST_SUPERUSER=admin@example.com + EMAIL_TEST_USER=test@example.com defaults",
+    "FastAPI-branded product name in PROJECT_NAME and route head() titles"
+  ],
+  "pitfalls": [
+    {
+      "kind": "build-needs-env",
+      "detail": "settings = Settings() runs at import and SECRET_KEY, PROJECT_NAME, DATABASE_URL, FIRST_SUPERUSER, FIRST_SUPERUSER_PASSWORD have no defaults; additionally any value equal to 'changethis' raises ValueError unless FASTAPI_ENV=development. So `pytest`/`alembic`/`fastapi dev` all fail before doing anything until a real .env exists one directory above backend/.",
+      "evidence": "backend/app/core/config.py"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "Requires Python >=3.14 (bleeding edge). .python-version pins 3.14 and the Docker image is python:3.14; a dev box with 3.11/3.12 must build a new interpreter (uv python install 3.14) before `uv sync` works.",
+      "evidence": "backend/pyproject.toml requires-python, .python-version, backend/Dockerfile"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "Frontend build output goes to ../backend/app/frontend and is served by FastAPI (app.frontend in backend/app/main.py). There is no standalone frontend deploy: forgetting `bun run build` after frontend edits means FastAPI keeps serving a stale SPA, and git-ignores backend/app/frontend/ so the artifact is invisible in git.",
+      "evidence": "frontend/vite.config.ts, backend/app/main.py, .gitignore"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "Backend wheels are compiled/native: psycopg[binary], pwdlib[argon2,bcrypt] (argon2-cffi + bcrypt), and Python 3.14 wheels are required — no pure-Python fallback.",
+      "evidence": "backend/pyproject.toml dependencies"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "Very fresh major versions across the JS stack (React 19.2, Vite 8, TypeScript 6, Tailwind 4 via @tailwindcss/vite, Biome 2, @hey-api/openapi-ts 0.97, @vitejs/plugin-react-swc 4, TanStack Router 1.170). Adding older plugins/components (eslint, eslint-plugin-react-hooks, framer-motion-era code, tailwind 3 configs) will fight these; the repo also moved from ESLint to Biome and from CRACO/react-scripts to Vite, so most blog snippets for this template no longer apply.",
+      "evidence": "frontend/package.json, frontend/biome.json"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "The deploy workflow is deliberately inert on the template itself: deploy.yml has `if: github.repository != 'fastapi/full-stack-fastapi-template'`, so pushing to a fresh copy of the repo shows a green/no-op Deploy run that silently does nothing until repo vars/secrets (DATABASE_URL, SECRET_KEY, FIRST_SUPERUSER_PASSWORD, PROJECT_NAME, FIRST_SUPERUSER, FASTAPI_CLOUD_TOKEN, FASTAPI_CLOUD_APP_ID) are configured.",
+      "evidence": ".github/workflows/deploy.yml"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "Two root-level leftovers that mislead: frontend/index.html still references /vite.svg (not present in frontend/public), and root .gitignore ignores only .vscode/node_modules/build artifacts — there is no .env ignore entry, so the committed root .env (placeholder 'changethis' secrets) stays in git history.",
+      "evidence": "frontend/index.html, .gitignore"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "Playwright e2e requires downloaded browsers plus a running backend, Postgres and Mailpit; the suite's auth.setup + reset-password specs read one-time tokens from the Mailpit HTTP API, so tests fail confusingly when mailpit is not up. Local runs want `docker compose up -d db mailpit` first, and `bun ci`/`bun install` needs bun, not npm/yarn.",
+      "evidence": "frontend/playwright.config.ts, frontend/tests/utils/mailpit.ts, .github/workflows/playwright.yml, backend/README.md"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "Two email code paths must stay in sync: React Email sources in packages/react-email/emails/*.tsx are exported to backend/app/email-templates/*.html via `bun run email:export`, and the backend renders those committed HTML files with jinja2. Editing the .tsx alone changes nothing at runtime.",
+      "evidence": "packages/react-email/package.json, backend/app/email-templates/, backend/app/utils.py"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "Self-hosted compose deploy mounts /var/run/docker.sock into Traefik (root-equivalent host access) and needs a real DOMAIN var or compose.deploy.yml aborts; on Windows/macOS Docker Desktop the `develop.watch` live-sync workflow is the only smooth local path.",
+      "evidence": "compose.yml, compose.deploy.yml, compose.override.yml"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "Older, widely-copied versions of this template used cookiecutter, PostgreSQL 'items' + a Next/CRA frontend, but master is now a non-cookiecutter bun+uv repo — treat any pre-0.11 tutorial (cookiecutter flags, `{{cookiecutter.project_slug}}`, GitHub Actions secrets generation) as wrong.",
+      "evidence": "release-notes.md, backend/Dockerfile (no cookiecutter), root package.json"
+    }
+  ],
+  "complexity": {
+    "pages": 8,
+    "components": 51,
+    "db_models": 2,
+    "migrations": 5,
+    "loc_estimate": 11000
+  },
+  "health": {
+    "stars": 45711,
+    "forks": 9088,
+    "open_issues": 0,
+    "contributors": 82,
+    "top_contributor_share": 0.23,
+    "last_commit": "2026-09-01",
+    "last_release": "0.12.0",
+    "commits_last_90d": 161,
+    "issues_closed_last_90d": 1
+  },
+  "verdict": {
+    "best_for": "A Python-team SaaS starter that already ships production-shaped plumbing — JWT auth with password recovery, admin user management, Postgres+SQLModel+Alembic migrations, typed auto-generated TS client, pytest+Playwright CI and Docker/Traefik deploy — so a new API+SPA product can start from login/admin/migrations on day one.",
+    "weak_for": "Anything needing multi-tenancy, teams/orgs, billing, i18n/RTL, file uploads, background jobs or a real Next.js/SSR frontend — none of those exist here, and the only domain model is a placeholder Item; it is also pinned to Python 3.14 and bleeding-edge JS majors.",
+    "swap_burden": "medium — auth is hand-rolled JWT (no library to rip out, but no OAuth/orgs either), the SwiftUI-free stack is otherwise standard; the real work is deleting the Item demo domain, rewriting the FastAPI-Cloud/Traefik deploy glue, and re-exporting the React Email templates after any copy change."
+  },
+  "evidence": {
+    "framework": "backend/pyproject.toml (fastapi[standard]>=0.141.1), frontend/package.json (react 19.2, @tanstack/react-router 1.170, vite 8.2), backend/app/main.py (app.frontend + openapi_url)",
+    "auth": "backend/app/core/security.py, backend/app/api/deps.py, backend/app/api/routes/login.py, backend/app/models.py (User.is_superuser, hashed_password)",
+    "db": "compose.yml (postgres:18), backend/app/models.py (SQLModel table models: User, Item), backend/app/alembic/versions/ (5 revisions)",
+    "env": "backend/app/core/config.py Settings fields, committed root .env key names (values never read/printed), frontend/.env, compose.yml, .github/workflows/deploy.yml",
+    "routes": "frontend/src/routeTree.gen.ts route ids ('/', '/login', '/signup', '/recover-password', '/reset-password', '/admin', '/items', '/settings'), @router decorators in backend/app/api/routes/*.py",
+    "deploy": "backend/Dockerfile (bun build stage + uv sync + CMD fastapi run --workers 4), compose.yml, compose.override.yml, compose.deploy.yml, .fastapicloudignore, .github/workflows/deploy.yml, deployment.md",
+    "tests": "backend/tests/** (5 pytest modules, conftest), frontend/tests/** (6 *.spec.ts + auth.setup.ts), .github/workflows/test-backend.yml (--fail-under=90)",
+    "vendor": "backend/pyproject.toml (sentry-sdk, psycopg, pwdlib), backend/app/main.py (sentry_sdk.init), .env + frontend/.env names, frontend/tests/utils/mailpit.ts, compose.yml/compose.deploy.yml",
+    "features": "frontend/src/routes/**, frontend/src/components/** (51 files, 24 shadcn ui), backend/app/api/routes/** — features listed only where a route/component/dependency exists; README-only claims (e.g. 'React Email templates') were confirmed against packages/react-email/package.json",
+    "complexity": "git trees API blob counts (252 blobs): frontend/src/components = 51 files (24 under ui/), routes = 10 files -> 8 URLs, SQLModel table=True classes = 2, alembic versions = 5; loc_estimate = (py 91,156 + ts 44,901 + tsx 185,038 bytes) / 29.2 sampled bytes-per-line = ~11.0k hand-written LOC, excluding 492 KB of generated code (frontend/src/client/** from @hey-api/openapi-ts + routeTree.gen.ts)",
+    "health": "gh api repos/fastapi/full-stack-fastapi-template (stars 45711, forks 9088, size 7087 KB, archived false, pushed_at 2026-09-18); issues?state=open + search/issues (open issues 0, closed last 90d 1); contributors?per_page=100 (82 contributors, 1,146 contributions); top_contributor_share = tiangolo 260/1146 = 0.23 with bot accounts excluded (github-actions[bot] 282/1146 = 0.25 if bots counted); search/commits committer-date>=2026-06-25 = 161; releases latest 0.12.0 (2026-08-12); commits?per_page=1 -> 2026-09-01",
+    "unmeasured_notes": "issue/PR history is not representative: an issue-manager GitHub Action auto-closes stale issues, which is why open_issues reads 0"
+  },
+  "unmeasured": [
+    "Hand-written LOC is an estimate (~11.0k), not a measured count: cloning is forbidden by the contract, so it is derived from git-trees blob byte sizes divided by a 29.2 bytes-per-line ratio sampled from 14 source files.",
+    "Test health is unknown: tests were never run (no clone/allowed execution), so pass/fail state, actual coverage % and Playwright flakiness are unverified.",
+    "Runtime/build behaviour unverified: no `uv sync`, `bun install`, `bun run build` or `docker compose up` was executed, so dependency-resolution success on Python 3.14, any peer-conflict warnings and image build time are unmeasured.",
+    "Whether packages/react-email `email:export` output currently matches the committed backend/app/email-templates/*.html byte-for-byte was not checked (would require running the tool).",
+    "Routes are taken from files/decorators, not from a running app: the live OpenAPI document (/api/v1/openapi.json) was not fetched, and framework-level defaults (404 handler, trailing-slash redirects) are not enumerated.",
+    "Only the master branch was inspected; the 6 other branches (dependabot bumps, fix-backend-reload-during-playwright-tests) were not read, so unreleased changes are outside this snapshot.",
+    "Frontend bundle size, Core Web Vitals, dark-mode/a11y quality and mobile behaviour were not measured (no browser run against the app).",
+    "Binary/asset content (img/*.png screenshots, favicon, SVG logos) was not inspected, so visual-branding effort is judged from filenames and import sites only.",
+    "Docker Hub / npm / PyPI download and licence-pricing data for the vendors (Sentry tiers, FastAPI Cloud pricing) was not queried; effort_guess values are engineering estimates, not measured.",
+    "Contributor metrics come from the contributors API which counts default-branch commits only and includes bots; issue search counts are capped at the search API's pagination, so historical totals are approximate."
+  ]
+}

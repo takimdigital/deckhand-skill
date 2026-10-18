@@ -1,0 +1,650 @@
+{
+  "repo": "bagisto/bagisto",
+  "slug": "bagisto",
+  "measured_at": "2026-09-24T03:09:41Z",
+  "upstream_commit": "805b67013134ebc53f1da1285f0aa6632f5dde62",
+  "default_branch": "2.4",
+  "archived": false,
+  "size_kb": 416696,
+  "languages": {
+    "PHP": 72.9,
+    "Blade": 21.0,
+    "TypeScript": 5.5,
+    "JavaScript": 0.4,
+    "CSS": 0.1,
+    "Dockerfile": 0.1,
+    "Shell": 0.0
+  },
+  "framework": {
+    "name": "laravel",
+    "version": "^12.0 (PHP >=8.3 <8.5)",
+    "router": "none",
+    "notes": "'none' = no JS meta-framework router; this is a server-rendered Laravel app (Blade views + package-level PHP route files + a Vue 3.5 island layer mounted on them). NOT react-vite: there are ZERO .vue files and ZERO React/vite-react deps in the repo - the 1.34 MB of TypeScript is 307 Playwright end-to-end page-object files under packages/Webkul/*/tests/e2e-pw/, and Vite is used only as the asset bundler. Frontend stack pinned from packages/Webkul/{Shop,Admin}/package.json: vue ^3.5.13, vue-router absent, @vitejs/plugin-vue ^5.2.4, vee-validate ^4.9.1, vue-flatpickr, flatpickr, vuedraggable, tailwindcss ^3.3.2, vite ^6.4.2; the storefront mounts Vue via createApp() from vue/dist/vue.esm-bundler in packages/Webkul/Shop/src/Resources/assets/js/app.js. Backend is a Laravel 12 modular monolith: 41 self-contained packages under packages/Webkul/ (Admin, Shop, Product, Sales, Stripe, ...) wired through konekt/concord, 2,621 PHP files in packages/, 243 models, 103 repositories."
+  },
+  "package_manager": "composer",
+  "node_or_python_requirement": "PHP >=8.3 <8.5 with ext-calendar, curl, intl, mbstring, openssl, pdo, pdo_mysql, tokenizer; Node: no engines field pinned, but Vite ^6 requires Node >=18/20 (built assets are committed so a build is not required to run)",
+  "monorepo": {
+    "is_monorepo": true,
+    "workspaces": [
+      "composer path repositories -> packages/*/* (41 Webkul packages, symlinked via repositories[0] type=path url=packages/*/*)"
+    ],
+    "notes": "One Laravel app shell (app/, config/, routes/, bootstrap/, database/) + 41 in-repo Composer packages under packages/Webkul/*, each with its own composer.json, package.json, tailwind.config.js, vite.config.js and tests. This is a monorepo by Composer path-repository, not an npm workspace. Frontend assets build PER PACKAGE (cd packages/Webkul/Admin && npm install && npm run build), not from the root - the root package.json only builds resources/css/app.css + resources/js/app.js."
+  },
+  "stack": {
+    "db": "mysql",
+    "orm": "eloquent",
+    "auth": {
+      "provider": "custom",
+      "methods": [
+        "email-password",
+        "oauth",
+        "two-factor",
+        "api-token"
+      ],
+      "roles": [
+        "customer",
+        "admin"
+      ],
+      "notes": "Own Laravel guards, no SaaS. Customer guard (session) + admin guard with ACL roles/permissions (Webkul/User), email verification, password reset, TOTP 2FA + backup codes via pragmarx/google2fa (Admin/src/Http/Controllers/User/TwoFactorController.php), social login via laravel/socialite + Webkul/SocialLogin, REST auth via laravel/sanctum. orm value 'eloquent' is outside the contract's enum (drizzle/prisma/sqlmodel/typeorm) because none of those apply to PHP - Eloquent + konekt/concord proxy/repository pattern is what is actually used (103 repositories)."
+    },
+    "ui": [
+      "blade",
+      "vue",
+      "tailwind",
+      "vite",
+      "flatpickr",
+      "vee-validate"
+    ],
+    "i18n": {
+      "library": "laravel trans() + astrotomic/laravel-translatable",
+      "default": "en",
+      "locales": [
+        "ar",
+        "bn",
+        "ca",
+        "de",
+        "en",
+        "es",
+        "fa",
+        "fr",
+        "he",
+        "hi_IN",
+        "id",
+        "it",
+        "ja",
+        "nl",
+        "pl",
+        "pt_BR",
+        "ro",
+        "ru",
+        "sin",
+        "tr",
+        "uk",
+        "zh_CN"
+      ],
+      "rtl_aware": true,
+      "translation_files": 330
+    },
+    "payments": {
+      "provider": "stripe",
+      "model": "one-time",
+      "webhooks": true
+    },
+    "email": {
+      "provider": "smtp",
+      "templates": 30,
+      "transactional": true
+    },
+    "analytics": [],
+    "jobs": [
+      "laravel-queue",
+      "redis-queue",
+      "full-page-cache-jobs"
+    ],
+    "search": [
+      "elasticsearch(optional, env ELASTICSEARCH_HOST)",
+      "database-like-search",
+      "sitemap"
+    ],
+    "storage": [
+      "local-public-disk",
+      "s3(aws sdk, env AWS_*)",
+      "imagemagick/intervention-image-thumbnails"
+    ],
+    "realtime": [
+      "pusher",
+      "laravel-broadcasting(log driver by default)"
+    ],
+    "flags": [],
+    "observability": [
+      "laravel-log",
+      "debugbar(dev only via barryvdh/laravel-debugbar)",
+      "laravel/octane"
+    ]
+  },
+  "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "catalog-eav",
+    "product-types(simple/configurable/virtual/downloadable/bundled/booking/grouped)",
+    "categories",
+    "cart",
+    "onepage-checkout",
+    "orders",
+    "invoices",
+    "shipments",
+    "refunds",
+    "rma-returns",
+    "tax",
+    "cart-rules-coupons",
+    "catalog-rules",
+    "customer-groups",
+    "wishlist",
+    "compare",
+    "reviews",
+    "cms-pages",
+    "marketing-campaigns",
+    "newsletter-subscribers",
+    "url-rewrites",
+    "sitemap",
+    "multi-currency",
+    "multi-locale(22)",
+    "acl-roles",
+    "2fa",
+    "social-login",
+    "social-share",
+    "elasticsearch-search",
+    "full-page-cache",
+    "image-cache",
+    "theme-appearance-editor",
+    "magic-ai-content-generation",
+    "rest-api(shop)",
+    "rest-api(admin)",
+    "webmcp-endpoints",
+    "data-transfer-import-export",
+    "notifications",
+    "reporting",
+    "gdpr",
+    "eu-withdrawal",
+    "inventory-sources",
+    "installer-wizard",
+    "api-keys"
+  ],
+  "routes": {
+    "pages": [
+      "/ (shop.home.index, HomeController)",
+      "/contact-us",
+      "/appearance-preview",
+      "/search",
+      "/page/{slug} (CMS page)",
+      "/sitemap.xml",
+      "/robots.txt",
+      "/compare",
+      "/product/{id}/{attribute_id} (file download)",
+      "/booking-slots/{id}",
+      "/{slug} and /{category}/{slug} -> ProductsCategoriesProxyController fallback (the whole catalog rides a catch-all)",
+      "/checkout/cart",
+      "/checkout/onepage",
+      "/checkout/onepage/success",
+      "/customer/login (shop.customer.session.index)",
+      "/customer/register",
+      "/customer/forgot-password",
+      "/customer/reset-password/{token}",
+      "/customer/verify-account/{token}",
+      "/customer/account",
+      "/customer/account/profile",
+      "/customer/account/wishlist",
+      "/customer/account/reviews",
+      "/customer/account/gdpr",
+      "/customer/account/orders",
+      "/withdraw (EU withdrawal lookup, throttled)",
+      "/withdraw/{orderId}/create",
+      "/withdraw/confirmation/{uuid}",
+      "/webmcp/product",
+      "/webmcp/wishlist/add",
+      "/admin/* (prefix = config app.admin_url, default 'admin'; 13 admin route files)",
+      "/installer/* (Installer wizard: 5 routes)",
+      "/stripe/redirect",
+      "/stripe/success",
+      "/stripe/cancel",
+      "/razorpay/* , /payu/* , /phonepe/* , /payglocal/* , /paypal/* (gateway callbacks)"
+    ],
+    "api": [
+      "/api/core/countries",
+      "/api/core/states",
+      "/api/categories",
+      "/api/categories/tree",
+      "/api/categories/attributes",
+      "/api/categories/attributes/{attribute_id}/options",
+      "/api/categories/max-price/{id?}",
+      "/api/products",
+      "/api/products/{id}/related",
+      "/api/products/{id}/up-sell",
+      "/api/product/{id}/reviews",
+      "/api/product/{id}/review",
+      "/api/product/{id}/reviews/{review_id}/translate",
+      "/api/compare-items (GET/POST/DELETE)",
+      "/api/checkout/cart (GET/POST/PUT/DELETE)",
+      "/api/checkout/cart/coupon",
+      "/api/checkout/cart/estimate-shipping-methods",
+      "/api/checkout/cart/move-to-wishlist",
+      "/api/checkout/onepage/summary",
+      "/api/checkout/onepage/addresses",
+      "/api/checkout/onepage/shipping-methods",
+      "/api/checkout/onepage/payment-methods",
+      "/api/checkout/onepage/orders",
+      "/api/customer/login",
+      "/api/customer/addresses",
+      "/api/customer/wishlist",
+      "/stripe/webhook (POST, CSRF-exempt)",
+      "admin: /admin/dashboard/stats, /admin/datagrid/look-up, /admin/datagrid/saved-filters, /admin/tinymce/upload, /admin/magic-ai/content, /admin/magic-ai/image"
+    ],
+    "protected": [
+      "/admin/* (admin middleware + ACL)",
+      "/customer/account/* (customer guard)",
+      "/api/customer/* (customer guard)",
+      "/api/checkout/* (session)"
+    ],
+    "count": 511,
+    "notes": "count=511 is a COUNTED total of Route::get/post/put/patch/delete/any/resource declarations across the 25 of 26 route files that declare routes (Paypal/src/Routes/web.php declares none inline). 41 of those are the /api/* group, 3 are checkout, 20 store-front, 53 customer, 2 webmcp, 4 stripe. There are no Next.js-style files - routing is PHP route files per package under packages/Webkul/*/src/Routes/ (Admin has 13 files: sales 82, settings 74, marketing 58, catalog 44, customers 39, ...)."
+  },
+  "env": {
+    "count": 60,
+    "names": [
+      "APP_NAME",
+      "APP_ENV",
+      "APP_KEY",
+      "APP_DEBUG",
+      "APP_DEBUG_ALLOWED_IPS",
+      "APP_URL",
+      "APP_ADMIN_URL",
+      "APP_TIMEZONE",
+      "APP_LOCALE",
+      "APP_FALLBACK_LOCALE",
+      "APP_FAKER_LOCALE",
+      "APP_CURRENCY",
+      "APP_MAINTENANCE_DRIVER",
+      "BCRYPT_ROUNDS",
+      "LOG_CHANNEL",
+      "LOG_STACK",
+      "LOG_DEPRECATIONS_CHANNEL",
+      "LOG_LEVEL",
+      "DB_CONNECTION",
+      "DB_HOST",
+      "DB_PORT",
+      "DB_DATABASE",
+      "DB_USERNAME",
+      "DB_PASSWORD",
+      "DB_PREFIX",
+      "SESSION_DRIVER",
+      "SESSION_LIFETIME",
+      "SESSION_ENCRYPT",
+      "SESSION_PATH",
+      "SESSION_DOMAIN",
+      "BROADCAST_CONNECTION",
+      "FILESYSTEM_DISK",
+      "QUEUE_CONNECTION",
+      "CACHE_STORE",
+      "CACHE_PREFIX",
+      "MEMCACHED_HOST",
+      "REDIS_CLIENT",
+      "REDIS_HOST",
+      "REDIS_PASSWORD",
+      "REDIS_PORT",
+      "MAIL_MAILER",
+      "MAIL_SCHEME",
+      "MAIL_HOST",
+      "MAIL_PORT",
+      "MAIL_USERNAME",
+      "MAIL_PASSWORD",
+      "MAIL_FROM_ADDRESS",
+      "MAIL_FROM_NAME",
+      "ADMIN_MAIL_ADDRESS",
+      "ADMIN_MAIL_NAME",
+      "CONTACT_MAIL_ADDRESS",
+      "CONTACT_MAIL_NAME",
+      "AWS_ACCESS_KEY_ID",
+      "AWS_SECRET_ACCESS_KEY",
+      "AWS_DEFAULT_REGION",
+      "AWS_BUCKET",
+      "AWS_USE_PATH_STYLE_ENDPOINT",
+      "VITE_APP_NAME",
+      "VITE_HOST",
+      "VITE_PORT"
+    ],
+    "required_at_build": [],
+    "notes": "60 names counted from .env.example (exactly 60 KEY= lines; the names above ARE that full list). No value is a real credential - APP_KEY, DB_PASSWORD, MAIL_*, AWS_* are empty or example placeholders (shop@example.com / admin@example.com / contact@example.com). Required-at-startup, not build: APP_KEY is empty and must be generated (`php artisan key:generate`; composer's post-create-project-cmd does it) or every request fails; DB_DATABASE/DB_USERNAME/DB_PASSWORD are empty with DB_CONNECTION=mysql (port 3306). Names read via env() in config/ but ABSENT from .env.example and therefore easy to miss: ELASTICSEARCH_HOST/USER/PASS (config/elasticsearch.php), APP_PORT/WWWGROUP/FORWARD_* (docker-compose.yml), and all gateway keys - Stripe/PayPal/Razorpay/PayU/PhonePe/PayGlocal credentials and MagicAI provider keys are stored in admin configuration, not in .env. SECRETS CHECK: no secret VALUE is committed in any tracked file; only NAMES appear (AWS_ACCESS_KEY_ID, DB_PASSWORD)."
+  },
+  "deploy": {
+    "docker": true,
+    "dockerfile_port": 8080,
+    "compose": true,
+    "standalone_output": false,
+    "build_cmd": "composer install (repo itself is a Laravel project; the alternative is `composer create-project bagisto/bagisto`); frontend assets optional: cd packages/Webkul/{Admin,Shop,Installer} && npm install && npm run build",
+    "start_cmd": "php artisan serve (dev) or php artisan bagisto:install on a fresh DB; production image: one `docker run` boots nginx|apache|litespeed + php-fpm + bundled mysql|mariadb under supervisor",
+    "migrations_cmd": "php artisan migrate  (or `php artisan bagisto:install` which runs migrations+seeders+assets); 192 migration files; `php artisan up`/`down` for maintenance, `php artisan optimize:clear` after config changes",
+    "paas_coupling": [
+      "docker-hub(webkul/bagisto)",
+      "laravel-sail",
+      "kubernetes-agnostic",
+      "forge(public/forge dir present)"
+    ],
+    "notes": "Two independent docker setups: (1) docker-compose.yml = Laravel Sail for DEV with laravel.test (built from vendor/laravel/sail/runtimes/8.3 - note this path only exists AFTER composer install), mysql/mysql-server:8.0, redis:alpine, elasticsearch 7.17 + kibana 7.17, mailpit; exposes ${APP_PORT:-80} and ${VITE_PORT:-5173}. (2) docker/production/* = a published single-container PRODUCTION image (webkul/bagisto) in 6 combinations: nginx(default)|apache|litespeed x mysql(default)|mariadb, run at http://localhost:8080, with shared/entrypoint.sh + build-install.sh that run migrations and seed on first boot. No PHP-FPM/nginx config is committed at the app root, and no .next-style standalone output (N/A for PHP)."
+  },
+  "tests": {
+    "frameworks": [
+      "pest",
+      "phpunit",
+      "playwright",
+      "pint(lint)"
+    ],
+    "unit_files": 153,
+    "e2e_files": 307,
+    "ci_workflows": [
+      ".github/workflows/pest-tests.yml",
+      ".github/workflows/playwright-tests.yml",
+      ".github/workflows/pint-tests.yml",
+      ".github/workflows/translation-tests.yml",
+      ".github/workflows/docker-publish.yml"
+    ],
+    "notes": "153 *Test.php files across 13 packages (Admin, Shop, Core, Customer, DataGrid, EUWithdrawal, FPC, Installer, Payment, PayGlocal, PayU, Razorpay, Stripe); phpunit.xml defines 20+ named testsuites and sets APP_ENV=testing / CACHE_STORE=array / MAIL_MAILER=array. 307 Playwright e2e files (packages/Webkul/*/tests/e2e-pw/, page-object pattern) - that is where the TypeScript language share comes from. pest-tests.yml is a real matrix over MySQL 8.0 AND MariaDB 10.11. Repo AGENTS.md names four gates (Pint, Pest, Playwright, translations) and says 'a gate you did not run is a gate that failed'."
+  },
+  "vendor": [
+    {
+      "name": "stripe",
+      "where": [
+        "composer.json (stripe/stripe-php ^17.3)",
+        "packages/Webkul/Stripe/src/Payment/Stripe.php",
+        "packages/Webkul/Stripe/src/Routes/web.php (/stripe/webhook)"
+      ],
+      "what_it_does": "card payments + webhook",
+      "swap_target_hint": "PayPal/Razorpay/PayU/PhonePe/PayGlocal already shipped as sibling packages; Paddle would be new work",
+      "effort_guess": "1-2 days"
+    },
+    {
+      "name": "paypal",
+      "where": [
+        "composer.json (paypal/paypal-server-sdk ^2.0)",
+        "packages/Webkul/Paypal/"
+      ],
+      "what_it_does": "PayPal checkout (SDK v2 migration noted in UPGRADE.md)",
+      "swap_target_hint": "n/a - built in",
+      "effort_guess": "hours"
+    },
+    {
+      "name": "razorpay / payu / phonepe / payglocal",
+      "where": [
+        "composer.json (razorpay/razorpay ^2.9)",
+        "packages/Webkul/{Razorpay,PayU,PhonePe,PayGlocal}/"
+      ],
+      "what_it_does": "regional (mostly India) payment gateways",
+      "swap_target_hint": "n/a - built in",
+      "effort_guess": "hours"
+    },
+    {
+      "name": "laravel-cashier",
+      "where": [
+        "composer.json (laravel/cashier ^16.0)"
+      ],
+      "what_it_does": "Stripe subscription/billing primitives (not wired to storefront subscriptions, which are newsletter)",
+      "swap_target_hint": "remove if no recurring billing is planned",
+      "effort_guess": "1-2 hours"
+    },
+    {
+      "name": "elasticsearch",
+      "where": [
+        "composer.json (elasticsearch/elasticsearch ^8.10)",
+        "config/elasticsearch.php",
+        "packages/Webkul/Core/src/ElasticSearch.php",
+        "packages/Webkul/Product/src/Jobs/ElasticSearch/*"
+      ],
+      "what_it_does": "product search/indexing (opt-in via env)",
+      "swap_target_hint": "the DB search driver already works; or Meilisearch",
+      "effort_guess": "1-2 days to remove safely (indexers, jobs, tests reference it)"
+    },
+    {
+      "name": "redis / predis",
+      "where": [
+        "composer.json (predis/predis ^2.2)",
+        "docker-compose.yml redis service",
+        "CACHE_STORE / QUEUE_CONNECTION env"
+      ],
+      "what_it_does": "cache + queue backend (file/sync by default)",
+      "swap_target_hint": "database or file drivers",
+      "effort_guess": "hours"
+    },
+    {
+      "name": "pusher",
+      "where": [
+        "composer.json (pusher/pusher-php-server ^7.0)",
+        "BROADCAST_CONNECTION=log default"
+      ],
+      "what_it_does": "websocket broadcasting backend",
+      "swap_target_hint": "reverb (Laravel first-party) or log driver",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "brevo (symfony/brevo-mailer)",
+      "where": [
+        "composer.json (symfony/brevo-mailer ^7.4)"
+      ],
+      "what_it_does": "transactional email transport option; default mailer is bagisto-dynamic-smtp configured in admin",
+      "swap_target_hint": "any Laravel mailer (smtp/ses/postmark/mailgun) - it is config, not code",
+      "effort_guess": "1 hour"
+    },
+    {
+      "name": "aws-sdk / s3",
+      "where": [
+        ".env.example (AWS_ACCESS_KEY_ID, AWS_BUCKET)",
+        "FILESYSTEM_DISK=public default"
+      ],
+      "what_it_does": "remote file storage for media/products",
+      "swap_target_hint": "local disk or any Flysystem adapter",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "openai / gemini / cohere / anthropic (via laravel/ai)",
+      "where": [
+        "composer.json (laravel/ai ^0.2.2)",
+        "config/ai.php (default=openai, default_for_images=gemini, default_for_reranking=cohere)",
+        "packages/Webkul/MagicAI/src/AiProvider.php",
+        "admin routes /admin/magic-ai/*"
+      ],
+      "what_it_does": "MagicAI: AI product description/content and image generation from the admin",
+      "swap_target_hint": "swap provider in config/ai.php; keys are stored in admin config, not env",
+      "effort_guess": "1-2 hours"
+    },
+    {
+      "name": "google (recaptcha enterprise + google2fa is separate)",
+      "where": [
+        "UPGRADE.md (Google reCAPTCHA Enterprise Integration)",
+        "composer.json (pragmarx/google2fa ^8.0 for admin 2FA)"
+      ],
+      "what_it_does": "bot protection on storefront forms; TOTP 2FA for admin users",
+      "swap_target_hint": "n/a",
+      "effort_guess": "hours"
+    },
+    {
+      "name": "intervention/image + spatie packages",
+      "where": [
+        "composer.json (intervention/image, spatie/laravel-responsecache, spatie/laravel-sitemap, stevebauman/purify, enshrined/svg-sanitize, maatwebsite/excel, barryvdh/laravel-dompdf, mpdf/mpdf)"
+      ],
+      "what_it_does": "image thumbnails, response cache, sitemap, HTML/ SVG sanitising, Excel import/export, PDF invoices",
+      "swap_target_hint": "mostly replaceable utilities, each independently swappable",
+      "effort_guess": "1 day for the set"
+    },
+    {
+      "name": "laravel-octane + sail",
+      "where": [
+        "composer.json (laravel/octane ^2.3, dev docker-compose.yml builds from vendor/laravel/sail/runtimes/8.3)"
+      ],
+      "what_it_does": "high-throughput PHP worker runtime option; dev container stack",
+      "swap_target_hint": "plain php-fpm (production images use fpm/apache/litespeed already)",
+      "effort_guess": "hours"
+    },
+    {
+      "name": "apple/social providers via laravel/socialite",
+      "where": [
+        "composer.json (laravel/socialite ^5.0)",
+        "packages/Webkul/SocialLogin/"
+      ],
+      "what_it_does": "customer social login",
+      "swap_target_hint": "n/a - built in",
+      "effort_guess": "hours"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "config/app.php + .env (APP_NAME, APP_URL, APP_ADMIN_URL, APP_TIMEZONE, APP_CURRENCY, APP_LOCALE)",
+      "kind": "domain",
+      "note": "APP_NAME=Bagisto, APP_ADMIN_URL=admin (admin path is configurable), APP_URL=http://localhost"
+    },
+    {
+      "path": "packages/Webkul/Shop/src/Resources/views/components/layouts/index.blade.php",
+      "kind": "metadata",
+      "note": "storefront html lang/dir + meta; theme is data-driven from config/themes.php"
+    },
+    {
+      "path": "config/themes.php",
+      "kind": "theme",
+      "note": "registers shop + admin themes and each theme's 'customize' sections/image cache"
+    },
+    {
+      "path": "packages/Webkul/Shop/src/Resources/assets/css/app.css + packages/Webkul/{Shop,Admin}/tailwind.config.js",
+      "kind": "theme",
+      "note": "Tailwind 3 theme tokens; Shop tailwind.config.js carries brand colours navyBlue #060C3B, lightOrange #F6F2EB, darkGreen #40994A, darkBlue #0044F2, darkPink #F85156 and the Poppins font"
+    },
+    {
+      "path": "packages/Webkul/Shop/src/Resources/views/emails/layout.blade.php",
+      "kind": "email",
+      "note": "single shared email shell for ~30 transactional templates"
+    },
+    {
+      "path": ".env.example (MAIL_FROM_ADDRESS=shop@example.com, ADMIN_MAIL_ADDRESS=admin@example.com, CONTACT_MAIL_ADDRESS=contact@example.com)",
+      "kind": "email",
+      "note": "placeholder sender identities"
+    },
+    {
+      "path": "packages/Webkul/Core/ (logo/asset config in admin Configuration)",
+      "kind": "logo",
+      "note": "logo and favicon are admin-configurable settings, so most branding is data not code"
+    },
+    {
+      "path": "public/fonts/*.ttf",
+      "kind": "theme",
+      "note": "34 MB of Noto fonts (SC/JP and others) shipped in-repo - CJK webfont payload you may want to drop"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "Docker production image seeds a default admin: admin@example.com / admin123 (docker/production/README.md 'Default admin credentials', with a 'change immediately' warning)",
+    "Bundled DB credentials in the production image are bagisto/bagisto (docker/production/README.md FAQ)",
+    "packages/Webkul/Installer/src/Data/demo-products.json - a 6.35 MB demo product catalogue used by the installer/seeders",
+    "packages/Webkul/Installer/src/Resources/assets/images/seeders/locales/*.png - demo seed imagery per locale",
+    "storage/app/public/data-transfer/samples/images/product-images.zip + the identical 447 KB test fixture in Admin/tests/e2e-pw/data/",
+    "public/llms.txt and public/llms-full.txt (650 KB) - committed AI-crawler description files for the demo store",
+    "Packages ship example Blade views named example.blade.php (components/example.blade.php in Shop) - placeholder template left in the tree",
+    "Default admin credentials named in the README flow: email admin@example.com"
+  ],
+  "pitfalls": [
+    {
+      "kind": "docs-lie",
+      "detail": "The repo description and README sell 'multi-vendor marketplace', but there is NO marketplace code in this repo: 0 occurrences of 'marketplace', 'seller' or 'vendor'-as-seller across all 3,856 tracked paths (the only 'vendor' hit is a bundled JS chunk named vendor-*.js). Multi-vendor is a separate paid/commercial Bagisto extension. Do not promise a marketplace from this template alone.",
+      "evidence": "git/trees/2.4?recursive=1 grepped case-insensitively for marketplace|seller|vendor -> 0 code hits; composer.json has no marketplace/vendor package; README.md 'multi-vendor marketplace' line"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README says 'Built with Laravel and Vue.js' and AGENTS.md instructs the agent to load skills from .agents/skills/<name>/SKILL.md (or .claude/skills/), but neither .agents/ nor .claude/ exists on branch 2.4 - the skills directory 404s, so an agent following AGENTS.md finds nothing to read.",
+      "evidence": "api.github.com/repos/bagisto/bagisto/contents/.agents?ref=2.4 -> 404; .claude?ref=2.4 -> 404; recursive tree has no .agents/.claude paths (while .github and .editorconfig do appear)"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "Install order matters and the dev Docker path hides it: docker-compose.yml builds laravel.test from ./vendor/laravel/sail/runtimes/8.3, a path that only exists AFTER composer install - `docker compose up` on a fresh clone fails until composer has run. Also APP_KEY is empty in .env.example, so any request before `php artisan key:generate` throws.",
+      "evidence": ".env.example (APP_KEY= empty); docker-compose.yml build.context: ./vendor/laravel/sail/runtimes/8.3"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "PHP extension wall: composer requires ext-calendar, curl, intl, mbstring, openssl, pdo, pdo_mysql, tokenizer and PHP >=8.3 <8.5 hard-capped. A host on PHP 8.2 or 8.5 cannot install even though Laravel 12 itself is looser.",
+      "evidence": "composer.json require.php '>=8.3 <8.5' + the ext-* list"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "composer post-autoload-dump runs `php artisan package:discover --ansi` on EVERY autoload dump - if the app is not yet configured (no .env/APP_KEY) this prints confusing errors during install and can hard-fail CI that only wanted to vendor the code.",
+      "evidence": "composer.json scripts.post-autoload-dump"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "Frontend deps live in THREE package.json files (packages/Webkul/Admin, Shop, Installer) plus a near-empty root one, and each pins its OWN vue/vite/tailwind/playwright versions (Shop pins @playwright/test ^1.57.0 while Admin and the root pin ^1.58.1; Admin also pulls vue-cal). 'npm install at the root' does not install the admin/storefront toolchain - agents then report phantom missing modules.",
+      "evidence": "package.json (root) vs packages/Webkul/{Admin,Shop,Installer}/package.json; AGENTS.md 'Frontend assets build from within each package, not the root'"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "416 MB repo: 34 MB of committed Noto CJK webfonts in public/fonts, 5.4 MB of committed Vite build output under public/themes/*/build, a 6.35 MB demo-products.json and duplicated asset copies (every built asset also exists once as source under packages/Webkul/*/src/Resources/assets - e.g. side-bar-menu svg 1,173,653 B twice, hero-image jpg 792,772 B twice). A clone is slow and the duplicated bytes bloat any diff.",
+      "evidence": "git tree byte sums: public/fonts 33,963,735 B; public/themes 5,436,448 B; packages/Webkul/Installer/src/Data/demo-products.json 6,352,274 B; duplicate svg/jpg paths"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "Committed build output plus AGENTS.md's 'Do not edit public/themes/*/*/build/' means the Vite bundles in public/ can silently diverge from the sources under packages/*/src/Resources/assets - a template change looks applied but the served bundle is stale until you rebuild the right package.",
+      "evidence": "AGENTS.md 'Do not edit' list; public/themes/*/build/assets/* present in the tree alongside the same files under src/Resources/assets/"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "Search behaves differently by environment: without Elasticsearch the storefront falls back to the DB driver, but config/elasticsearch.php + Webkul/Core/src/ElasticSearch.php + indexer jobs still ship, so a dev who enables ES for one test can change product-listing behaviour and get confusing test drift.",
+      "evidence": "config/elasticsearch.php (env ELASTICSEARCH_HOST), packages/Webkul/Product/src/Jobs/ElasticSearch/*, docker-compose.yml elasticsearch 7.17 + kibana"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "192 migration files across 41 packages are applied as one global sequence by `php artisan migrate`; a package added or removed out of order leaves the schema half-built and the failure surfaces as a missing-table 500 deep in a page render, not at migrate time.",
+      "evidence": "192 files matching packages/*/src/Database/Migrations; packages/Webkul/Installer/src/Console/Commands/Installer.php"
+    }
+  ],
+  "blocking": [],
+  "complexity": {
+    "pages": 553,
+    "components": 41,
+    "db_models": 243,
+    "migrations": 192,
+    "loc_estimate": 620000
+  },
+  "health": {
+    "stars": 28163,
+    "forks": 3297,
+    "open_issues": 24,
+    "contributors": 320,
+    "top_contributor_share": 0.279,
+    "last_commit": "2026-09-22",
+    "last_release": "v2.4.12",
+    "commits_last_90d": 269,
+    "issues_closed_last_90d": 59,
+    "notes": "open_issues 24 total but only 20 are real issues (4 are PRs). contributors 320 taken from the Link rel=last page count of repos/bagisto/bagisto/contributors (per_page=1 -> page 320). top_contributor_share = jitendra-webkul 6,394 contributions / 22,900 commits on branch 2.4 (Link rel=last on the commits endpoint) = 0.279. Very much alive: 269 commits and 53 merged PRs in the last 90 days, last release v2.4.12 on 2026-09-22, and a v2.5.0-beta4 line in flight. Branch layout is version-per-branch (1.x, 2.1, 2.2, 2.3, 2.4, master) - 2.4 is the maintained stable line and the default branch."
+  },
+  "verdict": {
+    "best_for": "A business that needs a full self-hosted Laravel storefront fast - catalog/EAV, cart, one-page checkout, invoices/shipments/refunds, RMA, tax, 22 locales incl. RTL, multi-currency, 6 payment gateways, an admin with ACL and 2FA, Docker production images and a real Pest+Playwright suite - and is willing to work inside its 41-package conventions.",
+    "weak_for": "Anyone assuming this repo is a multi-vendor marketplace (that is a separate paid extension), a JS/React app (it is Blade + Vue islands with 0 .vue files), or a small codebase they can read end-to-end - 2,621 package PHP files across 41 modules with a mandatory repository-pattern convention make deep changes a real onboarding project.",
+    "swap_burden": "heavy - every theme, branding and business-rule change happens inside Bagisto's own package/Concord/repository conventions (no comments inside method bodies, all DB access through repositories, every user-facing string through trans() in 22 locales, and AGENTS.md forbids adding or removing Composer/npm dependencies without approval), and stripping features means removing whole modules plus their migrations."
+  },
+  "evidence": {
+    "framework": "composer.json (laravel/framework ^12.0, php >=8.3 <8.5, 41 Webkul\\* psr-4 entries) + packages/Webkul/{Shop,Admin}/package.json (vue ^3.5.13, @vitejs/plugin-vue, tailwindcss ^3.3.2, vite ^6.4.2) + packages/Webkul/Shop/src/Resources/assets/js/app.js (createApp from vue.esm-bundler) + artisan + bootstrap/app.php",
+    "stack": "composer.json require block (stripe/stripe-php, paypal/paypal-server-sdk, razorpay, elasticsearch, predis, pusher, laravel/cashier, laravel/sanctum, pragmarx/google2fa, laravel/socialite, laravel/ai) + config/{ai,database,elasticsearch,themes,concord}.php",
+    "auth": "packages/Webkul/Admin/src/Routes/auth-routes.php + Admin/src/Http/Controllers/User/{TwoFactorController,SessionController}.php + packages/Webkul/Customer/ + packages/Webkul/SocialLogin/ + composer.json (laravel/sanctum, pragmarx/google2fa, laravel/socialite)",
+    "i18n": "lang/ has 22 locale dirs (ar,bn,ca,de,en,es,fa,fr,he,hi_IN,id,it,ja,nl,pl,pt_BR,ro,ru,sin,tr,uk,zh_CN); 330 files under packages/*/src/Resources/lang/; RTL confirmed at packages/Webkul/Shop/src/Resources/views/components/layouts/index.blade.php line 11 -> dir=\"{{ core()->getCurrentLocale()->direction }}\"",
+    "vendor": "composer.json require/require-dev + .env.example (names only) + config/{ai,elasticsearch}.php + packages/Webkul/{Stripe,Paypal,Razorpay,PayU,PhonePe,PayGlocal,MagicAI,SocialLogin}/",
+    "deploy": "docker-compose.yml (Sail: laravel.test + mysql 8.0 + redis + elasticsearch 7.17 + kibana + mailpit) + docker/production/{nginx,apache,litespeed,shared}/Dockerfile + docker/production/README.md (webkul/bagisto image runs at :8080, seeds admin@example.com/admin123) + public/forge/",
+    "routes": "gh api git/trees/2.4?recursive=1 then counted Route:: declarations in the 26 files under packages/Webkul/*/src/Routes/ (511 total) and read packages/Webkul/Shop/src/Routes/{web,api,store-front,customer,checkout,webmcp}-routes.php",
+    "tests": "phpunit.xml (20+ suites) + 153 *Test.php across 13 packages + 307 files under */tests/e2e-pw/ + .github/workflows/{pest,playwright,pint,translation}-tests.yml",
+    "health": "gh api repos/bagisto/bagisto{,/contributors,/releases,/commits,/issues} + search/issues (closed >=2026-06-25 = 59, merged PRs = 53) + search/commits committer-date:>=2026-06-25 = 269 + Link rel=last counts for contributors (320) and commits (22,900)",
+    "blocking": "nothing found, checks run: (a) grepped the full path list for .exe/.so/.dll/.bin/.phar/.zip/.gz - only 4 legitimate shell scripts under docker/production/shared/ and two product-images.zip test fixtures; (b) only .env.example exists, no committed .env; (c) no vendor/ or node_modules/ committed (0 paths each); (d) composer.lock and the per-package package.json files exist, so no dependency is unversioned; (e) read the classic entry points public/index.php, artisan and bootstrap/app.php - all stock Laravel, no injected or obfuscated code; (f) .env.example values contain no credential - all blank or example.*"
+  },
+  "unmeasured": [
+    "Nothing was installed or executed (remote-API measurement only): I did not run composer install, npm install, php artisan migrate, the Pest suite or a Playwright run, so install success, migration success and the real green/red state of main are NOT verified.",
+    "loc_estimate 620,000 is byte-derived (PHP 22,241,138 B + Blade 5,077,584 B in packages/, assuming ~44 B/line), not a counted LOC.",
+    "complexity.pages 553 is the count of .blade.php view files (there is no 'pages' concept in PHP routing); complexity.components 41 is the package count, not UI components.",
+    "Route count 511 is a grep of `Route::` declarations in the 25 route files that contain them; packages can also register routes at runtime from service providers (Paypal/src/Routes/web.php declares none inline yet PayPal obviously works), so the true routable surface is somewhat higher.",
+    "TranslationsChecker / lang coverage: I did not run `php artisan bagisto:translations:check`, so whether all 22 locales are complete is unknown.",
+    "UPGRADE.md (55,922 B) was only read in its first ~40 lines; per-version breaking-change detail beyond v2.4 was not audited.",
+    "Whether the v2.5.0-beta line changes any of the above: I measured branch 2.4 (the default) only; master/2.5.0-beta4 were not measured.",
+    "DB model semantics: 243 files under packages/*/src/Models/ were counted, but I did not read the schema to confirm every one is a table-backed Eloquent model (Concord proxies included).",
+    "Payments 'model' is recorded as one-time because checkout is order-based; laravel/cashier is present in composer.json and its intended production use inside Bagisto was not traced.",
+    "Email template count 30 counts .blade.php files under */Resources/views/emails/ seen in the tree; per-gateway and per-locale variants were not resolved."
+  ]
+}

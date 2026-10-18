@@ -1,0 +1,406 @@
+{
+  "repo": "burakorkmez/triply-ai",
+  "slug": "triply-ai",
+  "measured_at": "2026-09-24T03:06:58Z",
+  "upstream_commit": "8dd1112bb77985a4135c23228c0f5d06a5d94a91",
+  "default_branch": "master",
+  "archived": false,
+  "size_kb": 29264,
+  "languages": {
+    "TypeScript": 71.11,
+    "HTML": 22.2,
+    "CSS": 6.3,
+    "JavaScript": 0.39
+  },
+  "framework": {
+    "name": "expo",
+    "version": "~56.0.12",
+    "router": "expo-router (file-based, src/app)",
+    "notes": "React Native mobile app (react-native 0.85.3, react 19.2.3), NOT a web React SPA — no vite/next anywhere. expo-router ~56.2.11 supplies both screens and server endpoints (files ending in +api.ts). app.json sets web.output='server' and web.bundler='metro', so the same routes can be exported for web, but the product targets iOS/Android via expo-dev-client + native prebuild. AGENTS.md pins the correct docs to https://docs.expo.dev/versions/v56.0.0/."
+  },
+  "package_manager": "npm",
+  "node_or_python_requirement": null,
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "Single Expo app at repo root (no workspaces field). legal/ is a second, independent deployable inside the same repo: a static-assets Cloudflare Worker (legal/wrangler.jsonc) serving landing/privacy/terms/support HTML."
+  },
+  "stack": {
+    "db": "postgres",
+    "orm": "drizzle",
+    "auth": {
+      "provider": "clerk",
+      "methods": [
+        "oauth"
+      ],
+      "roles": [],
+      "notes": "Google + Apple OAuth only (src/hooks/useSSOAuth.ts strategies 'oauth_google' | 'oauth_apple'; src/app/(auth)/sign-in.tsx has exactly two buttons). No email-password or magic-link UI exists. Client gating is a Redirect to /sign-in in src/app/(home)/_layout.tsx; every API route re-verifies 'Authorization: Bearer <Clerk session token>' server-side in src/lib/auth.ts via verifyToken. No role/admin concept anywhere in the tree."
+    },
+    "ui": [
+      "nativewind",
+      "tailwindcss",
+      "expo-symbols",
+      "@expo/ui",
+      "expo-glass-effect",
+      "react-native-reanimated",
+      "expo-linear-gradient",
+      "expo-image"
+    ],
+    "i18n": {
+      "library": "none",
+      "default": null,
+      "locales": [],
+      "rtl_aware": false,
+      "translation_files": 0
+    },
+    "payments": {
+      "provider": "none",
+      "model": "none",
+      "webhooks": false
+    },
+    "email": {
+      "provider": "none",
+      "templates": 0,
+      "transactional": false
+    },
+    "analytics": [],
+    "jobs": [
+      "inngest"
+    ],
+    "search": [],
+    "storage": [
+      "imagekit"
+    ],
+    "realtime": [],
+    "flags": [
+      "inngest-experiment trip-plan-model (experiment.weighted mini:90 / full:10)"
+    ],
+    "observability": [
+      "sentry"
+    ]
+  },
+  "features": [
+    "accounts",
+    "dashboard",
+    "uploads",
+    "jobs",
+    "map"
+  ],
+  "routes": {
+    "pages": [
+      "/sign-in",
+      "/",
+      "/assistant",
+      "/trips",
+      "/profile",
+      "/generate-trip",
+      "/trip-loading",
+      "/trip/[id]"
+    ],
+    "api": [
+      "/api/trips",
+      "/api/trips/[id]",
+      "/api/trips/[id]/status",
+      "/api/trips/[id]/cover",
+      "/api/assistant",
+      "/api/assistant/messages",
+      "/api/inngest",
+      "/api/webhooks/clerk"
+    ],
+    "protected": [
+      "/",
+      "/assistant",
+      "/trips",
+      "/profile",
+      "/generate-trip",
+      "/trip-loading",
+      "/trip/[id]"
+    ],
+    "count": 16,
+    "notes": "8 screens + 8 API route files (plus 3 _layout.tsx navigators not counted). Paths taken from the git tree of src/app/; expo-router maps (home)/index.tsx to '/' and [id].tsx to a dynamic segment. Only /sign-in is public. '/api/inngest' is Inngest's serve endpoint and '/api/webhooks/clerk' is the Svix-verified Clerk webhook."
+  },
+  "env": {
+    "count": 14,
+    "names": [
+      "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY",
+      "CLERK_SECRET_KEY",
+      "CLERK_WEBHOOK_SIGNING_SECRET",
+      "DATABASE_URL",
+      "OPENAI_API_KEY",
+      "UNSPLASH_ACCESS_KEY",
+      "UNSPLASH_SECRET_KEY",
+      "INNGEST_DEV",
+      "IMAGEKIT_PRIVATE_KEY",
+      "IMAGEKIT_PUBLIC_KEY",
+      "IMAGEKIT_URL_ENDPOINT",
+      "INNGEST_SIGNING_KEY",
+      "INNGEST_EVENT_KEY",
+      "SENTRY_AUTH_TOKEN"
+    ],
+    "required_at_build": [
+      "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY",
+      "SENTRY_AUTH_TOKEN"
+    ],
+    "notes": "All values empty in .env.example — no secrets committed. The 11 uncommented .env.example names are required for dev; INNGEST_SIGNING_KEY / INNGEST_EVENT_KEY are present but commented out ('only needed in production'); SENTRY_AUTH_TOKEN appears only in README's env list, not in .env.example. SENTRY_AUTH_TOKEN is needed for the Sentry Expo plugin's source-map upload; the EXPO_PUBLIC_ prefix is inlined at build time per the comment in src/lib/env.ts. Runtime is hard-failing: src/db/index.ts throws at module import when DATABASE_URL is missing and src/lib/env.ts getters throw on every other secret, so any /api route import fails before serving a request."
+  },
+  "deploy": {
+    "docker": false,
+    "dockerfile_port": null,
+    "compose": false,
+    "standalone_output": false,
+    "build_cmd": null,
+    "start_cmd": "npm run start",
+    "migrations_cmd": "npm run db:push",
+    "paas_coupling": [
+      "cloudflare-workers"
+    ],
+    "notes": "No Dockerfile, no docker-compose, no eas.json, no CI. README's run instructions are 'npm install' then 'npx expo run:ios' / 'npx expo run:android' — a native prebuild toolchain (Xcode / Android Studio) is required because of expo-dev-client and the config plugins; there is no web-only or container path. No build script exists in package.json. DB schema is applied with drizzle-kit push (src/drizzle.config.ts sets out './drizzle' but no drizzle/ directory is committed, so there are zero migration files). paas_coupling is only the bundled marketing/legal site: legal/ is a Cloudflare static-assets Worker (name 'triply-legal') deployed independently of the app."
+  },
+  "tests": {
+    "frameworks": [],
+    "unit_files": 0,
+    "e2e_files": 0,
+    "ci_workflows": [],
+    "notes": "Zero test files at any depth (tree grep for test/spec/__tests__/vitest/jest/playwright returns nothing) and no .github directory at all — gh api repos/.../contents/.github returns 404, so the repo has no CI, no issue templates, no CodeRabbit config despite the README advertising 'AI Code Review with CodeRabbit'. The only JSON under .claude/skills/*/evals/ are Claude Code skill evaluation specs, not application tests."
+  },
+  "vendor": [
+    {
+      "name": "clerk",
+      "where": [
+        "package.json",
+        "app.json",
+        ".env.example",
+        "src/hooks/useSSOAuth.ts",
+        "src/lib/auth.ts",
+        "src/app/api/webhooks/clerk+api.ts"
+      ],
+      "what_it_does": "user auth/sessions (Google + Apple SSO), session-token verification on every API route, and user.created/updated/deleted webhooks that drive DB sync",
+      "swap_target_hint": "better-auth (mobile OAuth needs a device flow; expect custom work)",
+      "effort_guess": "3-5 days"
+    },
+    {
+      "name": "neon",
+      "where": [
+        "package.json",
+        ".env.example",
+        "src/db/index.ts",
+        "drizzle.config.ts",
+        "AGENTS.md"
+      ],
+      "what_it_does": "hosted serverless Postgres reached over HTTP with @neondatabase/serverless + drizzle-orm/neon-http",
+      "swap_target_hint": "supabase / any Postgres (swap the neon-http driver for node-postgres)",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "openai",
+      "where": [
+        "package.json",
+        ".env.example",
+        "src/lib/openai.ts",
+        "src/lib/api.ts"
+      ],
+      "what_it_does": "trip itinerary + budget generation and the chat assistant; Structured Outputs via zodResponseFormat on gpt-4o-mini (90%) / gpt-4o (10%)",
+      "swap_target_hint": "any OpenAI-compatible endpoint (Anthropic/Groq/local) behind the same zod schemas",
+      "effort_guess": "1 day"
+    },
+    {
+      "name": "inngest",
+      "where": [
+        "package.json",
+        ".env.example",
+        "src/inngest/client.ts",
+        "src/inngest/functions.ts",
+        "src/app/api/inngest+api.ts"
+      ],
+      "what_it_does": "durable background jobs: trip-generation pipeline with step.run, a weighted model experiment, and the Clerk user-sync functions",
+      "swap_target_hint": "self-hosted Inngest or a queue + worker (BullMQ/Trigger.dev)",
+      "effort_guess": "2-3 days"
+    },
+    {
+      "name": "imagekit",
+      "where": [
+        "package.json",
+        ".env.example",
+        "src/lib/images.ts",
+        "src/lib/image-url.ts"
+      ],
+      "what_it_does": "re-hosts Unsplash covers and stores user-uploaded trip cover images; delivery-time transform URLs (ik.imagekit.io)",
+      "swap_target_hint": "Cloudinary / S3 + sharp",
+      "effort_guess": "half a day"
+    },
+    {
+      "name": "unsplash",
+      "where": [
+        ".env.example",
+        "src/lib/images.ts",
+        "src/app/(home)/index.tsx"
+      ],
+      "what_it_does": "destination cover photos via api.unsplash.com/search/photos, with required photographer attribution stored on the trips row",
+      "swap_target_hint": "Pexels / Picsum / own asset library (attribution fields must be kept for ToS compliance)",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "sentry",
+      "where": [
+        "package.json",
+        "app.json",
+        ".env.example",
+        "src/app/_layout.tsx",
+        "src/lib/api.ts"
+      ],
+      "what_it_does": "crash/error tracking plus manual gen_ai spans and structured logs; mobile replay; app.json hardcodes org 'codesistency-gs' / project 'triply-tutorial'",
+      "swap_target_hint": "remove or point at your own Sentry org (no vendor lock beyond DSN)",
+      "effort_guess": "2-4 hours"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "app.json",
+      "kind": "metadata",
+      "note": "expo.name/slug/scheme 'triply', ios.bundleIdentifier 'com.burakorkmez.triply', ios.appleTeamId '9NSCVL7862', splash + adaptive-icon colours (#208AEF, #E6F4FE), plugin list embeds the Sentry org/project"
+    },
+    {
+      "path": "package.json",
+      "kind": "metadata",
+      "note": "package name 'triply'"
+    },
+    {
+      "path": "assets/images/",
+      "kind": "logo",
+      "note": "icon.png (799 KB), logo-glow.png, splash-icon.png, world.png (1.1 MB), auth-bg.png (2.2 MB), android adaptive icons, expo badges — all app-branded artwork"
+    },
+    {
+      "path": "legal/index.html",
+      "kind": "copy",
+      "note": "full marketing landing page: title 'Triply — Plan the perfect trip in seconds', announcement bar, hero copy, fake App Store / Google Play buttons and dead links, brand 'Triply'"
+    },
+    {
+      "path": "legal/privacy-policy.html + legal/terms-of-service.html + legal/support.html",
+      "kind": "copy",
+      "note": "legal copy referring to Triply and the triply.com domain; support contact is mailto:support@triply.com"
+    },
+    {
+      "path": "src/lib/images.ts",
+      "kind": "domain",
+      "note": "ImageKit upload folder '/triply/covers' and Unsplash referral utm_source=triply"
+    },
+    {
+      "path": "src/lib/api.ts",
+      "kind": "copy",
+      "note": "Sentry agent identity constants ASSISTANT_AGENT_NAME='Travel Companion', ASSISTANT_MODEL='gpt-4o-mini'"
+    },
+    {
+      "path": "src/app/(home)/index.tsx",
+      "kind": "copy",
+      "note": "home copy plus a hardcoded destination list (Santorini/Kyoto/Bali) with inline Unsplash CDN image URLs"
+    },
+    {
+      "path": "src/app/generate-trip.tsx, src/app/trip/[id].tsx, src/app/(home)/profile.tsx",
+      "kind": "copy",
+      "note": "screen-level copy and hardcoded hex palette (#0F1B2D, #5B8DEF, #3A6EDA) repeated inline instead of a shared theme token file"
+    },
+    {
+      "path": "design/ + assets/images/screenshot-for-readme.png",
+      "kind": "theme",
+      "note": "~15 MB of AI-generated UI mockups/design-system sheets kept in-repo; referenced by nothing in the code"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "POPULAR_DESTINATIONS in src/app/(home)/index.tsx — 3 hardcoded destinations (Santorini/Kyoto/Bali) with fixed star ratings ('4.9'/'4.8'/'4.7') and hardcoded images.unsplash.com photo IDs, not from the API",
+    "legal/index.html — invented marketing content (announcement bar 'The AI assistant now plans multi-week trips', hero/footage copy) with App Store and Google Play buttons both pointing at href=\"#\"",
+    "legal/support.html — contact address support@triply.com (domain is not owned/verified by the code; no mail infrastructure exists)",
+    "app.json — Sentry org 'codesistency-gs' / project 'triply-tutorial' from the tutorial author, plus his appleTeamId and com.burakorkmez.triply bundle id",
+    "design/*.png and assets/images/screenshot-for-readme.png — tutorial/design mockup assets shipped in the repo (no code references)",
+    "README.md — 'Beginner-Friendly Structured Workflow', 'AI Code Review with CodeRabbit', 'App Store-Ready Project Structure' are tutorial promises; no CodeRabbit config, no store submission config and no tests exist in the tree"
+  ],
+  "pitfalls": [
+    {
+      "kind": "build-needs-env",
+      "detail": "src/db/index.ts throws 'Missing DATABASE_URL' at module import and src/lib/env.ts getters throw for CLERK_SECRET_KEY / OPENAI_API_KEY / UNSPLASH_ACCESS_KEY / the three IMAGEKIT_* vars, so importing any /api route (or running Inngest functions) without a complete .env fails immediately. There is no .env in the repo and no offline/mock mode.",
+      "evidence": "src/db/index.ts, src/lib/env.ts, .env.example"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "package.json declares \"reset-project\": \"node ./scripts/reset-project.js\" but no scripts/ directory exists anywhere in the tree, so `npm run reset-project` fails with MODULE_NOT_FOUND.",
+      "evidence": "package.json scripts vs gh api git/trees/master?recursive=1 (no scripts/ path)"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "drizzle.config.ts sets out: './drizzle' but no drizzle/ directory is committed — there are zero migration files; schema changes are applied only with `npm run db:push` (drizzle-kit push) against a live Neon database. Anyone expecting migrate/rollback files finds none.",
+      "evidence": "drizzle.config.ts + git tree (no drizzle/ path), package.json scripts"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "Native-only build: expo-dev-client, @expo/ui, expo-glass-effect, expo-symbols, react-native-maps 1.27.2, react-native-reanimated 4.3.1 + react-native-worklets. It cannot run in Expo Go or as a plain web app — `npx expo run:ios|android` (Xcode/Android Studio) or a fresh EAS setup is required.",
+      "evidence": "package.json dependencies, app.json plugins, README run instructions, AGENTS.md"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "src/inngest/client.ts hardcodes `isDev: true`, so Inngest signature validation is skipped and events are assumed to go to a local dev server; production wiring (INNGEST_SIGNING_KEY/INNGEST_EVENT_KEY, which are commented out in .env.example) needs a code change, and the documented dev flow requires `npm run inngest` (inngest-cli) running alongside the app.",
+      "evidence": "src/inngest/client.ts, .env.example, package.json scripts"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README's env list and .env.example disagree: README omits INNGEST_DEV and lists SENTRY_AUTH_TOKEN that .env.example does not contain; the README also claims CodeRabbit AI review and 'App Store-Ready' structure while the repo has no .github directory and no store config. Follow the code, not the README.",
+      "evidence": "README.md vs .env.example vs gh api repos/.../contents/.github (404)"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "Expo SDK 56 with React Native 0.85 / React 19.2 and a caret-free pin set (react 19.2.3, react-native-maps 1.27.2, reanimated 4.3.1). The navigation uses expo-router's 'unstable' native-tabs API (expo-router/unstable-native-tabs) and AGENTS.md forbids switching to a JS tab bar, so upgrades are risky and iOS-Liquid-Glass behaviour is platform-specific.",
+      "evidence": "package.json, src/app/(home)/_layout.tsx, AGENTS.md"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "AGENTS.md ends with stray literal '</content>' / '</invoke>' tag lines (file is 1776 bytes and those tags are really in it) — a pasted AI-transcript artifact, harmless but confusing to an agent that parses the file. AGENTS.md also forbids ever starting the dev server, which conflicts with a fresh checkout where nothing is running.",
+      "evidence": "AGENTS.md (tail bytes verified via curl | od -c)"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "Repo carries ~29 MB of committed binaries: design/ mockup PNGs (~15 MB) plus assets/images (auth-bg.png 2.2 MB, world.png 1.1 MB, screenshot-for-readme.png 1.4 MB); legal/ui-inspiration.png is 5.8 MB and excluded from the Worker only via legal/.assetsignore. Sparse/shallow clones save real time.",
+      "evidence": "git tree blob sizes; legal/.assetsignore"
+    }
+  ],
+  "blocking": [],
+  "complexity": {
+    "pages": 8,
+    "components": 1,
+    "db_models": 5,
+    "migrations": 0,
+    "loc_estimate": 6300
+  },
+  "health": {
+    "stars": 51,
+    "forks": 19,
+    "open_issues": 0,
+    "contributors": 1,
+    "top_contributor_share": 1.0,
+    "last_commit": "2026-07-04",
+    "last_release": null,
+    "commits_last_90d": 16,
+    "issues_closed_last_90d": 0
+  },
+  "verdict": {
+    "best_for": "A tutorial-grade but genuinely complete Expo/React Native reference for an AI trip-planner or similar AI-generation mobile product — real auth, real Postgres schema, a durable Inngest generation pipeline, streaming chat assistant and image pipeline — best used as a working starting point to rebuild the same feature set rather than as maintained infrastructure.",
+    "weak_for": "Anything expecting production maturity: it is a 6-day, single-author, 16-commit tutorial build with no tests, no CI, no Docker/migrations, hardcoded dev-mode Inngest, client-side-only route gating, no admin/roles, no i18n, no payments and no email — and it cannot run in Expo Go or a container, so a native toolchain (or a new EAS setup) is a prerequisite for even the first screen.",
+    "swap_burden": "medium — Clerk, Neon, Inngest, ImageKit, Unsplash and Sentry are all isolated behind thin single-purpose modules (src/lib/auth.ts, src/db/index.ts + drizzle, src/inngest/*, src/lib/images.ts, src/lib/env.ts), so each swap is small, but the mobile-only toolchain, hardcoded isDev Inngest and client-side route protection must be fixed before anything is deployable."
+  },
+  "evidence": {
+    "framework": "package.json deps (expo ~56.0.12, expo-router ~56.2.11, react-native 0.85.3) + app.json (plugins, web.output=server) + AGENTS.md; verified NO vite/next in dependencies",
+    "auth": "src/lib/auth.ts (verifyToken Bearer), src/hooks/useSSOAuth.ts (oauth_google/oauth_apple), src/app/(auth)/sign-in.tsx (two buttons), src/app/(home)/_layout.tsx (Redirect /sign-in), src/app/api/webhooks/clerk+api.ts (svix)",
+    "vendor": ".env.example + package.json + src/lib/{openai,images,env,api}.ts + src/inngest/{client,functions}.ts + app.json",
+    "deploy": "git tree (no Dockerfile/CI/eas.json), package.json scripts, README run section, legal/wrangler.jsonc",
+    "health": "gh api repos/burakorkmez/triply-ai (stars/forks/size/archived/default_branch), /contributors, /commits?per_page=1 + Link header (16 total commits), /releases (0), /tags (0), /issues (0 open)",
+    "routes": "gh api repos/.../git/trees/master?recursive=1 (all src/app/** paths)",
+    "env": ".env.example (11 live + 2 commented names) + README env block (SENTRY_AUTH_TOKEN) + src/lib/env.ts + src/db/index.ts",
+    "complexity": "tree blob sizes: src/ 36 files / ~156 KB → ~4.4k LOC; legal/ html+css ~63 KB → ~1.6k LOC; 1 file under src/components; 5 pgTable exports in src/db/schema.ts; 0 drizzle/ migrations"
+  },
+  "unmeasured": [
+    "node_or_python_requirement — package.json has no engines field and no .nvmrc/.node-version in the tree; Expo SDK 56's own Node floor is not stated anywhere in the repo, so I left it null rather than quoting outside documentation.",
+    "Runtime behaviour — per the remote-only rule nothing was installed or executed, so 'npm install' success, native prebuild/EAS build outcome, and the actual drizzle-kit push result are unverified. Dependency resolution was spot-checked only: all 8 sampled packages (@neondatabase/serverless 1.1.0, imagekit 6.0.0, inngest 4.21.0, svix 2.5.0, nativewind 4.2.7, typescript 7.0.2, expo 57.0.24, react-native-maps 1.29.8) return HTTP 200 from registry.npmjs.org — no phantom dependency found, but the full 42-declaration set and the ~756 KB package-lock.json were not exhaustively re-resolved.",
+    "Exact LOC — estimated from tracked blob byte sizes divided by 35; no line counts were read file-by-file (would need a clone).",
+    "Vercel/metrics for the landing page, real store-readiness, and whether the referenced Clerk/Sentry/ImageKit/Neon accounts still exist — not measurable from the repo.",
+    "Component count is 1 by directory (src/components/AuthIcons.tsx); screen-local UI blocks inside src/app/** were not counted individually, so 1 understates real UI-surface count.",
+    "Two of the three deepest screens (src/app/trip/[id].tsx 21.9 KB, src/app/generate-trip.tsx 17.4 KB) were skimmed for imports/route shape only, not read in full — an unlisted feature or hardcoded block could hide there.",
+    "I did not audit .claude/skills/** (37 KB of vendored Clerk Claude Code skill markdown) or skills-lock.json hashes beyond confirming there is no executable/hook content in .claude/settings.json (which contains only {\"enabledPlugins\": {\"expo@claude-plugins-official\": true}})."
+  ]
+}

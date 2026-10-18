@@ -1,0 +1,21 @@
+{
+  "name": "",
+  "business": "",
+  "shape": "",
+  "audience": "",
+  "market": "",
+  "languages": ["en"],
+  "brand": { "name": "", "tagline": "", "primary": "", "logo": "", "tone": "", "social": [] },
+  "features": [],
+  "money": "",
+  "content": "owner-supplied | draft-then-correct",
+  "hosting": "vps | free-preview | undecided",
+  "domain": "",
+  "deadline": "",
+  "assumed": [],
+  "seo": {
+    "keywords": [], "locations": [], "profiles": [], "photos": [], "founder": "", "founded": "", "reviews": "",
+    "local": { "category": "", "address": "", "phone": "", "email": "", "hours": [], "price_range": "" },
+    "ai_crawlers": "allow", "search_console": "", "bing": "", "gbp": "", "places": "", "reviews_asked": ""
+  }
+}

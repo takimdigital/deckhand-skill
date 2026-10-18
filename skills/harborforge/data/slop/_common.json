@@ -1,0 +1,33 @@
+{
+  "schema": "deckhand.slop-common/1",
+  "why": "Shared by every language pack: how much each signal weighs and where review and slop start. A pack may override any threshold or weight for its language (e.g. zh turns the em-dash rule off: —— is ordinary Chinese punctuation).",
+  "weights": {
+    "strong": 3,
+    "buzz": 1,
+    "phrase": 3,
+    "transition": 1.5,
+    "superlative": 2,
+    "em_dash": 1,
+    "exclaim": 0.5,
+    "emoji": 1,
+    "triad": 0.5,
+    "rhythm": 3
+  },
+  "thresholds": {
+    "review": 4,
+    "slop": 10,
+    "floor_words": 40,
+    "transitions_min": 2,
+    "triads_min": 3,
+    "em_dash": true,
+    "em_dash_words_per": 150,
+    "exclaim_words_per": 60,
+    "rhythm_min_sentences": 8,
+    "rhythm_cv": 0.22,
+    "short_words": 8,
+    "short_chars": 15
+  },
+  "scoring": "points = the weights of every hit; density = points per 100 words (at least floor_words counted, so a short hero is not let off); review from `review`, slop from `slop`; score = density x 5, capped at 100. One strong hit makes a text at least `review`; a leaked chat voice (kind leak) makes it `slop`.",
+  "emoji": ["🚀", "✨", "💡", "🔥", "🎯", "⚡", "🌟", "💪", "🙌", "📈", "🔑", "💯", "👉", "🧠", "🤝"],
+  "max_pages": 30
+}

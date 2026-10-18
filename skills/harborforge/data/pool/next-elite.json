@@ -1,0 +1,381 @@
+{
+  "repo": "salmanshahriar/Next-Elite",
+  "slug": "next-elite",
+  "measured_at": "2026-09-23T22:13:52Z",
+  "upstream_commit": "8865298a9a0ca62f8126283328ef6d25ccd0cdb8",
+  "default_branch": "main",
+  "archived": false,
+  "size_kb": 10297,
+  "languages": {
+    "TypeScript": 96.96,
+    "CSS": 2.51,
+    "Dockerfile": 0.34,
+    "JavaScript": 0.19
+  },
+  "framework": {
+    "name": "next",
+    "version": "16.3.4",
+    "router": "app",
+    "notes": "App Router + React 19.2.8. next-intl plugin wrapped in next.config.mjs; root-level proxy.ts is a no-op passthrough (Next 16 replaced middleware.ts) so locales are cookie-based and URLs are NOT prefixed. output:'standalone' is applied only when process.env.VERCEL is unset. No turbopack key in next.config.mjs (Next 16 defaults)."
+  },
+  "package_manager": "npm",
+  "node_or_python_requirement": ">=22.12.0",
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "single app; package.json has no workspaces field, no turbo/pnpm-workspace files. .github/nodejs.version pins 22; Dockerfile uses node:22-alpine."
+  },
+  "stack": {
+    "db": "none",
+    "orm": "none",
+    "auth": {
+      "provider": "better-auth",
+      "methods": [
+        "email-password",
+        "oauth"
+      ],
+      "roles": [
+        "user",
+        "admin"
+      ],
+      "notes": "better-auth 1.7.3. emailAndPassword always enabled; the Google social provider is registered only when GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET are both set (button separately gated by NEXT_PUBLIC_GOOGLE_AUTH_ENABLED). NO database adapter is passed to betterAuth() and no db/orm dependency exists anywhere, so session persistence is unverified. Role 'admin' comes from the AUTH_ADMIN_EMAILS CSV allowlist (or the demo accounts while NEXT_PUBLIC_DEMO_MODE=true), otherwise 'user'. Permissions are dashboard.view:user / dashboard.view:admin; server guards requireUser()/requirePermission(); parallel-route slots @admin/@user both resolve to /dashboard, /profile, /settings."
+    },
+    "ui": [
+      "tailwind-v4",
+      "shadcn",
+      "radix",
+      "lucide-react",
+      "phosphor-icons",
+      "tw-animate-css",
+      "cva",
+      "sonner",
+      "embla-carousel",
+      "three+postprocessing",
+      "react-day-picker",
+      "nextjs-toploader"
+    ],
+    "i18n": {
+      "library": "next-intl",
+      "default": "en",
+      "locales": [
+        "en",
+        "bn",
+        "ar",
+        "fr",
+        "es",
+        "zh"
+      ],
+      "rtl_aware": true,
+      "translation_files": 6
+    },
+    "payments": {
+      "provider": "none",
+      "model": "none",
+      "webhooks": false
+    },
+    "email": {
+      "provider": "none",
+      "templates": 0,
+      "transactional": false
+    },
+    "analytics": [
+      "vercel-analytics (@vercel/analytics/next mounted in src/app/layout.tsx)"
+    ],
+    "jobs": [],
+    "search": [],
+    "storage": [],
+    "realtime": [],
+    "flags": [],
+    "observability": [
+      "sentry (@sentry/nextjs, DSN-gated; next.config.mjs is NOT wrapped with withSentryConfig)"
+    ]
+  },
+  "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "i18n"
+  ],
+  "routes": {
+    "pages": [
+      "/",
+      "/ui-components",
+      "/login",
+      "/register",
+      "/password-reset",
+      "/dashboard",
+      "/profile",
+      "/settings",
+      "/unauthorized",
+      "/sitemap.xml",
+      "/robots.txt",
+      "/manifest.webmanifest"
+    ],
+    "api": [
+      "/api/auth/[...all]",
+      "/api/health"
+    ],
+    "protected": [
+      "/dashboard",
+      "/profile",
+      "/settings",
+      "/unauthorized"
+    ],
+    "count": 14
+  },
+  "env": {
+    "count": 10,
+    "names": [
+      "BETTER_AUTH_URL",
+      "BETTER_AUTH_SECRET",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "AUTH_ADMIN_EMAILS",
+      "SENTRY_DSN",
+      "NEXT_PUBLIC_APP_URL",
+      "NEXT_PUBLIC_GOOGLE_AUTH_ENABLED",
+      "NEXT_PUBLIC_DEMO_MODE",
+      "NEXT_PUBLIC_SENTRY_DSN"
+    ],
+    "required_at_build": [],
+    "notes": "Every var is .optional() with a fallback in src/libs/env.ts, so `next build` needs no environment at all (CI sets SKIP_ENV_VALIDATION=true; BETTER_AUTH_SECRET falls back to a 'PLEASE_SET_...' placeholder that only triggers a console.warn in production). .env.example documents only 4 of the 10 names (NEXT_PUBLIC_APP_URL, BETTER_AUTH_URL, NEXT_PUBLIC_GOOGLE_AUTH_ENABLED, NEXT_PUBLIC_DEMO_MODE). NEXT_PUBLIC_SENTRY_DSN is read directly in src/instrumentation-client.ts and appears in neither the env schema nor .env.example. The Docker build takes NEXT_PUBLIC_APP_URL / NEXT_PUBLIC_GOOGLE_AUTH_ENABLED / NEXT_PUBLIC_DEMO_MODE as build ARGs. Only names were read; no values inspected."
+  },
+  "deploy": {
+    "docker": true,
+    "dockerfile_port": 6767,
+    "compose": true,
+    "standalone_output": true,
+    "build_cmd": "npm run build",
+    "start_cmd": "npm run start",
+    "migrations_cmd": null,
+    "paas_coupling": [
+      "vercel",
+      "docker/dokploy-selfhost"
+    ],
+    "notes": "Multi-stage Dockerfile: node:22-alpine deps+builder -> gcr.io/distroless/nodejs22-debian12 runner (nonroot), copies .next/standalone + .next/static + public, EXPOSE 6767, HEALTHCHECK curls http://127.0.0.1:6767/api/health, CMD server.js (no shell). Port 6767 is hardcoded in scripts.dev/scripts.start and e2e/playwright.config.ts; only the standalone server honours the Dockerfile ENV PORT. docker-compose.yml builds the Dockerfile, maps 6767:6767 and loads .env via env_file. Vercel coupling: next.config.mjs drops standalone when VERCEL is set, better-auth trusts *.vercel.app, README ships a Deploy-to-Vercel button, NEXT_PUBLIC_APP_URL points at the author deployment. No DB -> no migration step."
+  },
+  "tests": {
+    "frameworks": [
+      "vitest",
+      "playwright"
+    ],
+    "unit_files": 11,
+    "e2e_files": 1,
+    "ci_workflows": [
+      ".github/workflows/check.yml",
+      ".github/workflows/playwright.yml"
+    ],
+    "notes": "Unit/component tests are colocated as *.test.ts(x): button, card, demo/accounts, rbac/roles, schemas/login, schemas/register, libs/env, libs/utils, plus tests/auth/authorization.test.ts, tests/auth/roles.test.ts, tests/i18n/routing.test.ts (11 files). jsdom + @testing-library/react, shared renderWithProviders helper in tests/utils/render.tsx, config/vitest.config.ts forces SKIP_ENV_VALIDATION=true. E2E is one spec, e2e/home.spec.ts (home title, source-code link, /api/health json, /login field ids), with a self-started web server on 127.0.0.1:6767 - dev locally across chromium+firefox+webkit, production start:standalone + chromium only in CI. check.yml runs typecheck -> lint (oxlint + oxfmt) -> knip -> vitest -> build."
+  },
+  "vendor": [
+    {
+      "name": "sentry",
+      "where": [
+        "package.json",
+        "src/instrumentation.ts",
+        "src/instrumentation-client.ts"
+      ],
+      "what_it_does": "client + server + edge error tracking and 10% tracing, initialised only when a DSN is present and NODE_ENV=production",
+      "swap_target_hint": "delete the two instrumentation files, or point the DSN at self-hosted Sentry/GlitchTip",
+      "effort_guess": "1 hour"
+    },
+    {
+      "name": "vercel-analytics",
+      "where": [
+        "package.json",
+        "src/app/layout.tsx"
+      ],
+      "what_it_does": "page-view analytics via the <Analytics /> component from @vercel/analytics/next",
+      "swap_target_hint": "umami / plausible script tag, or remove the component",
+      "effort_guess": "under 1 hour"
+    },
+    {
+      "name": "google-oauth",
+      "where": [
+        "src/features/auth/lib/auth.ts",
+        "src/libs/env.ts",
+        ".env.example"
+      ],
+      "what_it_does": "optional Google social sign-in through better-auth socialProviders; env-gated and UI-gated, needs a Google Cloud OAuth client with matching redirect URIs",
+      "swap_target_hint": "any other better-auth social provider (github, etc.) or none at all",
+      "effort_guess": "2-4 hours incl. Google Cloud console"
+    },
+    {
+      "name": "vercel",
+      "where": [
+        "next.config.mjs",
+        "src/features/auth/lib/auth.ts",
+        "README.md",
+        ".env.example"
+      ],
+      "what_it_does": "primary hosting target: process.env.VERCEL disables standalone output, better-auth allowlists *.vercel.app, README ships a Deploy-to-Vercel button, and NEXT_PUBLIC_APP_URL defaults to the author Vercel-hosted demo",
+      "swap_target_hint": "self-host the Docker/distroless standalone image (compose, Coolify, Dokploy); keep output:'standalone' and set real BETTER_AUTH_URL + NEXT_PUBLIC_APP_URL",
+      "effort_guess": "1 hour"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "src/features/site/site.config.json",
+      "kind": "metadata",
+      "note": "single source of truth: appName, title, description, tagline, domain, keywords, organization (name/email/phone/address), contact + social handles, og image, theme colours, pricing block"
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "kind": "metadata",
+      "note": "metadata + viewport built from siteConfig (title, OG, twitter, icons, alternates)"
+    },
+    {
+      "path": "messages/en.json",
+      "kind": "copy",
+      "note": "148 translation keys across 11 namespaces; same file set exists for bn/ar/fr/es/zh (6 files, ~39 KB total)"
+    },
+    {
+      "path": "src/components/layout/app-brand.tsx",
+      "kind": "logo",
+      "note": "brand lockup used by the header, both sidebars and the auth split pane"
+    },
+    {
+      "path": "src/components/shared/logo.tsx",
+      "kind": "logo",
+      "note": "inline SVG logo component"
+    },
+    {
+      "path": "public/logo.svg",
+      "kind": "logo",
+      "note": "also public/icon.svg, public/favicon.ico and the five public/Next-Elite-*.webp screenshots/OG image carry the brand"
+    },
+    {
+      "path": "src/app/styles/tokens.css",
+      "kind": "theme",
+      "note": "design tokens consumed by globals.css / tailwind v4 (dark #09090b, light #ede9fe come from site.config.json)"
+    },
+    {
+      "path": ".env.example",
+      "kind": "domain",
+      "note": "NEXT_PUBLIC_APP_URL defaults to https://nextelite.salmanshahriar.com"
+    },
+    {
+      "path": "public/llms.txt",
+      "kind": "copy",
+      "note": "5.6 KB AI-crawler brief naming the product, domain and stack"
+    },
+    {
+      "path": "src/components/pages/landing-page.tsx",
+      "kind": "copy",
+      "note": "24.6 KB marketing page (hero / features / CTA) with product-specific wording"
+    },
+    {
+      "path": "src/components/pages/ui-components-page.tsx",
+      "kind": "copy",
+      "note": "57 KB component-gallery page backing /ui-components, includes placeholder rows and example.com text"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "Marketing copy hardcoded in src/components/pages/landing-page.tsx (hero, feature grid, CTA) - text lives in TSX, only part comes from messages/",
+    "src/components/pages/ui-components-page.tsx - ~1400-line showcase rendering every primitive with placeholder rows, example.com and DEMO labels",
+    "src/features/site/site.config.json placeholder org data: contact@yourdomain.com, support@yourdomain.com, '+1-234-567-8900', 123 Main Street / New York, '@yourhandle', 'Brief description of your organization' - while domain points at the author live demo",
+    "site.config.json pricing block (freemium, USD 0-99) with no payment code behind it anywhere",
+    "src/features/auth/demo/ - seed credentials module (accounts.ts holds two email/password pairs) rendered as a click-to-fill panel while NEXT_PUBLIC_DEMO_MODE=true",
+    "public/Next-Elite-*.webp screenshots of the author deployment (home, auth, admin, UI components, Lighthouse) shipped in the repo"
+  ],
+  "pitfalls": [
+    {
+      "kind": "dead-demo",
+      "detail": "Better Auth is wired with no persistence: betterAuth({...}) passes baseURL/secret/emailAndPassword/socialProviders but no `database`, and there is no db/orm dependency (no drizzle, prisma, sqlite, kysely) anywhere. The demo sign-in helper swallows sign-up errors (`catch { void error }`) and then signs in, so the credential panel looks functional while session storage is undefined.",
+      "evidence": "src/features/auth/lib/auth.ts + src/features/auth/demo/sign-in.ts + package.json"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README's project tree lists src/config/ (App navigation & feature flags) and public/llms.txt lists src/features/theme/, src/features/navigation/ and src/features/site/home-features.ts - none of these exist in the git tree; the real feature dirs are auth/, i18n/, site/.",
+      "evidence": "README.md + public/llms.txt vs gh api repos/salmanshahriar/Next-Elite/git/trees/main?recursive=1"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README and llms.txt advertise AUTH_ADMIN_EMAILS *or* NEXT_PUBLIC_AUTH_ADMIN_EMAILS for admin access, but src/libs/env.ts only defines the server-side AUTH_ADMIN_EMAILS; the NEXT_PUBLIC_ variant is never read. README also says 'TypeScript 6' while package.json pins typescript 7.0.2.",
+      "evidence": "src/libs/env.ts + package.json vs README.md"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README claims 'Every variable is documented in .env.example' and 'Set environment variables from .env.example in Vercel project settings', but .env.example contains only 4 of the 10 names the code reads (missing BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_ADMIN_EMAILS, SENTRY_DSN, NEXT_PUBLIC_SENTRY_DSN).",
+      "evidence": ".env.example + src/libs/env.ts + README.md"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "Sentry is installed and initialised but next.config.mjs is not wrapped with withSentryConfig and neither DSN name appears in .env.example, so error tracking silently no-ops; even with a DSN no source maps would be uploaded.",
+      "evidence": "next.config.mjs + src/instrumentation.ts + .env.example"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "/unauthorized sits inside the (protected) route group whose layout calls requireUser(), so an unauthenticated visitor is redirected to /login and never reaches the unauthorized page; it is only reachable while signed in with the wrong role. The (auth) layout mirrors this by bouncing signed-in users to /dashboard.",
+      "evidence": "src/app/(protected)/layout.tsx + src/features/auth/rbac/require.ts + src/app/(auth)/layout.tsx"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "`prepare` runs `lefthook install || true` on every npm install, so a fresh checkout writes .git/hooks (needs a git repo with a writable .git; harmless in a bare tarball because of the || true).",
+      "evidence": "package.json scripts.prepare + lefthook.yml"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "sharp is overridden to ^0.35.4 and whitelisted in package.json allowScripts, so its install script must run to fetch the native binary; installing with --ignore-scripts leaves next/image on a degraded optimizer. The same allowScripts block gates @sentry/cli, @swc/core and @parcel/watcher.",
+      "evidence": "package.json (overrides + allowScripts)"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "Dependency graph is advanced/future-pinned: next 16.3.4 + react 19.2.8 + typescript 7.0.2 + tailwind 4.3.3, several @radix-ui packages pinned to exact versions, and 5 overrides (kysely, postcss, sharp, uuid, @swc/helpers). Reproduce with `npm ci` as the Dockerfile and CI do; a lockfile-free install can drift into conflicting majors.",
+      "evidence": "package.json"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README headlines '50+ custom & reusable UI components' and shows a Lighthouse screenshot, but the repo ships 44 files under src/components/ui (42 components, 2 of them tests) and the Lighthouse image is a static public/*.webp - no performance evidence is reproducible from the code.",
+      "evidence": "src/components/ui file listing + public/Next-Elite-LightHouse.webp"
+    }
+  ],
+  "complexity": {
+    "pages": 12,
+    "components": 75,
+    "db_models": 0,
+    "migrations": 0,
+    "loc_estimate": 11700
+  },
+  "health": {
+    "stars": 114,
+    "forks": 32,
+    "open_issues": 0,
+    "contributors": 4,
+    "top_contributor_share": 0.78,
+    "last_commit": "2026-09-21",
+    "last_release": "v2.0.1",
+    "commits_last_90d": 182,
+    "issues_closed_last_90d": 2
+  },
+  "verdict": {
+    "best_for": "A frontend-first Next.js 16 SaaS/admin shell where the backend already exists: auth pages, RBAC role slots, sidebar dashboards, 42 UI primitives and a 6-locale RTL-aware i18n layer are done and ready to point at your own REST/GraphQL API.",
+    "weak_for": "Anything that must store data itself - there is no database, ORM, migrations, billing, email, uploads, jobs or search code, and Better Auth has no adapter wired, so accounts and sessions must be finished before the demo credentials mean anything.",
+    "swap_burden": "light - nothing paid is load-bearing (Sentry and Vercel Analytics are DSN-gated and deletable) and branding/SEO is centralised in src/features/site/site.config.json plus messages/"
+  },
+  "evidence": {
+    "framework": "package.json dependencies (next 16.3.4) + next.config.mjs + recursive tree (app router under src/app, root proxy.ts)",
+    "routes": "git/trees/main?recursive=1 - page.tsx/route.ts/sitemap.ts/robots.ts/manifest.ts paths; the earlier factory boot counted 15 build routes because /_not-found is included",
+    "stack": "package.json, components.json, src/features/auth/lib/auth.ts, src/features/i18n/request.ts, src/features/site/site.config.json, src/libs/env.ts",
+    "auth": "src/features/auth/** (lib/auth.ts, rbac/roles.ts, rbac/permissions.ts, rbac/can.ts, rbac/require.ts, demo/*, server/get-current-user.ts)",
+    "i18n": "src/features/i18n/*.ts + messages/{en,bn,ar,fr,es,zh}.json + site.config.json languages block (ar direction=rtl) + src/features/i18n/use-is-rtl.ts",
+    "env": "src/libs/env.ts (@t3-oss/env-nextjs schema), .env.example, Dockerfile ARGs, .github/workflows/*.yml",
+    "deploy": "Dockerfile + docker-compose.yml + package.json scripts + next.config.mjs (VERCEL branch) + README",
+    "tests": "config/vitest.config.ts, config/vitest.setup.ts, e2e/playwright.config.ts, e2e/home.spec.ts, tests/**, colocated *.test.ts(x) in the tree, .github/workflows/{check,playwright}.yml",
+    "vendor": "package.json dependencies + src/instrumentation.ts + src/instrumentation-client.ts + src/app/layout.tsx + .env.example + README",
+    "pitfalls": "per-pitfall files (auth.ts, demo/sign-in.ts, libs/env.ts, next.config.mjs, route-group layouts, package.json) compared against README.md and public/llms.txt",
+    "complexity": "file counts from the recursive tree (75 files under src/components, 44 under src/components/ui, 0 db models / migrations); loc_estimate = 356180 bytes of src/**/*.{ts,tsx} divided by 30.5 bytes-per-line measured on a 10-file sample",
+    "health": "gh api repos/salmanshahriar/Next-Elite (stars, forks, size 10297 KB, pushed_at), /contributors?anon=1 (249/64/6/1 of 320 commits -> 0.78), /commits?since=90d (100+82), /releases (10, latest v2.0.1 2026-08-28), /issues?state=closed&since=90d (2 non-PR issues closed, 65 PRs closed, 67 merged)"
+  },
+  "unmeasured": [
+    "Runtime behaviour of any kind - the contract forbids cloning or executing the repo, so login / sign-up / session persistence, RTL layout rendering in Arabic and the /dashboard redirect chain are static-reading inferences only",
+    "Whether Better Auth can serve a session at all without a database adapter (unverifiable without running it; recorded as unpersisted in stack.auth.notes and pitfalls)",
+    "Exact line counts / true LOC - the GitHub API exposes bytes only, so loc_estimate is derived from blob bytes and a 30.5 bytes-per-line sample",
+    "Real Lighthouse / performance figures - only a static screenshot in public/ is provided",
+    "Actual environment variable values, DSNs and OAuth client IDs (deliberately not read; names only)",
+    "Traffic, clones and referrer stats; discussions and wiki content (has_discussions and has_wiki are true but were not read)",
+    "The 'Ably' realtime dependency named in the task brief - no ably package, file, import or workflow reference exists in package.json or the recursive tree; a code search matched only the substring 'ably' inside README.md, so stack.realtime is empty rather than asserted",
+    "Contributor identity merge - the owner login (249 commits) and an unlinked 'Salman Shahriar' author (6 commits) are almost certainly the same human but unverified, so top_contributor_share uses the API's own 249/320 = 0.78",
+    "Whether knip / oxlint / oxfmt currently pass (per-run CI status was not fetched)"
+  ]
+}

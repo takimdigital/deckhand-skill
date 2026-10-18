@@ -1,0 +1,51 @@
+{
+  "name": "example — replace every value with the real plan",
+  "nav": {
+    "header": ["route:/", "route:/menu", "route:/pricing", "route:/login"],
+    "footer": ["route:/legal", "mailto:hello@example.com"]
+  },
+  "pages": [
+    {
+      "id": "home", "route": "/", "title": "Home", "auth": "public",
+      "purpose": "turn a visitor into a first order in one screen",
+      "sections": [
+        { "id": "hero", "slot": "hero", "actions": [
+          { "id": "order", "label": "Order your first loaf", "to": "route:/order" },
+          { "id": "see-menu", "label": "See the menu", "to": "route:/menu" } ] },
+        { "id": "how", "slot": "features" },
+        { "id": "faq", "slot": "faq" },
+        { "id": "cta", "slot": "cta", "actions": [ { "id": "cta-order", "label": "Claim my free loaf", "to": "route:/order" } ] }
+      ],
+      "features": ["ordering"]
+    },
+    { "id": "menu", "route": "/menu", "title": "Menu", "data": true, "states": ["empty", "loading", "error"],
+      "sections": [ { "id": "list", "slot": "content", "actions": [ { "id": "add", "label": "Add to order", "to": "route:/order" } ] } ] },
+    { "id": "pricing", "route": "/pricing", "title": "Subscriptions",
+      "sections": [ { "id": "plans", "slot": "pricing", "actions": [ { "id": "sub", "label": "Subscribe", "to": "route:/order" } ] } ] },
+    { "id": "order", "route": "/order", "title": "Order", "features": ["ordering"],
+      "sections": [ { "id": "form", "slot": "contact" } ],
+      "actions": [ { "id": "place", "label": "Place order", "to": "api:POST /api/orders", "then": "route:/order/thanks", "error": "state:order.error" } ] },
+    { "id": "thanks", "route": "/order/thanks", "title": "Thank you", "features": ["ordering"], "terminal": false,
+      "sections": [ { "id": "confirm", "slot": "content", "actions": [ { "id": "back", "label": "Back to the menu", "to": "route:/menu" } ] } ] },
+    { "id": "login", "route": "/login", "title": "Sign in",
+      "sections": [ { "id": "form", "slot": "login" } ],
+      "actions": [ { "id": "signin", "label": "Sign in", "to": "api:POST /api/auth/sign-in", "then": "route:/account", "error": "state:login.error" } ] },
+    { "id": "account", "route": "/account", "title": "My orders", "auth": "user", "data": true, "states": ["empty", "loading", "error"],
+      "features": ["accounts"], "sections": [ { "id": "orders", "slot": "content" } ] },
+    { "id": "legal", "route": "/legal", "title": "Legal", "sections": [ { "id": "text", "slot": "content" } ] }
+  ],
+  "features": [
+    { "id": "ordering", "title": "Order bread online", "pages": ["home", "order", "thanks"], "api": ["POST /api/orders"],
+      "entities": ["Order"], "emails": ["order-confirmation"], "done": "an order placed on /order is stored, emailed, and shown on /account" },
+    { "id": "accounts", "title": "Customer accounts", "pages": ["login", "account"], "api": ["POST /api/auth/sign-in"],
+      "entities": ["User"], "done": "a customer signs in and sees their orders" }
+  ],
+  "forms": [
+    { "id": "order-form", "page": "order", "fields": ["name", "email", "address", "items"], "submit": "api:POST /api/orders",
+      "success": "route:/order/thanks", "error": "state:order.error" }
+  ],
+  "entities": [
+    { "id": "Order", "fields": ["id", "customer", "items", "total", "status", "createdAt"] },
+    { "id": "User", "fields": ["id", "email", "name"] }
+  ]
+}

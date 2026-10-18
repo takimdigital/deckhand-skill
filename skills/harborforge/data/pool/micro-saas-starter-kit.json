@@ -1,0 +1,492 @@
+{
+  "repo": "UNC-GDSC/Micro-SaaS-Starter-Kit",
+  "slug": "micro-saas-starter-kit",
+  "measured_at": "2026-09-23T22:18:00Z",
+  "upstream_commit": "96a68ad7967b112a75956d37a51b3bef30c717c7",
+  "default_branch": "main",
+  "archived": false,
+  "size_kb": 106,
+  "languages": {
+    "TypeScript": 98.01,
+    "CSS": 0.72,
+    "JavaScript": 0.71,
+    "Dockerfile": 0.53,
+    "Shell": 0.03
+  },
+  "framework": {
+    "name": "next",
+    "version": "14.1.0",
+    "router": "app",
+    "notes": "App Router at repo root (app/, lib/, components/ - no src/ dir). next.config.js sets output:'standalone', reactStrictMode, images.domains for google/github avatars, experimental.serverActions.allowedOrigins ['localhost:3000'], and wraps the config with withSentryConfig."
+  },
+  "package_manager": "npm",
+  "node_or_python_requirement": ">=18.0.0",
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "Single package.json at root, no workspaces field; .npmrc sets engine-strict=true"
+  },
+  "stack": {
+    "db": "postgres",
+    "orm": "prisma",
+    "auth": {
+      "provider": "next-auth",
+      "methods": [
+        "oauth"
+      ],
+      "roles": [
+        "user",
+        "admin"
+      ],
+      "notes": "NextAuth v4 (^4.24.5) + @next-auth/prisma-adapter, session strategy 'database'. Providers: Google and GitHub only - no credentials/email-password or magic-link path and no /api/auth/register route. User.role defaults to 'user' in prisma/schema.prisma and app/dashboard/admin/page.tsx gates on session.user.role === 'admin', but the session callback in lib/auth.ts only copies id + stripe fields (types/next-auth.d.ts does not declare role), so /dashboard/admin redirects for every user."
+    },
+    "ui": [
+      "tailwind",
+      "shadcn-style",
+      "radix",
+      "lucide-react",
+      "cva",
+      "tailwind-merge"
+    ],
+    "i18n": {
+      "library": "none",
+      "default": "en",
+      "locales": [
+        "en"
+      ],
+      "rtl_aware": false,
+      "translation_files": 0
+    },
+    "payments": {
+      "provider": "stripe",
+      "model": "subscription",
+      "webhooks": true
+    },
+    "email": {
+      "provider": "resend",
+      "templates": 3,
+      "transactional": true
+    },
+    "analytics": [
+      "@vercel/analytics",
+      "@vercel/speed-insights"
+    ],
+    "jobs": [
+      "bullmq",
+      "ioredis"
+    ],
+    "search": [],
+    "storage": [],
+    "realtime": [],
+    "flags": [
+      "db-backed FeatureFlag model + lib/feature-flags.ts (no callers)",
+      "ENABLE_BACKGROUND_JOBS / ENABLE_ANALYTICS / ENABLE_FEEDBACK documented in .env.example but never read"
+    ],
+    "observability": [
+      "sentry"
+    ]
+  },
+  "features": [
+    "accounts",
+    "dashboard",
+    "admin",
+    "teams",
+    "billing",
+    "api-keys",
+    "notifications"
+  ],
+  "routes": {
+    "pages": [
+      "/",
+      "/login",
+      "/pricing",
+      "/faq",
+      "/changelog",
+      "/privacy",
+      "/terms",
+      "/dashboard",
+      "/dashboard/admin",
+      "/dashboard/api-keys",
+      "/dashboard/settings",
+      "/dashboard/teams"
+    ],
+    "api": [
+      "/api/auth/[...nextauth]",
+      "/api/devices",
+      "/api/export",
+      "/api/feedback",
+      "/api/feedback/[feedbackId]/vote",
+      "/api/invoices",
+      "/api/keys",
+      "/api/notifications",
+      "/api/stripe/create-checkout-session",
+      "/api/stripe/create-portal-session",
+      "/api/support",
+      "/api/support/[ticketId]",
+      "/api/teams",
+      "/api/webhooks/stripe"
+    ],
+    "protected": [
+      "/dashboard",
+      "/dashboard/admin",
+      "/dashboard/api-keys",
+      "/dashboard/settings",
+      "/dashboard/teams"
+    ],
+    "count": 26
+  },
+  "env": {
+    "count": 37,
+    "names": [
+      "CI",
+      "COOKIE_CONSENT_VERSION",
+      "DATABASE_URL",
+      "EMAIL_FROM",
+      "ENABLE_ANALYTICS",
+      "ENABLE_BACKGROUND_JOBS",
+      "ENABLE_FEEDBACK",
+      "GITHUB_ID",
+      "GITHUB_SECRET",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "LOCKOUT_DURATION_MINUTES",
+      "MAX_LOGIN_ATTEMPTS",
+      "NEXTAUTH_SECRET",
+      "NEXTAUTH_URL",
+      "NEXT_PUBLIC_APP_NAME",
+      "NEXT_PUBLIC_APP_URL",
+      "NEXT_PUBLIC_SENTRY_DSN",
+      "NODE_ENV",
+      "PASSWORD_MIN_LENGTH",
+      "PRIVACY_VERSION",
+      "REDIS_HOST",
+      "REDIS_PASSWORD",
+      "REDIS_PORT",
+      "RESEND_API_KEY",
+      "SENTRY_ORG",
+      "SENTRY_PROJECT",
+      "STRIPE_PRICE_ID_BASIC",
+      "STRIPE_PRICE_ID_BASIC_YEARLY",
+      "STRIPE_PRICE_ID_ENTERPRISE",
+      "STRIPE_PRICE_ID_ENTERPRISE_YEARLY",
+      "STRIPE_PRICE_ID_PRO",
+      "STRIPE_PRICE_ID_PRO_YEARLY",
+      "STRIPE_PUBLIC_KEY",
+      "STRIPE_SECRET_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "TERMS_VERSION"
+    ],
+    "required_at_build": [
+      "DATABASE_URL",
+      "NEXTAUTH_SECRET",
+      "NEXTAUTH_URL"
+    ],
+    "notes": "Names only, never values. Count is the union of .env.example (32 names) plus names the code reads that the example omits (STRIPE_PRICE_ID_BASIC_YEARLY, STRIPE_PRICE_ID_PRO_YEARLY, STRIPE_PRICE_ID_ENTERPRISE_YEARLY, NODE_ENV, CI). 12 documented names are read by nothing (STRIPE_PUBLIC_KEY, REDIS_PASSWORD, ENABLE_BACKGROUND_JOBS/ANALYTICS/FEEDBACK, PASSWORD_MIN_LENGTH, MAX_LOGIN_ATTEMPTS, LOCKOUT_DURATION_MINUTES, COOKIE_CONSENT_VERSION, TERMS_VERSION, PRIVACY_VERSION; NEXTAUTH_URL is consumed by next-auth itself). required_at_build reflects the env the CI 'build' job passes; next.config.js additionally reads SENTRY_ORG/SENTRY_PROJECT at config load."
+  },
+  "deploy": {
+    "docker": true,
+    "dockerfile_port": 3000,
+    "compose": true,
+    "standalone_output": true,
+    "build_cmd": "npm run build",
+    "start_cmd": "npm start",
+    "migrations_cmd": "npm run db:migrate",
+    "paas_coupling": [
+      "vercel"
+    ],
+    "notes": "3-stage node:18-alpine Dockerfile (deps -> builder -> runner, USER nextjs, CMD node server.js) using `npm ci` + `npx prisma generate`; docker-compose.yml adds postgres:15-alpine plus the app on port 3000. vercel.json overrides buildCommand to `prisma generate && next build` and installCommand to `npm install`. No lockfile is committed, so `npm ci` in both Docker and CI fails; the Dockerfile also COPYs /app/public, which does not exist in the repo. No prisma/migrations directory and db:migrate is `prisma migrate dev` (interactive, dev-only) - there is no deploy-safe migration command."
+  },
+  "tests": {
+    "frameworks": [
+      "jest",
+      "playwright"
+    ],
+    "unit_files": 0,
+    "e2e_files": 1,
+    "ci_workflows": [
+      ".github/workflows/ci.yml"
+    ],
+    "notes": "CI has 4 jobs (lint, test, e2e, build), each starting with `npm ci`. The test job runs `jest --ci` against a repo with zero unit/integration test files (only jest.config.js + jest.setup.js exist). Playwright's single spec e2e/example.spec.ts holds 3 smoke tests whose expected headings match the current pages; playwright.config.ts runs chromium/firefox/webkit with a `npm run dev` webServer. README's `npm test` maps to `jest --watch`."
+  },
+  "vendor": [
+    {
+      "name": "stripe",
+      "where": [
+        "package.json",
+        ".env.example",
+        "lib/stripe.ts",
+        "app/api/stripe/create-checkout-session/route.ts",
+        "app/api/stripe/create-portal-session/route.ts",
+        "app/api/webhooks/stripe/route.ts"
+      ],
+      "what_it_does": "subscription checkout, billing portal, webhook-driven subscription state on the User model",
+      "swap_target_hint": "lemonsqueezy or paddle",
+      "effort_guess": "2-4 days"
+    },
+    {
+      "name": "resend",
+      "where": [
+        "package.json",
+        ".env.example",
+        "lib/email.ts"
+      ],
+      "what_it_does": "transactional email (welcome, subscription confirmation, cancellation) as inline HTML templates",
+      "swap_target_hint": "nodemailer/SMTP or postmark",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "sentry",
+      "where": [
+        "package.json",
+        "next.config.js",
+        "sentry.client.config.ts",
+        "sentry.server.config.ts",
+        "sentry.edge.config.ts",
+        ".env.example"
+      ],
+      "what_it_does": "error tracking plus source-map upload at build time via withSentryConfig",
+      "swap_target_hint": "self-hosted GlitchTip or drop withSentryConfig",
+      "effort_guess": "1-2 hours"
+    },
+    {
+      "name": "vercel",
+      "where": [
+        "vercel.json",
+        "package.json",
+        "app/layout.tsx"
+      ],
+      "what_it_does": "deploy/build config, traffic analytics and speed insights mounted in the root layout",
+      "swap_target_hint": "any node host; remove <Analytics/> and <SpeedInsights/>",
+      "effort_guess": "half a day"
+    },
+    {
+      "name": "redis (ioredis + bullmq)",
+      "where": [
+        "package.json",
+        ".env.example",
+        "lib/jobs.ts"
+      ],
+      "what_it_does": "queue backend for background jobs - the module is never imported by any route or page",
+      "swap_target_hint": "delete the module, or pg-boss / inngest",
+      "effort_guess": "half a day (module is dead code)"
+    },
+    {
+      "name": "google-oauth",
+      "where": [
+        "package.json",
+        ".env.example",
+        "lib/auth.ts",
+        "app/login/page.tsx"
+      ],
+      "what_it_does": "Google sign-in, one of only two ways into the product",
+      "swap_target_hint": "keep, or swap to any OAuth provider",
+      "effort_guess": "1-2 hours"
+    },
+    {
+      "name": "github-oauth",
+      "where": [
+        "package.json",
+        ".env.example",
+        "lib/auth.ts",
+        "app/login/page.tsx"
+      ],
+      "what_it_does": "GitHub sign-in, the other entry path",
+      "swap_target_hint": "keep, or swap to any OAuth provider",
+      "effort_guess": "1-2 hours"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "app/layout.tsx",
+      "kind": "metadata",
+      "note": "title/description/openGraph/twitter all 'Micro SaaS Starter Kit'; metadataBase from NEXT_PUBLIC_APP_URL"
+    },
+    {
+      "path": "app/page.tsx",
+      "kind": "copy",
+      "note": "hero 'Launch Your SaaS in Days, Not Months', 10-item feature list, footer '(c) 2024 Micro SaaS'"
+    },
+    {
+      "path": "components/navbar.tsx",
+      "kind": "copy",
+      "note": "brand text renders NEXT_PUBLIC_APP_NAME || 'Micro SaaS' and owns the sign-in/sign-out menu"
+    },
+    {
+      "path": "lib/subscription.ts",
+      "kind": "copy",
+      "note": "4 plan names/prices and marketing bullet lists that drive /pricing"
+    },
+    {
+      "path": "lib/email.ts",
+      "kind": "email",
+      "note": "3 HTML email templates branded from NEXT_PUBLIC_APP_NAME with EMAIL_FROM as sender"
+    },
+    {
+      "path": ".env.example",
+      "kind": "domain",
+      "note": "NEXT_PUBLIC_APP_NAME/APP_URL and EMAIL_FROM defaults are 'Micro SaaS' / localhost"
+    },
+    {
+      "path": "app/faq/page.tsx",
+      "kind": "copy",
+      "note": "10 hardcoded Q&As plus support@example.com"
+    },
+    {
+      "path": "app/changelog/page.tsx",
+      "kind": "copy",
+      "note": "hardcoded v1.0.0 entries dated January 2024"
+    },
+    {
+      "path": "app/privacy/page.tsx",
+      "kind": "copy",
+      "note": "legal text 'Last updated: January 2024'"
+    },
+    {
+      "path": "app/terms/page.tsx",
+      "kind": "copy",
+      "note": "legal text with the same January 2024 date"
+    },
+    {
+      "path": "lib/api-docs.ts",
+      "kind": "copy",
+      "note": "OpenAPI title 'Micro SaaS API', contact support@example.com, servers include api.example.com (module is unused)"
+    },
+    {
+      "path": "next.config.js",
+      "kind": "domain",
+      "note": "serverActions.allowedOrigins hardcoded to ['localhost:3000']"
+    },
+    {
+      "path": "docker-compose.yml",
+      "kind": "domain",
+      "note": "NEXT_PUBLIC_APP_URL pinned to http://localhost:3000"
+    },
+    {
+      "path": "README.md",
+      "kind": "copy",
+      "note": "CI/license badges point at github.com/your-repo and the 'View Demo' link is a dead '#'"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "marketing copy + feature list on / with footer '(c) 2024 Micro SaaS' (app/page.tsx)",
+    "10 FAQ entries, incl. a 14-day free trial and 30-day money-back guarantee no code enforces (app/faq/page.tsx)",
+    "changelog v1.0.0 entries dated January 2024 (app/changelog/page.tsx)",
+    "4 pricing tiers with invented plan feature bullets and prices in lib/subscription.ts",
+    "privacy/terms legal copy (app/privacy/page.tsx, app/terms/page.tsx)",
+    "support@example.com placeholders (app/faq/page.tsx, lib/api-docs.ts)",
+    "admin dashboard MRR card hardcoded to '$0' (app/dashboard/admin/page.tsx)"
+  ],
+  "pitfalls": [
+    {
+      "kind": "peer-conflicts",
+      "detail": "npm install cannot resolve at all: dependency '@radix-ui/react-skeleton@^0.0.5' does not exist on npm (registry 404; Radix ships no skeleton primitive) - a fresh install fails before anything else can be tried",
+      "evidence": "package.json; registry.npmjs.org/@radix-ui%2Freact-skeleton -> 404 (react-slot/react-progress -> 200)"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "No lockfile is committed (no package-lock.json/yarn.lock/pnpm-lock.yaml) yet CI and the Dockerfile both run `npm ci`, which requires one -> all four CI jobs and the docker build die at the install step",
+      "evidence": ".github/workflows/ci.yml; Dockerfile; git tree (package-lock.json 404)"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README claims '75+ enterprise features', '18,000+ lines of production code', '150+ files' and 'Zero technical debt'; measured: 102 files, 8,006 lines of .ts/.tsx/.js, 12 pages, 14 API routes, 26 Prisma models, and the badges point at github.com/your-repo with 'View Demo' as a dead '#' anchor",
+      "evidence": "README.md vs git tree + per-file line counts"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "13 of ~26 lib modules are imported by no route, page or component (api-docs, two-factor, jobs, rate-limit, security, audit, compliance, feature-flags, onboarding, referrals, impersonation, usage-tracking, analytics-advanced) - 2FA, background jobs, referrals, feature flags, the Swagger playground and audit logging exist as code but are unreachable",
+      "evidence": "import sweep over every .ts/.tsx/.js file vs app/api route list"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "/dashboard/admin can never be reached: the page redirects unless session.user.role === 'admin', but the session callback in lib/auth.ts never copies role onto the session and types/next-auth.d.ts does not declare it, so every user is bounced back to /dashboard",
+      "evidence": "lib/auth.ts; types/next-auth.d.ts; app/dashboard/admin/page.tsx"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "About a dozen declared dependencies are never imported anywhere: framer-motion, recharts, react-chartjs-2, zustand, next-themes, sonner, react-hook-form, zod, date-fns, cookie, @stripe/stripe-js, swagger-ui-react, plus radix primitives checkbox/popover/progress/select/separator/switch - install weight and audit noise with no feature behind them",
+      "evidence": "package.json vs import sweep"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "Dockerfile does `COPY --from=builder /app/public ./public` but the repo has no public/ directory, so the image build fails; node:18-alpine also installs only libc6-compat while bcrypt is a native addon",
+      "evidence": "Dockerfile; git tree (public/ 404); package.json (bcrypt)"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "No prisma/migrations directory is committed and db:migrate is `prisma migrate dev` (interactive, dev-only), so there is no deploy-safe migration path; the README quick-start uses db:push, and db:seed points at prisma/seed.ts which does not exist",
+      "evidence": "package.json scripts; git tree; prisma/schema.prisma; README.md"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "npm install runs postinstall `prisma generate` and prepare `husky install` (the latter fails outside a git checkout), and .npmrc sets engine-strict=true so Node < 18 aborts the install outright",
+      "evidence": "package.json scripts; .npmrc"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": ".env.example documents 12 names the code never reads (STRIPE_PUBLIC_KEY, REDIS_PASSWORD, ENABLE_BACKGROUND_JOBS/ANALYTICS/FEEDBACK, PASSWORD_MIN_LENGTH, MAX_LOGIN_ATTEMPTS, LOCKOUT_DURATION_MINUTES, COOKIE_CONSENT_VERSION, TERMS_VERSION, PRIVACY_VERSION, NEXTAUTH_URL) while the code reads 3 STRIPE_PRICE_ID_*_YEARLY names that are not documented, so yearly checkout sends an undefined priceId; security policy values are hardcoded in lib/security.ts instead of read from env",
+      "evidence": ".env.example vs process.env sweep; lib/subscription.ts; lib/security.ts"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "The CI build job passes only DATABASE_URL/NEXTAUTH_SECRET/NEXTAUTH_URL, next.config.js reads SENTRY_ORG/SENTRY_PROJECT at config load, and lib/stripe.ts constructs Stripe from a non-null-asserted STRIPE_SECRET_KEY (likewise lib/email.ts with RESEND_API_KEY) - any import of those modules without env throws at module scope",
+      "evidence": ".github/workflows/ci.yml; next.config.js; lib/stripe.ts; lib/email.ts"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "lib/jobs.ts opens an ioredis connection and instantiates four BullMQ queues at module scope, so merely importing the existing queueEmail helper requires a reachable Redis (default localhost:6379) at runtime or build",
+      "evidence": "lib/jobs.ts"
+    }
+  ],
+  "complexity": {
+    "pages": 12,
+    "components": 14,
+    "db_models": 26,
+    "migrations": 0,
+    "loc_estimate": 8006
+  },
+  "health": {
+    "stars": 2,
+    "forks": 3,
+    "open_issues": 1,
+    "contributors": 2,
+    "top_contributor_share": 0.83,
+    "last_commit": "2025-11-23",
+    "last_release": null,
+    "commits_last_90d": 0,
+    "issues_closed_last_90d": 0
+  },
+  "verdict": {
+    "best_for": "A read-only reference/demo artifact - e.g. harvesting a broad multi-tenant Prisma schema or shadcn-style dashboard pages for ideas - not a base to install and launch.",
+    "weak_for": "Any real launch as-is: install is impossible (phantom @radix-ui/react-skeleton), there is no lockfile, no migrations, zero unit tests, sign-in is Google/GitHub OAuth only, and roughly half the advertised features are unreferenced lib code.",
+    "swap_burden": "heavy - Stripe, Resend, Redis/BullMQ, Sentry and NextAuth all need touching, but first the dependency tree, lockfile, migrations and ~13 dead modules have to be fixed or triaged."
+  },
+  "evidence": {
+    "framework": "package.json dependencies (next 14.1.0) + next.config.js (output:'standalone', withSentryConfig) + git tree (app/ at root, no src/)",
+    "stack": "prisma/schema.prisma (postgresql datasource, 26 models) + package.json + .env.example",
+    "auth": "lib/auth.ts (NextAuth v4 + PrismaAdapter, Google/GitHub providers, strategy 'database') + types/next-auth.d.ts + middleware.ts + app/login/page.tsx",
+    "ui": "package.json (tailwindcss, tailwindcss-animate, cva, tailwind-merge, radix primitives, lucide-react) + components/ui/* (13 files) + tailwind.config.ts (hsl CSS-var theme, darkMode class)",
+    "routes": "git tree: app/**/page.tsx (12) and app/api/**/route.ts (14); protected paths from middleware.ts matcher + app/dashboard/layout.tsx",
+    "features": "route/page/import sweep (app/api/keys + app/dashboard/api-keys for api-keys; app/api/teams + app/dashboard/teams + lib/teams.ts for teams; app/api/stripe/* + app/api/webhooks/stripe for billing; app/api/notifications + lib/notifications.ts for notifications)",
+    "vendor": ".env.example + package.json + import sweep (lib/stripe.ts, lib/email.ts, lib/jobs.ts, sentry.*.config.ts, vercel.json)",
+    "deploy": "Dockerfile + docker-compose.yml + vercel.json + next.config.js + package.json scripts",
+    "tests": "package.json scripts + jest.config.js + jest.setup.js + playwright.config.ts + e2e/example.spec.ts + .github/workflows/ci.yml",
+    "health": "gh api repos/UNC-GDSC/Micro-SaaS-Starter-Kit (+ /contributors, /commits, /releases, /issues, /forks, search/issues) - 6 commits total, all dated 2025-11-23 (repo created 2025-11-23), 5 authored as 'claude' and 1 as 'hoangsonww' so top_contributor_share = 5/6; 0 releases/tags; the single open item is PR #1 (from a fork, 232 changed files, opened 2026-05-19); last push 2025-11-23 => dormant ~10 months at measurement",
+    "pitfalls": "package.json + npm registry lookup for @radix-ui/react-skeleton + Dockerfile + .github/workflows/ci.yml + README.md comparison + import sweep + .env.example/process.env diff + git tree"
+  },
+  "unmeasured": [
+    "Install/build/test runtime outcomes: the repo was never cloned or executed (contract rule), so 'npm install fails' and 'jest --ci has no tests' are inferred from the phantom dependency, the missing lockfile and the empty test set - not observed.",
+    "Whether `next build` or the Playwright smoke tests actually pass; the CI jobs have presumably never been green (all 6 commits are dated the day the repo was created).",
+    "Runtime behavior of the middleware/session combination (next-auth v4 database sessions behind next-auth/middleware) - not exercised, so no claim is made about it.",
+    "Bundle size, Lighthouse/perf, and actual Stripe/Resend/Redis/Postgres integration behavior.",
+    "LICENSE text was not read (GitHub API reports spdx MIT); no per-contributor commit count beyond the 6-commit API list.",
+    "The 232-file open PR #1 was not reviewed, so it is unknown whether it fixes any of the pitfalls above."
+  ],
+  "blocking": [
+    {
+      "kind": "install-impossible",
+      "why": "package.json depends on '@radix-ui/react-skeleton@^0.0.5', which does not exist on npm; a fresh install fails before anything else can run.",
+      "evidence": "verified by the pool owner: registry.npmjs.org/@radix-ui%2Freact-skeleton -> HTTP 404 (control @radix-ui%2Freact-slot -> HTTP 200)"
+    }
+  ]
+}

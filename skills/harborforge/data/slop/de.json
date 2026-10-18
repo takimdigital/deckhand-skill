@@ -1,0 +1,287 @@
+{
+  "schema": "deckhand.slop/1",
+  "lang": "de",
+  "name": "Deutsch",
+  "maturity": "seed",
+  "maintainers": [
+    "deckhand"
+  ],
+  "script": "latin",
+  "suffixes": [
+    "e",
+    "en",
+    "er",
+    "es",
+    "em",
+    "s",
+    "n"
+  ],
+  "stopwords": [
+    "der",
+    "die",
+    "das",
+    "und",
+    "in",
+    "zu",
+    "den",
+    "mit",
+    "von",
+    "ist",
+    "für",
+    "auf",
+    "nicht",
+    "ein",
+    "eine",
+    "sie",
+    "wir",
+    "ihr",
+    "ihre",
+    "unsere",
+    "es",
+    "im",
+    "dem",
+    "bei",
+    "sich",
+    "auch",
+    "an",
+    "wie",
+    "werden",
+    "oder"
+  ],
+  "words": {
+    "strong": [
+      "revolutionieren|revolutioniert|revolutionär",
+      "bahnbrechend",
+      "nahtlos",
+      "ganzheitlich",
+      "synergie|synergien",
+      "paradigma",
+      "unvergleichlich",
+      "beispiellos",
+      "wegweisend",
+      "eckpfeiler",
+      "entfesseln|entfesselt",
+      "hochmodern",
+      "zukunftssicher",
+      "zukunftsweisend",
+      "disruptiv",
+      "unvergesslich",
+      "eintauchen"
+    ],
+    "buzz": [
+      "innovativ",
+      "lösungen",
+      "maßgeschneidert",
+      "robust",
+      "optimieren|optimiert|optimierung",
+      "ökosystem",
+      "erstklassig",
+      "mehrwert",
+      "dynamisch",
+      "leidenschaftlich",
+      "einzigartig",
+      "außergewöhnlich",
+      "exzellenz",
+      "reise",
+      "erlebnis",
+      "perfekt"
+    ]
+  },
+  "fixes": {
+    "innovativ": "sagen, was neu ist",
+    "lösungen": "die Leistung nennen",
+    "maßgeschneidert": "sagen, was angepasst wird",
+    "erstklassig": "ein Beleg: Zahl, Bewertung, Auszeichnung",
+    "mehrwert": "den Nutzen nennen"
+  },
+  "phrases": [
+    {
+      "id": "heutige-welt",
+      "kind": "opener",
+      "w": 4,
+      "rx": "in (der|unserer) heutigen (schnelllebigen |digitalen |modernen )?(welt|zeit|gesellschaft)|in einer (sich (ständig|stetig|rasant) (wandelnden|verändernden)|immer schneller werdenden) welt",
+      "example": "In der heutigen schnelllebigen Welt zählt jede Minute.",
+      "fix": "mit dem Problem des Kunden beginnen"
+    },
+    {
+      "id": "digitales-zeitalter",
+      "kind": "opener",
+      "w": 3,
+      "rx": "im (digitalen |ki-)?zeitalter",
+      "example": "Im digitalen Zeitalter braucht jeder eine Website.",
+      "fix": "streichen"
+    },
+    {
+      "id": "es-ist-wichtig",
+      "kind": "hedge",
+      "w": 3,
+      "rx": "es ist (wichtig|erwähnenswert|entscheidend|wesentlich),? (zu (beachten|betonen|erwähnen)|hervorzuheben)",
+      "example": "Es ist wichtig zu beachten, dass wir sonntags öffnen.",
+      "fix": "die Tatsache sagen"
+    },
+    {
+      "id": "nicht-nur-sondern",
+      "kind": "structure",
+      "w": 2,
+      "rx": "nicht nur [^.;!?]{1,60},? sondern auch",
+      "example": "nicht nur schnell, sondern auch zuverlässig",
+      "fix": "zwei Fakten, zwei Sätze"
+    },
+    {
+      "id": "nicht-x-sondern",
+      "kind": "structure",
+      "w": 3,
+      "rx": "(das|es) ist nicht (nur |einfach )?[^.;!?]{1,50}[.,;—–-]+ ?(das|es) ist",
+      "example": "Das ist nicht nur ein Haarschnitt. Es ist ein Ritual.",
+      "fix": "sagen, was es ist"
+    },
+    {
+      "id": "ob-oder",
+      "kind": "structure",
+      "w": 2,
+      "rx": "ob (sie|du) [^,.;]{1,40} oder ",
+      "example": "Ob Sie Anfänger oder Profi sind, wir haben den Kurs.",
+      "fix": "sagen, für wen"
+    },
+    {
+      "id": "nicht-weiter-suchen",
+      "kind": "cta",
+      "w": 3,
+      "rx": "suchen sie nicht (länger|weiter)|warten sie nicht länger|worauf warten sie",
+      "example": "Sie suchen einen Klempner? Suchen Sie nicht weiter.",
+      "fix": "ein klarer Button: Angebot anfordern"
+    },
+    {
+      "id": "bereit",
+      "kind": "cta",
+      "w": 2,
+      "rx": "bereit,? (ihr|dein|ihre|deine|ihren|deinen|den|die|das) [^?]{1,40}\\?",
+      "example": "Bereit, Ihren Garten zu verwandeln?",
+      "fix": "ein klarer Button: Termin buchen"
+    },
+    {
+      "id": "naechstes-level",
+      "kind": "cta",
+      "w": 3,
+      "rx": "auf (das|ein) (nächste|neues) (level|niveau)|auf die nächste stufe",
+      "example": "Bringen Sie Ihr Geschäft auf das nächste Level.",
+      "fix": "das Ergebnis: 20 Buchungen mehr pro Woche"
+    },
+    {
+      "id": "potenzial",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(entfesseln|entfalten|entdecken|nutzen) sie (ihr|das) (volles |ganzes |volle )?potenzial",
+      "example": "Entfalten Sie Ihr volles Potenzial.",
+      "fix": "das Ergebnis sagen"
+    },
+    {
+      "id": "zusammenfassend",
+      "kind": "closer",
+      "w": 2,
+      "rx": "(zusammenfassend|abschließend|alles in allem) (lässt sich sagen|kann man sagen)",
+      "example": "Zusammenfassend lässt sich sagen, dass wir da sind.",
+      "fix": "streichen"
+    },
+    {
+      "id": "stand-der-technik",
+      "kind": "claim",
+      "w": 3,
+      "rx": "auf dem neuesten stand der technik|modernste(n)? technologie",
+      "example": "modernste Technologie",
+      "fix": "die Technik oder Maschine nennen"
+    },
+    {
+      "id": "bei-marke-glauben",
+      "kind": "opener",
+      "w": 3,
+      "rx": "^bei [a-z0-9äöüß&' -]{2,30} (glauben|verstehen|sind) wir",
+      "example": "Bei Bloom glauben wir, dass Schönheit persönlich ist.",
+      "fix": "sagen, was Sie tun und für wen"
+    },
+    {
+      "id": "mehr-als-nur",
+      "kind": "structure",
+      "w": 2,
+      "rx": "mehr als nur (ein|eine|einen)",
+      "example": "mehr als nur eine Bäckerei",
+      "fix": "sagen, was es ist"
+    },
+    {
+      "id": "erlebnis",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(nahtloses|unvergessliches|einzigartiges|unvergleichliches) (erlebnis|einkaufserlebnis|nutzererlebnis)",
+      "example": "ein unvergessliches Erlebnis",
+      "fix": "sagen, was konkret passiert"
+    },
+    {
+      "id": "tauchen-sie-ein",
+      "kind": "filler",
+      "w": 3,
+      "rx": "tauchen sie ein|tauche ein",
+      "example": "Tauchen Sie ein in unsere Welt.",
+      "fix": "die Karte ansehen"
+    },
+    {
+      "id": "herzen-von",
+      "kind": "filler",
+      "w": 1,
+      "rx": "im herzen (von|der|des)",
+      "example": "im Herzen von Berlin",
+      "fix": "die Straße oder das Viertel"
+    },
+    {
+      "id": "chat-leak",
+      "kind": "leak",
+      "w": 5,
+      "rx": "als (ki|künstliche intelligenz|sprachmodell)|ich hoffe,? (das|dies) hilft|gute frage|gerne! hier|hier ist (eine|die) (überarbeitete|verbesserte) (version|fassung)|passen sie (es|den text) gerne an|\\[(hier )?einfügen[a-zäöüß ]*\\]",
+      "example": "Gerne! Hier ist ein Abschnitt für Ihre Bäckerei.",
+      "fix": "eine Chatbot-Antwort auf der Seite: löschen"
+    }
+  ],
+  "transitions": [
+    "darüber hinaus",
+    "außerdem",
+    "zudem",
+    "ferner",
+    "folglich",
+    "somit",
+    "daher",
+    "dennoch",
+    "letztendlich",
+    "zusammenfassend",
+    "insbesondere",
+    "tatsächlich"
+  ],
+  "superlatives": [
+    "beste",
+    "besten",
+    "bester",
+    "führend",
+    "führende",
+    "führenden",
+    "marktführer",
+    "nummer eins",
+    "nr. 1",
+    "#1",
+    "unschlagbar",
+    "unübertroffen"
+  ],
+  "and": [
+    "und",
+    "oder"
+  ],
+  "examples": {
+    "slop": [
+      "In der heutigen schnelllebigen Welt revolutionieren unsere innovativen Lösungen Ihr Unternehmen. Darüber hinaus entfalten Sie Ihr volles Potenzial mit nahtlosen, maßgeschneiderten Prozessen.",
+      "Im Herzen von Berlin ist unsere Bäckerei mehr als nur eine Bäckerei — ein unvergessliches Erlebnis. Suchen Sie nicht weiter.",
+      "Gerne! Hier ist ein Abschnitt für Ihren Friseursalon."
+    ],
+    "clean": [
+      "Sauerteigbrot, Brezeln und Croissants, jeden Morgen ab 5 Uhr in Köln gebacken. Bis 20 Uhr bestellen, am nächsten Tag abholen.",
+      "Wir reparieren tropfende Hähne, verstopfte Abflüsse und Heizungen in Leipzig. Die Anfahrt kostet 60 €, die meisten Einsätze dauern unter einer Stunde.",
+      "Ana schneidet seit 2009 Haare in der Hauptstraße. Schnitt mit Föhnen dauert 45 Minuten und kostet 38 €."
+    ]
+  }
+}

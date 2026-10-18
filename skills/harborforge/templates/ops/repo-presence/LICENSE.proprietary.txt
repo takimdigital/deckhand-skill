@@ -1,0 +1,7 @@
+{{NAME}} — private, proprietary
+
+Copyright (c) {{YEAR}} {{OWNER}}. All rights reserved.
+
+This repository is private. No permission is granted to use, copy, modify,
+merge, publish, distribute, sublicense, or sell its contents, in whole or in
+part, without prior written permission.

@@ -1,0 +1,525 @@
+{
+  "repo": "epicweb-dev/epic-stack",
+  "slug": "epic-stack",
+  "measured_at": "2026-09-23T22:14:40Z",
+  "upstream_commit": "8473afd804b66dba6a23f317908dc35d1535e90d",
+  "default_branch": "main",
+  "archived": false,
+  "size_kb": 14635,
+  "languages": {
+    "TypeScript": 95.2,
+    "JavaScript": 2.7,
+    "CSS": 1.3,
+    "Dockerfile": 0.7
+  },
+  "framework": {
+    "name": "react-router",
+    "version": "7.16.0",
+    "router": "none",
+    "notes": "React Router v7 framework mode (SSR), declared as ^7.16.0, served by a hand-written Express 5 server (server/app.ts + server/index.ts) instead of the default React Router server. Routing is file-based via react-router-auto-routes (app/routes.ts, autoRoutes()); not a Next.js app/pages router. Legacy Remix packages remain: @remix-run/server-runtime ^2.17.4, remix-auth ^4.2.0, remix-auth-github, remix-utils, @nasa-gcn/remix-seo. Docs still call it Remix (docs/features.md)."
+  },
+  "package_manager": "npm",
+  "node_or_python_requirement": "^22.18.0",
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "Single package (private, name epic-stack-template). No workspaces field, no pnpm-workspace.yaml. remix.init/ carries its own package.json + lockfile but is a template-init helper, not a workspace."
+  },
+  "stack": {
+    "db": "sqlite",
+    "orm": "prisma",
+    "auth": {
+      "provider": "custom",
+      "methods": [
+        "email-password",
+        "oauth",
+        "passkey"
+      ],
+      "roles": [
+        "user",
+        "admin"
+      ],
+      "notes": "Self-managed auth: cookie sessions (createCookieSessionStorage, cookie name en_session, sameSite lax, httpOnly) + bcryptjs password hashing + @epic-web/totp 2FA + @simplewebauthn passkeys (registration/authentication routes) + email verification (6-digit code or link) backed by the Verification model. OAuth via remix-auth + remix-auth-github; GitHub is the ONLY provider wired (app/utils/connections.server.ts). Rate-limited auth paths plus honeypot fields; CSRF tokens were deliberately removed (docs/decisions/035-remove-csrf.md). RBAC = Role/Permission rows enforced by requireUserWithRole / requireUserWithPermission."
+    },
+    "ui": [
+      "tailwind",
+      "shadcn",
+      "radix",
+      "sonner",
+      "class-variance-authority",
+      "tailwind-merge",
+      "tw-animate-css"
+    ],
+    "i18n": {
+      "library": "none",
+      "default": "en",
+      "locales": [
+        "en"
+      ],
+      "rtl_aware": false,
+      "translation_files": 0,
+      "notes": "No i18n library and no translation files; English strings are inline. intl-parse-accept-language is used only to derive the user time zone (app/utils/client-hints.tsx), not for translations. docs/features.md lists internationalization as future work."
+    },
+    "payments": {
+      "provider": "none",
+      "model": "none",
+      "webhooks": false,
+      "notes": "No payment SDK and no webhook route anywhere; no STRIPE_* env var. docs/features.md lists Stripe ecommerce support as future work."
+    },
+    "email": {
+      "provider": "resend",
+      "templates": 3,
+      "transactional": true,
+      "notes": "Plain fetch() to https://api.resend.com/emails (app/utils/email.server.ts) with React Email rendering via @react-email/components. 3 templates: signup email verification (app/routes/_auth/signup.tsx), password reset (app/routes/_auth/forgot-password.tsx), change-email confirmation (app/routes/settings/profile/change-email.server.tsx). Hardcoded sender hello@epicstack.dev. RESEND_API_KEY is optional in the zod env schema (emails are logged instead when unset)."
+    },
+    "analytics": [],
+    "jobs": [],
+    "search": [
+      "user-search"
+    ],
+    "storage": [
+      "s3-compatible (Tigris on Fly.io)"
+    ],
+    "realtime": [],
+    "flags": [],
+    "observability": [
+      "sentry",
+      "server-timing"
+    ]
+  },
+  "features": [
+    "accounts",
+    "admin",
+    "uploads",
+    "search",
+    "notifications",
+    "2fa",
+    "passkeys",
+    "sso-github",
+    "notes-crud",
+    "rbac",
+    "theming",
+    "image-optimization",
+    "caching",
+    "seo",
+    "rate-limiting",
+    "healthcheck",
+    "data-export",
+    "email-verification"
+  ],
+  "routes": {
+    "pages": [
+      "/",
+      "/about",
+      "/privacy",
+      "/support",
+      "/tos",
+      "/login",
+      "/signup",
+      "/logout",
+      "/forgot-password",
+      "/reset-password",
+      "/verify",
+      "/onboarding",
+      "/onboarding/:provider",
+      "/auth/:provider",
+      "/auth/:provider/callback",
+      "/me",
+      "/settings/profile",
+      "/settings/profile/password",
+      "/settings/profile/password/create",
+      "/settings/profile/passkeys",
+      "/settings/profile/connections",
+      "/settings/profile/photo",
+      "/settings/profile/change-email",
+      "/settings/profile/two-factor",
+      "/settings/profile/two-factor/verify",
+      "/settings/profile/two-factor/disable",
+      "/admin/cache",
+      "/admin/cache/sqlite",
+      "/admin/cache/sqlite/:cacheKey",
+      "/admin/cache/lru/:cacheKey",
+      "/users",
+      "/users/:username",
+      "/users/:username/notes",
+      "/users/:username/notes/new",
+      "/users/:username/notes/:noteId",
+      "/users/:username/notes/:noteId/edit",
+      "/* (catch-all 404)"
+    ],
+    "api": [
+      "/resources/healthcheck",
+      "/resources/images",
+      "/resources/download-user-data",
+      "/resources/theme-switch",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/webauthn/registration",
+      "/webauthn/authentication"
+    ],
+    "protected": [
+      "/me",
+      "/settings/profile",
+      "/settings/profile/password",
+      "/settings/profile/passkeys",
+      "/settings/profile/connections",
+      "/settings/profile/photo",
+      "/settings/profile/change-email",
+      "/settings/profile/two-factor",
+      "/admin/cache (role=admin)",
+      "/users/:username/notes (owner or read:note:any)"
+    ],
+    "count": 45,
+    "notes": "45 route modules (plus 3 _layout files = 48 files under app/routes/, per the git tree). URL paths derived from react-router-auto-routes conventions (_auth/_marketing/_seo are pathless layouts, [.] escapes dots, $param -> :param, trailing _ unstacks password_.create). There is no /api/* namespace: server endpoints live under /resources/* plus /robots.txt, /sitemap.xml and the /webauthn/* action routes."
+  },
+  "env": {
+    "count": 29,
+    "names": [
+      "NODE_ENV",
+      "DATABASE_PATH",
+      "DATABASE_URL",
+      "SESSION_SECRET",
+      "HONEYPOT_SECRET",
+      "INTERNAL_COMMAND_TOKEN",
+      "CACHE_DATABASE_PATH",
+      "SENTRY_DSN",
+      "RESEND_API_KEY",
+      "GITHUB_CLIENT_ID",
+      "GITHUB_CLIENT_SECRET",
+      "GITHUB_REDIRECT_URI",
+      "GITHUB_TOKEN",
+      "ALLOW_INDEXING",
+      "AWS_ACCESS_KEY_ID",
+      "AWS_SECRET_ACCESS_KEY",
+      "AWS_REGION",
+      "AWS_ENDPOINT_URL_S3",
+      "BUCKET_NAME",
+      "MOCKS",
+      "PORT",
+      "PLAYWRIGHT_TEST_BASE_URL",
+      "SENTRY_AUTH_TOKEN",
+      "SENTRY_ORG",
+      "SENTRY_PROJECT",
+      "COMMIT_SHA",
+      "VITEST",
+      "FLY_APP_NAME",
+      "FLY_REGION"
+    ],
+    "required_at_build": [],
+    "notes": ".env.example ships 19 names (placeholders / MOCK_* values only, no real secrets). The app zod schema in app/utils/env.server.ts also has 19; of these the five Tigris/AWS vars are NOT optional (the app throws without them) while SENTRY_DSN, RESEND_API_KEY and GITHUB_* are optional. The container additionally injects LITEFS_DIR, DATABASE_FILENAME, CACHE_DATABASE_FILENAME, INTERNAL_PORT, FLY, PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK (other/Dockerfile) and LiteFS needs FLY_CONSUL_URL, PRIMARY_REGION, HOSTNAME (other/litefs.yml). CI supplies FLY_API_TOKEN as a GitHub secret. Nothing is required at build time: the typecheck CI job runs npm run build BEFORE copying .env, and the Dockerfile build needs only an optional SENTRY_AUTH_TOKEN build secret."
+  },
+  "deploy": {
+    "docker": true,
+    "dockerfile_port": 8080,
+    "compose": false,
+    "standalone_output": false,
+    "build_cmd": "npm run build",
+    "start_cmd": "npm start",
+    "migrations_cmd": "npx prisma migrate deploy",
+    "paas_coupling": [
+      "fly.io",
+      "github-actions",
+      "tigris"
+    ],
+    "notes": "Dockerfile lives at other/Dockerfile (fly.toml sets dockerfile=/other/Dockerfile, ignorefile=/other/Dockerfile.dockerignore) and its header says the file is moved to the repo root before building. Container CMD is litefs mount (FUSE + Fly consul lease), which then runs other/litefs.yml exec: prisma migrate deploy -> WAL pragmas -> prisma generate --sql -> npm start. The app process listens on PORT=8081 inside the container behind the LiteFS proxy on INTERNAL_PORT=8080 (= fly.toml internal_port; health checks /resources/healthcheck and /litefs/health). Deploy is flyctl-only from GitHub Actions (.github/workflows/deploy.yml: container + deploy jobs on push to dev/main, staging and production Fly apps named from fly.toml). No docker-compose, no Vercel/Docker-Swarm config. standalone_output is a Next.js concept and does not apply (false)."
+  },
+  "tests": {
+    "frameworks": [
+      "vitest",
+      "playwright",
+      "testing-library",
+      "msw"
+    ],
+    "unit_files": 7,
+    "e2e_files": 8,
+    "ci_workflows": [
+      ".github/workflows/deploy.yml"
+    ],
+    "notes": "Vitest config lives in vite.config.ts (include ./app/**/*.test.{ts,tsx}, globalSetup tests/setup/global-setup.ts, v8 coverage). 7 unit test files (app/**/*.test.*): auth.server, headers.server, misc.error-message, misc.use-double-check, sentry-event-filters, routes/_auth/auth.$provider/callback, routes/users/$username/index. 8 Playwright specs in tests/e2e (2fa, error-boundary, note-images, notes, onboarding, passkey, search, settings-profile) with image fixtures and test helpers. tests/setup/setup-test-env.ts loads .env via dotenv and makes console.error/console.warn THROW. CI is a single workflow with 5 jobs (lint, typecheck, vitest, playwright, container) plus a deploy job; each job copies .env.example to .env and runs prisma migrate deploy first. scripts.validate = run-p test lint typecheck test:e2e:run."
+  },
+  "vendor": [
+    {
+      "name": "fly.io",
+      "where": [
+        "fly.toml",
+        "other/Dockerfile",
+        "other/litefs.yml",
+        ".github/workflows/deploy.yml",
+        "server/index.ts",
+        "docs/deployment.md"
+      ],
+      "what_it_does": "hosting/PaaS: internal port 8080, volumes, health checks, fly-client-ip rate-limit key, flyctl deploys of staging + production apps",
+      "swap_target_hint": "any Docker host / VPS / Railway / Render (drop LiteFS for a single instance)",
+      "effort_guess": "2-4 days"
+    },
+    {
+      "name": "litefs",
+      "where": [
+        "other/Dockerfile",
+        "other/litefs.yml",
+        "app/utils/litefs.server.ts",
+        "app/routes/admin/cache/*"
+      ],
+      "what_it_does": "SQLite replication + leases via Fly consul; container entrypoint is litefs mount and the app talks to the primary over Fly internal networking",
+      "swap_target_hint": "none (single-instance SQLite) or Postgres with real replication",
+      "effort_guess": "2-3 days"
+    },
+    {
+      "name": "tigris (S3-compatible object storage)",
+      "where": [
+        "app/utils/storage.server.ts",
+        "app/routes/resources/images.tsx",
+        ".env.example",
+        "tests/mocks/tigris.ts"
+      ],
+      "what_it_does": "profile-photo and note-image storage plus serving optimized images; hand-rolled AWS SigV4 signing (no AWS SDK dependency)",
+      "swap_target_hint": "any S3-compatible endpoint (R2/MinIO/AWS S3) by changing AWS_ENDPOINT_URL_S3 + bucket secrets",
+      "effort_guess": "half day"
+    },
+    {
+      "name": "sentry",
+      "where": [
+        "package.json",
+        "server/utils/monitoring.ts",
+        "app/utils/monitoring.client.tsx",
+        "vite.config.ts",
+        "react-router.config.ts",
+        ".env.example"
+      ],
+      "what_it_does": "error + performance monitoring, session replay, Prisma instrumentation, source-map upload at build",
+      "swap_target_hint": "GlitchTip/self-hosted, or remove entirely (SENTRY_DSN is optional)",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "resend",
+      "where": [
+        "package.json",
+        "app/utils/email.server.ts",
+        ".env.example",
+        "tests/mocks/resend.ts"
+      ],
+      "what_it_does": "transactional email (verification, reset, change-email) via plain fetch to api.resend.com",
+      "swap_target_hint": "Postmark/SendGrid/SMTP by rewriting sendEmail()",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "github oauth",
+      "where": [
+        "app/utils/providers/github.server.ts",
+        "app/utils/connections.server.ts",
+        ".env.example",
+        "package.json"
+      ],
+      "what_it_does": "third-party login / account connection via remix-auth-github (only provider wired)",
+      "swap_target_hint": "any remix-auth strategy (Google/OIDC via web-oidc) or delete the provider",
+      "effort_guess": "2-4 hours"
+    },
+    {
+      "name": "haveibeenpwned pwnedpasswords range API",
+      "where": [
+        "app/utils/auth.server.ts",
+        "tests/mocks/pwned-passwords.ts"
+      ],
+      "what_it_does": "k-anonymity breached-password check on signup/password change (free, no key)",
+      "swap_target_hint": "none needed; delete the call for offline use",
+      "effort_guess": "under an hour"
+    },
+    {
+      "name": "openimg + sharp",
+      "where": [
+        "package.json",
+        "app/routes/resources/images.tsx",
+        "app/utils/misc.tsx"
+      ],
+      "what_it_does": "on-the-fly image optimization and serving (sharp native binary)",
+      "swap_target_hint": "keep, or swap for a CDN image resizer",
+      "effort_guess": "1-2 days"
+    },
+    {
+      "name": "epic-web npm packages",
+      "where": [
+        "package.json (@epic-web/cachified, client-hints, remember, totp, invariant, config)"
+      ],
+      "what_it_does": "caching, client hints, TOTP, shared eslint/prettier config",
+      "swap_target_hint": "vendored equivalents (same author, MIT, no account or key)",
+      "effort_guess": "1-3 days"
+    },
+    {
+      "name": "faker",
+      "where": [
+        "prisma/seed.ts",
+        "tests/db-utils.ts",
+        "package.json"
+      ],
+      "what_it_does": "generates demo users/notes/images for seeding and tests",
+      "swap_target_hint": "keep (dev-only)",
+      "effort_guess": "minutes"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "app/root.tsx",
+      "kind": "metadata",
+      "note": "title Epic Notes / Error | Epic Notes and description Your own captain's log"
+    },
+    {
+      "path": "app/routes/_marketing/index.tsx",
+      "kind": "copy",
+      "note": "home page is a marketing page for The Epic Stack with links to epicweb.dev and a third-party logo wall"
+    },
+    {
+      "path": "app/routes/_marketing/+logos/logos.ts",
+      "kind": "copy",
+      "note": "logo cloud of Docker/ESLint/Fly/Prisma/Resend/Sentry/Tailwind etc. with outbound hrefs"
+    },
+    {
+      "path": "public/site.webmanifest",
+      "kind": "metadata",
+      "note": "PWA name and icons"
+    },
+    {
+      "path": "public/favicons/ + app/assets/favicons/",
+      "kind": "logo",
+      "note": "Epic Stack favicons, apple-touch-icon, android-chrome icons"
+    },
+    {
+      "path": "package.json",
+      "kind": "metadata",
+      "note": "name epic-stack-template, author Kent C. Dodds, MIT"
+    },
+    {
+      "path": "fly.toml",
+      "kind": "domain",
+      "note": "app = epic-stack-template drives every deploy; primary_region sjc"
+    },
+    {
+      "path": "app/utils/email.server.ts",
+      "kind": "email",
+      "note": "hardcoded sender from: hello@epicstack.dev"
+    },
+    {
+      "path": "app/utils/session.server.ts",
+      "kind": "domain",
+      "note": "cookie name en_session"
+    },
+    {
+      "path": "README.md + docs/*",
+      "kind": "copy",
+      "note": "91 markdown docs (incl. 49 ADR files and 11 agent SKILL.md files) all branded for the Epic Stack"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "placeholder marketing pages: app/routes/_marketing/about.tsx, privacy.tsx, support.tsx, tos.tsx each render a single line of text (for example About page)",
+    "home page marketing copy plus logo wall for The Epic Stack (app/routes/_marketing/index.tsx)",
+    "faker-generated demo data: prisma/seed.ts seeds 5 users with role user, notes and note images; kody fixtures under tests/fixtures/images and public/img/user.png",
+    "branded constants: email sender hello@epicstack.dev and session cookie name en_session"
+  ],
+  "pitfalls": [
+    {
+      "kind": "build-needs-env",
+      "detail": "Runtime env is validated with zod in app/utils/env.server.ts and throws on missing variables; DATABASE_PATH, DATABASE_URL, SESSION_SECRET, HONEYPOT_SECRET, INTERNAL_COMMAND_TOKEN, CACHE_DATABASE_PATH and all five Tigris vars (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_ENDPOINT_URL_S3, BUCKET_NAME) are NOT optional, so the app will not boot without storage credentials even if you never upload a file. app/utils/session.server.ts also calls process.env.SESSION_SECRET.split(',') at import time, which crashes the process with an unhelpful TypeError when SESSION_SECRET is unset. Copy .env.example to .env first. Build time is fine: CI builds before copying .env.",
+      "evidence": "app/utils/env.server.ts, app/utils/session.server.ts, .github/workflows/deploy.yml"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "No postinstall script in the repo, but Prisma client generation is required before dev/build/typecheck: run npx prisma generate (and npx prisma generate --sql for the TypedSQL searchUsers query) or imports of #app/utils/db.server.ts and @prisma/client/sql fail. npm run setup bundles build + migrate deploy + generate --sql + playwright install.",
+      "evidence": "package.json (scripts.setup, prisma), other/Dockerfile, app/routes/users/index.tsx"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "sharp (^0.34.5, image optimization) and @sentry/profiling-node (^10.38.0) ship platform-specific native binaries; unusual platforms or Node ABIs fail at install or first run. bcryptjs (pure JS) avoids a node-gyp build, so no C toolchain is needed otherwise.",
+      "evidence": "package.json"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": ".npmrc pins legacy-peer-deps=true, i.e. upstream accepts unresolved peer ranges (React 19 alongside remix-auth-github/remix-utils). npm install works with it; pnpm/yarn or a flagless npm ci can fail on peer resolution.",
+      "evidence": ".npmrc"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "docs/features.md claims SQLite caching is done with better-sqlite3 and that the framework is Remix; the code uses node:sqlite (DatabaseSync) and React Router v7, and better-sqlite3 is not a dependency at all.",
+      "evidence": "app/utils/cache.server.ts (node:sqlite) vs docs/features.md, package.json"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "docs/security.md and docs/troubleshooting.md tell you to edit contentSecurityPolicy directives or remove reportOnly: true in server/index.ts, but that block no longer exists there: headers now come from @nichtsam/helmet defaults plus a hand-written nonce, so an agent following those docs hunts for configuration that was moved or removed.",
+      "evidence": "server/index.ts vs docs/troubleshooting.md, docs/security.md"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "docs/getting-started.md still describes npx epicli new / create-remix --template workflows, and a leftover remix.init/ directory (364-line index.mjs that rewrites fly.toml, package.json and .env.example and prompts interactively) is still in the repo even though this repo IS the template (private, name epic-stack-template).",
+      "evidence": "docs/getting-started.md, remix.init/index.mjs, package.json"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "Four of the five marketing routes are one-line stubs (About page, etc.) and the home page is a marketing page for the Epic Stack itself; the only real product surface is notes plus settings under /users/:username/notes. Anything expecting a working dashboard must build it.",
+      "evidence": "app/routes/_marketing/about.tsx, privacy.tsx, support.tsx, tos.tsx, index.tsx"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "The production image entrypoint is litefs mount (FUSE plus a Fly consul lease) with migrations executed by other/litefs.yml on the primary candidate. docker run of the built image will not start the app locally without /dev/fuse and LiteFS/consul env, and the app port (8081) sits behind the LiteFS proxy (8080), so naive port mapping hits the wrong process.",
+      "evidence": "other/Dockerfile (CMD litefs mount, PORT/INTERNAL_PORT), other/litefs.yml, fly.toml"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "Tests need .env: tests/setup/setup-test-env.ts imports dotenv/config and app/utils/env.server.ts before anything else, and it monkey-patches console.error/console.warn to THROW, so incidental React or React Router warnings surface as hard test failures. Playwright needs browsers installed (npm run test:e2e:install) and the app built (pretest:e2e:run runs npm run build).",
+      "evidence": "tests/setup/setup-test-env.ts, vite.config.ts, package.json"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "Local dev is mock-first: npm run dev sets MOCKS=true and MSW intercepts Resend, GitHub OAuth, Tigris and pwned-passwords. GITHUB_* values must be prefixed MOCK_ (and AWS_* can be fake) or the code calls the real APIs on login/upload.",
+      "evidence": ".env.example comments, index.ts, tests/mocks/index.ts"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "node:sqlite requires Node >= 22.5 and engines requires ^22.18.0; older Node lacks DatabaseSync entirely (cache.server.ts, tests/setup/db-setup.ts). Docker (node:22-bookworm-slim) and CI (node 22) match.",
+      "evidence": "package.json engines, app/utils/cache.server.ts, other/Dockerfile"
+    }
+  ],
+  "complexity": {
+    "pages": 39,
+    "components": 19,
+    "db_models": 11,
+    "migrations": 1,
+    "loc_estimate": 14020
+  },
+  "health": {
+    "stars": 5542,
+    "forks": 462,
+    "open_issues": 13,
+    "contributors": 176,
+    "top_contributor_share": 0.587,
+    "last_commit": "2026-08-29",
+    "last_release": "2026-01-20",
+    "commits_last_90d": 5,
+    "issues_closed_last_90d": 1
+  },
+  "verdict": {
+    "best_for": "A production-shaped single-tenant web app that needs real auth (password + 2FA + passkeys + GitHub SSO), RBAC, file uploads, transactional email and a SQLite database, deployed as your own Docker container.",
+    "weak_for": "Multi-tenant SaaS that needs billing, i18n/RTL, Postgres scale-out, background jobs or edge/serverless hosting - none of that exists here, and the Fly.io + LiteFS + Tigris coupling is opinionated.",
+    "swap_burden": "heavy - auth is hand-rolled and correct but is entwined with sessions/verification/permissions, and hosting is woven through the Dockerfile, litefs.yml, fly.toml, CI, the rate limiter (fly-client-ip) and storage (AWS_ENDPOINT_URL_S3), so dropping Fly means rewriting the deploy layer plus the storage signature code."
+  },
+  "evidence": {
+    "framework": "package.json (react-router ^7.16.0, @react-router/express, @react-router/dev, react-router-auto-routes) + react-router.config.ts + app/routes.ts + server/app.ts",
+    "stack": "package.json dependencies, prisma/schema.prisma (datasource sqlite, 11 models), app/utils/auth.server.ts, session.server.ts, permissions.server.ts, storage.server.ts, email.server.ts, cache.server.ts, env.server.ts, connections.server.ts",
+    "features": "gh api repos/.../git/trees/main?recursive=1 (app/routes/**), app/routes/users/index.tsx (Prisma TypedSQL search), app/routes/admin/cache/index.tsx (requireUserWithRole admin), app/routes/settings/profile/photo.tsx (uploads), tests/e2e specs",
+    "routes": "gh api repos/.../git/trees/main?recursive=1 (app/routes/**) + docs/routing.md conventions",
+    "env": ".env.example + app/utils/env.server.ts zod schema + other/Dockerfile ENV block + other/litefs.yml",
+    "deploy": "other/Dockerfile, other/litefs.yml, fly.toml, .github/workflows/deploy.yml, docs/deployment.md",
+    "tests": "vite.config.ts (test block), tests/e2e/*.test.ts, tests/setup/setup-test-env.ts, .github/workflows/deploy.yml job list",
+    "vendor": ".env.example, package.json, app/utils/storage.server.ts, email.server.ts, auth.server.ts, providers/github.server.ts, server/utils/monitoring.ts",
+    "complexity": "line counts of all 172 tracked text files fetched from raw.githubusercontent.com (14,020 lines total; app/routes 5,135; app/utils 2,598; tests 2,123; app/components 1,231; root configs 1,117; prisma 747; server 330); markdown docs excluded",
+    "health": "gh api repos/epicweb-dev/epic-stack, /contributors (3 pages, 176 rows, 952 total contributions), /commits?since=2026-06-25 (5), /releases (latest published tag 2026-01-20), search/issues (closed since 2026-06-25 = 1; open issues 6, open PRs 7, open_issues_count 13 includes PRs)",
+    "readme_vs_code": "README and docs/features.md promise Remix, better-sqlite3, Grafana dashboards and future Stripe/i18n/feature flags; the code shows React Router v7, node:sqlite, Sentry and no payments/i18n/flags, so the features list was taken from code only"
+  },
+  "unmeasured": [
+    "Exact resolved dependency versions: package.json declares caret ranges (for example react-router ^7.16.0); no install was run and the repo code was never executed, so the lockfile was not resolved to exact versions.",
+    "Whether the app actually builds, starts, or passes its tests - no dependency installation or code execution was performed (forbidden by the contract).",
+    "Real-world deploy status: no Fly app, Sentry project, Resend domain or Tigris bucket was checked (needs credentials), so paas_coupling is inferred from config files.",
+    "Traffic, clone and visitor stats plus discussions activity (require push access), and issue/PR comment sentiment.",
+    "Dependency vulnerability/deprecation status of the tree (no npm audit was run).",
+    "Runtime behaviour of sharp/openimg image optimization and of the LiteFS consul lease (needs a live Fly environment).",
+    "top_contributor_share is computed from GitHub per-contributor commit counts (952 across 176 listed contributors); GitHub caps or anonymises some contributions, so it approximates commit share rather than a git blame share.",
+    "Exact URL paths are derived from react-router-auto-routes conventions rather than from running npx react-router routes (which would execute repo tooling)."
+  ]
+}

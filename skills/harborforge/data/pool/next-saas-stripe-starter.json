@@ -1,0 +1,421 @@
+{
+  "repo": "mickasmt/next-saas-stripe-starter",
+  "slug": "next-saas-stripe-starter",
+  "measured_at": "2026-09-23T22:15:16Z",
+  "upstream_commit": "a78d130af7e04d0250d65c67f217976f7eb3adc2",
+  "default_branch": "main",
+  "archived": false,
+  "size_kb": 3162,
+  "languages": {
+    "TypeScript": 81.3,
+    "MDX": 17.4,
+    "JavaScript": 0.7,
+    "CSS": 0.6,
+    "Shell": 0.0
+  },
+  "framework": {
+    "name": "next",
+    "version": "14.2.5",
+    "router": "app",
+    "notes": "App Router at repo root (app/, no src/); route groups (marketing)/(auth)/(protected)/(docs); next.config.js is wrapped by withContentlayer (contentlayer2) and dynamically imports env.mjs, so the env schema is validated at config load."
+  },
+  "package_manager": "pnpm",
+  "node_or_python_requirement": "not declared in package.json engines; .nvmrc = v16.18.0 (stale) while next@14.2.5 needs Node >=18.17.0; @types/node ^20",
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "single Next.js app at repo root; pnpm-lock.yaml (440 KB) is the only lockfile, no pnpm-workspace.yaml"
+  },
+  "stack": {
+    "db": "postgres",
+    "orm": "prisma",
+    "auth": {
+      "provider": "next-auth",
+      "methods": [
+        "oauth",
+        "magic-link"
+      ],
+      "roles": [
+        "user",
+        "admin"
+      ],
+      "notes": "Auth.js v5 beta (next-auth 5.0.0-beta.19) with @auth/prisma-adapter; providers are Google OAuth + Resend magic-link only (no email+password, and no GitHub provider despite an unused sendVerificationRequest import in auth.config.ts). JWT session strategy; UserRole enum ADMIN|USER; middleware.ts re-exports auth from auth.ts instead of the adapter-free auth.config.ts."
+    },
+    "ui": [
+      "tailwind",
+      "shadcn",
+      "radix",
+      "recharts",
+      "lucide",
+      "next-themes",
+      "sonner",
+      "vaul"
+    ],
+    "i18n": {
+      "library": "none",
+      "default": "en",
+      "locales": [
+        "en"
+      ],
+      "rtl_aware": false,
+      "translation_files": 0
+    },
+    "payments": {
+      "provider": "stripe",
+      "model": "subscription",
+      "webhooks": true
+    },
+    "email": {
+      "provider": "resend",
+      "templates": 1,
+      "transactional": true
+    },
+    "analytics": [
+      "vercel-analytics"
+    ],
+    "jobs": [],
+    "search": [
+      "cmdk command palette (client-side only, no server search)"
+    ],
+    "storage": [],
+    "realtime": [],
+    "flags": [],
+    "observability": []
+  },
+  "features": [
+    "accounts",
+    "admin",
+    "dashboard",
+    "billing",
+    "blog",
+    "docs",
+    "search",
+    "dark-mode"
+  ],
+  "routes": {
+    "pages": [
+      "/",
+      "/pricing",
+      "/[slug]",
+      "/blog",
+      "/blog/[slug]",
+      "/blog/category/[slug]",
+      "/login",
+      "/register",
+      "/docs/[[...slug]]",
+      "/guides",
+      "/guides/[slug]",
+      "/dashboard",
+      "/dashboard/billing",
+      "/dashboard/charts",
+      "/dashboard/settings",
+      "/admin",
+      "/admin/orders"
+    ],
+    "api": [
+      "/api/auth/[...nextauth]",
+      "/api/og",
+      "/api/user (DELETE)",
+      "/api/webhooks/stripe (POST)"
+    ],
+    "protected": [
+      "/dashboard",
+      "/dashboard/billing",
+      "/dashboard/charts",
+      "/dashboard/settings",
+      "/admin",
+      "/admin/orders"
+    ],
+    "count": 21
+  },
+  "env": {
+    "count": 15,
+    "names": [
+      "NEXT_PUBLIC_APP_URL",
+      "AUTH_SECRET",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "GITHUB_OAUTH_TOKEN",
+      "DATABASE_URL",
+      "RESEND_API_KEY",
+      "EMAIL_FROM",
+      "STRIPE_API_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PLAN_ID",
+      "NEXT_PUBLIC_STRIPE_PRO_YEARLY_PLAN_ID",
+      "NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PLAN_ID",
+      "NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID",
+      "NEXTAUTH_URL"
+    ],
+    "required_at_build": [
+      "NEXT_PUBLIC_APP_URL",
+      "AUTH_SECRET",
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "GITHUB_OAUTH_TOKEN",
+      "DATABASE_URL",
+      "RESEND_API_KEY",
+      "EMAIL_FROM",
+      "STRIPE_API_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PLAN_ID",
+      "NEXT_PUBLIC_STRIPE_PRO_YEARLY_PLAN_ID",
+      "NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PLAN_ID",
+      "NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID"
+    ],
+    "notes": "14 of 15 are non-optional in env.mjs (@t3-oss/env-nextjs createEnv) and next.config.js imports env.mjs, so both `pnpm dev` and `pnpm build` throw before compiling unless all of them are set; only NEXTAUTH_URL is .optional(). .env.example (commented 'MySQL - Neon DB' but actually a postgres:// URL) lists the same set minus NEXTAUTH_URL; README says copy to .env.local, docs say .env - both gitignored. GITHUB_OAUTH_TOKEN is required yet used only for an optional GitHub star fetch."
+  },
+  "deploy": {
+    "docker": false,
+    "dockerfile_port": null,
+    "compose": false,
+    "standalone_output": false,
+    "build_cmd": "pnpm build",
+    "start_cmd": "pnpm start",
+    "migrations_cmd": "npx prisma db push",
+    "paas_coupling": [
+      "vercel",
+      "neon"
+    ],
+    "notes": "No Dockerfile, no docker-compose, no vercel.json, no `output: 'standalone'` in next.config.js, no .github/ directory. Deploy path is the Vercel button in README plus content/docs/installation.mdx (which itself warns the deploy fails until env vars are set). migrations_cmd is the command the docs give (content/docs/configuration/database.mdx); package.json has NO migrate/db script at all (scripts: dev, build, turbo, start, lint, preview, postinstall, email) and prisma/migrations/0_init is a baseline, not a migrate history. postinstall runs `prisma generate`."
+  },
+  "tests": {
+    "frameworks": [],
+    "unit_files": 0,
+    "e2e_files": 0,
+    "ci_workflows": [],
+    "notes": "No test runner and no test file anywhere: the 323-entry tree has no *.test.* / *.spec.* / __tests__ and no vitest/jest/playwright/cypress dependency or config; there is no .github/ directory at all, so no CI, issue templates or code scanning. Quality tooling is lint/format only (eslint + next/core-web-vitals, prettier + prettier-plugin-tailwindcss, commitlint, husky)."
+  },
+  "vendor": [
+    {
+      "name": "stripe",
+      "where": [
+        "package.json",
+        "env.mjs",
+        ".env.example",
+        "lib/stripe.ts",
+        "lib/subscription.ts",
+        "actions/generate-user-stripe.ts",
+        "actions/open-customer-portal.ts",
+        "app/api/webhooks/stripe/route.ts",
+        "components/forms/billing-form-button.tsx"
+      ],
+      "what_it_does": "subscription checkout (mode: subscription), billing portal, and webhook sync of stripeCustomerId/stripeSubscriptionId/stripePriceId/stripeCurrentPeriodEnd onto the User row",
+      "swap_target_hint": "lemonsqueezy / polar / paddle",
+      "effort_guess": "1-2 weeks"
+    },
+    {
+      "name": "resend",
+      "where": [
+        "package.json",
+        "env.mjs",
+        ".env.example",
+        "lib/email.ts",
+        "auth.config.ts",
+        "emails/magic-link-email.tsx"
+      ],
+      "what_it_does": "magic-link sign-in email delivery (Auth.js Resend provider) plus the React Email template",
+      "swap_target_hint": "nodemailer/SMTP, postmark, or drop magic-link and keep Google OAuth",
+      "effort_guess": "half a day"
+    },
+    {
+      "name": "neon",
+      "where": [
+        ".env.example",
+        "env.mjs",
+        "content/docs/configuration/database.mdx",
+        "config/site.ts"
+      ],
+      "what_it_does": "hosted serverless Postgres behind DATABASE_URL (the Prisma datasource is plain postgresql, so Neon itself is not in the code)",
+      "swap_target_hint": "any Postgres (Supabase, RDS, self-hosted) - no code change, only DATABASE_URL",
+      "effort_guess": "minutes"
+    },
+    {
+      "name": "vercel",
+      "where": [
+        "package.json (@vercel/analytics, @vercel/og)",
+        "components/analytics.tsx",
+        "app/api/og/route.tsx",
+        "README.md deploy button"
+      ],
+      "what_it_does": "hosting target, visitor analytics, and the edge ImageResponse OG image route",
+      "swap_target_hint": "any Node host (Fly/VPS/Cloudflare) - needs a Dockerfile or `output: 'standalone'` you must add, plus replacing @vercel/og and @vercel/analytics",
+      "effort_guess": "half a day"
+    },
+    {
+      "name": "google-oauth",
+      "where": [
+        "env.mjs (GOOGLE_CLIENT_ID/SECRET)",
+        "auth.config.ts"
+      ],
+      "what_it_does": "Google sign-in provider",
+      "swap_target_hint": "add/remove providers in auth.config.ts (an unused GITHUB_OAUTH_TOKEN already exists)",
+      "effort_guess": "minutes"
+    },
+    {
+      "name": "github-api",
+      "where": [
+        "env.mjs (GITHUB_OAUTH_TOKEN)",
+        "components/sections/hero-landing.tsx"
+      ],
+      "what_it_does": "Authorization header for the landing-hero fetch of api.github.com star count",
+      "swap_target_hint": "delete the fetch or hardcode a number",
+      "effort_guess": "minutes"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "config/site.ts",
+      "kind": "metadata",
+      "note": "site name 'SaaS Starter', long description, mailSupport support@saas-starter.com, twitter/github links; footerLinks rows mostly href '#'"
+    },
+    {
+      "path": "lib/utils.ts",
+      "kind": "metadata",
+      "note": "constructMetadata() defaults title/description/ogImage/favicon from siteConfig; used by nearly every page"
+    },
+    {
+      "path": "public/site.webmanifest",
+      "kind": "logo",
+      "note": "name/short_name 'SaaS Starter' plus the android icon set"
+    },
+    {
+      "path": "public/_static/favicons/ + public/favicon.ico",
+      "kind": "logo",
+      "note": "full favicon set, referenced by constructMetadata icons"
+    },
+    {
+      "path": "public/_static/og.jpg + app/opengraph-image.jpg",
+      "kind": "logo",
+      "note": "static OG images carrying upstream branding; siteConfig.ogImage points at /_static/og.jpg"
+    },
+    {
+      "path": "components/sections/hero-landing.tsx",
+      "kind": "copy",
+      "note": "hardcoded h1 'Kick off with a bang with SaaS Starter', the 'Next.js 14, Prisma, Neon, Auth.js v5...' pitch, an upstream twitter announcement link, and the star fetch pinned to mickasmt/next-saas-stripe-starter"
+    },
+    {
+      "path": "styles/globals.css",
+      "kind": "theme",
+      "note": "all shadcn CSS variables (baseColor neutral per components.json) - colors and dark mode live here"
+    },
+    {
+      "path": "app/(protected)/dashboard/page.tsx, app/(protected)/admin/page.tsx, app/(protected)/admin/orders/page.tsx, app/(protected)/dashboard/settings/page.tsx",
+      "kind": "metadata",
+      "note": "per-page titles hardcoded as '<Page> - SaaS Starter'"
+    },
+    {
+      "path": "emails/magic-link-email.tsx",
+      "kind": "email",
+      "note": "React Email magic-link template; siteName passed in from siteConfig"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "landing page sections (components/sections/*) - audience/first-90-days marketing copy, screenshots and wording for a generic SaaS",
+    "6 fake testimonials in config/landing.ts (testimonials[]), rendered by components/sections/testimonials.tsx",
+    "4 demo blog posts in content/blog/*.mdx (Next.js/contentlayer topics) and 2 guides in content/guides/*.mdx, attributed to avatars mickasmt/shadcn",
+    "4 docs pages in content/docs/configuration/*.mdx that document this starter's own setup",
+    "/admin shows 4 identical InfoCard stat blocks plus two TransactionsList tables of the same hardcoded data, and /dashboard/charts renders 9 static recharts demos",
+    "/admin/orders is a static EmptyPlaceholder ('No orders listed') - its getCurrentUser()/ADMIN redirect is commented out",
+    "components/forms/newsletter-form.tsx only toasts the submitted JSON - no signup backend",
+    "content/pages/privacy.mdx and content/pages/terms.mdx boilerplate served through the /[slug] catch route"
+  ],
+  "pitfalls": [
+    {
+      "kind": "build-needs-env",
+      "detail": "env.mjs uses @t3-oss/env-nextjs createEnv with 14 non-optional vars (Google OAuth, DATABASE_URL, RESEND_API_KEY, STRIPE_API_KEY, the 4 Stripe price IDs, GITHUB_OAUTH_TOKEN...) and next.config.js does `import('./env.mjs')`, so the config load throws: `pnpm dev` and `pnpm build` both fail before compiling until every credential is present, and placeholder values still break Stripe/Resend at runtime. The repo's own install doc warns the Vercel deploy 'will fail'.",
+      "evidence": "next.config.js + env.mjs + content/docs/installation.mdx"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": ".nvmrc pins v16.18.0 but next@14.2.5 requires Node >= 18.17 - `nvm use` on a fresh clone hands you an unsupported runtime. Build with Node 20 (.nvmrc is simply stale).",
+      "evidence": ".nvmrc vs package.json (next 14.2.5) and @types/node ^20"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README lists 'Framer Motion' under UI and a `use-debounce` hook among utilities; framer-motion is not in package.json and no .ts/.tsx file in the tree imports it (all 186 source files were fetched and grepped), so any motion work starts from zero.",
+      "evidence": "README.md vs package.json + full .ts/.tsx scan"
+    },
+    {
+      "kind": "postinstall",
+      "detail": "husky@^9 with .husky/pre-commit (pretty-quick) and .husky/commit-msg (commitlint) exists, but package.json has no `prepare` script or husky install step, so the hooks are never wired on a fresh clone (and the files use the husky v8 shim style). Expect no git hooks despite the directory.",
+      "evidence": "package.json scripts vs .husky/*"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "components/sections/hero-landing.tsx fetches https://api.github.com/repos/mickasmt/next-saas-stripe-starter at render time (next: {revalidate: 3600}) for the star count on '/'. Offline, rate-limited, or after a rebrand it returns an error body, stars is undefined, and nFormatter(undefined) renders into the hero; the URL is a hardcoded upstream reference.",
+      "evidence": "components/sections/hero-landing.tsx"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "/admin and /admin/orders are static mock UI, not features: OrdersPage's `redirect('/login')` + ADMIN check is commented out and prisma/schema.prisma has no Order model, so 'orders' must be built from scratch.",
+      "evidence": "app/(protected)/admin/orders/page.tsx + prisma/schema.prisma (User, Account, Session, VerificationToken only)"
+    },
+    {
+      "kind": "outdated-deps",
+      "detail": "next is pinned exactly to 14.2.5, inside the affected range of CVE-2025-29927 (authorization bypass when the check lives in middleware; fixed in 14.2.25) and middleware.ts is the auth gate in this repo. next-auth is a 5.0.0-beta, and there has been no commit since 2024-07-26, so Next 15 / Auth.js 5 stable / React 19 upgrades are unassisted work.",
+      "evidence": "package.json (next 14.2.5, next-auth 5.0.0-beta.19) + middleware.ts + GHSA-f82v-jwr5-mffw"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "middleware.ts re-exports `auth` from auth.ts (which imports PrismaAdapter and @prisma/client) instead of the edge-safe auth.config.ts that was split out for exactly that purpose - the Auth.js documented pattern. Not exercised here (repo never built), but a known source of Edge-runtime/Prisma bundling errors; auth.config.ts also carries a dead sendVerificationRequest import and a commented-out provider option.",
+      "evidence": "middleware.ts + auth.ts + auth.config.ts"
+    },
+    {
+      "kind": "native-deps",
+      "detail": "contentlayer2/next-contentlayer2 (community fork of the unmaintained contentlayer) wraps next.config and generates .contentlayer/generated at dev/build time, but that directory is gitignored while tsconfig.json maps 'contentlayer/generated' and compiles contentlayer.config.ts - so a fresh clone's tsc/editor reports missing modules until a dev/build run creates it. sharp@^0.33.4 is the only native module (prebuilt binaries).",
+      "evidence": "next.config.js, contentlayer.config.ts, tsconfig.json, .gitignore (.contentlayer), package.json"
+    }
+  ],
+  "complexity": {
+    "pages": 17,
+    "components": 108,
+    "db_models": 4,
+    "migrations": 1,
+    "loc_estimate": 12534
+  },
+  "health": {
+    "stars": 3003,
+    "forks": 630,
+    "open_issues": 26,
+    "contributors": 4,
+    "top_contributor_share": 0.983,
+    "last_commit": "2024-07-26",
+    "last_release": "v1.0.0",
+    "commits_last_90d": 0,
+    "issues_closed_last_90d": 0
+  },
+  "verdict": {
+    "best_for": "A single-tenant B2C/B2B SaaS that needs a polished marketing site, a role-gated dashboard and Stripe subscription billing on Next 14 App Router, when you will rebrand and extend it yourself rather than track upstream.",
+    "weak_for": "Anything needing teams/orgs, i18n, uploads, background jobs, API keys or an audit trail - and any team that wants tests, CI or a maintained upgrade path (dormant since 2024-07-26, zero test files, zero workflows, beta Auth.js).",
+    "swap_burden": "medium - Stripe/Resend/Neon/Vercel are thin and mostly config-swappable, but rebranding (every page, OG/favicons, hero copy), replacing the mock admin/orders pages, removing the upstream GitHub star fetch, and adding the missing tests/CI/Docker are all manual."
+  },
+  "evidence": {
+    "framework": "package.json (next 14.2.5, next-contentlayer2) + app/ tree from gh api git/trees/main?recursive=1",
+    "stack": "package.json dependencies, prisma/schema.prisma, auth.ts + auth.config.ts, env.mjs, components.json, next.config.js",
+    "auth": "auth.ts, auth.config.ts, middleware.ts, lib/session.ts, prisma/schema.prisma (UserRole enum)",
+    "payments": "lib/stripe.ts, lib/subscription.ts, config/subscriptions.ts, actions/generate-user-stripe.ts, actions/open-customer-portal.ts, app/api/webhooks/stripe/route.ts",
+    "email": "lib/email.ts, emails/magic-link-email.tsx, auth.config.ts",
+    "routes": "git/trees/main?recursive=1 paths under app/ (17 page.tsx + 4 route.ts) plus each page.tsx read via raw.githubusercontent.com",
+    "env": "env.mjs + .env.example + content/docs/installation.mdx",
+    "deploy": "tree (no Dockerfile/compose/vercel.json/.github), next.config.js, package.json scripts, README.md, content/docs/configuration/database.mdx",
+    "tests": "full tree scan (no test files, no .github/) + package.json devDependencies",
+    "vendor": "package.json + env.mjs + .env.example + the per-vendor source files listed above",
+    "features": "app/ route files, config/dashboard.ts, components/ tree, package.json (cmdk, next-themes); README promises were cross-checked against code and NOT counted",
+    "complexity": "counts from git/trees/main?recursive=1; loc_estimate is the measured line count of all 186 .ts/.tsx files fetched via raw.githubusercontent.com",
+    "health": "gh api repos/mickasmt/next-saas-stripe-starter (.stargazers_count 3003, .forks_count 630, .open_issues_count 26 = 17 issues + 9 PRs per search API), /contributors (mickasmt 174, devstack-be 1, Security2431 1, adrianbucks 1 -> 174/177 = 0.983), /releases (3, latest v1.0.0), /commits?per_page=1 (177 commits on main, HEAD a78d130 dated 2024-07-26), commits?since=<now-90d> = 0, search closed issues last 90d = 0",
+    "pitfalls": "next.config.js + env.mjs, .nvmrc, README.md, .husky/*, hero-landing.tsx, admin pages, package.json, middleware.ts"
+  },
+  "unmeasured": [
+    "Nothing was installed, built or run (contract forbids it), so 'build-needs-env', the middleware/Prisma Edge concern and the husky-hook conclusion are read from source, not reproduced.",
+    "No dependency resolution was performed: peer conflicts between next-auth 5.0.0-beta.19 / react 18.3.1 / contentlayer2 0.5.x are unknown.",
+    "Non-TS code size: only .ts/.tsx lines were counted (12,534); CSS/MDX/JS sizes come from the languages API byte shares.",
+    "Runtime SaaS details (Stripe plan/price behaviour, live Neon/Vercel/Resend configuration) - out of scope; the billing page itself states it is a Stripe test-environment demo.",
+    "contributors is a single API page (4 accounts returned); 100+ contributor repos would need pagination, and contributors excludes anonymous/co-authored commits.",
+    "open_issues=26 is the API's open_issues_count (17 issues + 9 PRs); issues-only is 17. Both were measured and the combined figure is reported.",
+    "Repo settings not queried: branch protection, required status checks, dependabot/security alerts, traffic, wiki/discussions.",
+    "GitHub code search was rate-limited (403) at measurement time, so the 'no framer-motion / no i18n' findings rest on fetching and grepping all 186 .ts/.tsx files plus the config files, not on a server-side search over every extension.",
+    "Issue quality/triage was not assessed (only titles of the 5 most recent open items were sampled; one is a generic automated 'security audit' issue).",
+    "No test coverage exists to measure; complexity.loc_estimate is lines of code, not a quality metric."
+  ]
+}

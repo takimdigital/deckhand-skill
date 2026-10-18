@@ -1,0 +1,282 @@
+{
+  "schema": "deckhand.slop/1",
+  "lang": "it",
+  "name": "Italiano",
+  "maturity": "seed",
+  "maintainers": [
+    "deckhand"
+  ],
+  "script": "latin",
+  "suffixes": [
+    "i",
+    "e",
+    "a",
+    "o"
+  ],
+  "stopwords": [
+    "il",
+    "lo",
+    "la",
+    "i",
+    "gli",
+    "le",
+    "di",
+    "del",
+    "della",
+    "e",
+    "in",
+    "un",
+    "una",
+    "è",
+    "per",
+    "che",
+    "con",
+    "non",
+    "su",
+    "al",
+    "nel",
+    "si",
+    "come",
+    "più",
+    "tuo",
+    "tua",
+    "nostro",
+    "nostra",
+    "sono",
+    "da"
+  ],
+  "words": {
+    "strong": [
+      "rivoluzionare|rivoluziona|rivoluzionario|rivoluzionaria",
+      "sinergia|sinergie",
+      "paradigma",
+      "impareggiabile|impareggiabili",
+      "olistico|olistica",
+      "meticoloso|meticolosa|meticolosamente",
+      "trasformativo|trasformativa",
+      "elevare|eleva|eleviamo",
+      "sbloccare|sblocca",
+      "immergiti|immergersi",
+      "arazzo",
+      "incastonato|incastonata",
+      "dirompente",
+      "indimenticabile",
+      "all'avanguardia"
+    ],
+    "buzz": [
+      "innovativo|innovativa|innovativi|innovative",
+      "soluzioni",
+      "fluido|fluida",
+      "ecosistema",
+      "robusto|robusta",
+      "ottimizzare|ottimizza",
+      "potenziare|potenzia",
+      "gioiello",
+      "su misura",
+      "chiavi in mano",
+      "dinamico|dinamica",
+      "appassionato|appassionata|appassionati",
+      "eccezionale|eccezionali",
+      "unico|unica",
+      "autentico|autentica",
+      "eccellenza",
+      "esperienza"
+    ]
+  },
+  "fixes": {
+    "innovativo": "dire cosa c'è di nuovo",
+    "soluzioni": "nominare il servizio",
+    "impareggiabile": "una prova: un numero, una recensione",
+    "esperienza": "dire cosa succede in concreto",
+    "eccellenza": "un fatto che lo dimostri"
+  },
+  "phrases": [
+    {
+      "id": "mondo-di-oggi",
+      "kind": "opener",
+      "w": 4,
+      "rx": "nel mondo (di oggi|odierno|frenetico)|in un mondo (in (continua|costante) evoluzione|dove|sempre più|che cambia)",
+      "example": "In un mondo in continua evoluzione, il tempo conta.",
+      "fix": "iniziare dal problema del cliente"
+    },
+    {
+      "id": "era-digitale",
+      "kind": "opener",
+      "w": 3,
+      "rx": "nell['’]era (digitale|dell['’]ia|dell['’]intelligenza artificiale)",
+      "example": "Nell'era digitale, il sito conta.",
+      "fix": "eliminare"
+    },
+    {
+      "id": "importante-notare",
+      "kind": "hedge",
+      "w": 3,
+      "rx": "è (importante|fondamentale|essenziale) (notare|sottolineare|ricordare|tenere presente)|vale la pena (notare|sottolineare|ricordare)",
+      "example": "È importante notare che apriamo la domenica.",
+      "fix": "dire il fatto"
+    },
+    {
+      "id": "non-solo-e",
+      "kind": "structure",
+      "w": 3,
+      "rx": "non (è|si tratta di) (solo|solamente|semplicemente) [^.;!?]{1,50}[.,;—–-]+ ?è",
+      "example": "Non è solo un taglio, è un rituale.",
+      "fix": "dire cos'è, una volta"
+    },
+    {
+      "id": "non-solo-ma-anche",
+      "kind": "structure",
+      "w": 2,
+      "rx": "non solo [^.;!?]{1,60} ma anche",
+      "example": "non solo veloce ma anche affidabile",
+      "fix": "due fatti, due frasi"
+    },
+    {
+      "id": "che-tu-sia",
+      "kind": "structure",
+      "w": 2,
+      "rx": "che tu sia [^,.;]{1,40},? o ",
+      "example": "Che tu sia principiante o esperto, vieni.",
+      "fix": "dire per chi"
+    },
+    {
+      "id": "non-cercare-oltre",
+      "kind": "cta",
+      "w": 3,
+      "rx": "non cercare oltre|non aspettare oltre|cosa aspetti",
+      "example": "Cerchi un idraulico? Non cercare oltre.",
+      "fix": "un bottone chiaro: Chiedi un preventivo"
+    },
+    {
+      "id": "pronto-a",
+      "kind": "cta",
+      "w": 2,
+      "rx": "pront[oiae] a (trasformare|portare|scoprire|iniziare|vivere|elevare|fare il salto)[^?]{0,40}\\?",
+      "example": "Pronto a trasformare il tuo giardino?",
+      "fix": "un bottone chiaro: Prenota"
+    },
+    {
+      "id": "livello-successivo",
+      "kind": "cta",
+      "w": 3,
+      "rx": "al (livello successivo|prossimo livello)",
+      "example": "Porta la tua attività al livello successivo.",
+      "fix": "il risultato: 20 prenotazioni in più a settimana"
+    },
+    {
+      "id": "libera-potenziale",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(libera|sblocca|liberare|sbloccare|esprimi) (tutto )?il (tuo|suo) (vero |pieno )?potenziale",
+      "example": "Libera tutto il tuo potenziale.",
+      "fix": "dire il risultato"
+    },
+    {
+      "id": "in-conclusione",
+      "kind": "closer",
+      "w": 2,
+      "rx": "(in conclusione|in sintesi|in definitiva|per concludere)[,.]",
+      "example": "In sintesi, siamo qui.",
+      "fix": "eliminare"
+    },
+    {
+      "id": "senza-precedenti",
+      "kind": "claim",
+      "w": 3,
+      "rx": "senza precedenti|in continua evoluzione|all['’]avanguardia|di ultima generazione|pilastro fondamentale",
+      "example": "tecnologia di ultima generazione",
+      "fix": "nominare la tecnica o la macchina"
+    },
+    {
+      "id": "da-marca-crediamo",
+      "kind": "opener",
+      "w": 3,
+      "rx": "^da [a-z0-9àèéìòù&' -]{2,30}, (crediamo|comprendiamo|ci impegniamo|siamo appassionati)",
+      "example": "Da Bloom, crediamo che la bellezza sia personale.",
+      "fix": "dire cosa fate e per chi"
+    },
+    {
+      "id": "piu-di-un",
+      "kind": "structure",
+      "w": 2,
+      "rx": "(molto )?più di (un|una|uno) (semplice )?[a-zàèéìòù]+",
+      "example": "più di una semplice panetteria",
+      "fix": "dire cos'è"
+    },
+    {
+      "id": "esperienza-unica",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(vivi|regalati|scopri) un['’]esperienza|esperienza (fluida|indimenticabile|immersiva|unica|impareggiabile)",
+      "example": "Vivi un'esperienza indimenticabile.",
+      "fix": "dire cosa succede in concreto"
+    },
+    {
+      "id": "immergiti",
+      "kind": "filler",
+      "w": 3,
+      "rx": "(immergiti|tuffati|lasciati trasportare) (nel|nella|nei|negli|nelle|in)",
+      "example": "Immergiti nei nostri sapori.",
+      "fix": "vedi il menu"
+    },
+    {
+      "id": "cuore-di",
+      "kind": "filler",
+      "w": 1,
+      "rx": "nel (pieno )?cuore (di|del|della)",
+      "example": "nel cuore di Roma",
+      "fix": "la via o il quartiere"
+    },
+    {
+      "id": "chat-leak",
+      "kind": "leak",
+      "w": 5,
+      "rx": "come (un['’])?(ia|intelligenza artificiale|modello linguistico)|spero che (questo )?(ti|le) sia utile|ottima domanda|certo! ecco|ecco (una|la) versione (rivista|migliorata)|sentiti libero di (adattare|personalizzare)|\\[inserire [a-zàèéìòù ]+\\]",
+      "example": "Certo! Ecco una sezione per la tua panetteria.",
+      "fix": "risposta di un chatbot sulla pagina: eliminare"
+    }
+  ],
+  "transitions": [
+    "inoltre",
+    "pertanto",
+    "di conseguenza",
+    "tuttavia",
+    "ciononostante",
+    "infatti",
+    "in definitiva",
+    "infine",
+    "altresì",
+    "peraltro",
+    "dunque"
+  ],
+  "superlatives": [
+    "migliore",
+    "migliori",
+    "leader",
+    "numero uno",
+    "n. 1",
+    "#1",
+    "perfetto",
+    "perfetta",
+    "ineguagliabile",
+    "insuperabile",
+    "imbattibile"
+  ],
+  "and": [
+    "e",
+    "ed",
+    "o"
+  ],
+  "examples": {
+    "slop": [
+      "In un mondo in continua evoluzione, le nostre soluzioni innovative rivoluzionano la tua attività per liberare tutto il tuo potenziale. Inoltre, il nostro team appassionato ottimizza ogni fase della tua esperienza.",
+      "Nel cuore di Roma, la nostra panetteria è molto più di una semplice panetteria — un'esperienza indimenticabile. Non cercare oltre.",
+      "Certo! Ecco una sezione iniziale per il tuo salone."
+    ],
+    "clean": [
+      "Pane a lievito madre, baguette e cornetti sfornati ogni mattina dalle 5 a Bologna. Ordina entro le 20 e ritira il giorno dopo.",
+      "Ripariamo perdite, caldaie e scaldabagni a Torino. L'uscita costa 50 €, e la maggior parte degli interventi dura meno di un'ora.",
+      "Ana taglia i capelli in via Roma dal 2009. Taglio e piega durano 45 minuti e costano 35 €."
+    ]
+  }
+}

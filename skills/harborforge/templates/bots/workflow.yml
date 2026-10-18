@@ -1,0 +1,25 @@
+# deckhand bot: {{ID}} — {{TITLE}}
+# Verify the schedule by its own trigger once: `gh workflow run deckhand-{{ID}}.yml` then `gh run list -w deckhand-{{ID}}.yml`
+name: deckhand-{{ID}}
+on:
+  schedule:
+    - cron: "{{CRON}}"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # alert state survives between runs (a bot reports CHANGES, never the same alert twice)
+      - uses: actions/cache@v4
+        with:
+          path: .bot-state
+          key: deckhand-bot-state-{{ID}}-${{ github.run_id }}
+          restore-keys: deckhand-bot-state-{{ID}}-
+{{STEPS}}

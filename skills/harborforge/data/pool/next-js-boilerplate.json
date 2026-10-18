@@ -1,0 +1,467 @@
+{
+  "repo": "ixartz/Next-js-Boilerplate",
+  "slug": "next-js-boilerplate",
+  "measured_at": "2026-09-23T22:14:11Z",
+  "upstream_commit": "9df22d0980702729da01c4465b9fb8ca292d6cce",
+  "default_branch": "main",
+  "archived": false,
+  "size_kb": 45864,
+  "languages": {
+    "TypeScript": 99.83,
+    "CSS": 0.17
+  },
+  "framework": {
+    "name": "next",
+    "version": "16.3.1",
+    "router": "app",
+    "notes": "App Router only (no pages dir). Next 16 conventions: the middleware file is src/proxy.ts (not middleware.ts) and it composes Arcjet + clerkMiddleware + next-intl routing. React 19.2.8; reactCompiler enabled for production builds (next.config.ts). next-intl plugin + withSentryConfig wrappers in next.config.ts. An extra runtime dep, translation-resilience (0.3.0), installs a client DOM shim from src/instrumentation-client.ts so browser auto-translation cannot break React updates."
+  },
+  "package_manager": "npm",
+  "node_or_python_requirement": ">=24",
+  "monorepo": {
+    "is_monorepo": false,
+    "workspaces": [],
+    "notes": "Single root package.json; only package-lock.json present (pnpm-lock.yaml / yarn.lock / bun.lock all 404); CI installs with `npm ci`."
+  },
+  "stack": {
+    "db": "postgres",
+    "orm": "drizzle",
+    "auth": {
+      "provider": "clerk",
+      "methods": [
+        "email-password",
+        "oauth",
+        "magic-link"
+      ],
+      "roles": [],
+      "notes": "Clerk only (@clerk/nextjs 7.5.12). src/proxy.ts protects /dashboard(.*) via createRouteMatcher; UI comes from Clerk-hosted components on catch-all routes (SignIn/SignUp/UserProfile); ClerkProvider is mounted in the (auth) layout with cssLayerName 'clerk' for Tailwind 4. README claims passkeys/MFA/social/impersonation - that is Clerk dashboard config, not repo code. No role, permission or tenant code exists anywhere in the tree."
+    },
+    "ui": [
+      "tailwind"
+    ],
+    "i18n": {
+      "library": "next-intl",
+      "default": "en",
+      "locales": [
+        "en",
+        "fr"
+      ],
+      "rtl_aware": false,
+      "translation_files": 2
+    },
+    "payments": {
+      "provider": "none",
+      "model": "none",
+      "webhooks": false
+    },
+    "email": {
+      "provider": "none",
+      "templates": 0,
+      "transactional": false
+    },
+    "analytics": [],
+    "jobs": [],
+    "search": [],
+    "storage": [],
+    "realtime": [],
+    "flags": [],
+    "observability": [
+      "sentry",
+      "logtape-jsonl-console",
+      "better-stack-log-sink"
+    ]
+  },
+  "features": [
+    "accounts",
+    "dashboard",
+    "i18n"
+  ],
+  "routes": {
+    "pages": [
+      "/",
+      "/about",
+      "/counter",
+      "/portfolio",
+      "/portfolio/[slug]",
+      "/sign-in/[[...sign-in]]",
+      "/sign-up/[[...sign-up]]",
+      "/dashboard",
+      "/dashboard/user-profile/[[...user-profile]]",
+      "/robots.txt",
+      "/sitemap.xml"
+    ],
+    "api": [
+      "/api/counter"
+    ],
+    "protected": [
+      "/dashboard",
+      "/dashboard/user-profile"
+    ],
+    "count": 12
+  },
+  "env": {
+    "count": 22,
+    "names": [
+      "CLERK_SECRET_KEY",
+      "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+      "DATABASE_URL",
+      "ARCJET_KEY",
+      "NEXT_PUBLIC_APP_URL",
+      "NEXT_PUBLIC_LOGGING_LEVEL",
+      "NEXT_PUBLIC_BETTER_STACK_SOURCE_TOKEN",
+      "NEXT_PUBLIC_BETTER_STACK_INGESTING_HOST",
+      "NEXT_PUBLIC_POSTHOG_KEY",
+      "NEXT_PUBLIC_POSTHOG_HOST",
+      "NODE_ENV",
+      "NEXT_TELEMETRY_DISABLED",
+      "NEXT_PUBLIC_SENTRY_DSN",
+      "NEXT_PUBLIC_SENTRY_DISABLED",
+      "SENTRY_ORGANIZATION",
+      "SENTRY_PROJECT",
+      "SENTRY_AUTH_TOKEN",
+      "BROWSER_TO_TERMINAL_DISABLED",
+      "CHECKLY_EMAIL_ADDRESS",
+      "CHECKLY_PROJECT_NAME",
+      "CHECKLY_LOGICAL_ID",
+      "PORT"
+    ],
+    "required_at_build": [
+      "CLERK_SECRET_KEY",
+      "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+      "DATABASE_URL"
+    ],
+    "notes": "Names only - no values read or recorded. Env.ts (T3 Env + zod) validates 11 vars; the three in required_at_build are z.string().min(1) so they are mandatory, and next.config.ts does `import './src/libs/Env'` at module load, so `next build`/`next dev` abort without them. ARCJET_KEY, the Sentry vars, Better Stack vars and both PostHog vars are .optional() and their features silently switch off when unset. NEXT_PUBLIC_SENTRY_DISABLED / NEXT_TELEMETRY_DISABLED / BROWSER_TO_TERMINAL_DISABLED / SENTRY_ORGANIZATION / SENTRY_PROJECT / SENTRY_AUTH_TOKEN / CHECKLY_* / PORT are read with raw process.env (next.config.ts, src/instrumentation*.ts, playwright.config.ts). CI-only secrets, never read by the app: CODECOV_TOKEN, CHROMATIC_PROJECT_TOKEN, CROWDIN_PROJECT_ID, CROWDIN_PERSONAL_TOKEN, CHECKLY_API_KEY, CHECKLY_ACCOUNT_ID."
+  },
+  "deploy": {
+    "docker": false,
+    "dockerfile_port": null,
+    "compose": false,
+    "standalone_output": false,
+    "build_cmd": "npm run build",
+    "start_cmd": "npm start",
+    "migrations_cmd": "npm run db:migrate",
+    "paas_coupling": [],
+    "notes": "No Dockerfile, docker-compose, vercel.json or netlify.toml anywhere in the tree (Dockerfile -> 404 on main). README deploy section is platform-agnostic: define DATABASE_URL + CLERK_SECRET_KEY, `npm run build`, `npm run start`; migrations run automatically inside the build (build = run-s db:migrate build:next). `npm run build-local` builds against a throwaway in-memory PGLite server and needs no external DB. next.config.ts sets no `output: 'standalone'` (only outputFileTracingIncludes for ./migrations on '/'). Soft Vercel hints only: .gitignore ignores .vercel and the proxy matcher excludes /_vercel. CI runs unit/e2e jobs inside mcr.microsoft.com/playwright:v1.62.1 containers - that is a test runner, not a deploy image."
+  },
+  "tests": {
+    "frameworks": [
+      "vitest",
+      "playwright",
+      "storybook"
+    ],
+    "unit_files": 2,
+    "e2e_files": 4,
+    "ci_workflows": [
+      ".github/workflows/CI.yml",
+      ".github/workflows/crowdin.yml",
+      ".github/workflows/release.yml"
+    ],
+    "notes": "unit_files = src/templates/BaseTemplate.test.tsx + src/utils/Helpers.test.ts. vitest.config.ts defines two projects: 'unit' (node env, src/**/*.test.ts) and 'ui' (*.test.tsx + src/hooks/**/*.test.ts in headless chromium via vitest browser mode + Playwright). e2e_files = tests/e2e/{Counter,I18n,Sanity.check,Visual}.e2e.ts; there is also 1 integration file (tests/integration/Counter.integ.ts) which Playwright, not vitest, runs (testMatch '*.(integ|e2e).ts'). Storybook 10 + 1 story file, tested with `npm run storybook:test`. CI.yml jobs: build, static (commitlint + next typegen + oxlint + knip + i18n-check), unit (+Codecov), storybook, e2e (+Chromatic visual regression; chromium locally, chromium+firefox in CI). Sanity.check.e2e.ts is consumed by Checkly, not by CI. package.json scripts: test, test:e2e, storybook:test, check:types, check:deps, check:i18n, lint."
+  },
+  "vendor": [
+    {
+      "name": "clerk",
+      "where": [
+        "package.json",
+        ".env",
+        "src/proxy.ts",
+        "src/app/[locale]/(auth)/layout.tsx",
+        "src/app/[locale]/(auth)/(center)/sign-in/[[...sign-in]]/page.tsx",
+        "src/utils/AppConfig.ts"
+      ],
+      "what_it_does": "auth, sessions, hosted sign-in/sign-up/user-profile UI, redirects",
+      "swap_target_hint": "better-auth (the author's paid 'Plus' kit already does exactly this swap) or Auth.js",
+      "effort_guess": "3-5 days"
+    },
+    {
+      "name": "sentry",
+      "where": [
+        "package.json",
+        "next.config.ts",
+        "src/instrumentation.ts",
+        "src/instrumentation-client.ts",
+        ".env.production"
+      ],
+      "what_it_does": "error monitoring, session replay, logs, source-map upload; disabled by NEXT_PUBLIC_SENTRY_DISABLED",
+      "swap_target_hint": "none required - turn off or replace with GlitchTip/self-hosted Sentry",
+      "effort_guess": "0.5 hour"
+    },
+    {
+      "name": "arcjet",
+      "where": [
+        "package.json",
+        "src/libs/Arcjet.ts",
+        "src/proxy.ts",
+        ".env"
+      ],
+      "what_it_does": "bot detection + Shield WAF on every non-static request; optional, silently skipped when ARCJET_KEY is empty",
+      "swap_target_hint": "Cloudflare bot management / your own rate limiting + delete the aj.protect block",
+      "effort_guess": "0.5-1 day"
+    },
+    {
+      "name": "better-stack",
+      "where": [
+        "src/libs/Logger.ts",
+        ".env.production"
+      ],
+      "what_it_does": "log ingestion endpoint - LogTape POSTs JSON lines to the configured ingesting host with a bearer token",
+      "swap_target_hint": "any HTTP log sink (Axiom/Datadog) or drop the sink to console-only",
+      "effort_guess": "1-2 hours"
+    },
+    {
+      "name": "neon",
+      "where": [
+        "README.md",
+        ".env",
+        ".env.production",
+        "src/libs/DBConnection.ts",
+        "src/models/Schema.ts"
+      ],
+      "what_it_does": "recommended managed Postgres for production (affiliate link in code comments); only DATABASE_URL is read",
+      "swap_target_hint": "any Postgres provider or self-hosted instance",
+      "effort_guess": "0.5 hour"
+    },
+    {
+      "name": "posthog",
+      "where": [
+        ".env",
+        "src/libs/Env.ts"
+      ],
+      "what_it_does": "NOTHING in this repo - two env vars exist and the README/marketing page advertise 'Analytics with PostHog', but no posthog SDK is in package.json and no init code exists",
+      "swap_target_hint": "wire in whatever analytics you use; nothing to remove but the two env vars",
+      "effort_guess": "0.5-2 hours to add your own"
+    },
+    {
+      "name": "checkly",
+      "where": [
+        "README.md",
+        ".env.production",
+        "tests/e2e/Sanity.check.e2e.ts"
+      ],
+      "what_it_does": "external synthetic monitoring that runs the *.check.e2e.ts Playwright tests on a schedule; no SDK dependency",
+      "swap_target_hint": "any uptime monitor, or delete the check test",
+      "effort_guess": "0.5 hour"
+    },
+    {
+      "name": "crowdin",
+      "where": [
+        "crowdin.yml",
+        ".github/workflows/crowdin.yml",
+        "src/libs/I18n.ts",
+        "src/app/[locale]/(auth)/(center)/sign-in/[[...sign-in]]/page.tsx"
+      ],
+      "what_it_does": "translation management service that commits localized src/locales/*.json (daily cron + on-push + bot commits)",
+      "swap_target_hint": "hand-maintain locales and delete the crowdin workflow (otherwise bot commits keep landing)",
+      "effort_guess": "1 hour"
+    },
+    {
+      "name": "chromatic",
+      "where": [
+        "package.json",
+        ".github/workflows/CI.yml",
+        "playwright.config.ts"
+      ],
+      "what_it_does": "visual regression of Storybook + Playwright snapshots in CI (@chromatic-com/playwright)",
+      "swap_target_hint": "drop the chromaui/action step and the disableAutoSnapshot fixture",
+      "effort_guess": "0.5 hour"
+    },
+    {
+      "name": "codecov",
+      "where": [
+        "codecov.yml",
+        ".github/workflows/CI.yml"
+      ],
+      "what_it_does": "coverage upload from the unit job",
+      "swap_target_hint": "delete the codecov step",
+      "effort_guess": "15 min"
+    },
+    {
+      "name": "vercel",
+      "where": [
+        ".gitignore",
+        "src/proxy.ts"
+      ],
+      "what_it_does": "hosting hints only: .vercel is gitignored and the proxy matcher skips /_vercel; there is no vercel.json and no Vercel-specific code",
+      "swap_target_hint": "none needed - build/start are plain npm scripts, so any Node host works",
+      "effort_guess": "none"
+    }
+  ],
+  "rebrand_surface": [
+    {
+      "path": "src/utils/AppConfig.ts",
+      "kind": "metadata",
+      "note": "AppConfig.name = 'Nextjs Starter' - the single source of the visible app name (h1, footer, page titles) plus the locale list and localePrefix 'as-needed'"
+    },
+    {
+      "path": "src/locales/en.json",
+      "kind": "copy",
+      "note": "every user-visible string incl. the Pro/Plus upsell and sponsor-adjacent copy; en.json is the Crowdin source of truth"
+    },
+    {
+      "path": "src/locales/fr.json",
+      "kind": "copy",
+      "note": "machine-synced FR copy - regenerate or delete if you drop i18n"
+    },
+    {
+      "path": "src/app/[locale]/(marketing)/page.tsx",
+      "kind": "copy",
+      "note": "hardcoded (not translated) English marketing copy that links @Ixartz and the Next.js Boilerplate Pro/Plus kits"
+    },
+    {
+      "path": "src/components/Sponsors.tsx",
+      "kind": "logo",
+      "note": "9 sponsor logos with UTM/affiliate links (Clerk, CodeRabbit, Sentry, Arcjet, Crowdin, Better Stack, PostHog, Checkly, the Pro kit); rendered on / and /dashboard"
+    },
+    {
+      "path": "src/components/DemoBadge.tsx",
+      "kind": "logo",
+      "note": "fixed 'Demo of Next.js Boilerplate' badge linking to the upstream repo; mounted in src/app/[locale]/layout.tsx so it shows on EVERY page"
+    },
+    {
+      "path": "src/components/DemoBanner.tsx",
+      "kind": "logo",
+      "note": "second demo banner rendered by the marketing layout and the counter page"
+    },
+    {
+      "path": "src/templates/BaseTemplate.tsx",
+      "kind": "domain",
+      "note": "footer credit links to https://nextjs-boilerplate.com; header renders AppConfig.name"
+    },
+    {
+      "path": "src/app/[locale]/layout.tsx",
+      "kind": "theme",
+      "note": "root layout: favicon/apple-touch icon metadata + DemoBadge; no title/description template here"
+    },
+    {
+      "path": ".env.production",
+      "kind": "domain",
+      "note": "NEXT_PUBLIC_APP_URL points at demo.nextjs-boilerplate.com; CHECKLY_PROJECT_NAME/LOGICAL_ID carry the upstream product name"
+    },
+    {
+      "path": "public/assets/images",
+      "kind": "logo",
+      "note": "20 image assets incl. nextjs-boilerplate-saas.png, sponsor logos, posthog-logo.svg"
+    },
+    {
+      "path": "README.md",
+      "kind": "copy",
+      "note": "sponsor wall, live-demo links and affiliate links throughout"
+    }
+  ],
+  "hardcoded_demo_content": [
+    "English-only marketing copy in src/app/[locale]/(marketing)/page.tsx (not routed through next-intl) with an @Ixartz link and a 'Need advanced features?' upsell",
+    "9-logo sponsor table in src/components/Sponsors.tsx shown on / and /dashboard with UTM/affiliate links",
+    "'Demo of Next.js Boilerplate' fixed badge (src/components/DemoBadge.tsx) mounted in the root layout, plus DemoBanner in the marketing layout",
+    "6 fake portfolio slugs (0-5) generated by generateStaticParams and sitemap.ts, rendering the placeholder PortfolioSlug.content paragraph from src/locales/*.json",
+    "About page paragraph ('We are a team of passionate individuals...') in src/locales/*.json",
+    "/counter DB demo: counter table + CounterForm + CurrentCount, kept purely as an example of a DB write/read",
+    "Dashboard shows 'Hello {email}!' plus two upsell paragraphs (Dashboard.alternative_message / max_message) linking to the Pro and Plus paid kits"
+  ],
+  "pitfalls": [
+    {
+      "kind": "build-needs-env",
+      "detail": "CLERK_SECRET_KEY, NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and DATABASE_URL are z.string().min(1) and next.config.ts imports src/libs/Env at module load, so dev AND build abort instantly without them; the tracked .env ships placeholder values only (a Clerk *test* publishable key plus 'your_clerk_secret_key'), so the app cannot run until you create a Clerk app and a database",
+      "evidence": "src/libs/Env.ts, next.config.ts, .env"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": "`npm run build` = run-s db:migrate build:next, so a production build requires a REACHABLE Postgres - a wrong DATABASE_URL makes the Next build hang ~60s and fail; use `npm run build-local` (throwaway in-memory PGLite) for offline/CI builds",
+      "evidence": "package.json scripts, .env.production comment"
+    },
+    {
+      "kind": "dev-env-quirk",
+      "detail": "The dev database is PGLite served over a socket by @electric-sql/pglite-socket (`db-server:file` creates local.db and runs migrations first) - no Docker and no external Postgres are needed, but a bare `next dev` has no database: always start through `npm run dev`",
+      "evidence": "package.json scripts db-server:file, drizzle.config.ts, .gitignore (*.db)"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README 'Checkly monitoring' tells you to update `checkly.config.ts` - that file does not exist on main (404); Checkly is only a sponsor logo, three env names and the *.check.e2e.ts naming convention",
+      "evidence": "README.md, tree listing of main"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "README feature list and the marketing page still advertise 'Analytics with PostHog', 'ESLint, Prettier' and 'Husky, Commitlint', but package.json contains no posthog, eslint, prettier or husky - lint/format run through oxlint+oxfmt via ultracite and hooks through lefthook. The two PostHog env vars are validated in Env.ts yet no PostHog SDK or init code exists",
+      "evidence": "README.md, src/app/[locale]/(marketing)/page.tsx, package.json, src/libs/Env.ts"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "AGENTS.md (the agent instruction file that CLAUDE.md imports) says 'Only these bun run scripts' and 'Follow existing ESLint setup', but the repo ships package-lock.json and CI runs `npm ci` - there is no bun lockfile, so following its commands literally leads nowhere",
+      "evidence": "AGENTS.md, CLAUDE.md, package-lock.json, .github/workflows/CI.yml"
+    },
+    {
+      "kind": "docs-lie",
+      "detail": "Promotional copy for the author's paid Pro/Plus kits is baked into the app itself (Dashboard locale strings + src/components/Hello.tsx + the sponsor table), so a rebranded product still markets someone else's products on /dashboard",
+      "evidence": "src/components/Hello.tsx, src/locales/en.json, src/components/Sponsors.tsx"
+    },
+    {
+      "kind": "dead-demo",
+      "detail": "/portfolio, /portfolio/0../portfolio/5, /about and /counter are pure demo pages (placeholder paragraphs, a counter table, sponsor wall); the fixed DemoBadge is injected into the root layout so it renders on every page until deleted",
+      "evidence": "src/app/[locale]/(marketing)/portfolio/[slug]/page.tsx, src/app/sitemap.ts, src/app/[locale]/layout.tsx"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "package.json pins `overrides: { hono: 4.12.31 }` for a dependency that is only transitive (via Clerk/Arcjet) - bumping those packages may silently fight the override, and dependency tooling (knip / npm ls) will not explain it",
+      "evidence": "package.json overrides"
+    },
+    {
+      "kind": "peer-conflicts",
+      "detail": "Unit tests are not plain node tests: the vitest 'ui' project runs *.test.tsx in headless chromium (vitest browser mode + Playwright) and CI executes test jobs inside mcr.microsoft.com/playwright:v1.62.1, so locally `npx playwright install` is needed before `npm run test` succeeds",
+      "evidence": "vitest.config.ts, .github/workflows/CI.yml"
+    },
+    {
+      "kind": "build-needs-env",
+      "detail": ".env and .env.production ARE tracked in git (only *.local is gitignored), so an agent tempted to 'just drop secrets in .env' would commit them; the repo convention is .env.local / .env.production.local",
+      "evidence": ".gitignore, .env, .env.production"
+    }
+  ],
+  "complexity": {
+    "pages": 9,
+    "components": 10,
+    "db_models": 1,
+    "migrations": 1,
+    "loc_estimate": 2084
+  },
+  "health": {
+    "stars": 13079,
+    "forks": 2407,
+    "open_issues": 3,
+    "contributors": 39,
+    "top_contributor_share": 0.878,
+    "last_commit": "2026-09-09",
+    "last_release": "v6.4.1",
+    "commits_last_90d": 9,
+    "issues_closed_last_90d": 0
+  },
+  "verdict": {
+    "best_for": "A new Next.js 16 App Router product that needs the boring plumbing done and nothing else: real auth with hosted UI, Postgres+Drizzle with migrations wired into the build, two-locale i18n, a full unit/integration/e2e/Storybook harness and a CI pipeline that works on day one.",
+    "weak_for": "Anything SaaS-shaped beyond accounts - no billing/Stripe, no teams, roles or permissions, no email, uploads, admin panel, analytics or API keys; the paid Pro/Plus sibling kits are where those live.",
+    "swap_burden": "light - no Dockerfile and almost no proprietary lock-in (Clerk is the only deep one, 3-5 days to replace), so the real work is deleting the sponsor/demo surface and adding your own UI kit and features."
+  },
+  "evidence": {
+    "repo": "gh api repos/ixartz/Next-js-Boilerplate (.size bytes->size_kb, stars, forks, archived=false, default_branch=main)",
+    "languages": "gh api repos/ixartz/Next-js-Boilerplate/languages (TypeScript 73719 B, CSS 128 B)",
+    "framework": "package.json dependencies + next.config.ts + tree of main (src/proxy.ts instead of middleware.ts)",
+    "stack": "package.json, src/libs/{Env,DB,Arcjet,Logger,I18nRouting}.ts, src/utils/DBConnection.ts, src/models/Schema.ts, src/app/[locale]/(auth)/layout.tsx, drizzle.config.ts",
+    "routes": "tree of main: src/app/[locale]/**/page.tsx, src/app/api/counter/route.ts, src/app/{robots,sitemap}.ts",
+    "env": "src/libs/Env.ts (names only), .env, .env.production, next.config.ts, .github/workflows/CI.yml secrets - no values read or recorded",
+    "deploy": "tree of main (no Dockerfile/compose/vercel.json), package.json scripts, README.md deploy section, .gitignore",
+    "tests": ".github/workflows/CI.yml, .github/actions/setup-project/action.yml, vitest.config.ts, playwright.config.ts, tree (tests/)",
+    "vendor": "package.json, .env/.env.production names, README.md, crowdin.yml, codecov.yml, .github/workflows/{CI,release,crowdin}.yml, source imports",
+    "pitfalls": "per-pitfall evidence above; README and marketing-page claims cross-checked against package.json, gh api search/code and the file tree",
+    "health": "gh api repos/... (stars/forks) + repos/.../contributors?anon=1 (39, top 1526 of 1738 commits = 0.878) + commits?since=2026-06-25 (9) + releases (v6.4.1) + search/issues (3 open, 0 closed since 2026-06-25)",
+    "complexity": "counts from the main tree; loc_estimate = 72,953 B of .ts/.tsx/.css (63 files, stories excluded) divided by the measured 35 bytes/line on a 10-file sample",
+    "vendor_free_tooling_note": "Also present but no SaaS account involved: pglite/@electric-sql/pglite-socket (local DB), tailwind, storybook, semantic-release, commitlint, knip, ultracite/oxlint/oxfmt, lefthook, faker"
+  },
+  "unmeasured": [
+    "Exact line counts per file: loc_estimate 2084 is derived from blob byte sizes (72,953 B / 35 B-per-line sampled on 10 files), not a true count of all 63 source files.",
+    "Runtime behaviour: nothing was cloned or executed (contract rule), so 'the demo works' is inferred from source and CI config only.",
+    "Actual test coverage %, CI pass/fail history and Codecov numbers (would need a Codecov account/token); only the CI job list from CI.yml was read.",
+    "OpenGraph/Twitter metadata: two open issues and one open PR request it; I found only favicon/apple-touch icons in src/app/[locale]/layout.tsx, so no og:image is configured - the PR bodies were not read in full.",
+    "README claims about Clerk capabilities (passwordless, passkeys, MFA, impersonation, forgot/reset password, delete account) - these are Clerk dashboard settings, not verifiable from repo code.",
+    "Whether the live demo actually deploys on Vercel or Netlify: no vercel.json/netlify.toml exists and the README deploy section is platform-agnostic; only .gitignore and the /_vercel matcher hint at Vercel.",
+    "The paid Pro and Plus sibling products referenced by the upsell copy (their repos/features were not inspected - out of scope).",
+    "Dependency vulnerability state (`npm audit` / `npm audit signatures` runs in release.yml but was not run here) and the exact transitive origin of the pinned hono override (no install performed).",
+    "Language percentages come from GitHub's detector, which reports only TypeScript/CSS and ignores JSON/SQL/Markdown bytes in the repo.",
+    "Issue-quality and reviewer-latency metrics (time-to-first-response, stale PR age) were not computed; only open/closed counts and the 90-day commit count were measured."
+  ]
+}

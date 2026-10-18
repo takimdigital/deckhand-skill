@@ -1,0 +1,31 @@
+# RustFS local — the "home S3" target for the backup pipeline (vps-ops ref 55 §7).
+# Docker Desktop (or any Docker engine). Loopback-only ports; creds live in .env (chmod it).
+#   .env:   RUSTFS_ACCESS_KEY=…  RUSTFS_SECRET_KEY=…
+#   up:     docker compose up -d        health: curl -fsS http://127.0.0.1:9000/health
+#   console: http://localhost:9001      (the SPA lives at /rustfs/console/ — "/" answers 403 to curl, fine in a browser)
+# rclone remote:  type=s3 · provider=Minio · endpoint=http://127.0.0.1:9000 · region=us-east-1 · force_path_style=true
+# Then LOCAL_S3_REMOTE=rustfs:<bucket> in the home-pull env file.
+# [verified live 2026-09-20: rustfs/rustfs:1.0.0 healthy in ~18s, rclone round-trip + mirror OK]
+services:
+  rustfs:
+    image: rustfs/rustfs:1.0.0        # pin — never :latest
+    container_name: rustfs-home
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9000:9000"         # S3 API — loopback only, never expose to the LAN
+      - "127.0.0.1:9001:9001"         # console UI — loopback only
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
+      RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_OBS_LOGGER_LEVEL: error
+      RUSTFS_OBS_LOG_DIRECTORY: /var/log/rustfs/
+    volumes:
+      - rustfs-data:/data
+      - rustfs-logs:/var/log/rustfs
+volumes:
+  rustfs-data:
+  rustfs-logs:

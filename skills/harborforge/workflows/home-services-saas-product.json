@@ -1,0 +1,140 @@
+{
+  "schema": "deckhand.workflow/1",
+  "id": "home-services-saas-product",
+  "version": 1,
+  "title": "Multi-role SaaS boilerplate for a home-services trade, built to sell",
+  "summary": "A production-ready product for one trade (cleaning, plumbing, HVAC…): owner dashboard, field-worker mobile app, client portal, marketing site, a fictional demo company in the seed, the buyer's kit. From scratch, Next.js + Postgres (PGlite in dev), parallel builders after a frozen foundation.",
+  "requires": {"dh": ">=2.2.0"},
+  "match": {
+    "deliverable": ["product"],
+    "shape": ["saas"],
+    "industry": ["cleaning", "plumbing", "hvac", "electrician", "landscaping", "pest-control", "handyman"],
+    "family": "home-services",
+    "features": ["accounts", "roles", "scheduling", "booking", "client-portal", "mobile", "invoicing", "quotes", "photos", "reports", "white-label"],
+    "stack": {"framework": "next", "db": "postgres"},
+    "path": "scratch"
+  },
+  "proof": {
+    "reviewed": false,
+    "runs": [
+      {"date": "2026-09-25", "project": "a cleaning-company product", "harness": "hermes", "os": "windows", "complete": false, "reached": "G2",
+       "errors": 20, "minutes": 110, "source": "maintainer review of the field run (20 defects D1–D20); the steps below carry the fixes"}
+    ]
+  },
+  "params": {
+    "trade": {"default": "cleaning", "why": "the trade the product serves (cleaning, plumbing…)"},
+    "category": {"default": "cleaning business software", "why": "3–5 words for research queries — never the whole pitch"},
+    "roles": {"default": "owner,worker,client"},
+    "languages": {"default": "en"},
+    "agents": {"default": "4", "why": "the sub-agents the harness really runs in parallel (Hermes delegate_task: up to 10; 3–4 is the sweet spot)"},
+    "db_port": {"default": "5772", "why": "take the one `dh dev port --from 5700` prints (Windows reserves random ranges)"},
+    "slug": {"default": "home-services-kit"}
+  },
+  "ask_upfront": [
+    {"id": "Q-deliverable", "q": "Is this a product you will sell to many {{trade}} businesses (a boilerplate), or one real company's app?", "default": "a product (boilerplate)", "ask_at": "define",
+     "why": "it changes the plan, PENDING and the honesty rules", "learned_from": "the first run: not asked explicitly; the plan asked for a real company's address and insurance, corrected twice"},
+    {"id": "Q-demo", "q": "The demo company in the product: fictional (in the seed only, wiped by a reset script — recommended) or your real company?", "default": "fictional, in the seed", "ask_at": "define",
+     "learned_from": "the first run: 'make it like a real business' arrived at G1, three hours in, and re-opened the plan"},
+    {"id": "Q-roles", "q": "Roles: {{roles}} — any other (supervisor, admin, dispatcher)?", "default": "{{roles}}", "ask_at": "define"},
+    {"id": "Q-modules", "q": "Modules on day one: scheduling, jobs with checklists + photos, quotes, invoices, client portal, quality inspections, inventory, reports, website editor — remove any?", "default": "all", "ask_at": "define"},
+    {"id": "Q-languages", "q": "Languages (first = default)?", "default": "{{languages}}", "ask_at": "define"},
+    {"id": "Q-payments", "q": "Online payments in the product now (Stripe) or invoices only (payments later)?", "default": "invoices only", "ask_at": "define"},
+    {"id": "Q-images", "q": "Images: generated with a commercial-use model (licence checked, THIRD_PARTY_NOTICES) or none?", "default": "generated, commercial licence only", "ask_at": "define",
+     "learned_from": "the first run: a non-commercial model was picked first and had to be replaced"},
+    {"id": "Q-mode", "q": "Stop at each gate for your go (phased — recommended), or run through (auto)?", "default": "phased", "ask_at": "define"},
+    {"id": "Q-agents", "q": "How many builders may run in parallel on your machine?", "default": "{{agents}}", "ask_at": "plan"},
+    {"id": "Q-price", "q": "The product's own sale price and licence terms (for the README and LICENSE)", "ask_at": "review",
+     "why": "announced at define so you can decide early; asked before packaging"}
+  ],
+  "phases": [
+    {"id": "define", "goal": "one batched round of questions, every answer recorded",
+     "steps": [
+       {"id": "D1", "do": "dh profile doctor", "expect": "ok: true — the access that exists (never ask for what it covers)"},
+       {"id": "D2", "do": "dh pool query --shape saas", "expect": "top 3 with reasons; an honest gap means path scratch"},
+       {"id": "D3", "ask": ["Q-deliverable", "Q-demo", "Q-roles", "Q-modules", "Q-languages", "Q-payments", "Q-images", "Q-mode"]},
+       {"id": "D4", "do": "dh brief set deliverable=product category=\"{{category}}\" shape=saas languages={{languages}}", "expect": "ok: true, deliverable product"},
+       {"id": "D5", "write": "business, audience (the roles), brand.name with `dh brief set`; each answer as `dh note decision \"the owner's words\"`"},
+       {"id": "D6", "do": "dh phase done define", "expect": "ok: true"}
+     ], "exit": "dh phase done define"},
+    {"id": "research", "goal": "3 real competitors, their prices, the trade's vocabulary — every claim quoted from its page",
+     "steps": [
+       {"id": "R1", "do": "dh research brief --focus competitors --agent A1", "expect": "a brief naming references/research-card.md"},
+       {"id": "R2", "write": "per page: `dh research seen URL` first, then `dh research add URL --by A1 --kind competitor --note \"dense facts: prices, features, gaps\"`"},
+       {"id": "R3", "write": "claims (label, url, verbatim quote) and 10+ vocabulary terms in .deckhand/research/agents/A1.json; summary fields in .deckhand/research.json"},
+       {"id": "R4", "do": "dh research verify", "expect": "ok: true — 0 quotes missing from their pages"},
+       {"id": "R5", "do": "dh phase done research", "expect": "ok: true"}
+     ], "exit": "dh phase done research"},
+    {"id": "plan", "goal": "every page per role, every action wired, split for the builders you really run",
+     "steps": [
+       {"id": "P1", "do": "dh plan init", "expect": "created the sitemap template"},
+       {"id": "P2", "write": "sitemap.json: marketing site, owner dashboard, worker app, client portal, auth; features own their pages + APIs; forms with success AND error"},
+       {"id": "P3", "do": "dh plan lint", "expect": "ok: true, 0 errors"},
+       {"id": "P4", "do": "dh plan render", "expect": "PLAN.md written"},
+       {"id": "P5", "do": "dh plan split --agents {{agents}}", "expect": "AGENT-1.md … AGENT-n.md + CONVENTIONS.md; orchestrator_first lists WP-00"},
+       {"id": "P6", "do": "dh phase done plan", "expect": "ok: true, gate G1"},
+       {"id": "P7", "gate": "dh gate pass G1 --quote \"the owner's words\"", "expect": "passed with verdict approve — a change request re-opens the plan instead"}
+     ], "exit": "dh phase done plan"},
+    {"id": "build", "goal": "foundation first (frozen), then parallel builders, then the orchestrator re-proves everything",
+     "steps": [
+       {"id": "B1", "do": "dh scaffold --to . --pm pnpm", "expect": "project in the planning folder; kept: .deckhand, AGENTS.md, PENDING.md"},
+       {"id": "B2", "do": "dh dev port --from 5700", "expect": "a bind-tested free port for the database (use it as db_port)"},
+       {"id": "B3", "do": "dh dev add db --cmd \"npx pglite-server --db=.pglite --port={{db_port}}\" --port {{db_port}} --env-file .env", "expect": "services: db"},
+       {"id": "B4", "write": "WP-00 yourself: schema + migrations, seed (the fictional demo company, db/seed only), auth with the roles, layout, navigation, components/ui, lib — then freeze them"},
+       {"id": "B5", "do": "pnpm run db:migrate && pnpm run db:seed", "expect": "exit 0"},
+       {"id": "B6", "do": "npx tsc --noEmit", "expect": "exit 0 (the foundation compiles before anyone builds on it)"},
+       {"id": "B7", "do": "dh dev start", "expect": "running: true, services db up, a local URL"},
+       {"id": "B8", "delegate": "one sub-agent per .deckhand/work/AGENT-n.md ({{agents}} at most), all in ONE batch; each reads CONVENTIONS.md first (references/team.md)"},
+       {"id": "B9", "do": "dh bb read --kind done", "expect": "a done line per agent (or a blocker you resolve)"},
+       {"id": "B10", "do": "npx tsc --noEmit", "expect": "exit 0 across all packages (re-proved by the orchestrator, not taken from the builders)"},
+       {"id": "B11", "check": "curl -sI http://localhost:3000/ | head -n 1", "expect": "200 — then every route per role, signed in (route matrix), on dev AND on the production build"},
+       {"id": "B12", "write": "visual QA: screenshots desktop + phone for each role (vision when the harness has it) — fix what they show"},
+       {"id": "B13", "do": "dh phase done build", "expect": "ok: true, gate G2"},
+       {"id": "B14", "gate": "dh gate pass G2 --quote \"the owner's words\"", "expect": "passed — the G2 message had the logins table, what was tested, what was fixed, ONE question"}
+     ], "exit": "dh phase done build"},
+    {"id": "brand", "goal": "no template or placeholder left; SEO the buyer can fill",
+     "steps": [
+       {"id": "N1", "do": "dh rebrand scan", "expect": "the list of template names and demo copy"},
+       {"id": "N2", "do": "dh rebrand check", "expect": "ok: true (the demo company in db/seed is a warning for a product, not a blocker)"},
+       {"id": "N3", "do": "dh seo apply", "expect": "robots, sitemap, metadata, JSON-LD — facts read from the app's settings (the buyer fills them)"},
+       {"id": "N4", "do": "dh seo audit", "expect": "no launch-breaker; owner facts listed as the buyer's"},
+       {"id": "N5", "do": "dh phase done brand", "expect": "ok: true"}
+     ], "exit": "dh phase done brand"},
+    {"id": "tryon",
+     "steps": [
+       {"id": "T1", "do": "dh phase skip tryon --reason \"product: each buyer rebrands\"", "expect": "skipped", "optional": true}
+     ], "exit": "dh phase skip tryon --reason \"product\""},
+    {"id": "review", "goal": "the buyer's kit, a green verify",
+     "steps": [
+       {"id": "V1", "write": "README.md (what, stack, quick start), LICENSE (your terms), CUSTOMIZE.md (rebrand, facts, settings), db:reset script that wipes the demo company, THIRD_PARTY_NOTICES.md"},
+       {"id": "V2", "do": "dh verify", "expect": "ok: true — product-kit, routes on the production build, secrets, honesty rows green"},
+       {"id": "V3", "do": "dh phase done review", "expect": "ok: true, gate G4"},
+       {"id": "V4", "gate": "dh gate pass G4 --quote \"the owner's words\"", "expect": "passed — for a product, G4 means: package it"}
+     ], "exit": "dh phase done review"},
+    {"id": "deploy", "goal": "the product in your library (a hosted demo is optional)",
+     "steps": [
+       {"id": "X1", "do": "dh harvest --name {{slug}} --push", "expect": "a private repo in your library, secret scan clean"},
+       {"id": "X2", "do": "dh handoff", "expect": "HANDOFF.md written"},
+       {"id": "X3", "do": "dh phase skip deploy --reason \"product: packaged in the library, not hosted\"", "expect": "skipped", "optional": true}
+     ], "exit": "dh phase skip deploy --reason \"product\""}
+  ],
+  "pitfalls": [
+    {"id": "PF1", "at": "B7", "when": {"os": "windows"}, "sig": "EACCES|permission denied.*:\\d+", "fix": "a reserved port: Deckhand picks bind-tested ports; for your own scripts use `dh dev port`"},
+    {"id": "PF2", "at": "B11", "when": {"os": "windows"}, "sig": "getaddrinfo ENOTFOUND", "fix": "HOSTNAME from git-bash: Deckhand sets HOSTNAME=127.0.0.1 for servers it starts — start the production build with `dh verify`, not by hand"},
+    {"id": "PF3", "at": "B5", "sig": "too many clients|Connection terminated", "fix": "PGlite takes one connection: pool max 1 in dev"},
+    {"id": "PF4", "at": "B8", "when": {"harness": "hermes"}, "fix": "delegate_task: no curly-brace or angle-bracket placeholder in any task text (the whole batch is refused); browser_navigate refuses localhost — builders check pages with curl; each builder uses its own scratch folder"},
+    {"id": "PF5", "at": "B8", "fix": "builders never run a production build (it rewrites .next under the dev server) and never restart the dev server"},
+    {"id": "PF6", "at": "B12", "when": {"os": "windows"}, "sig": "EBUSY", "fix": "a shell's working directory inside .next/standalone locks it: cd to the project root everywhere, then rebuild"},
+    {"id": "PF7", "at": "D3", "fix": "a key pasted in chat: `dh vault set NAME` at once, tell the owner once that it sits in the chat history (rotate it if that history leaves the machine)"}
+  ],
+  "creative": [
+    "the words on every page, in the trade's own vocabulary (research R3)",
+    "the design direction of the marketing site and the dashboard",
+    "which modules make the product worth buying against the 3 competitors",
+    "the product's price, licence and how it is sold"
+  ],
+  "changelog": [
+    {"version": 1, "date": "2026-09-25", "change": "extracted from the first field run and its review",
+     "why": "the first multi-role product built with Deckhand; its 20 defects are fixed in dh and encoded here as steps and pitfalls",
+     "evidence": "a Hermes session on Windows (2026-09-25) and its read-only evidence pack"}
+  ]
+}

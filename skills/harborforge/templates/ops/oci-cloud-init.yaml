@@ -1,0 +1,25 @@
+#cloud-config
+# vps-ops — Oracle Cloud (Ubuntu) first-boot prep for a Coolify host.
+# Paste into: Create Instance -> Show advanced options -> Management -> Initialization script
+# (the console base64-encodes it; limit 32,000 bytes — this file is ~1 KB).
+# Does: (1) root SSH with the key you pasted for the 'ubuntu' user, (2) opens 80/443 in the
+# in-VM iptables (Oracle Ubuntu images REJECT everything but SSH by default), (3) restarts ssh.
+# It does NOT install Coolify — the agent does that over SSH (ref 11, step 3).
+# Verify after boot: /var/log/vps-ops-cloud-init.log and `ssh root@<ip> whoami` -> root
+
+write_files:
+  - path: /etc/ssh/sshd_config.d/99-vps-ops-root.conf
+    permissions: '0644'
+    content: |
+      PermitRootLogin prohibit-password
+      PubkeyAuthentication yes
+
+runcmd:
+  - [bash, -c, "echo 'vps-ops cloud-init start' >> /var/log/vps-ops-cloud-init.log"]
+  - [bash, -c, "mkdir -p /root/.ssh && chmod 700 /root/.ssh"]
+  - [bash, -c, "if [ -f /home/ubuntu/.ssh/authorized_keys ]; then cp /home/ubuntu/.ssh/authorized_keys /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys && echo 'root key installed' >> /var/log/vps-ops-cloud-init.log; fi"]
+  - [bash, -c, "iptables -I INPUT 1 -m state --state NEW -p tcp --dport 80 -j ACCEPT || echo 'iptables 80 failed' >> /var/log/vps-ops-cloud-init.log"]
+  - [bash, -c, "iptables -I INPUT 2 -m state --state NEW -p tcp --dport 443 -j ACCEPT || echo 'iptables 443 failed' >> /var/log/vps-ops-cloud-init.log"]
+  - [bash, -c, "netfilter-persistent save >> /var/log/vps-ops-cloud-init.log 2>&1 || { apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq iptables-persistent && netfilter-persistent save >> /var/log/vps-ops-cloud-init.log 2>&1; } || true"]
+  - [bash, -c, "systemctl restart ssh 2>/dev/null || true; systemctl try-restart ssh.socket 2>/dev/null || true"]
+  - [bash, -c, "echo 'vps-ops cloud-init done' >> /var/log/vps-ops-cloud-init.log"]

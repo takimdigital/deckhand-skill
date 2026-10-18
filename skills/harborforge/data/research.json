@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "about": "Research questions per focus, pre-filled into each agent's brief by `dh research brief` (placeholders come from the brief). Each question is an evidence spec: TARGET (what to find), PRIMARY (where it really lives), DONE_WHEN (stop), FRESH (changes over time: always search, never memory).",
+  "labels": ["VERIFIED", "SECONDARY", "INFERRED", "NOT_FOUND"],
+  "vocabulary_kinds": ["customer", "trade", "search"],
+  "min_vocabulary": 3,
+  "min_found": 3,
+  "by_shape": {
+    "why": "research asks what fits the business shape; a shape not listed keeps the full bar (3 competitors, conversion plays, verified quotes)",
+    "internal": {"about": "a tool for the owner's own team: no competitors to beat, no visitors to convert",
+                 "competitors": 0, "conversion": false, "evidence": false,
+                 "need": ["audience.primary", "audience.jobs_to_be_done", "current.tools", "features.now"]}
+  },
+  "focus": {
+    "competitors": {
+      "budget": {"searches": 8, "pages": 10},
+      "questions": [
+        {"id": "competitors.set", "target": "3-5 real businesses selling {business} to {audience} in {market}: name, site, one-line promise",
+         "primary": "each competitor's own site (not directories or listicles)", "done_when": "3 opened sites, each with its promise quoted", "fresh": false},
+        {"id": "competitors.edges", "target": "per competitor: 2 things that convert (instant quote, same-day slots, guarantee, reviews) and 1 gap",
+         "primary": "their home, services and booking pages", "done_when": "2 strengths + 1 gap per competitor, each quoted", "fresh": false}
+      ]
+    },
+    "pricing": {
+      "budget": {"searches": 6, "pages": 8},
+      "questions": [
+        {"id": "pricing.shape", "target": "how {business} is priced in {market}: the unit (hour, room, m², visit, plan) and the anchor prices",
+         "primary": "competitors' own pricing or quote pages", "done_when": "prices from 3 competitors, each quoted with its unit", "fresh": true},
+        {"id": "pricing.extras", "target": "add-ons, minimums, recurring discounts, cancellation fees",
+         "primary": "pricing pages, FAQs, terms", "done_when": "what 2 competitors charge extra for, quoted", "fresh": true}
+      ]
+    },
+    "audience": {
+      "budget": {"searches": 6, "pages": 8},
+      "questions": [
+        {"id": "audience.pains", "target": "what {audience} complain about and praise when buying {business} in {market}, in their own words",
+         "primary": "reviews (Google, Trustpilot, local directories), forums, Reddit", "done_when": "5 pains or praises, each quoted verbatim", "fresh": false},
+        {"id": "audience.jobs", "target": "why they buy (the trigger: moving out, new baby, guests, office opening)",
+         "primary": "reviews and forum threads", "done_when": "3 triggers quoted", "fresh": false}
+      ]
+    },
+    "conversion": {
+      "budget": {"searches": 5, "pages": 8},
+      "questions": [
+        {"id": "conversion.first_screen", "target": "what the best {business} sites in {market} show before scrolling: offer, proof, the main action",
+         "primary": "competitors' home pages", "done_when": "the first screen of 3 competitors described from their own text", "fresh": false},
+        {"id": "conversion.mechanism", "target": "how a visitor becomes a customer: instant quote, booking calendar, call, form; what trust proof sits next to it",
+         "primary": "booking and quote pages", "done_when": "the mechanism of 3 competitors, quoted", "fresh": false}
+      ]
+    },
+    "discovery": {
+      "budget": {"searches": 6, "pages": 6},
+      "questions": [
+        {"id": "discovery.terms", "target": "the words people in {market} type to find {business} (service + place, questions, comparisons)",
+         "primary": "the titles and headings of pages that rank, search suggestions, 'people also ask'", "done_when": "8 search phrases seen on real result pages", "fresh": true},
+        {"id": "discovery.pages", "target": "which page types rank for those words (service page, city page, guide, directory)",
+         "primary": "the results pages themselves", "done_when": "the page type of the top results for 3 phrases", "fresh": true}
+      ]
+    },
+    "local-rules": {
+      "budget": {"searches": 6, "pages": 6},
+      "questions": [
+        {"id": "rules.required", "target": "licences, insurance, certifications and consumer rules for {business} in {market} (price display, cancellation rights, taxes)",
+         "primary": "government, regulator or trade-body pages", "done_when": "each rule quoted from an official page, or NOT_FOUND with what was tried", "fresh": true}
+      ]
+    },
+    "vocabulary": {
+      "budget": {"searches": 5, "pages": 8},
+      "questions": [
+        {"id": "vocabulary.terms", "target": "the exact words customers, professionals and ranking pages use for {business} in {language}",
+         "primary": "competitor sites, trade bodies, job ads, reviews", "done_when": "8 terms, each copied from a real page with a quote containing it", "fresh": false}
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "why": "dh workflow query: a workflow proven for one trade transfers to its family (cleaning -> plumbing: same roles, same flows, other words). Keywords are matched longest-first in the brief's category/business.",
+  "families": {
+    "home-services": ["cleaning", "janitorial", "maid", "carpet-cleaning", "window-cleaning", "pressure-washing", "plumbing", "plumber", "electrician", "electrical", "hvac", "heating", "air-conditioning", "landscaping", "lawn-care", "gardening", "pest-control", "handyman", "roofing", "painting", "painter", "locksmith", "moving", "movers", "pool-service", "junk-removal", "home-inspection", "appliance-repair", "field-service", "home services"],
+    "health-clinic": ["dentist", "dental", "physio", "physiotherapy", "clinic", "chiropractor", "therapist", "therapy", "vet", "veterinary", "optician", "osteopath", "medical", "nutritionist", "psychologist"],
+    "beauty": ["salon", "hair-salon", "barber", "spa", "nails", "nail-salon", "tattoo", "beauty", "esthetician", "massage"],
+    "food": ["bakery", "restaurant", "cafe", "coffee", "catering", "food-truck", "pizzeria", "patisserie", "butcher", "meal-prep"],
+    "fitness": ["gym", "yoga", "pilates", "personal-trainer", "martial-arts", "crossfit", "dance-studio", "climbing"],
+    "education": ["tutoring", "tutor", "school", "exam-prep", "exam", "language-school", "driving-school", "course", "academy", "coaching"],
+    "professional": ["lawyer", "law-firm", "accountant", "accounting", "consultant", "consulting", "architect", "agency", "notary", "insurance-broker", "recruiter"],
+    "real-estate": ["real-estate", "property-management", "rental", "vacation-rental", "realtor", "estate-agent"],
+    "events": ["photographer", "photography", "wedding", "dj", "event-venue", "event-planner", "florist"],
+    "retail": ["shop", "boutique", "store", "e-commerce", "ecommerce"],
+    "automotive": ["garage", "mechanic", "car-wash", "detailing", "auto-repair", "driving"],
+    "pets": ["dog-grooming", "grooming", "pet-sitting", "dog-walking", "kennel", "pet"]
+  }
+}
