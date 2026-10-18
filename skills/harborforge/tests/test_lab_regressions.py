@@ -20,7 +20,6 @@ class LabRegressions(unittest.TestCase):
     def test_deploy_guard_handles_current_and_legacy_state(self):
         with tempfile.TemporaryDirectory() as d:
             project = Path(d)
-            project.mkdir()
             with mock.patch.dict(os.environ, {"DECKHAND_HOME": str(project.parent / "hf-state")}):
                 state.init(project, "Bakery", "phased", "pool")
             for key in ("app_uuid", "app"):
