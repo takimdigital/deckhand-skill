@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { detectProject, specFor } from './lib/project.mjs';
 import { loadCatalog, rank, kitOf } from './lib/catalog.mjs';
-import { fetchBundle, writeBundle, pascal, slugOf } from './lib/materialize.mjs';
+import { fetchBundle, writeBundle, pascal, slugOf, actionLinkModes } from './lib/materialize.mjs';
 import { parameterize, bind, contentProp } from './lib/transplant.mjs';
 import { ensureTokens, bake, PLACEHOLDER, logoLocalsFor, install, brandName, ensurePlaceholder, demoTexts, recordDemoCopy } from './lib/engine.mjs';
 import { contentCount } from './lib/transplant.mjs';
@@ -138,12 +138,13 @@ async function main() {
         if (stage.problems.length || !stage.export) { fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true }); continue; }
         const entryAbs = path.join(root, stage.entry);
         const entryCode = fs.readFileSync(entryAbs, 'utf8');
-        const p = parameterize(stage.entry, entryCode, stage.export, { stripChrome: slot !== 'navbar', logoLocals: logoLocalsFor(stage, entryCode, slot),
+        const p = parameterize(stage.entry, entryCode, stage.export, { linkActions: orig.units.some((u) => u.role === 'action' && u.href) ? actionLinkModes(root, stage.entry, entryCode) : null, stripChrome: slot !== 'navbar', logoLocals: logoLocalsFor(stage, entryCode, slot),
           forms: FORM_SLOTS.has(slot) || (copy[slot] && copy[slot].form) ? 'keep' : 'hide' });
         const fl = fillLinks(stage.entry, p.code, links, slot);     // footer/navbar: the plan's routes
         p.code = fl.code;
         fs.writeFileSync(entryAbs, p.code);                 // demo text is measured on the slotted code
         const b = bind(orig, p, { placeholder: hasPublic ? PLACEHOLDER : null, brand });
+        if (b.lost) { fs.rmSync(path.join(root, stage.relDir), { recursive: true, force: true }); continue; }
         if (fl.filled.length) b.hidden.push(...fl.filled.map((f) => `${f.array}: ${f.kind} from your plan (${f.count})`));
         const demoVisual = demoTexts(root, stage.relDir, linkTexts(links)).length;
         // one design family across the page reads as one brand: a close call goes to the first section's kit

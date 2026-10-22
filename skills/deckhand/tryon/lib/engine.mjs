@@ -18,7 +18,7 @@ import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { detectProject, specFor } from './project.mjs';
 import { loadCatalog, rank, SKILL_DIR } from './catalog.mjs';
-import { fetchBundle, writeBundle, pascal, slugOf, entryExport } from './materialize.mjs';
+import { fetchBundle, writeBundle, pascal, slugOf, entryExport, actionLinkModes } from './materialize.mjs';
 import { extractUnits, parameterize, bind, contentProp, shapeOf, contentCount, ownerLogos, defaultPropsOf } from './transplant.mjs';
 import { itemCss, tokenLayer } from './theme.mjs';
 import { kindOf } from './slots.mjs';
@@ -493,7 +493,7 @@ export async function stageCandidate(ctx, cand) {
     // own title): the owner's words go into its props like a section's, or it is not offered
     const logoLocals = logoLocalsFor(stage, entryCode);
     let p;
-    try { p = parameterize(stage.entry, entryCode, stage.export, { stripChrome, logoLocals, logoSwap: ownerLogos(orig).length >= 2, forms: (orig.forms || []).some((f) => f.src) ? 'swap' : FORM_SLOTS.has(slot) || orig.inputs.length ? 'keep' : 'hide' }); } catch (e) {
+    try { p = parameterize(stage.entry, entryCode, stage.export, { linkActions: orig.units.some((u) => u.role === 'action' && u.href) ? actionLinkModes(root, stage.entry, entryCode) : null, stripChrome, logoLocals, logoSwap: ownerLogos(orig).length >= 2, forms: (orig.forms || []).some((f) => f.src) ? 'swap' : FORM_SLOTS.has(slot) || orig.inputs.length ? 'keep' : 'hide' }); } catch (e) {
       return skip('PARAMETERIZE_FAILED', e.message, stage.relDir);
     }
     // a footer/navbar shows the owner's routes (plan sitemap), never the design's demo menu

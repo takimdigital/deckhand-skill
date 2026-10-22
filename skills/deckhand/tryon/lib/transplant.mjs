@@ -129,6 +129,10 @@ function textRange(kids) {
 function findHref(el) {
   const own = attr(el, 'href') || attr(el, 'to');
   if (own) return own;
+  const render = attr(el, 'render');
+  if (render?.value?.type === 'JSXExpressionContainer' && render.value.expression.type === 'JSXElement') {
+    const href = findHref(render.value.expression); if (href) return href;
+  }
   const kids = (el.children || []).filter((c) => c.type === 'JSXElement');
   return kids.length === 1 ? findHref(kids[0]) : null;
 }
@@ -951,7 +955,35 @@ function defaultPropSlots(fn) {
  * opts.stripChrome: drop header/navbar components a block embeds (the site has its own) and
  * turn a nested <main> into a <div>.
  */
+/** Turn a supported bare CTA into a real link before collecting its content slots. */
+function linkActions(file, code, modes) {
+  const edits = [];
+  walk(parse(file, code), (node) => {
+    if (node.type !== 'JSXElement' || !node.closingElement) return true;
+    const name = jsxName(node.openingElement.name), mode = name === 'button' ? 'host' : modes[name];
+    if (!mode || findHref(node) || node.openingElement.attributes.some((a) => a.type === 'JSXSpreadAttribute'
+      || (a.type === 'JSXAttribute' && /^(on[A-Z]|type$|form|disabled$|asChild$|render$)/.test(a.name.name)))) return true;
+    const open = node.openingElement, close = node.closingElement;
+    if (mode === 'host') {
+      edits.push({ start: open.name.start, end: open.name.end, text: 'a' }, { start: close.name.start, end: close.name.end, text: 'a' },
+        { start: open.end - 1, end: open.end - 1, text: ' href="#"' });
+    } else if (mode === 'asChild') {
+      edits.push({ start: open.end - 1, end: open.end, text: ' asChild><a href="#">' }, { start: close.start, end: close.start, text: '</a>' });
+    } else if (mode === 'render') {
+      edits.push({ start: open.end - 1, end: open.end - 1, text: ' render={<a href="#" />}' });
+    }
+    return true;
+  });
+  edits.sort((a, b) => b.start - a.start || b.end - a.end);
+  for (const e of edits) code = code.slice(0, e.start) + e.text + code.slice(e.end);
+  return code;
+}
+
 export function parameterize(file, code, exp, opts = {}) {
+  if (opts.linkActions) {
+    const linked = linkActions(file, code, opts.linkActions);
+    if (linked !== code) return parameterize(file, linked, exp, { ...opts, linkActions: null });
+  }
   const ast = parse(file, code);
   const fn = exp ? findComponentFn(ast, exp) : null;
   if (!fn) return { code, slots: [], lists: [], reason: 'NO_COMPONENT_FUNCTION' };
@@ -1405,6 +1437,7 @@ export function bind(orig, cand, opts = {}) {
         filled++;
         const place = (pairs, left, empty) => {
           for (const [u, x] of pairs) {
+            if (u.role === 'action' && u.href && !x.href) { lost = 'action'; dropped.push({ role: u.role, text: u.text }); continue; }
             props.push([x.key, `<>${u.src}</>`]);
             if (x.href && u.href) props.push([x.key + 'Href', u.href]);
             carried.push({ role: u.role, text: u.text });
@@ -1456,6 +1489,7 @@ export function bind(orig, cand, opts = {}) {
     s = [...s.filter((x) => !x.optional), ...s.filter((x) => x.optional)];   // a real subtitle slot first
     const n = Math.min(o.length, s.length);
     for (let i = 0; i < n; i++) {
+      if (role === 'action' && o[i].href && !s[i].href && !s[i].hrefProp) { lost = 'action'; dropped.push({ role, text: o[i].text }); continue; }
       props.push([s[i].key, s[i].propName && !o[i].dynamic ? JSON.stringify(o[i].text) : `<>${o[i].src}</>`]);
       if (s[i].href && o[i].href) props.push([s[i].key + 'Href', o[i].href]);
       if (s[i].hrefProp && o[i].href) props.push(['@' + s[i].hrefProp, o[i].href]);
@@ -1538,6 +1572,7 @@ export function bind(orig, cand, opts = {}) {
         }
         const hrefF = cl.fields.find((f) => f.role === 'href');
         const act = it.units.find((u) => u.role === 'action' && u.href);
+        if (act && !hrefF) lost = 'action';
         if (hrefF && act) obj[hrefF.field] = { __src: act.href };           // JS source: a quoted string or the owner's expression
         const bulletsF = cl.fields.find((f) => f.role === 'bullets');
         if (bulletsF && it.bullets.length) { obj[bulletsF.field] = it.bullets; carried.push({ role: 'item', text: it.bullets.join(', ') }); }

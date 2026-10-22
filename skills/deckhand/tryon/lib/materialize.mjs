@@ -18,11 +18,38 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { followGh, fetchJsonItem, importsOf, pkgName, getText } from './registry.mjs';
 import { normalizeClasses } from './theme.mjs';
-import { specFor, depInstalled } from './project.mjs';
+import { detectProject, specFor, depInstalled } from './project.mjs';
 import { libraryDir } from './catalog.mjs';
 
 const require = createRequire(import.meta.url);
 const { parse, walk } = require('./ast.cjs');
+
+/** Discover link composition from the actual imported Button implementation, never a registry/base guess. */
+export function actionLinkModes(root, file, code) {
+  const modes = {}, prof = detectProject(root), boundary = fs.realpathSync(root);
+  for (const st of parse(file, code).program.body) {
+    if (st.type !== 'ImportDeclaration') continue;
+    const spec = st.source.value;
+    const rel = spec.startsWith('.') ? path.resolve(root, path.dirname(file), spec)
+      : Object.values(prof.ui || {}).find((rel) => specFor(prof, rel) === spec);
+    if (!rel) continue;
+    const base = path.resolve(root, rel);
+    let source = null;
+    for (const ext of ['', '.tsx', '.jsx', '.ts', '.js', '/index.tsx', '/index.jsx']) {
+      try {
+        const target = fs.realpathSync(base + ext), relative = path.relative(boundary, target);
+        if (relative.startsWith('..' + path.sep) || relative === '..' || path.isAbsolute(relative) || !fs.statSync(target).isFile()) continue;
+        source = fs.readFileSync(target, 'utf8'); break;
+      } catch { /* try the next source extension */ }
+    }
+    if (!source) continue;
+    const mode = /\basChild\b/.test(source) && /\bSlot\b/.test(source) ? 'asChild'
+      : /from\s+["']@base-ui(?:-components)?\/react\/button["']/.test(source) ? 'render' : null;
+    if (!mode) continue;
+    for (const sp of st.specifiers) if (sp.type === 'ImportSpecifier' && (sp.imported.name || sp.imported.value) === 'Button') modes[sp.local.name] = mode;
+  }
+  return modes;
+}
 
 const UTILS_SRC = `import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
