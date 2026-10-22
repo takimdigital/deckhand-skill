@@ -302,7 +302,7 @@ F5 OPEN (swap) [[tryon/lib/engine.mjs#open]]
         children of its own; `'inline'` when `children` lands inside a text element — then only an owner element
         holding words is wrapped, a card's divs never go into a `<p>`); else it wraps the owner's content, and the
         design's own text-rendered prop defaults are passed empty ([[tryon/lib/transplant.mjs#defaultPropsOf]]). A
-        button prop's link prop (`<a href={primaryCtaUrl}>{primaryCtaText}</a>`) takes the owner's href.
+        button prop's link prop (`<a href={primaryCtaUrl}>{primaryCtaText}</a>`) takes the owner's href. Bare CTA buttons become anchors only when the actual imported primitive supports Radix asChild or Base UI render ([[tryon/lib/materialize.mjs#actionLinkModes]]); host buttons keep their classes on an anchor. Existing handlers are never overwritten. A destination with no compatible slot is lost: action and the design is refused, not counted as carried text.
    4. Install-free candidates are checked as they are staged ([[tryon/lib/engine.mjs#checkImports]], one child
       node: every named import and `NS.x`/`<NS.X>` read must exist; a package the import itself needs and nobody
       installed counts) → BROKEN_IMPORT, and the next candidate takes the place. A candidate that needs an install is
